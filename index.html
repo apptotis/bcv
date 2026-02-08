@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html lang="pt-PT">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Torneio Basket Club de Valença</title>
+    <link rel="stylesheet" href="css/style.css">
+    <!-- Fonte Google (Opcional, mas melhora o visual) -->
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&display=swap" rel="stylesheet">
+    <!-- Supabase via CDN -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+</head>
+<body>
+
+    <!-- Header / Menu -->
+    <header class="main-header">
+        <div class="logo-container">
+            <img src="Logo_bcv.jpg" alt="Logo BCV" class="site-logo">
+            <h1>Torneio Intercidades</h1>
+        </div>
+        <button class="menu-toggle" aria-label="Abrir Menu">
+            <span></span>
+            <span></span>
+            <span></span>
+        </button>
+        <nav class="main-nav">
+            <ul>
+                <li><a href="#visao-geral" class="active" data-target="visao-geral">Visão Geral</a></li>
+                <li><a href="#equipas" data-target="equipas">Equipas</a></li>
+                <li><a href="#jogos" data-target="jogos">Jogos</a></li>
+                <li><a href="#roteiro" data-target="roteiro">Roteiro</a></li>
+                <li><a href="#contactos" data-target="contactos">Contactos</a></li>
+                <li><a href="#admins" data-target="admins">Admins</a></li>
+            </ul>
+        </nav>
+    </header>
+
+    <!-- Conteúdo Principal -->
+    <main id="app-content">
+        
+        <!-- Seção Visão Geral -->
+        <section id="visao-geral" class="page-section active">
+            <div class="poster-container">
+                <img src="cartaz_facebook.jpg" alt="Cartaz Oficial do Torneio" class="responsive-poster">
+            </div>
+            <div class="info-container">
+                <h2>Torneio Internacional Intercidades</h2>
+                <p><strong>Valença e Tui</strong></p>
+                <p>28, 29 e 30 de Março</p>
+                <p>Pavilhão Municipal de Valença</p>
+            </div>
+        </section>
+
+        <!-- Seção Equipas -->
+        <section id="equipas" class="page-section hidden">
+            <h2>Equipas Participantes</h2>
+            <div id="equipas-list" class="grid-container">
+                <p class="loading">A carregar equipas...</p>
+                <!-- Equipas serão carregadas aqui via JS -->
+            </div>
+        </section>
+
+        <!-- Seção Jogos -->
+        <section id="jogos" class="page-section hidden">
+            <h2>Jogos e Horários</h2>
+            <div id="jogos-filter">
+                <!-- Filtros de dia/escalão podem entrar aqui -->
+            </div>
+            <div id="jogos-list" class="list-container">
+                <p class="loading">A carregar jogos...</p>
+                <!-- Jogos serão carregados aqui via JS -->
+            </div>
+        </section>
+
+        <!-- Seção Roteiro -->
+        <section id="roteiro" class="page-section hidden">
+            <h2>Roteiro do Evento</h2>
+            <div class="roteiro-content">
+                <!-- Conteúdo estático ou dinâmico do roteiro -->
+                <ul>
+                    <li><strong>28 de Março:</strong> Abertura e Jogos de Fase de Grupos</li>
+                    <li><strong>29 de Março:</strong> Continuação da Fase de Grupos</li>
+                    <li><strong>30 de Março:</strong> Finais e Entrega de Prémios</li>
+                </ul>
+            </div>
+        </section>
+
+        <!-- Seção Contactos -->
+        <section id="contactos" class="page-section hidden">
+            <h2>Contactos</h2>
+            <div class="contact-info">
+                <p>Basket Club de Valença</p>
+                <p>Email: basketclubvalenca@gmail.com</p>
+                <!-- Adicionar mais infos se necessário -->
+            </div>
+        </section>
+
+        <!-- Seção Admins -->
+        <section id="admins" class="page-section hidden">
+            <h2>Área Administrativa</h2>
+            <div id="login-form">
+                <input type="email" id="admin-email" placeholder="Email">
+                <input type="password" id="admin-password" placeholder="Senha">
+                <button id="btn-login">Entrar</button>
+            </div>
+            <div id="admin-dashboard" class="hidden">
+                <p>Bem-vindo, Admin.</p>
+                <!-- Controles de admin aqui -->
+            </div>
+        </section>
+
+    </main>
+
+    <!-- Scripts -->
+    <script src="js/config.js"></script>
+    <script src="js/script.js"></script>
+</body>
+</html>

@@ -1,0 +1,316 @@
+:root {
+    --primary-color: #6a1b9a;
+    /* Roxo vibrante */
+    --secondary-color: #4a148c;
+    /* Roxo mais escuro para header */
+    --accent-color: #ffca28;
+    /* Amarelo complementar para detalhes (basket) */
+    --text-color: #333;
+    --bg-color: #f9f9f9;
+    --white: #ffffff;
+    --spacing: 16px;
+    --card-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+* {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+}
+
+body {
+    font-family: 'Roboto', sans-serif;
+    background-color: var(--bg-color);
+    color: var(--text-color);
+    line-height: 1.6;
+}
+
+/* Header */
+.main-header {
+    background-color: var(--secondary-color);
+    color: var(--white);
+    padding: var(--spacing);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    position: sticky;
+    top: 0;
+    z-index: 1000;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+}
+
+.logo-container {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.site-logo {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    object-fit: cover;
+    border: 2px solid var(--white);
+}
+
+.main-header h1 {
+    font-size: 1.2rem;
+    font-weight: 700;
+}
+
+/* Navegação */
+.main-nav {
+    display: none;
+    /* Escondido por padrão no mobile */
+    position: absolute;
+    top: 100%;
+    left: 0;
+    width: 100%;
+    background-color: var(--secondary-color);
+    flex-direction: column;
+}
+
+.main-nav.open {
+    display: flex;
+}
+
+.main-nav ul {
+    list-style: none;
+}
+
+.main-nav li {
+    border-top: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.main-nav a {
+    display: block;
+    padding: 15px var(--spacing);
+    color: var(--white);
+    text-decoration: none;
+    font-weight: 500;
+    transition: background 0.3s;
+}
+
+.main-nav a:hover,
+.main-nav a.active {
+    background-color: var(--primary-color);
+}
+
+.menu-toggle {
+    background: none;
+    border: none;
+    cursor: pointer;
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+}
+
+.menu-toggle span {
+    display: block;
+    width: 25px;
+    height: 3px;
+    background-color: var(--white);
+    border-radius: 2px;
+}
+
+/* Conteúdo Principal */
+#app-content {
+    padding: var(--spacing);
+    max-width: 1200px;
+    margin: 0 auto;
+}
+
+.page-section {
+    display: none;
+    /* Esconde todas as seções */
+    animation: fadeIn 0.5s ease;
+}
+
+.page-section.active {
+    display: block;
+    /* Mostra a seção ativa */
+}
+
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+    }
+
+    to {
+        opacity: 1;
+    }
+}
+
+h2 {
+    color: var(--primary-color);
+    margin-bottom: var(--spacing);
+    border-bottom: 2px solid var(--primary-color);
+    display: inline-block;
+}
+
+/* Visão Geral */
+.poster-container {
+    text-align: center;
+    margin-bottom: var(--spacing);
+}
+
+.responsive-poster {
+    max-width: 100%;
+    height: auto;
+    border-radius: 8px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+.info-container {
+    background: var(--white);
+    padding: var(--spacing);
+    border-radius: 8px;
+    text-align: center;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+}
+
+.info-container p {
+    margin-bottom: 8px;
+    font-size: 1.1rem;
+}
+
+/* Cards e Listas (Genérico para Equipas/Jogos) */
+.grid-container {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+    gap: var(--spacing);
+}
+
+.list-container {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+/* Desktop */
+@media (min-width: 768px) {
+    .main-nav {
+        display: block;
+        position: static;
+        width: auto;
+        background: none;
+    }
+
+    .main-nav ul {
+        display: flex;
+        gap: 20px;
+    }
+
+    .main-nav li {
+        border: none;
+    }
+
+    .main-nav a {
+        padding: 5px 10px;
+        border-radius: 4px;
+    }
+
+    .menu-toggle {
+        display: none;
+    }
+
+    .main-header h1 {
+        font-size: 1.5rem;
+    }
+}
+
+/* Estilos para Equipas */
+.equipa-card {
+    background: var(--white);
+    border-radius: 8px;
+    padding: 15px;
+    text-align: center;
+    box-shadow: var(--card-shadow);
+    transition: transform 0.2s;
+    border: 1px solid #eee;
+}
+
+.equipa-card:hover {
+    transform: translateY(-5px);
+}
+
+.equipa-logo {
+    display: flex;
+    justify-content: center;
+    margin-bottom: 10px;
+}
+
+.equipa-logo img {
+    width: 80px;
+    height: 80px;
+    object-fit: contain;
+}
+
+.placeholder-logo {
+    font-size: 3rem;
+    margin-bottom: 10px;
+}
+
+.equipa-card h3 {
+    font-size: 1.1rem;
+    color: var(--secondary-color);
+    margin-bottom: 5px;
+}
+
+/* Estilos para Jogos */
+.jogo-item {
+    background: var(--white);
+    border-radius: 8px;
+    padding: 15px;
+    box-shadow: var(--card-shadow);
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    border-left: 5px solid var(--primary-color);
+}
+
+.jogo-info {
+    display: flex;
+    justify-content: space-between;
+    font-size: 0.9rem;
+    color: #666;
+    border-bottom: 1px solid #eee;
+    padding-bottom: 8px;
+    margin-bottom: 8px;
+}
+
+.jogo-placar {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 15px;
+    font-weight: bold;
+    font-size: 1.1rem;
+}
+
+.equipa-nome {
+    flex: 1;
+    text-align: center;
+}
+
+.placar {
+    background: #eee;
+    padding: 2px 8px;
+    border-radius: 4px;
+    min-width: 30px;
+    text-align: center;
+}
+
+.x {
+    color: var(--accent-color);
+    font-size: 0.9rem;
+}
+
+/* Error message */
+.error {
+    color: red;
+    background: #fee;
+    padding: 10px;
+    border-radius: 4px;
+    text-align: center;
+}
