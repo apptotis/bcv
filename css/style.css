@@ -396,6 +396,13 @@ h2 {
 /* Footer */
 
 /* --- ADMIN PAINEL --- */
+#admin-panel {
+    width: 100%;
+    min-width: 768px;
+    /* Força largura mínima de tablet */
+    margin: 0 auto;
+}
+
 .login-box {
     max-width: 400px;
     margin: 0 auto;
