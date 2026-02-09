@@ -418,15 +418,24 @@ h2 {
     .equipa-actions {
         margin-top: 0;
         width: auto;
-        flex-direction: column;
-        /* Botões empilhados ou lado a lado? */
-        gap: 5px;
+        flex-direction: row;
+        /* Lado a lado */
+        gap: 10px;
     }
 
     .btn-link {
-        font-size: 0.8rem;
-        padding: 5px 10px;
+        font-size: 0.85rem;
+        padding: 8px 12px;
         text-align: center;
+        text-transform: uppercase;
+        font-weight: bold;
+        letter-spacing: 0.5px;
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        min-width: 80px;
+        /* Largura mínima para parecer botão consistente */
     }
 }
 
