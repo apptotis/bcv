@@ -154,12 +154,13 @@ document.addEventListener('DOMContentLoaded', () => {
             return;
         }
 
-        // Render Header
+        // Render Header (Layout Horizontal/Card)
         headerFn.innerHTML = `
-            ${equipa.logo_url ? `<img src="${equipa.logo_url}" alt="${equipa.nome}">` : '<div class="placeholder-logo" style="font-size:4rem">🏀</div>'}
-            <h2>${equipa.nome}</h2>
-            <p>${equipa.escalao || ''}</p>
-            ${equipa.treinadores ? `<small>Treinadores: ${equipa.treinadores}</small>` : ''}
+            ${equipa.logo_url ? `<img src="${equipa.logo_url}" alt="${equipa.nome}">` : '<div class="placeholder-logo" style="font-size:3rem">🏀</div>'}
+            <div class="equipa-header-info">
+                <h2>${equipa.nome}</h2>
+                <p>${equipa.escalao || ''}</p>
+            </div>
         `;
 
         contentFn.innerHTML = '<p class="loading">A carregar...</p>';
