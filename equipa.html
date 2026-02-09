@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="pt-PT">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Detalhes da Equipa - Torneio Eurocidade</title>
+    <link rel="stylesheet" href="css/style.css">
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&display=swap" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+</head>
+
+<body>
+    <header class="main-header">
+        <div class="logo-container">
+            <a href="index.html"
+                style="display: flex; align-items: center; gap: 10px; text-decoration: none; color: white;">
+                <img src="Logo_bcv.jpg" alt="Logo BCV" class="site-logo">
+                <h1>Torneio Eurocidade</h1>
+            </a>
+        </div>
+        <button class="menu-toggle" aria-label="Abrir Menu">
+            <span></span><span></span><span></span>
+        </button>
+        <nav class="main-nav">
+            <ul>
+                <li><a href="index.html">Visão Geral</a></li>
+                <li><a href="equipas.html" class="active">Equipas</a></li>
+                <li><a href="jogos.html">Jogos</a></li>
+                <li><a href="roteiro.html">Roteiro</a></li>
+                <li><a href="contactos.html">Contactos</a></li>
+                <li><a href="admin.html">Admins</a></li>
+            </ul>
+        </nav>
+    </header>
+
+    <main id="app-content">
+        <section id="equipa-detalhes" class="page-section active" style="display: block;">
+
+            <div id="equipa-header" class="text-center">
+                <!-- Preenchido via JS -->
+                <p class="loading">A carregar informações da equipa...</p>
+            </div>
+
+            <div class="equipa-tabs-display">
+                <!-- Botões para alternar se o usuário já estiver na página, se desejar -->
+                <!-- Por enquanto, o conteúdo é definido pela URL -->
+            </div>
+
+            <div id="equipa-content" class="mt-4">
+                <!-- Lista de Atletas ou Jogos -->
+            </div>
+
+            <div style="text-align: center; margin-top: 20px;">
+                <a href="equipas.html" class="btn-secondary">Voltar às Equipas</a>
+            </div>
+
+        </section>
+    </main>
+
+    <script src="js/config.js"></script>
+    <script src="js/script.js"></script>
+</body>
+
+</html>
