@@ -509,7 +509,17 @@ h2 {
     margin-bottom: 20px;
 }
 
-/* ... (inputs) ... */
+/* Inputs do Admin */
+.admin-form input,
+.admin-form select,
+.admin-form textarea {
+    padding: 10px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    font-family: inherit;
+    width: 100%;
+    /* Garante largura total dentro do flex container */
+}
 
 .admin-form .row {
     display: flex;
