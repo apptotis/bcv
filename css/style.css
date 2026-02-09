@@ -161,7 +161,12 @@ h2 {
 
 .responsive-poster {
     max-width: 100%;
+    max-height: calc(100vh - 180px);
+    /* Ajuste para caber Header + Footer + Margens sem scroll */
+    width: auto;
+    /* Mantém proporção */
     height: auto;
+    object-fit: contain;
     border-radius: 8px;
     box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
 }
