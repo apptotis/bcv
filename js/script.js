@@ -19,13 +19,17 @@ document.addEventListener('DOMContentLoaded', () => {
     // 2. Lógica Específica por Página
     const path = window.location.pathname;
     const page = path.split("/").pop();
+    console.log("Current path:", path, "Detected page:", page);
 
-    if (page === 'equipas.html' && supabase) {
+    if (page.includes('equipas') && supabase) {
+        console.log("Iniciando fetchEquipas...");
         fetchEquipas();
-    } else if (page === 'jogos.html' && supabase) {
+    } else if (page.includes('jogos') && supabase) {
         fetchJogos();
-    } else if (page.includes('equipa.html') && supabase) {
+    } else if (page.includes('equipa') && supabase) { // 'equipa.html' singular
         fetchEquipaDetalhes();
+    } else {
+        console.log("Nenhuma lógica específica para esta página ou Supabase não iniciado.");
     }
 
     // 3. Funções de Dados
