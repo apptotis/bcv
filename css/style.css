@@ -526,7 +526,7 @@ h2 {
 
 /* ... (inputs) ... */
 
-/* Inputs do Admin */
+/* Inputs do Admin - FORÇAR LARGURA TOTAL */
 .admin-form input,
 .admin-form select,
 .admin-form textarea {
@@ -534,30 +534,23 @@ h2 {
     border: 1px solid #ddd;
     border-radius: 4px;
     font-family: inherit;
-    width: 100%;
-    box-sizing: border-box;
-    /* Garante que padding não cause overflow */
+    width: 100% !important;
+    /* Força largura total */
+    max-width: 100% !important;
+    box-sizing: border-box !important;
 }
 
 .admin-form .row {
-    display: flex;
-    gap: 10px;
-    flex-wrap: wrap;
+    display: block !important;
+    /* Simplifica para bloco */
+    width: 100% !important;
+    margin-bottom: 0;
 }
 
 .admin-form .row>* {
-    flex: 1 1 auto;
-    /* Permite crescer e encolher */
-    min-width: 0;
-    /* Remove min-width que causa problemas */
-    box-sizing: border-box;
-}
-
-/* Garante que inputs dentro de .row também tenham 100% */
-.admin-form .row>input,
-.admin-form .row>select {
-    min-width: 200px;
-    /* Apenas para garantir legibilidade mínima */
+    width: 100% !important;
+    max-width: 100% !important;
+    box-sizing: border-box !important;
 }
 
 .btn-success {
