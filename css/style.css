@@ -507,7 +507,18 @@ h2 {
     border-radius: 8px;
     box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
     margin-bottom: 20px;
+    width: 100%;
+    /* Força largura total explicitamente */
 }
+
+/* Abas Content */
+.tab-content,
+.tab-pane {
+    width: 100%;
+    /* Garante que as abas ocupem tudo */
+}
+
+/* ... (inputs) ... */
 
 /* Inputs do Admin */
 .admin-form input,
