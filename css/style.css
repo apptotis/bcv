@@ -529,20 +529,29 @@ h2 {
     border-radius: 4px;
     font-family: inherit;
     width: 100%;
-    /* Garante largura total dentro do flex container */
+    box-sizing: border-box;
+    /* Garante que padding não cause overflow */
 }
 
 .admin-form .row {
     display: flex;
     gap: 10px;
     flex-wrap: wrap;
-    /* Permite quebrar linha em tablets verticais */
 }
 
 .admin-form .row>* {
-    flex: 1;
+    flex: 1 1 auto;
+    /* Permite crescer e encolher */
+    min-width: 0;
+    /* Remove min-width que causa problemas */
+    box-sizing: border-box;
+}
+
+/* Garante que inputs dentro de .row também tenham 100% */
+.admin-form .row>input,
+.admin-form .row>select {
     min-width: 200px;
-    /* Garante tamanho mínimo legível antes de quebrar */
+    /* Apenas para garantir legibilidade mínima */
 }
 
 .btn-success {
