@@ -387,7 +387,7 @@ document.addEventListener('DOMContentLoaded', async () => {
                     <small>${equipa.treinadores || ''}</small>
                 </div>
                 <div style="display: flex; gap: 5px;">
-                    <button class="btn" style="background: #6c757d; color: white;" onclick="editEquipa('${equipa.id}')">Editar</button>
+                    <button class="btn-success btn-sm" onclick="editEquipa('${equipa.id}')">Editar</button>
                     <button class="btn-danger btn-sm" onclick="deleteEquipa('${equipa.id}')">Excluir</button>
                 </div>
             `;
