@@ -4,63 +4,36 @@ document.addEventListener('DOMContentLoaded', () => {
     if (typeof SUPABASE_URL !== 'undefined' && typeof SUPABASE_ANON_KEY !== 'undefined' && SUPABASE_ANON_KEY !== 'SUA_SUPABASE_ANON_KEY_AQUI') {
         supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
         console.log("Supabase inicializado!");
-    } else {
-        console.warn("Supabase não inicializado. Verifique js/config.js");
-        document.getElementById('equipas-list').innerHTML = '<p class="error">Erro de configuração: Chave de API não encontrada.</p>';
-        document.getElementById('jogos-list').innerHTML = '<p class="error">Erro de configuração: Chave de API não encontrada.</p>';
     }
 
-    // Referências do DOM
+    // 1. Menu Mobile Toggle (Comum a todas as páginas)
     const menuToggle = document.querySelector('.menu-toggle');
     const mainNav = document.querySelector('.main-nav');
-    const navLinks = document.querySelectorAll('.main-nav a');
-    const sections = document.querySelectorAll('.page-section');
 
-    // 1. Menu Mobile Toggle
-    menuToggle.addEventListener('click', () => {
-        mainNav.classList.toggle('open');
-    });
-
-    // 2. Navegação SPA
-    navLinks.forEach(link => {
-        link.addEventListener('click', (e) => {
-            const href = link.getAttribute('href');
-            // Se for link externo (não tiver data-target), segue normalmente
-            if (!link.getAttribute('data-target')) return;
-
-            e.preventDefault();
-
-            if (window.innerWidth < 768) {
-                mainNav.classList.remove('open');
-            }
-
-            navLinks.forEach(l => l.classList.remove('active'));
-            link.classList.add('active');
-
-            const targetId = link.getAttribute('data-target');
-
-            sections.forEach(section => {
-                section.classList.remove('active');
-                section.classList.add('hidden');
-            });
-
-            const targetSection = document.getElementById(targetId);
-            if (targetSection) {
-                targetSection.classList.remove('hidden');
-                targetSection.classList.add('active');
-            }
+    if (menuToggle && mainNav) {
+        menuToggle.addEventListener('click', () => {
+            mainNav.classList.toggle('open');
         });
-    });
+    }
+
+    // 2. Lógica Específica por Página
+    const path = window.location.pathname;
+    const page = path.split("/").pop();
+
+    if (page === 'equipas.html' && supabase) {
+        fetchEquipas();
+    } else if (page === 'jogos.html' && supabase) {
+        fetchJogos();
+    }
 
     // 3. Funções de Dados
     async function fetchEquipas() {
-        if (!supabase) return;
+        const container = document.getElementById('equipas-list');
+        if (!container) return;
 
         const { data, error } = await supabase
             .from('equipas')
             .select('*');
-
-        const container = document.getElementById('equipas-list');
 
         if (error) {
             console.error('Erro ao buscar equipas:', error);
@@ -77,7 +50,6 @@ document.addEventListener('DOMContentLoaded', () => {
         data.forEach(equipa => {
             const card = document.createElement('div');
             card.classList.add('equipa-card');
-            // Assume que existe 'nome', 'logo_url', 'escalao'
             card.innerHTML = `
                 <div class="equipa-logo">
                     ${equipa.logo_url ? `<img src="${equipa.logo_url}" alt="${equipa.nome}">` : '<div class="placeholder-logo">🏀</div>'}
@@ -90,14 +62,13 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     async function fetchJogos() {
-        if (!supabase) return;
+        const container = document.getElementById('jogos-list');
+        if (!container) return;
 
         const { data, error } = await supabase
             .from('jogos')
             .select('*')
             .order('data_hora', { ascending: true });
-
-        const container = document.getElementById('jogos-list');
 
         if (error) {
             console.error('Erro ao buscar jogos:', error);
@@ -115,7 +86,6 @@ document.addEventListener('DOMContentLoaded', () => {
             const item = document.createElement('div');
             item.classList.add('jogo-item');
 
-            // Formatar data
             const date = new Date(jogo.data_hora);
             const dia = date.toLocaleDateString('pt-PT', { day: '2-digit', month: '2-digit' });
             const hora = date.toLocaleTimeString('pt-PT', { hour: '2-digit', minute: '2-digit' });
@@ -123,24 +93,17 @@ document.addEventListener('DOMContentLoaded', () => {
             item.innerHTML = `
                 <div class="jogo-info">
                     <span class="jogo-data">${dia} ${hora}</span>
-                    <span class="jogo-local">${jogo.local || 'Pavilhão Municipal'}</span>
+                    <span class="jogo-local">${jogo.campo || 'Pavilhão Municipal'}</span>
                 </div>
                 <div class="jogo-placar">
-                    <span class="equipa-nome">${jogo.equipa_a}</span>
-                    <span class="placar">${jogo.resultado_a !== null ? jogo.resultado_a : '-'}</span>
+                    <span class="equipa-nome">${jogo.equipa_a || 'Equipa A'}</span> <!-- Melhorar com JOIN depois -->
+                    <span class="placar">${jogo.resultado_casa !== null ? jogo.resultado_casa : '-'}</span>
                     <span class="x">X</span>
-                    <span class="placar">${jogo.resultado_b !== null ? jogo.resultado_b : '-'}</span>
-                    <span class="equipa-nome">${jogo.equipa_b}</span>
+                    <span class="placar">${jogo.resultado_fora !== null ? jogo.resultado_fora : '-'}</span>
+                    <span class="equipa-nome">${jogo.equipa_b || 'Equipa B'}</span> <!-- Melhorar com JOIN depois -->
                 </div>
             `;
             container.appendChild(item);
         });
-    }
-
-    // Carregar dados iniciais apenas se estivermos na aba e supabase ok
-    // Por simplicidade, carregamos tudo ao iniciar se supabase estiver pronto
-    if (supabase) {
-        fetchEquipas();
-        fetchJogos();
     }
 });

@@ -4,16 +4,13 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Torneio Basket Club de Valença</title>
+    <title>Jogos - Torneio Eurocidade</title>
     <link rel="stylesheet" href="css/style.css">
     <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&display=swap" rel="stylesheet">
-    <!-- Supabase via CDN (Optional in Home) -->
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 </head>
 
 <body>
-
-    <!-- Header / Menu -->
     <header class="main-header">
         <div class="logo-container">
             <a href="index.html"
@@ -23,15 +20,13 @@
             </a>
         </div>
         <button class="menu-toggle" aria-label="Abrir Menu">
-            <span></span>
-            <span></span>
-            <span></span>
+            <span></span><span></span><span></span>
         </button>
         <nav class="main-nav">
             <ul>
-                <li><a href="index.html" class="active">Visão Geral</a></li>
+                <li><a href="index.html">Visão Geral</a></li>
                 <li><a href="equipas.html">Equipas</a></li>
-                <li><a href="jogos.html">Jogos</a></li>
+                <li><a href="jogos.html" class="active">Jogos</a></li>
                 <li><a href="roteiro.html">Roteiro</a></li>
                 <li><a href="contactos.html">Contactos</a></li>
                 <li><a href="admin.html">Admins</a></li>
@@ -39,27 +34,18 @@
         </nav>
     </header>
 
-    <!-- Conteúdo Principal -->
     <main id="app-content">
-
-        <!-- Seção Visão Geral -->
-        <section id="visao-geral" class="page-section active">
-            <div class="poster-container">
-                <h1 class="event-title">XXII Torneio Eurocidade</h1>
-                <h2 class="event-subtitle">Valença - Tui</h2>
-                <h3 class="event-date">28, 29 e 30 Março 2026</h3>
-                <img src="cartaz_facebook.jpg" alt="Cartaz Oficial do Torneio" class="responsive-poster">
-                <a href="https://www.google.com/maps/search/?api=1&query=Pavilhão+Municipal+de+Valença" target="_blank"
-                    class="location-link">
-                    📍 Pavilhão Municipal de Valença
-                </a>
-                <p class="dev-credits">Desenvolvido por T0TiS - Developers @ 2026</p>
+        <section id="jogos" class="page-section active" style="display: block;">
+            <h2>Jogos e Horários</h2>
+            <div id="jogos-filter">
+                <!-- Filtros podem entrar aqui -->
+            </div>
+            <div id="jogos-list" class="list-container">
+                <p class="loading">A carregar jogos...</p>
             </div>
         </section>
-
     </main>
 
-    <!-- Scripts -->
     <script src="js/config.js"></script>
     <script src="js/script.js"></script>
 </body>
