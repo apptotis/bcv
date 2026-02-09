@@ -541,7 +541,51 @@ h2 {
     text-align: center;
 }
 
-/* --- DETALHES DA EQUIPA --- */
+/* Admin Header Fix */
+.admin-header h2 {
+    margin-bottom: 0;
+    /* Remove margem para alinhar com botão */
+    border-bottom: none;
+    /* Remove borda se desejar limpar */
+}
+
+/* Admin List Items */
+.admin-list-item {
+    border-bottom: 1px solid #ccc;
+    padding: 10px 0;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 10px;
+}
+
+.admin-list-item-content {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    flex: 1;
+}
+
+.admin-list-actions {
+    display: flex;
+    gap: 5px;
+}
+
+/* Mobile/Tablet adjustment for admin list */
+@media (max-width: 600px) {
+    .admin-list-item {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+
+    .admin-list-actions {
+        width: 100%;
+        justify-content: flex-end;
+        /* Botões à direita mas em linha nova */
+        margin-top: 5px;
+    }
+}
+
 /* --- DETALHES DA EQUIPA --- */
 #equipa-header {
     margin-bottom: 20px;
