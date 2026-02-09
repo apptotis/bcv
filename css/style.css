@@ -129,6 +129,12 @@ body {
     /* Faz o conteúdo ocupar o espaço restante */
 }
 
+/* Remove limitação de largura na página admin para tablets */
+#admins {
+    max-width: none;
+    width: 100%;
+}
+
 .page-section {
     display: none;
     /* Esconde todas as seções */
