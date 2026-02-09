@@ -207,10 +207,18 @@ h2 {
 .event-subtitle {
     font-size: 1.4rem;
     color: var(--secondary-color);
-    margin-bottom: 15px;
+    margin-bottom: 5px;
+    /* Reduzido para aproximar da data */
     border-bottom: none;
     /* Remove a borda padrão do H2 */
     display: block;
+}
+
+.event-date {
+    font-size: 1.2rem;
+    color: var(--text-color);
+    margin-bottom: 15px;
+    font-weight: 500;
 }
 
 .dev-credits {
