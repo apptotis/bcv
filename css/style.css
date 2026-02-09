@@ -298,23 +298,40 @@ h2 {
 }
 
 /* Estilos para Equipas */
+/* Estilos para Equipas */
+#equipas-list {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    /* Desktop defaults */
+    gap: var(--spacing);
+}
+
 .equipa-card {
     background: var(--white);
-    border-radius: 8px;
+    border-radius: 4px;
+    /* Mais retangular */
     padding: 15px;
-    text-align: center;
     box-shadow: var(--card-shadow);
     transition: transform 0.2s;
     border: 1px solid #eee;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
 }
 
 .equipa-card:hover {
-    transform: translateY(-5px);
+    transform: translateY(-3px);
+}
+
+.equipa-main-content {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    width: 100%;
 }
 
 .equipa-logo {
-    display: flex;
-    justify-content: center;
     margin-bottom: 10px;
 }
 
@@ -324,15 +341,93 @@ h2 {
     object-fit: contain;
 }
 
-.placeholder-logo {
-    font-size: 3rem;
+.equipa-info {
     margin-bottom: 10px;
 }
 
 .equipa-card h3 {
-    font-size: 1.1rem;
+    font-size: 1.2rem;
     color: var(--secondary-color);
-    margin-bottom: 5px;
+    margin-bottom: 2px;
+}
+
+.equipa-card p {
+    color: #666;
+    font-size: 0.9rem;
+}
+
+/* Título */
+.equipa-actions {
+    margin-top: auto;
+    display: flex;
+    gap: 10px;
+    width: 100%;
+    justify-content: center;
+}
+
+.btn-info {
+    background-color: #17a2b8;
+    /* Azul cyan para Info */
+}
+
+.btn-info:hover {
+    background-color: #138496;
+}
+
+/* Mobile: Card Horizontal/Retangular Full Width */
+@media (max-width: 600px) {
+    #equipas-list {
+        grid-template-columns: 1fr;
+        /* Uma coluna */
+    }
+
+    .equipa-card {
+        flex-direction: row;
+        align-items: center;
+        justify-content: space-between;
+        text-align: left;
+        padding: 10px;
+    }
+
+    .equipa-main-content {
+        flex-direction: row;
+        align-items: center;
+        width: auto;
+        flex: 1;
+    }
+
+    .equipa-logo {
+        margin-bottom: 0;
+        margin-right: 15px;
+    }
+
+    .equipa-logo img {
+        width: 60px;
+        height: 60px;
+    }
+
+    .equipa-info {
+        margin-bottom: 0;
+    }
+
+    .equipa-card h3 {
+        font-size: 1.1rem;
+        margin-bottom: 0;
+    }
+
+    .equipa-actions {
+        margin-top: 0;
+        width: auto;
+        flex-direction: column;
+        /* Botões empilhados ou lado a lado? */
+        gap: 5px;
+    }
+
+    .btn-link {
+        font-size: 0.8rem;
+        padding: 5px 10px;
+        text-align: center;
+    }
 }
 
 /* Estilos para Jogos */

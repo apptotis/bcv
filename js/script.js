@@ -54,18 +54,25 @@ document.addEventListener('DOMContentLoaded', () => {
         }
 
         container.innerHTML = '';
+        container.innerHTML = '';
         data.forEach(equipa => {
             const card = document.createElement('div');
             card.classList.add('equipa-card');
+
+            // Estrutura atualizada para Flexbox/Mobile
             card.innerHTML = `
-                <div class="equipa-logo">
-                    ${equipa.logo_url ? `<img src="${equipa.logo_url}" alt="${equipa.nome}">` : '<div class="placeholder-logo">🏀</div>'}
+                <div class="equipa-main-content">
+                    <div class="equipa-logo">
+                        ${equipa.logo_url ? `<img src="${equipa.logo_url}" alt="${equipa.nome}">` : '<div class="placeholder-logo" style="font-size:2rem">🏀</div>'}
+                    </div>
+                    <div class="equipa-info">
+                        <h3>${equipa.nome}</h3>
+                        <p>${equipa.escalao || ''}</p>
+                    </div>
                 </div>
-                <h3>${equipa.nome}</h3>
-                <p>${equipa.escalao || ''}</p>
                 <div class="equipa-actions">
                     <a href="equipa.html?id=${equipa.id}&view=atletas" class="btn-link">Atletas</a>
-                    <a href="equipa.html?id=${equipa.id}&view=jogos" class="btn-link">Jogos</a>
+                    <a href="equipa.html?id=${equipa.id}&view=info" class="btn-link btn-info">Info</a>
                 </div>
             `;
             container.appendChild(card);
