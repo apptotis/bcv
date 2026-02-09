@@ -98,13 +98,14 @@ document.addEventListener('DOMContentLoaded', async () => {
     // --- CARREGAMENTO DE DADOS (Início) ---
     async function loadAdminData() {
         console.log("Carregando dados do admin...");
-        // Aqui vamos chamar as funções de listar equipas, atletas e jogos
-        await loadTeamsOptions(); // Preencher selects
+        await loadTeamsOptions();
+        await loadEquipasAdmin();
+        await loadAtletasAdmin(); // Carregar atletas
     }
 
-    // Preencher Selects de Equipas (para forms de atletas e jogos)
+    // Preencher Selects de Equipas
     async function loadTeamsOptions() {
-        const { data: equipas, error } = await supabase.from('equipas').select('id, nome');
+        const { data: equipas, error } = await supabase.from('equipas').select('id, nome, escalao');
         if (error) return console.error(error);
 
         const atletaSelect = document.getElementById('atleta-equipa-id');
@@ -117,11 +118,135 @@ document.addEventListener('DOMContentLoaded', async () => {
             equipas.forEach(e => {
                 const opt = document.createElement('option');
                 opt.value = e.id;
-                opt.textContent = e.nome;
+                // Exibe Nome e Escalão
+                opt.textContent = `${e.nome} (${e.escalao || 'Sem Escalão'})`;
                 sel.appendChild(opt);
             });
         });
     }
+
+    // ... (CRUD Equipas logic remains above) ...
+
+    // --- CRUD ATLETAS ---
+    const formAtleta = document.getElementById('form-atleta');
+
+    formAtleta.addEventListener('submit', async (e) => {
+        e.preventDefault();
+
+        const nome = document.getElementById('atleta-nome').value;
+        const equipaId = document.getElementById('atleta-equipa-id').value;
+        const fotoFile = document.getElementById('atleta-foto-file').files[0];
+
+        let fotoUrl = null;
+
+        try {
+            if (!equipaId) throw new Error("Selecione uma equipa.");
+
+            // Upload Foto
+            if (fotoFile) {
+                const fileName = `atleta_${Date.now()}_${fotoFile.name.replace(/\s/g, '_')}`;
+
+                // Usando mesmo bucket 'fotos' ou poderia ser um novo 'atletas'
+                const { data, error } = await supabase.storage
+                    .from('fotos')
+                    .upload(fileName, fotoFile);
+
+                if (error) throw error;
+
+                const { data: publicData } = supabase.storage.from('fotos').getPublicUrl(fileName);
+                fotoUrl = publicData.publicUrl;
+            }
+
+            // Insert Database
+            const { error: insertError } = await supabase
+                .from('atletas')
+                .insert([{
+                    nome,
+                    equipa_id: equipaId,
+                    foto_url: fotoUrl
+                }]);
+
+            if (insertError) throw insertError;
+
+            alert("Atleta adicionado com sucesso!");
+            formAtleta.reset();
+            loadAtletasAdmin(); // Atualiza lista
+
+        } catch (err) {
+            console.error(err);
+            alert("Erro ao criar atleta: " + err.message);
+        }
+    });
+
+    async function loadAtletasAdmin() {
+        const listContainer = document.getElementById('admin-atletas-list');
+        listContainer.innerHTML = 'Carregando...';
+
+        // Select com join para pegar nome da equipa (se precisar)
+        // Mas o Supabase JS simples retorna os IDs.
+        // Para simplificar, vou listar e mostrar o ID da equipa ou fazer um segundo select.
+        // Melhor: usar .select('*, equipas(nome, escalao)')
+
+        const { data, error } = await supabase
+            .from('atletas')
+            .select('*, equipas(nome, escalao)')
+            .order('created_at', { ascending: false });
+
+        if (error) {
+            listContainer.innerHTML = 'Erro ao carregar lista de atletas.';
+            console.error(error);
+            return;
+        }
+
+        listContainer.innerHTML = '';
+        if (data.length === 0) listContainer.innerHTML = '<p>Nenhum atleta cadastrado.</p>';
+
+        data.forEach(atleta => {
+            const div = document.createElement('div');
+            div.className = 'admin-list-item';
+            div.style.borderBottom = '1px solid #ccc';
+            div.style.padding = '10px 0';
+            div.style.display = 'flex';
+            div.style.justifyContent = 'space-between';
+            div.style.alignItems = 'center';
+
+            // Tratamento caso a equipa tenha sido deletada
+            const nomeEquipa = atleta.equipas ? `${atleta.equipas.nome} (${atleta.equipas.escalao})` : 'Equipa desconhecida';
+
+            div.innerHTML = `
+                <div style="display: flex; align-items: center; gap: 10px;">
+                    ${atleta.foto_url
+                    ? `<img src="${atleta.foto_url}" style="width: 40px; height: 40px; border-radius: 50%; object-fit: cover;">`
+                    : '<div style="width: 40px; height: 40px; background: #eee; border-radius: 50%;"></div>'}
+                    <div>
+                        <strong>${atleta.nome}</strong>
+                        <br>
+                        <small>${nomeEquipa}</small>
+                    </div>
+                </div>
+                <button class="btn-danger btn-sm" onclick="deleteAtleta('${atleta.id}')">Excluir</button>
+            `;
+            listContainer.appendChild(div);
+        });
+    }
+
+    window.deleteAtleta = async (id) => {
+        if (!confirm("Tem certeza que deseja apagar este atleta?")) return;
+
+        const { error } = await supabase.from('atletas').delete().eq('id', id);
+        if (error) {
+            alert("Erro ao apagar: " + error.message);
+        } else {
+            loadAtletasAdmin();
+        }
+    };
+
+    // --- CRUD JOGOS (Placeholder) ---
+    const formJogo = document.getElementById('form-jogo');
+    formJogo.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        alert("Criar Jogo: funcionalidade em implementação...");
+    });
 
     // --- CRUD EQUIPAS ---
     const formEquipa = document.getElementById('form-equipa');
@@ -248,18 +373,6 @@ document.addEventListener('DOMContentLoaded', async () => {
         }
     };
 
-    // --- CRUD ATLETAS (Placeholder) ---
-    const formAtleta = document.getElementById('form-atleta');
-    formAtleta.addEventListener('submit', async (e) => {
-        e.preventDefault();
-        alert("Criar Atleta: funcionalidade em implementação...");
-    });
 
-    // --- CRUD JOGOS (Placeholder) ---
-    const formJogo = document.getElementById('form-jogo');
-    formJogo.addEventListener('submit', async (e) => {
-        e.preventDefault();
-        alert("Criar Jogo: funcionalidade em implementação...");
-    });
 
 });
