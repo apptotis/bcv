@@ -125,8 +125,6 @@ document.addEventListener('DOMContentLoaded', async () => {
         });
     }
 
-    // ... (CRUD Equipas logic remains above) ...
-
     // --- CRUD ATLETAS ---
     const formAtleta = document.getElementById('form-atleta');
 
@@ -181,11 +179,6 @@ document.addEventListener('DOMContentLoaded', async () => {
     async function loadAtletasAdmin() {
         const listContainer = document.getElementById('admin-atletas-list');
         listContainer.innerHTML = 'Carregando...';
-
-        // Select com join para pegar nome da equipa (se precisar)
-        // Mas o Supabase JS simples retorna os IDs.
-        // Para simplificar, vou listar e mostrar o ID da equipa ou fazer um segundo select.
-        // Melhor: usar .select('*, equipas(nome, escalao)')
 
         const { data, error } = await supabase
             .from('atletas')
@@ -250,6 +243,7 @@ document.addEventListener('DOMContentLoaded', async () => {
 
     // --- CRUD EQUIPAS ---
     const formEquipa = document.getElementById('form-equipa');
+    let editingEquipaId = null; // Estado para edição
 
     // Carregar lista de equipas ao iniciar
     loadEquipasAdmin();
@@ -272,13 +266,8 @@ document.addEventListener('DOMContentLoaded', async () => {
             // 1. Upload Logo (se existir)
             if (logoFile) {
                 const fileName = `logo_${Date.now()}_${logoFile.name.replace(/\s/g, '_')}`;
-                const { data, error } = await supabase.storage
-                    .from('logos') // Requer bucket 'logos' criado no Supabase
-                    .upload(fileName, logoFile);
-
+                const { data, error } = await supabase.storage.from('logos').upload(fileName, logoFile);
                 if (error) throw error;
-
-                // Pegar URL pública
                 const { data: publicData } = supabase.storage.from('logos').getPublicUrl(fileName);
                 logoUrl = publicData.publicUrl;
             }
@@ -286,39 +275,48 @@ document.addEventListener('DOMContentLoaded', async () => {
             // 2. Upload Foto de Grupo (se existir)
             if (fotoFile) {
                 const fileName = `grupo_${Date.now()}_${fotoFile.name.replace(/\s/g, '_')}`;
-                const { data, error } = await supabase.storage
-                    .from('fotos') // Requer bucket 'fotos' criado
-                    .upload(fileName, fotoFile);
-
+                const { data, error } = await supabase.storage.from('fotos').upload(fileName, fotoFile);
                 if (error) throw error;
-
                 const { data: publicData } = supabase.storage.from('fotos').getPublicUrl(fileName);
                 fotoUrl = publicData.publicUrl;
             }
 
-            // 3. Insert Database
-            const { error: insertError } = await supabase
-                .from('equipas')
-                .insert([{
-                    nome,
-                    escalao,
-                    localizacao: local,
-                    descricao: desc,
-                    treinadores,
-                    logo_url: logoUrl,
-                    foto_grupo_url: fotoUrl
-                }]);
+            // 3. Montar Objeto de Dados
+            const updates = {
+                nome,
+                escalao,
+                localizacao: local,
+                descricao: desc,
+                treinadores
+            };
+            if (logoUrl) updates.logo_url = logoUrl;
+            if (fotoUrl) updates.foto_grupo_url = fotoUrl;
 
-            if (insertError) throw insertError;
+            // 4. Insert ou Update
+            if (editingEquipaId) {
+                // UPDATE
+                const { error } = await supabase.from('equipas').update(updates).eq('id', editingEquipaId);
+                if (error) throw error;
+                alert("Equipa atualizada com sucesso!");
+            } else {
+                // INSERT
+                const { error } = await supabase.from('equipas').insert([updates]);
+                if (error) throw error;
+                alert("Equipa criada com sucesso!");
+            }
 
-            alert("Equipa criada com sucesso!");
+            // Reset
             formEquipa.reset();
-            loadEquipasAdmin(); // Atualiza a lista
-            loadTeamsOptions(); // Atualiza os selects
+            editingEquipaId = null;
+            const btn = formEquipa.querySelector('button[type="submit"]');
+            if (btn) btn.textContent = "Adicionar Equipa";
+
+            loadEquipasAdmin();
+            loadTeamsOptions();
 
         } catch (err) {
             console.error(err);
-            alert("Erro ao criar equipa: " + err.message);
+            alert("Erro: " + err.message);
         }
     });
 
@@ -354,13 +352,42 @@ document.addEventListener('DOMContentLoaded', async () => {
                     <br>
                     <small>${equipa.treinadores || ''}</small>
                 </div>
-                <button class="btn-danger btn-sm" onclick="deleteEquipa('${equipa.id}')">Excluir</button>
+                <div style="display: flex; gap: 5px;">
+                    <button class="btn" style="background: #6c757d; color: white;" onclick="editEquipa('${equipa.id}')">Editar</button>
+                    <button class="btn-danger btn-sm" onclick="deleteEquipa('${equipa.id}')">Excluir</button>
+                </div>
             `;
             listContainer.appendChild(div);
         });
     }
 
-    // Função Global para deletar (precisa estar no window para o onclick funcionar)
+    // Função Global de Edição
+    window.editEquipa = async (id) => {
+        // Buscar dados atuais da equipa
+        const { data: equipa, error } = await supabase.from('equipas').select('*').eq('id', id).single();
+
+        if (error) {
+            alert("Erro ao buscar equipa: " + error.message);
+            return;
+        }
+
+        // Preencher formulário
+        document.getElementById('equipa-nome').value = equipa.nome;
+        document.getElementById('equipa-escalao').value = equipa.escalao || '';
+        document.getElementById('equipa-local').value = equipa.localizacao || '';
+        document.getElementById('equipa-desc').value = equipa.descricao || '';
+        document.getElementById('equipa-treinadores').value = equipa.treinadores || '';
+
+        // Alterar estado para edição
+        editingEquipaId = id;
+        const btn = formEquipa.querySelector('button[type="submit"]');
+        if (btn) btn.textContent = "Atualizar Equipa";
+
+        // Scroll para o topo do form para facilitar
+        formEquipa.scrollIntoView({ behavior: 'smooth' });
+    };
+
+    // Função Global para deletar
     window.deleteEquipa = async (id) => {
         if (!confirm("Tem certeza que deseja apagar esta equipa?")) return;
 
@@ -372,7 +399,5 @@ document.addEventListener('DOMContentLoaded', async () => {
             loadTeamsOptions();
         }
     };
-
-
 
 });
