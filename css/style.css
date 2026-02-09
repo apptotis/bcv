@@ -476,8 +476,11 @@ h2 {
 /* --- ADMIN PAINEL --- */
 #admin-panel {
     width: 100%;
-    /* max-width removido para ocupar toda a largura disponível (como o menu) */
+    /* Ocupar largura total disponível, alinhado com o menu/header */
+    max-width: 100%;
     margin: 0 auto;
+    padding: 0;
+    /* Remove padding extra do container para alinhar com header */
 }
 
 .login-box {
@@ -500,8 +503,7 @@ h2 {
     flex-direction: column;
     gap: 15px;
     background: #fff;
-    padding: 15px;
-    /* Reduzido levemente */
+    padding: 20px;
     border-radius: 8px;
     box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
     margin-bottom: 20px;
@@ -546,10 +548,17 @@ h2 {
     /* Remove borda se desejar limpar */
 }
 
-/* Admin List Items */
+/* Admin List Items (Card Style) */
 .admin-list-item {
-    border-bottom: 1px solid #ccc;
-    padding: 10px 0;
+    background: white;
+    border: 1px solid #eee;
+    border-radius: 8px;
+    /* Card style */
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+    /* Sombra suave */
+    padding: 15px;
+    margin-bottom: 10px;
+    /* Espaço entre cards */
     display: flex;
     justify-content: space-between;
     align-items: center;
