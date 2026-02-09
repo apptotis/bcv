@@ -158,13 +158,14 @@ h2 {
 #visao-geral {
     display: flex;
     flex-direction: column;
-    justify-content: center;
+    justify-content: flex-start;
+    /* Alinha ao topo em vez de centrar */
     align-items: center;
     flex: 1;
-    /* Ocupa o espaço restante */
     width: 100%;
     min-height: calc(100vh - 80px);
-    /* Garante altura total menos header */
+    padding-top: 20px;
+    /* Pequeno espaçamento do menu */
 }
 
 .poster-container {
