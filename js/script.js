@@ -59,20 +59,23 @@ document.addEventListener('DOMContentLoaded', () => {
             const card = document.createElement('div');
             card.classList.add('equipa-card');
 
-            // Estrutura atualizada para Flexbox/Mobile
+            // Estrutura atualizada conforme sketch do usuário
+            // [LOGO] | [NOME]
+            //        | [ESCALÃO]
+            //        | [BTN] [BTN]
             card.innerHTML = `
-                <div class="equipa-main-content">
-                    <div class="equipa-logo">
-                        ${equipa.logo_url ? `<img src="${equipa.logo_url}" alt="${equipa.nome}">` : '<div class="placeholder-logo" style="font-size:2rem">🏀</div>'}
-                    </div>
+                <div class="equipa-logo">
+                    ${equipa.logo_url ? `<img src="${equipa.logo_url}" alt="${equipa.nome}">` : '<div class="placeholder-logo" style="font-size:2rem">🏀</div>'}
+                </div>
+                <div class="equipa-content-right">
                     <div class="equipa-info">
                         <h3>${equipa.nome}</h3>
                         <p>${equipa.escalao || ''}</p>
                     </div>
-                </div>
-                <div class="equipa-actions">
-                    <a href="equipa.html?id=${equipa.id}&view=atletas" class="btn-link">Atletas</a>
-                    <a href="equipa.html?id=${equipa.id}&view=info" class="btn-link btn-info">Info</a>
+                    <div class="equipa-actions">
+                        <a href="equipa.html?id=${equipa.id}&view=atletas" class="btn-link">Atletas</a>
+                        <a href="equipa.html?id=${equipa.id}&view=info" class="btn-link btn-info">Info</a>
+                    </div>
                 </div>
             `;
             container.appendChild(card);

@@ -301,104 +301,105 @@ h2 {
 /* Estilos para Equipas */
 #equipas-list {
     display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
-    /* Desktop defaults */
+    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
     gap: var(--spacing);
 }
 
 .equipa-card {
     background: var(--white);
-    border-radius: 4px;
-    /* Mais retangular */
+    border-radius: 8px;
     padding: 15px;
     box-shadow: var(--card-shadow);
-    transition: transform 0.2s;
     border: 1px solid #eee;
     display: flex;
-    flex-direction: column;
+    flex-direction: row;
+    /* Sempre linha, mesmo em desktop se quiser, mas foco é mobile */
     align-items: center;
-    text-align: center;
+    gap: 15px;
+    transition: transform 0.2s;
 }
 
 .equipa-card:hover {
     transform: translateY(-3px);
 }
 
-.equipa-main-content {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    width: 100%;
-}
-
 .equipa-logo {
-    margin-bottom: 10px;
+    flex-shrink: 0;
 }
 
 .equipa-logo img {
     width: 80px;
     height: 80px;
     object-fit: contain;
+    border-radius: 50%;
+    background-color: #fff;
+}
+
+.equipa-content-right {
+    display: flex;
+    flex-direction: column;
+    flex: 1;
+    align-items: flex-start;
+    /* Alinhado à esquerda como no desenho */
 }
 
 .equipa-info {
-    margin-bottom: 10px;
+    margin-bottom: 8px;
+    text-align: left;
 }
 
 .equipa-card h3 {
-    font-size: 1.2rem;
+    font-size: 1.1rem;
     color: var(--secondary-color);
-    margin-bottom: 2px;
+    margin: 0;
+    line-height: 1.2;
+    font-weight: 700;
 }
 
 .equipa-card p {
     color: #666;
     font-size: 0.9rem;
+    margin: 0;
 }
 
-/* Título */
 .equipa-actions {
-    margin-top: auto;
     display: flex;
     gap: 10px;
-    width: 100%;
-    justify-content: center;
+}
+
+.btn-link {
+    font-size: 0.8rem;
+    padding: 6px 15px;
+    background-color: var(--white);
+    color: var(--primary-color);
+    text-decoration: none;
+    border-radius: 20px;
+    font-weight: bold;
+    text-transform: uppercase;
+    border: 1px solid var(--primary-color);
+    transition: all 0.3s;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+}
+
+.btn-link:hover {
+    background-color: var(--primary-color);
+    color: var(--white);
 }
 
 .btn-info {
-    background-color: #17a2b8;
-    /* Azul cyan para Info */
+    border-color: #17a2b8;
+    color: #17a2b8;
 }
 
 .btn-info:hover {
-    background-color: #138496;
+    background-color: #17a2b8;
+    color: white;
 }
 
-/* Mobile: Card Horizontal/Retangular Full Width */
-@media (max-width: 600px) {
-    #equipas-list {
-        grid-template-columns: 1fr;
-        /* Uma coluna */
-    }
-
+/* Ajustes Mobile específicos se necessário, mas o layout acima já é responsive */
+@media (max-width: 480px) {
     .equipa-card {
-        flex-direction: row;
-        align-items: center;
-        justify-content: space-between;
-        text-align: left;
         padding: 10px;
-    }
-
-    .equipa-main-content {
-        flex-direction: row;
-        align-items: center;
-        width: auto;
-        flex: 1;
-    }
-
-    .equipa-logo {
-        margin-bottom: 0;
-        margin-right: 15px;
     }
 
     .equipa-logo img {
@@ -406,36 +407,9 @@ h2 {
         height: 60px;
     }
 
-    .equipa-info {
-        margin-bottom: 0;
-    }
-
-    .equipa-card h3 {
-        font-size: 1.1rem;
-        margin-bottom: 0;
-    }
-
-    .equipa-actions {
-        margin-top: 0;
-        width: auto;
-        flex-direction: row;
-        /* Lado a lado */
-        gap: 10px;
-    }
-
     .btn-link {
-        font-size: 0.85rem;
-        padding: 8px 12px;
-        text-align: center;
-        text-transform: uppercase;
-        font-weight: bold;
-        letter-spacing: 0.5px;
-        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        min-width: 80px;
-        /* Largura mínima para parecer botão consistente */
+        padding: 5px 12px;
+        font-size: 0.75rem;
     }
 }
 
