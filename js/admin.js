@@ -123,13 +123,130 @@ document.addEventListener('DOMContentLoaded', async () => {
         });
     }
 
-    // --- CRUD EQUIPAS (Placeholder) ---
+    // --- CRUD EQUIPAS ---
     const formEquipa = document.getElementById('form-equipa');
+
+    // Carregar lista de equipas ao iniciar
+    loadEquipasAdmin();
+
     formEquipa.addEventListener('submit', async (e) => {
         e.preventDefault();
-        alert("Criar Equipa: funcionalidade em implementação...");
-        // Implementar lógica de upload + insert
+
+        const nome = document.getElementById('equipa-nome').value;
+        const escalao = document.getElementById('equipa-escalao').value;
+        const local = document.getElementById('equipa-local').value;
+        const desc = document.getElementById('equipa-desc').value;
+        const treinadores = document.getElementById('equipa-treinadores').value;
+        const logoFile = document.getElementById('equipa-logo-file').files[0];
+        const fotoFile = document.getElementById('equipa-foto-file').files[0];
+
+        let logoUrl = null;
+        let fotoUrl = null;
+
+        try {
+            // 1. Upload Logo (se existir)
+            if (logoFile) {
+                const fileName = `logo_${Date.now()}_${logoFile.name.replace(/\s/g, '_')}`;
+                const { data, error } = await supabase.storage
+                    .from('logos') // Requer bucket 'logos' criado no Supabase
+                    .upload(fileName, logoFile);
+
+                if (error) throw error;
+
+                // Pegar URL pública
+                const { data: publicData } = supabase.storage.from('logos').getPublicUrl(fileName);
+                logoUrl = publicData.publicUrl;
+            }
+
+            // 2. Upload Foto de Grupo (se existir)
+            if (fotoFile) {
+                const fileName = `grupo_${Date.now()}_${fotoFile.name.replace(/\s/g, '_')}`;
+                const { data, error } = await supabase.storage
+                    .from('fotos') // Requer bucket 'fotos' criado
+                    .upload(fileName, fotoFile);
+
+                if (error) throw error;
+
+                const { data: publicData } = supabase.storage.from('fotos').getPublicUrl(fileName);
+                fotoUrl = publicData.publicUrl;
+            }
+
+            // 3. Insert Database
+            const { error: insertError } = await supabase
+                .from('equipas')
+                .insert([{
+                    nome,
+                    escalao,
+                    localizacao: local,
+                    descricao: desc,
+                    treinadores,
+                    logo_url: logoUrl,
+                    foto_grupo_url: fotoUrl
+                }]);
+
+            if (insertError) throw insertError;
+
+            alert("Equipa criada com sucesso!");
+            formEquipa.reset();
+            loadEquipasAdmin(); // Atualiza a lista
+            loadTeamsOptions(); // Atualiza os selects
+
+        } catch (err) {
+            console.error(err);
+            alert("Erro ao criar equipa: " + err.message);
+        }
     });
+
+    async function loadEquipasAdmin() {
+        const listContainer = document.getElementById('admin-equipas-list');
+        listContainer.innerHTML = 'Carregando...';
+
+        const { data, error } = await supabase
+            .from('equipas')
+            .select('*')
+            .order('created_at', { ascending: false });
+
+        if (error) {
+            listContainer.innerHTML = 'Erro ao carregar lista.';
+            return;
+        }
+
+        listContainer.innerHTML = '';
+        if (data.length === 0) listContainer.innerHTML = '<p>Nenhuma equipa cadastrada.</p>';
+
+        data.forEach(equipa => {
+            const div = document.createElement('div');
+            div.className = 'admin-list-item';
+            div.style.borderBottom = '1px solid #ccc';
+            div.style.padding = '10px 0';
+            div.style.display = 'flex';
+            div.style.justifyContent = 'space-between';
+            div.style.alignItems = 'center';
+
+            div.innerHTML = `
+                <div>
+                    <strong>${equipa.nome}</strong> (${equipa.escalao || '-'})
+                    <br>
+                    <small>${equipa.treinadores || ''}</small>
+                </div>
+                <button class="btn-danger btn-sm" onclick="deleteEquipa('${equipa.id}')">Excluir</button>
+            `;
+            listContainer.appendChild(div);
+        });
+    }
+
+    // Função Global para deletar (precisa estar no window para o onclick funcionar)
+    window.deleteEquipa = async (id) => {
+        if (!confirm("Tem certeza que deseja apagar esta equipa?")) return;
+
+        const { error } = await supabase.from('equipas').delete().eq('id', id);
+        if (error) {
+            alert("Erro ao apagar: " + error.message);
+        } else {
+            loadEquipasAdmin();
+            loadTeamsOptions();
+        }
+    };
 
     // --- CRUD ATLETAS (Placeholder) ---
     const formAtleta = document.getElementById('form-atleta');

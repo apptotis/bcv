@@ -86,3 +86,43 @@ BEGIN
         CREATE POLICY "Admin pode deletar jogos" ON public.jogos FOR DELETE TO authenticated USING (true);
     END IF;
 END $$;
+
+-- 4. Tabela de Perfis de Usuários (Ligada ao Supabase Auth)
+-- Esta tabela estende os dados do auth.users (Tabela de sistema do Supabase)
+CREATE TABLE IF NOT EXISTS public.users (
+    id UUID REFERENCES auth.users(id) ON DELETE CASCADE PRIMARY KEY,
+    nome TEXT,
+    telemovel TEXT,
+    email TEXT, -- Copia do email para facilitar leitura
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT timezone('utc'::text, now()) NOT NULL
+);
+
+-- Habilitar RLS
+ALTER TABLE public.users ENABLE ROW LEVEL SECURITY;
+
+-- Policies
+-- Usuário pode ver seu próprio perfil
+CREATE POLICY "Usuários podem ver seu próprio perfil" ON public.users FOR SELECT USING (auth.uid() = id);
+-- Usuário pode atualizar seu próprio perfil
+CREATE POLICY "Usuários podem atualizar seu próprio perfil" ON public.users FOR UPDATE USING (auth.uid() = id);
+-- Admins (todos nessa tabela) podem ver todos os outros users (opcional, para listar gestores)
+CREATE POLICY "Admins podem ver todos os perfis" ON public.users FOR SELECT TO authenticated USING (true);
+
+
+-- 5. Função e Trigger para criar perfil automaticamente ao cadastrar
+-- Quando um usuário é criado no menu "Authentication", esta função roda e cria a entrada em public.users
+CREATE OR REPLACE FUNCTION public.handle_new_user()
+RETURNS TRIGGER AS $$
+BEGIN
+  INSERT INTO public.users (id, email, nome)
+  VALUES (new.id, new.email, new.raw_user_meta_data->>'nome');
+  RETURN new;
+END;
+$$ LANGUAGE plpgsql SECURITY DEFINER;
+
+-- Trigger
+-- Drop para garantir que não duplique se rodar o script de novo
+DROP TRIGGER IF EXISTS on_auth_user_created ON auth.users;
+CREATE TRIGGER on_auth_user_created
+  AFTER INSERT ON auth.users
+  FOR EACH ROW EXECUTE PROCEDURE public.handle_new_user();
