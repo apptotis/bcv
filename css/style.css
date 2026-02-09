@@ -220,6 +220,26 @@ h2 {
     font-weight: 500;
 }
 
+.location-link {
+    display: inline-block;
+    margin-top: 15px;
+    color: var(--primary-color);
+    text-decoration: none;
+    font-weight: bold;
+    font-size: 1.1rem;
+    padding: 8px 16px;
+    border: 1px solid var(--primary-color);
+    border-radius: 20px;
+    transition: all 0.3s ease;
+    background-color: var(--white);
+}
+
+.location-link:hover {
+    background-color: var(--primary-color);
+    color: var(--white);
+    transform: scale(1.05);
+}
+
 /* Cards e Listas (Genérico para Equipas/Jogos) */
 .grid-container {
     display: grid;
