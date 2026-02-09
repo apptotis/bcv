@@ -127,6 +127,7 @@ document.addEventListener('DOMContentLoaded', async () => {
 
     // --- CRUD ATLETAS ---
     const formAtleta = document.getElementById('form-atleta');
+    let editingAtletaId = null; // Estado para edição
 
     formAtleta.addEventListener('submit', async (e) => {
         e.preventDefault();
@@ -156,23 +157,35 @@ document.addEventListener('DOMContentLoaded', async () => {
             }
 
             // Insert Database
-            const { error: insertError } = await supabase
-                .from('atletas')
-                .insert([{
-                    nome,
-                    equipa_id: equipaId,
-                    foto_url: fotoUrl
-                }]);
+            const updates = {
+                nome,
+                equipa_id: equipaId
+            };
+            if (fotoUrl) updates.foto_url = fotoUrl;
 
-            if (insertError) throw insertError;
+            if (editingAtletaId) {
+                // UPDATE
+                const { error } = await supabase.from('atletas').update(updates).eq('id', editingAtletaId);
+                if (error) throw error;
+                alert("Atleta atualizado com sucesso!");
+            } else {
+                // INSERT
+                const { error } = await supabase.from('atletas').insert([updates]);
+                if (error) throw error;
+                alert("Atleta adicionado com sucesso!");
+            }
 
-            alert("Atleta adicionado com sucesso!");
+            // Reset
             formAtleta.reset();
+            editingAtletaId = null;
+            const btn = formAtleta.querySelector('button[type="submit"]');
+            if (btn) btn.textContent = "Adicionar Atleta";
+
             loadAtletasAdmin(); // Atualiza lista
 
         } catch (err) {
             console.error(err);
-            alert("Erro ao criar atleta: " + err.message);
+            alert("Erro: " + err.message);
         }
     });
 
@@ -217,11 +230,32 @@ document.addEventListener('DOMContentLoaded', async () => {
                         <small>${nomeEquipa}</small>
                     </div>
                 </div>
-                <button class="btn-danger btn-sm" onclick="deleteAtleta('${atleta.id}')">Excluir</button>
+                <div style="display: flex; gap: 5px;">
+                    <button class="btn-success btn-sm" onclick="editAtleta('${atleta.id}')">Editar</button>
+                    <button class="btn-danger btn-sm" onclick="deleteAtleta('${atleta.id}')">Excluir</button>
+                </div>
             `;
             listContainer.appendChild(div);
         });
     }
+
+    // Função Global de Edição de Atleta
+    window.editAtleta = async (id) => {
+        const { data: atleta, error } = await supabase.from('atletas').select('*').eq('id', id).single();
+        if (error) {
+            alert("Erro ao buscar atleta: " + error.message);
+            return;
+        }
+
+        document.getElementById('atleta-nome').value = atleta.nome;
+        document.getElementById('atleta-equipa-id').value = atleta.equipa_id;
+
+        editingAtletaId = id;
+        const btn = formAtleta.querySelector('button[type="submit"]');
+        if (btn) btn.textContent = "Atualizar Atleta";
+
+        formAtleta.scrollIntoView({ behavior: 'smooth' });
+    };
 
     window.deleteAtleta = async (id) => {
         if (!confirm("Tem certeza que deseja apagar este atleta?")) return;
