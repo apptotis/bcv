@@ -5,7 +5,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Admin - Torneio Eurocidade</title>
-    <link rel="stylesheet" href="css/style.css?v=5">
+    <link rel="stylesheet" href="css/style.css?v=6">
     <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&display=swap" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 </head>
@@ -65,21 +65,35 @@
                     <div id="tab-equipas" class="tab-pane active">
                         <h3>Gerir Equipas</h3>
                         <form id="form-equipa" class="admin-form">
-                            <input type="text" id="equipa-nome" placeholder="Nome da Equipa" required>
-                            <select id="equipa-escalao" required>
-                                <option value="" disabled selected>Selecionar Escalão</option>
-                                <option value="Mini 8">Mini 8</option>
-                                <option value="Mini 10">Mini 10</option>
-                                <option value="Mini 12">Mini 12</option>
-                            </select>
-                            <input type="text" id="equipa-local" placeholder="Localização (Ex: Porto)">
-                            <textarea id="equipa-desc" placeholder="Descrição breve"></textarea>
-                            <input type="text" id="equipa-treinadores"
-                                placeholder="Treinadores (separados por vírgula)">
+                            <div class="row">
+                                <input type="text" id="equipa-nome" placeholder="Nome da Equipa" required>
+                            </div>
+                            <div class="row">
+                                <select id="equipa-escalao" required>
+                                    <option value="" disabled selected>Selecionar Escalão</option>
+                                    <option value="Mini 8">Mini 8</option>
+                                    <option value="Mini 10">Mini 10</option>
+                                    <option value="Mini 12">Mini 12</option>
+                                </select>
+                            </div>
+                            <div class="row">
+                                <input type="text" id="equipa-local" placeholder="Localização (Ex: Porto)">
+                            </div>
+                            <div class="row">
+                                <textarea id="equipa-desc" placeholder="Descrição breve"></textarea>
+                            </div>
+                            <div class="row">
+                                <input type="text" id="equipa-treinadores"
+                                    placeholder="Treinadores (separados por vírgula)">
+                            </div>
                             <label>Logo da Equipa:</label>
-                            <input type="file" id="equipa-logo-file" accept="image/*">
+                            <div class="row">
+                                <input type="file" id="equipa-logo-file" accept="image/*">
+                            </div>
                             <label>Foto de Grupo:</label>
-                            <input type="file" id="equipa-foto-file" accept="image/*">
+                            <div class="row">
+                                <input type="file" id="equipa-foto-file" accept="image/*">
+                            </div>
                             <button type="submit" class="btn-success">Adicionar Equipa</button>
                         </form>
                         <hr>
@@ -90,12 +104,18 @@
                     <div id="tab-atletas" class="tab-pane hidden">
                         <h3>Gerir Atletas</h3>
                         <form id="form-atleta" class="admin-form">
-                            <select id="atleta-equipa-id" required>
-                                <option value="" disabled selected>Selecionar Equipa</option>
-                            </select>
-                            <input type="text" id="atleta-nome" placeholder="Nome do Atleta" required>
+                            <div class="row">
+                                <select id="atleta-equipa-id" required>
+                                    <option value="" disabled selected>Selecionar Equipa</option>
+                                </select>
+                            </div>
+                            <div class="row">
+                                <input type="text" id="atleta-nome" placeholder="Nome do Atleta" required>
+                            </div>
                             <label>Foto do Atleta:</label>
-                            <input type="file" id="atleta-foto-file" accept="image/*">
+                            <div class="row">
+                                <input type="file" id="atleta-foto-file" accept="image/*">
+                            </div>
                             <button type="submit" class="btn-success">Adicionar Atleta</button>
                         </form>
                         <hr>
