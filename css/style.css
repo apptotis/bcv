@@ -179,13 +179,30 @@ h2 {
 
 .responsive-poster {
     max-width: 100%;
-    max-height: calc(100vh - 120px);
-    /* Ajuste dinâmico para evitar scroll */
+    max-height: calc(100vh - 250px);
+    /* Ajuste maior para caber títulos */
     width: auto;
     height: auto;
     object-fit: contain;
     border-radius: 8px;
     box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+.event-title {
+    font-size: 1.8rem;
+    color: var(--primary-color);
+    margin-bottom: 5px;
+    text-transform: uppercase;
+    line-height: 1.2;
+}
+
+.event-subtitle {
+    font-size: 1.4rem;
+    color: var(--secondary-color);
+    margin-bottom: 15px;
+    border-bottom: none;
+    /* Remove a borda padrão do H2 */
+    display: block;
 }
 
 .dev-credits {
