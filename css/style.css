@@ -476,11 +476,8 @@ h2 {
 /* --- ADMIN PAINEL --- */
 #admin-panel {
     width: 100%;
-    max-width: 1000px;
-    /* Limita largura em telas grandes */
+    /* max-width removido para ocupar toda a largura disponível (como o menu) */
     margin: 0 auto;
-    padding: 0 10px;
-    /* Padding para não colar na borda em mobile */
 }
 
 .login-box {
