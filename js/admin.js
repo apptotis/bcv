@@ -43,30 +43,37 @@ document.addEventListener('DOMContentLoaded', async () => {
         }
     }
 
-    // Login
-    loginBtn.addEventListener('click', async () => {
-        const email = emailInput.value;
-        const password = passwordInput.value;
-        loginError.classList.add('hidden');
 
-        if (!email || !password) {
-            showError("Preencha email e senha.");
-            return;
-        }
+    // Login - usar submit do form para funcionar no mobile
+    const loginForm = document.getElementById('login-form');
+    if (loginForm) {
+        loginForm.addEventListener('submit', async (e) => {
+            e.preventDefault(); // Prevenir reload da página
 
-        const { data, error } = await supabase.auth.signInWithPassword({
-            email,
-            password
+            const email = emailInput.value;
+            const password = passwordInput.value;
+            loginError.classList.add('hidden');
+
+            if (!email || !password) {
+                showError("Preencha email e senha.");
+                return;
+            }
+
+            const { data, error } = await supabase.auth.signInWithPassword({
+                email,
+                password
+            });
+
+            if (error) {
+                showError("Erro: " + error.message);
+            } else {
+                // Sucesso - o listener cuidará da UI
+                emailInput.value = '';
+                passwordInput.value = '';
+            }
         });
+    }
 
-        if (error) {
-            showError("Erro: " + error.message);
-        } else {
-            // Sucesso - o listener cuidará da UI
-            emailInput.value = '';
-            passwordInput.value = '';
-        }
-    });
 
     // Logout
     logoutBtn.addEventListener('click', async () => {
