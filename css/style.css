@@ -208,7 +208,9 @@ h2 {
 }
 
 @media (max-width: 480px) {
-    .event-title {
+
+    .event-title,
+    .event-date {
         font-size: 1.3rem;
         /* Menor para caber numa linha no telemóvel */
     }
