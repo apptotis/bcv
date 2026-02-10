@@ -207,14 +207,7 @@ h2 {
     line-height: 1.2;
 }
 
-@media (max-width: 480px) {
 
-    .event-title,
-    .event-date {
-        font-size: 1.3rem;
-        /* Menor para caber numa linha no telemóvel */
-    }
-}
 
 .event-subtitle {
     font-size: 1.4rem;
@@ -232,6 +225,15 @@ h2 {
     margin-bottom: 15px;
     font-weight: 700;
     text-transform: uppercase;
+}
+
+/* Mobile - Ajustar tamanho de fonte */
+@media (max-width: 480px) {
+
+    .event-title,
+    .event-date {
+        font-size: 1.3rem !important;
+    }
 }
 
 .dev-credits {
