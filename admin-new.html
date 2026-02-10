@@ -103,8 +103,8 @@
         </div>
     </div>
 
-    <script src="js/config.js"></script>
-    <script src="js/admin.js"></script>
+    <script src="js/config.js?v=mobile1"></script>
+    <script src="js/admin.js?v=mobile1"></script>
     <script>
         // Debug info para mobile
         document.addEventListener('DOMContentLoaded', () => {
@@ -112,6 +112,10 @@
             if (debugInfo) {
                 debugInfo.textContent = 'JS carregado. Aguardando login...';
             }
+
+            // Log adicional para debug
+            console.log('Admin page loaded');
+            console.log('Login form exists:', !!document.getElementById('login-form'));
         });
     </script>
 </body>
