@@ -5,152 +5,119 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Admin - Torneio Eurocidade</title>
-    <link rel="stylesheet" href="css/style.css?v=99">
+    <link rel="stylesheet" href="css/admin.css">
     <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&display=swap" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 </head>
 
 <body>
-    <header class="main-header">
-        <div class="logo-container">
-            <a href="index.html"
-                style="display: flex; align-items: center; gap: 10px; text-decoration: none; color: white;">
-                <img src="Logo_bcv.jpg" alt="Logo BCV" class="site-logo">
-                <h1>Torneio Eurocidade</h1>
-            </a>
+    <!-- Login Container -->
+    <div id="admin-login-container">
+        <div class="login-card">
+            <h2>Área Administrativa</h2>
+            <form id="login-form">
+                <input type="email" id="admin-email" placeholder="Email" required autocomplete="email">
+                <input type="password" id="admin-password" placeholder="Senha" required autocomplete="current-password">
+                <button type="submit" id="btn-login" class="btn-primary">Entrar</button>
+            </form>
+            <p id="login-error" class="error-msg hidden"></p>
+            <p id="debug-info" style="font-size: 12px; color: #666; margin-top: 10px;"></p>
         </div>
-        <button class="menu-toggle" aria-label="Abrir Menu">
-            <span></span><span></span><span></span>
-        </button>
-        <nav class="main-nav">
-            <ul>
-                <li><a href="index.html">Visão Geral</a></li>
-                <li><a href="equipas.html">Equipas</a></li>
-                <li><a href="jogos.html">Jogos</a></li>
-                <li><a href="roteiro.html">Roteiro</a></li>
-                <li><a href="contactos.html">Contactos</a></li>
-                <li><a href="admin.html" class="active">Admins</a></li>
-            </ul>
-        </nav>
-    </header>
+    </div>
 
-    <main id="app-content">
-        <section id="admins" class="page-section active" style="display: block;">
-            <!-- Login Container -->
-            <div id="admin-login-container">
-                <h2>Área Administrativa</h2>
-                <div class="login-box">
-                    <input type="email" id="admin-email" placeholder="Email" required>
-                    <input type="password" id="admin-password" placeholder="Senha" required>
-                    <button id="btn-login" class="btn-primary">Entrar</button>
-                    <p id="login-error" class="error-msg hidden"></p>
-                </div>
+    <!-- Admin Panel -->
+    <div id="admin-panel" class="hidden">
+        <!-- Header -->
+        <header class="admin-header">
+            <h1>Gestão do Torneio</h1>
+            <button id="btn-logout" class="btn-logout">Sair</button>
+        </header>
+
+        <!-- Tabs -->
+        <div class="admin-tabs">
+            <button class="tab-btn active" data-tab="tab-equipas">Equipas</button>
+            <button class="tab-btn" data-tab="tab-atletas">Atletas</button>
+            <button class="tab-btn" data-tab="tab-jogos">Jogos</button>
+        </div>
+
+        <!-- Tab Content -->
+        <div class="tab-content">
+            <!-- Equipas Tab -->
+            <div id="tab-equipas" class="tab-pane active">
+                <h2>Gerir Equipas</h2>
+                <form id="form-equipa" class="admin-form">
+                    <input type="text" id="equipa-nome" placeholder="Nome da Equipa" required>
+                    <select id="equipa-escalao" required>
+                        <option value="" disabled selected>Selecionar Escalão</option>
+                        <option value="Mini 8">Mini 8</option>
+                        <option value="Mini 10">Mini 10</option>
+                        <option value="Mini 12">Mini 12</option>
+                    </select>
+                    <input type="text" id="equipa-local" placeholder="Localização (Ex: Porto)">
+                    <textarea id="equipa-desc" placeholder="Descrição breve"></textarea>
+                    <input type="text" id="equipa-treinadores" placeholder="Treinadores (separados por vírgula)">
+                    <label>Logo da Equipa:</label>
+                    <input type="file" id="equipa-logo-file" accept="image/*">
+                    <label>Foto de Grupo:</label>
+                    <input type="file" id="equipa-foto-file" accept="image/*">
+                    <button type="submit" class="btn-submit">Adicionar Equipa</button>
+                </form>
+                <hr>
+                <div id="admin-equipas-list" class="admin-list"></div>
             </div>
 
-            <!-- Admin Painel (Dashboard) -->
-            <div id="admin-panel" class="hidden">
-                <div class="admin-header">
-                    <h2>Gestão do Torneio</h2>
-                    <button id="btn-logout" class="btn-danger">Sair</button>
-                </div>
-
-                <div class="admin-tabs">
-                    <button class="tab-btn active" data-tab="tab-equipas">Equipas</button>
-                    <button class="tab-btn" data-tab="tab-atletas">Atletas</button>
-                    <button class="tab-btn" data-tab="tab-jogos">Jogos</button>
-                </div>
-
-                <div class="tab-content">
-                    <!-- Aba Equipas -->
-                    <div id="tab-equipas" class="tab-pane active">
-                        <h3>Gerir Equipas</h3>
-                        <form id="form-equipa" class="admin-form">
-                            <div class="row">
-                                <input type="text" id="equipa-nome" placeholder="Nome da Equipa" required>
-                            </div>
-                            <div class="row">
-                                <select id="equipa-escalao" required>
-                                    <option value="" disabled selected>Selecionar Escalão</option>
-                                    <option value="Mini 8">Mini 8</option>
-                                    <option value="Mini 10">Mini 10</option>
-                                    <option value="Mini 12">Mini 12</option>
-                                </select>
-                            </div>
-                            <div class="row">
-                                <input type="text" id="equipa-local" placeholder="Localização (Ex: Porto)">
-                            </div>
-                            <div class="row">
-                                <textarea id="equipa-desc" placeholder="Descrição breve"></textarea>
-                            </div>
-                            <div class="row">
-                                <input type="text" id="equipa-treinadores"
-                                    placeholder="Treinadores (separados por vírgula)">
-                            </div>
-                            <label>Logo da Equipa:</label>
-                            <div class="row">
-                                <input type="file" id="equipa-logo-file" accept="image/*">
-                            </div>
-                            <label>Foto de Grupo:</label>
-                            <div class="row">
-                                <input type="file" id="equipa-foto-file" accept="image/*">
-                            </div>
-                            <button type="submit" class="btn-success">Adicionar Equipa</button>
-                        </form>
-                        <hr>
-                        <div id="admin-equipas-list" class="admin-list"></div>
-                    </div>
-
-                    <!-- Aba Atletas -->
-                    <div id="tab-atletas" class="tab-pane hidden">
-                        <h3>Gerir Atletas</h3>
-                        <form id="form-atleta" class="admin-form">
-                            <div class="row">
-                                <select id="atleta-equipa-id" required>
-                                    <option value="" disabled selected>Selecionar Equipa</option>
-                                </select>
-                            </div>
-                            <div class="row">
-                                <input type="text" id="atleta-nome" placeholder="Nome do Atleta" required>
-                            </div>
-                            <label>Foto do Atleta:</label>
-                            <div class="row">
-                                <input type="file" id="atleta-foto-file" accept="image/*">
-                            </div>
-                            <button type="submit" class="btn-success">Adicionar Atleta</button>
-                        </form>
-                        <hr>
-                        <div id="admin-atletas-list" class="admin-list"></div>
-                    </div>
-
-                    <!-- Aba Jogos -->
-                    <div id="tab-jogos" class="tab-pane hidden">
-                        <h3>Gerir Jogos</h3>
-                        <form id="form-jogo" class="admin-form">
-                            <div class="row">
-                                <select id="jogo-equipa-casa" required>
-                                    <option value="" disabled selected>Equipa Casa</option>
-                                </select>
-                                <span>VS</span>
-                                <select id="jogo-equipa-fora" required>
-                                    <option value="" disabled selected>Equipa Fora</option>
-                                </select>
-                            </div>
-                            <div class="row">
-                                <input type="datetime-local" id="jogo-data">
-                                <input type="text" id="jogo-campo" placeholder="Campo (Ex: Campo 1)">
-                            </div>
-                            <button type="submit" class="btn-success">Agendar Jogo</button>
-                        </form>
-                        <hr>
-                        <div id="admin-jogos-list" class="admin-list"></div>
-                    </div>
-                </div>
+            <!-- Atletas Tab -->
+            <div id="tab-atletas" class="tab-pane hidden">
+                <h2>Gerir Atletas</h2>
+                <form id="form-atleta" class="admin-form">
+                    <select id="atleta-equipa-id" required>
+                        <option value="" disabled selected>Selecionar Equipa</option>
+                    </select>
+                    <input type="text" id="atleta-nome" placeholder="Nome do Atleta" required>
+                    <label>Foto do Atleta:</label>
+                    <input type="file" id="atleta-foto-file" accept="image/*">
+                    <button type="submit" class="btn-submit">Adicionar Atleta</button>
+                </form>
+                <hr>
+                <div id="admin-atletas-list" class="admin-list"></div>
             </div>
-        </section>
-    </main>
 
-    <script src="js/config.js?v=2"></script>
-    <script src="js/admin.js?v=2"></script>
+            <!-- Jogos Tab -->
+            <div id="tab-jogos" class="tab-pane hidden">
+                <h2>Gerir Jogos</h2>
+                <form id="form-jogo" class="admin-form">
+                    <select id="jogo-equipa-casa" required>
+                        <option value="" disabled selected>Selecionar Equipa Casa</option>
+                    </select>
+                    <div class="vs-separator">VS</div>
+                    <select id="jogo-equipa-fora" required>
+                        <option value="" disabled selected>Selecionar Equipa Fora</option>
+                    </select>
+                    <input type="datetime-local" id="jogo-data">
+                    <input type="text" id="jogo-campo" placeholder="Campo (Ex: Campo 1)">
+                    <button type="submit" class="btn-submit">Agendar Jogo</button>
+                </form>
+                <hr>
+                <div id="admin-jogos-list" class="admin-list"></div>
+            </div>
+        </div>
+    </div>
+
+    <script src="js/config.js?v=mobile2"></script>
+    <script src="js/admin.js?v=mobile2"></script>
+    <script>
+        // Debug info para mobile
+        document.addEventListener('DOMContentLoaded', () => {
+            const debugInfo = document.getElementById('debug-info');
+            if (debugInfo) {
+                debugInfo.textContent = 'JS carregado. Aguardando login...';
+            }
+
+            // Log adicional para debug
+            console.log('Admin page loaded');
+            console.log('Login form exists:', !!document.getElementById('login-form'));
+        });
+    </script>
 </body>
 
 </html>
