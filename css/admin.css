@@ -317,15 +317,7 @@ hr {
         padding: 15px;
     }
 
-    .admin-list-item {
-        flex-direction: column;
-        align-items: flex-start;
-    }
 
-    .admin-list-actions {
-        width: 100%;
-        justify-content: flex-end;
-    }
 }
 
 /* Mobile */
