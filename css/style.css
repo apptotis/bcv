@@ -244,6 +244,7 @@ h2 {
 .location-link {
     display: inline-block;
     margin-top: 15px;
+    margin-bottom: 20px;
     color: var(--primary-color);
     text-decoration: none;
     font-weight: bold;
