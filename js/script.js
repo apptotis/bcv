@@ -62,7 +62,11 @@ document.addEventListener('DOMContentLoaded', () => {
             // Apply custom shadow color and background if defined
             if (equipa.shadow_color) {
                 card.style.boxShadow = `0 10px 15px -3px ${equipa.shadow_color}40, 0 4px 6px -2px ${equipa.shadow_color}60`;
-                card.style.backgroundColor = `${equipa.shadow_color}1A`; // 10% opacity (hex: 1A = 26/255 ≈ 10%)
+
+                // Use custom opacity or default to 10%
+                const opacity = equipa.background_opacity || 10;
+                const opacityHex = Math.round((opacity / 100) * 255).toString(16).padStart(2, '0');
+                card.style.backgroundColor = `${equipa.shadow_color}${opacityHex}`;
             }
 
             // Estrutura atualizada conforme sketch do usuário

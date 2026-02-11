@@ -58,6 +58,9 @@
                     <input type="text" id="equipa-treinadores" placeholder="Treinadores (separados por vírgula)">
                     <label>Cor Sombra do Card:</label>
                     <input type="color" id="equipa-shadow-color" value="#3b82f6">
+                    <label>Intensidade do Fundo (<span id="opacity-value">10</span>%):</label>
+                    <input type="range" id="equipa-background-opacity" min="0" max="100" value="10" step="5"
+                        oninput="document.getElementById('opacity-value').textContent = this.value">
                     <label>Logo da Equipa:</label>
                     <input type="file" id="equipa-logo-file" accept="image/*">
                     <label>Foto de Grupo:</label>

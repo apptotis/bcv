@@ -299,6 +299,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         const desc = document.getElementById('equipa-desc').value;
         const treinadores = document.getElementById('equipa-treinadores').value;
         const shadowColor = document.getElementById('equipa-shadow-color').value;
+        const backgroundOpacity = parseInt(document.getElementById('equipa-background-opacity').value);
         const logoFile = document.getElementById('equipa-logo-file').files[0];
         const fotoFile = document.getElementById('equipa-foto-file').files[0];
 
@@ -331,7 +332,8 @@ document.addEventListener('DOMContentLoaded', async () => {
                 localizacao: local,
                 descricao: desc,
                 treinadores,
-                shadow_color: shadowColor
+                shadow_color: shadowColor,
+                background_opacity: backgroundOpacity
             };
             if (logoUrl) updates.logo_url = logoUrl;
             if (fotoUrl) updates.foto_grupo_url = fotoUrl;
@@ -422,6 +424,9 @@ document.addEventListener('DOMContentLoaded', async () => {
         document.getElementById('equipa-desc').value = equipa.descricao || '';
         document.getElementById('equipa-treinadores').value = equipa.treinadores || '';
         document.getElementById('equipa-shadow-color').value = equipa.shadow_color || '#3b82f6';
+        const opacityValue = equipa.background_opacity || 10;
+        document.getElementById('equipa-background-opacity').value = opacityValue;
+        document.getElementById('opacity-value').textContent = opacityValue;
 
         // Alterar estado para edição
         editingEquipaId = id;
