@@ -125,8 +125,35 @@ document.addEventListener('DOMContentLoaded', () => {
             return;
         }
 
+        // Store data globally for filtering
+        window.allJogos = data;
+
+        // Populate filters
+        populateFilters(data);
+
+        // Initial render
         container.innerHTML = '';
         renderJogos(data, container);
+
+        // Add filter event listeners
+        const equipaFilter = document.getElementById('filter-equipa');
+        const escalaoFilter = document.getElementById('filter-escalao');
+
+        if (equipaFilter) {
+            equipaFilter.addEventListener('change', () => {
+                const filtered = filterJogos(window.allJogos);
+                container.innerHTML = '';
+                renderJogos(filtered, container);
+            });
+        }
+
+        if (escalaoFilter) {
+            escalaoFilter.addEventListener('change', () => {
+                const filtered = filterJogos(window.allJogos);
+                container.innerHTML = '';
+                renderJogos(filtered, container);
+            });
+        }
     }
 
     // Populate filters with unique values
