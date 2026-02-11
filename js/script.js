@@ -59,6 +59,11 @@ document.addEventListener('DOMContentLoaded', () => {
             const card = document.createElement('div');
             card.classList.add('equipa-card');
 
+            // Apply custom shadow color if defined
+            if (equipa.shadow_color) {
+                card.style.boxShadow = `0 10px 15px -3px ${equipa.shadow_color}40, 0 4px 6px -2px ${equipa.shadow_color}60`;
+            }
+
             // Estrutura atualizada conforme sketch do usuário
             // [LOGO] | [NOME]
             //        | [ESCALÃO]

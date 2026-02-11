@@ -298,6 +298,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         const local = document.getElementById('equipa-local').value;
         const desc = document.getElementById('equipa-desc').value;
         const treinadores = document.getElementById('equipa-treinadores').value;
+        const shadowColor = document.getElementById('equipa-shadow-color').value;
         const logoFile = document.getElementById('equipa-logo-file').files[0];
         const fotoFile = document.getElementById('equipa-foto-file').files[0];
 
@@ -329,7 +330,8 @@ document.addEventListener('DOMContentLoaded', async () => {
                 escalao,
                 localizacao: local,
                 descricao: desc,
-                treinadores
+                treinadores,
+                shadow_color: shadowColor
             };
             if (logoUrl) updates.logo_url = logoUrl;
             if (fotoUrl) updates.foto_grupo_url = fotoUrl;
@@ -419,6 +421,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         document.getElementById('equipa-local').value = equipa.localizacao || '';
         document.getElementById('equipa-desc').value = equipa.descricao || '';
         document.getElementById('equipa-treinadores').value = equipa.treinadores || '';
+        document.getElementById('equipa-shadow-color').value = equipa.shadow_color || '#3b82f6';
 
         // Alterar estado para edição
         editingEquipaId = id;
