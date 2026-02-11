@@ -135,32 +135,34 @@ document.addEventListener('DOMContentLoaded', () => {
             item.classList.add('jogo-item');
 
             const date = new Date(jogo.data_hora);
-            const dateStr = date.toLocaleDateString('pt-PT', { day: '2-digit', month: '2-digit', year: 'numeric' });
-            const timeStr = date.toLocaleTimeString('pt-PT', { hour: '2-digit', minute: '2-digit' });
+            const dia = date.toLocaleDateString('pt-PT', { day: '2-digit', month: '2-digit' });
+            const hora = date.toLocaleTimeString('pt-PT', { hour: '2-digit', minute: '2-digit' });
 
             const equipaCasa = jogo.equipa_casa?.nome || 'Equipa A';
             const equipaFora = jogo.equipa_fora?.nome || 'Equipa B';
             const logoCasa = jogo.equipa_casa?.logo_url || '';
             const logoFora = jogo.equipa_fora?.logo_url || '';
+            const resultadoCasa = jogo.resultado_casa !== null ? jogo.resultado_casa : '-';
+            const resultadoFora = jogo.resultado_fora !== null ? jogo.resultado_fora : '-';
 
             item.innerHTML = `
-                <div class="jogo-header">
-                    <span class="jogo-escalao">${jogo.escalao || 'Mini'}</span>
-                    <span class="jogo-data">${dateStr} às ${timeStr}</span>
+                <div class="jogo-linha-1">
+                    <span class="jogo-data">${dia}</span>
+                    <span class="jogo-hora">${hora}</span>
+                    <span class="jogo-campo">${jogo.campo || 'Campo 1'}</span>
                 </div>
-                <div class="jogo-equipas">
-                    <div class="equipa">
-                        ${logoCasa ? `<img src="${logoCasa}" alt="${equipaCasa}" class="equipa-logo-small">` : ''}
-                        <span>${equipaCasa}</span>
-                    </div>
-                    <span class="vs">VS</span>
-                    <div class="equipa">
-                        ${logoFora ? `<img src="${logoFora}" alt="${equipaFora}" class="equipa-logo-small">` : ''}
-                        <span>${equipaFora}</span>
-                    </div>
+                <div class="jogo-linha-equipa">
+                    ${logoCasa ? `<img src="${logoCasa}" alt="${equipaCasa}" class="jogo-logo">` : '<div class="jogo-logo-placeholder">🏀</div>'}
+                    <span class="jogo-equipa-nome">${equipaCasa}</span>
+                    <span class="jogo-resultado">${resultadoCasa}</span>
                 </div>
-                <div class="jogo-info">
-                    <span>📍 ${jogo.campo || 'Campo a definir'}</span>
+                <div class="jogo-linha-equipa">
+                    ${logoFora ? `<img src="${logoFora}" alt="${equipaFora}" class="jogo-logo">` : '<div class="jogo-logo-placeholder">🏀</div>'}
+                    <span class="jogo-equipa-nome">${equipaFora}</span>
+                    <span class="jogo-resultado">${resultadoFora}</span>
+                </div>
+                <div class="jogo-linha-estado">
+                    <span>${jogo.estado || 'Agendado'}</span>
                 </div>
             `;
             container.appendChild(item);
