@@ -398,13 +398,20 @@ h2 {
     color: var(--white);
 }
 
+/* Custom color buttons will override via inline styles */
+.btn-link[style*="border-color"]:hover {
+    background-color: currentColor !important;
+    color: var(--white) !important;
+    opacity: 0.9;
+}
+
 .btn-info {
-    border-color: #17a2b8;
-    color: #17a2b8;
+    border-color: #28a745;
+    color: #28a745;
 }
 
 .btn-info:hover {
-    background-color: #17a2b8;
+    background-color: #28a745;
     color: white;
 }
 
