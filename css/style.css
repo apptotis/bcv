@@ -488,10 +488,23 @@ h2 {
     flex-shrink: 0;
 }
 
-.jogo-equipa-nome {
+.jogo-equipa-info {
     flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+}
+
+.jogo-equipa-nome {
     font-weight: 500;
     font-size: 1rem;
+    line-height: 1.2;
+}
+
+.jogo-equipa-escalao {
+    font-size: 0.8rem;
+    color: #666;
+    font-weight: 400;
 }
 
 .jogo-resultado {
