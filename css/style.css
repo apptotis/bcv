@@ -399,10 +399,9 @@ h2 {
 }
 
 /* Custom color buttons will override via inline styles */
-.btn-link[style*="border-color"]:hover {
-    background-color: currentColor !important;
+.btn-link[style*="--team-color"]:hover {
+    background-color: var(--team-color) !important;
     color: var(--white) !important;
-    opacity: 0.9;
 }
 
 .btn-info {
