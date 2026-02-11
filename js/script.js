@@ -145,6 +145,10 @@ document.addEventListener('DOMContentLoaded', () => {
             const resultadoCasa = jogo.resultado_casa !== null ? jogo.resultado_casa : '-';
             const resultadoFora = jogo.resultado_fora !== null ? jogo.resultado_fora : '-';
 
+            // Adicionar escalão ao nome da equipa
+            const nomeCompletoCasa = jogo.escalao ? `${equipaCasa} ${jogo.escalao}` : equipaCasa;
+            const nomeCompletoFora = jogo.escalao ? `${equipaFora} ${jogo.escalao}` : equipaFora;
+
             item.innerHTML = `
                 <div class="jogo-linha-1">
                     <span class="jogo-data">${dia}</span>
@@ -153,12 +157,12 @@ document.addEventListener('DOMContentLoaded', () => {
                 </div>
                 <div class="jogo-linha-equipa">
                     ${logoCasa ? `<img src="${logoCasa}" alt="${equipaCasa}" class="jogo-logo">` : '<div class="jogo-logo-placeholder">🏀</div>'}
-                    <span class="jogo-equipa-nome">${equipaCasa}</span>
+                    <span class="jogo-equipa-nome">${nomeCompletoCasa}</span>
                     <span class="jogo-resultado">${resultadoCasa}</span>
                 </div>
                 <div class="jogo-linha-equipa">
                     ${logoFora ? `<img src="${logoFora}" alt="${equipaFora}" class="jogo-logo">` : '<div class="jogo-logo-placeholder">🏀</div>'}
-                    <span class="jogo-equipa-nome">${equipaFora}</span>
+                    <span class="jogo-equipa-nome">${nomeCompletoFora}</span>
                     <span class="jogo-resultado">${resultadoFora}</span>
                 </div>
             `;
