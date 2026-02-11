@@ -92,19 +92,6 @@
     flex-shrink: 0;
 }
 
-/* Linha 4: Estado */
-.jogo-linha-estado {
-    margin-top: 4px;
-    padding-top: 4px;
-    border-top: 1px solid #e0e0e0;
-}
-
-.jogo-linha-estado span {
-    font-size: 0.75rem;
-    color: #666;
-    font-style: italic;
-}
-
 /* Grid container para jogos */
 #jogos-list {
     display: grid;
@@ -115,16 +102,26 @@
 
 /* Otimizações para Mobile */
 @media (max-width: 768px) {
+
+    /* Garantir largura total no mobile */
+    .page-section {
+        padding: 0 !important;
+    }
+
     #jogos-list {
         grid-template-columns: 1fr;
         gap: 8px;
         padding: 8px;
+        width: 100%;
+        max-width: 100%;
     }
 
     .jogo-item {
         padding: 10px;
         margin-bottom: 8px;
         border-radius: 6px;
+        width: 100%;
+        box-sizing: border-box;
     }
 
     .jogo-linha-1 {
@@ -168,15 +165,6 @@
     .jogo-resultado {
         font-size: 1rem;
         min-width: 22px;
-    }
-
-    .jogo-linha-estado {
-        margin-top: 3px;
-        padding-top: 3px;
-    }
-
-    .jogo-linha-estado span {
-        font-size: 0.7rem;
     }
 }
 

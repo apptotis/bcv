@@ -161,9 +161,6 @@ document.addEventListener('DOMContentLoaded', () => {
                     <span class="jogo-equipa-nome">${equipaFora}</span>
                     <span class="jogo-resultado">${resultadoFora}</span>
                 </div>
-                <div class="jogo-linha-estado">
-                    <span>${jogo.estado || 'Agendado'}</span>
-                </div>
             `;
             container.appendChild(item);
         });
