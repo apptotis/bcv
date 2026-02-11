@@ -129,6 +129,56 @@ document.addEventListener('DOMContentLoaded', () => {
         renderJogos(data, container);
     }
 
+    // Populate filters with unique values
+    function populateFilters(jogos) {
+        const equipas = new Set();
+        const escaloes = new Set();
+
+        jogos.forEach(jogo => {
+            if (jogo.equipa_casa?.nome) equipas.add(jogo.equipa_casa.nome);
+            if (jogo.equipa_fora?.nome) equipas.add(jogo.equipa_fora.nome);
+            if (jogo.escalao) escaloes.add(jogo.escalao);
+        });
+
+        // Populate equipa filter
+        const equipaFilter = document.getElementById('filter-equipa');
+        if (equipaFilter) {
+            Array.from(equipas).sort().forEach(equipa => {
+                const option = document.createElement('option');
+                option.value = equipa;
+                option.textContent = equipa;
+                equipaFilter.appendChild(option);
+            });
+        }
+
+        // Populate escalao filter
+        const escalaoFilter = document.getElementById('filter-escalao');
+        if (escalaoFilter) {
+            Array.from(escaloes).sort().forEach(escalao => {
+                const option = document.createElement('option');
+                option.value = escalao;
+                option.textContent = escalao;
+                escalaoFilter.appendChild(option);
+            });
+        }
+    }
+
+    // Filter games based on selected filters
+    function filterJogos(jogos) {
+        const equipaFilter = document.getElementById('filter-equipa')?.value || '';
+        const escalaoFilter = document.getElementById('filter-escalao')?.value || '';
+
+        return jogos.filter(jogo => {
+            const matchEquipa = !equipaFilter ||
+                jogo.equipa_casa?.nome === equipaFilter ||
+                jogo.equipa_fora?.nome === equipaFilter;
+
+            const matchEscalao = !escalaoFilter || jogo.escalao === escalaoFilter;
+
+            return matchEquipa && matchEscalao;
+        });
+    }
+
     function renderJogos(jogos, container) {
         jogos.forEach(jogo => {
             const item = document.createElement('div');
