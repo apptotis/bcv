@@ -317,6 +317,22 @@ h2 {
     gap: var(--spacing);
 }
 
+/* Estilos para Jogos - usar mesmo layout que equipas */
+#jogos-list {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+    gap: var(--spacing);
+}
+
+@media (max-width: 768px) {
+
+    #equipas-list,
+    #jogos-list {
+        grid-template-columns: 1fr;
+        gap: 10px;
+    }
+}
+
 .equipa-card {
     background: var(--white);
     border-radius: 8px;
