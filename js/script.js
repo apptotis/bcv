@@ -84,7 +84,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     </div>
                     <div class="equipa-actions">
                         <a href="equipa.html?id=${equipa.id}&view=atletas" class="btn-link" 
-                           style="${equipa.shadow_color ? `--team-color: ${equipa.shadow_color}; border-color: ${equipa.shadow_color}; color: ${equipa.shadow_color};` : ''}">Atletas</a>
+                           style="${equipa.shadow_color ? `--team-color: ${equipa.shadow_color}; border-color: ${equipa.shadow_color};` : ''}">Atletas</a>
                         <a href="equipa.html?id=${equipa.id}&view=info" class="btn-link btn-info">Info</a>
                     </div>
                 </div>
