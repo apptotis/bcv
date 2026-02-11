@@ -109,6 +109,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         await loadTeamsOptions();
         await loadEquipasAdmin();
         await loadAtletasAdmin(); // Carregar atletas
+        await loadJogosAdmin(); // Carregar jogos
     }
 
     // Preencher Selects de Equipas
@@ -276,12 +277,156 @@ document.addEventListener('DOMContentLoaded', async () => {
         }
     };
 
-    // --- CRUD JOGOS (Placeholder) ---
+    // --- CRUD JOGOS ---
     const formJogo = document.getElementById('form-jogo');
+    let editingJogoId = null;
+
     formJogo.addEventListener('submit', async (e) => {
         e.preventDefault();
-        alert("Criar Jogo: funcionalidade em implementação...");
+
+        const equipaCasaId = document.getElementById('jogo-equipa-casa').value;
+        const equipaForaId = document.getElementById('jogo-equipa-fora').value;
+        const dataHora = document.getElementById('jogo-data').value;
+        const campo = document.getElementById('jogo-campo').value;
+
+        try {
+            // Validar que as equipas são diferentes
+            if (equipaCasaId === equipaForaId) {
+                throw new Error("As equipas devem ser diferentes!");
+            }
+
+            // Buscar escalão da equipa casa (assumindo que ambas são do mesmo escalão)
+            const { data: equipaCasa, error: errorEquipa } = await supabase
+                .from('equipas')
+                .select('escalao')
+                .eq('id', equipaCasaId)
+                .single();
+
+            if (errorEquipa) throw errorEquipa;
+
+            const updates = {
+                equipa_casa_id: equipaCasaId,
+                equipa_fora_id: equipaForaId,
+                escalao: equipaCasa.escalao,
+                data_hora: dataHora || null,
+                campo: campo || null
+            };
+
+            if (editingJogoId) {
+                // UPDATE
+                const { error } = await supabase.from('jogos').update(updates).eq('id', editingJogoId);
+                if (error) throw error;
+                alert("Jogo atualizado com sucesso!");
+            } else {
+                // INSERT
+                const { error } = await supabase.from('jogos').insert([updates]);
+                if (error) throw error;
+                alert("Jogo agendado com sucesso!");
+            }
+
+            // Reset
+            formJogo.reset();
+            editingJogoId = null;
+            const btn = formJogo.querySelector('button[type="submit"]');
+            if (btn) btn.textContent = "Agendar Jogo";
+
+            loadJogosAdmin();
+
+        } catch (err) {
+            console.error(err);
+            alert("Erro: " + err.message);
+        }
     });
+
+    async function loadJogosAdmin() {
+        const listContainer = document.getElementById('admin-jogos-list');
+        listContainer.innerHTML = 'Carregando...';
+
+        const { data, error } = await supabase
+            .from('jogos')
+            .select(`
+                *,
+                equipa_casa:equipas!equipa_casa_id(nome, escalao),
+                equipa_fora:equipas!equipa_fora_id(nome, escalao)
+            `)
+            .order('data_hora', { ascending: true });
+
+        if (error) {
+            listContainer.innerHTML = 'Erro ao carregar lista de jogos.';
+            console.error(error);
+            return;
+        }
+
+        listContainer.innerHTML = '';
+        if (data.length === 0) listContainer.innerHTML = '<p>Nenhum jogo agendado.</p>';
+
+        data.forEach(jogo => {
+            const div = document.createElement('div');
+            div.className = 'admin-list-item';
+            div.style.borderBottom = '1px solid #ccc';
+            div.style.padding = '10px 0';
+            div.style.display = 'flex';
+            div.style.justifyContent = 'space-between';
+            div.style.alignItems = 'center';
+
+            const equipaCasa = jogo.equipa_casa?.nome || 'Equipa desconhecida';
+            const equipaFora = jogo.equipa_fora?.nome || 'Equipa desconhecida';
+            const dataHora = jogo.data_hora ? new Date(jogo.data_hora).toLocaleString('pt-PT') : 'Data a definir';
+
+            div.innerHTML = `
+                <div>
+                    <strong>${equipaCasa} vs ${equipaFora}</strong>
+                    <br>
+                    <small>${jogo.escalao || ''} | ${dataHora} | ${jogo.campo || 'Campo a definir'}</small>
+                </div>
+                <div style="display: flex; gap: 5px;">
+                    <button class="btn-success btn-sm" onclick="editJogo('${jogo.id}')">Editar</button>
+                    <button class="btn-danger btn-sm" onclick="deleteJogo('${jogo.id}')">Excluir</button>
+                </div>
+            `;
+            listContainer.appendChild(div);
+        });
+    }
+
+    // Função Global de Edição de Jogo
+    window.editJogo = async (id) => {
+        const { data: jogo, error } = await supabase.from('jogos').select('*').eq('id', id).single();
+        if (error) {
+            alert("Erro ao buscar jogo: " + error.message);
+            return;
+        }
+
+        document.getElementById('jogo-equipa-casa').value = jogo.equipa_casa_id;
+        document.getElementById('jogo-equipa-fora').value = jogo.equipa_fora_id;
+
+        // Converter data para formato datetime-local
+        if (jogo.data_hora) {
+            const date = new Date(jogo.data_hora);
+            const localDateTime = new Date(date.getTime() - date.getTimezoneOffset() * 60000)
+                .toISOString()
+                .slice(0, 16);
+            document.getElementById('jogo-data').value = localDateTime;
+        }
+
+        document.getElementById('jogo-campo').value = jogo.campo || '';
+
+        editingJogoId = id;
+        const btn = formJogo.querySelector('button[type="submit"]');
+        if (btn) btn.textContent = "Atualizar Jogo";
+
+        formJogo.scrollIntoView({ behavior: 'smooth' });
+    };
+
+    window.deleteJogo = async (id) => {
+        if (!confirm("Tem certeza que deseja apagar este jogo?")) return;
+
+        const { error } = await supabase.from('jogos').delete().eq('id', id);
+        if (error) {
+            alert("Erro ao apagar: " + error.message);
+        } else {
+            loadJogosAdmin();
+        }
+    };
 
     // --- CRUD EQUIPAS ---
     const formEquipa = document.getElementById('form-equipa');
