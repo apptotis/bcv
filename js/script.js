@@ -39,8 +39,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
         const { data, error } = await supabase
             .from('equipas')
-            .select('*')
-            .order('nome');
+            .select('*');
 
         if (error) {
             console.error('Erro ao buscar equipas:', error);
@@ -52,6 +51,15 @@ document.addEventListener('DOMContentLoaded', () => {
             container.innerHTML = '<p>Nenhuma equipa encontrada.</p>';
             return;
         }
+
+        // Custom sort by escalao: Mini 8, Mini 10, Mini 12, then by name
+        const escalaoOrder = { 'Mini 8': 1, 'Mini 10': 2, 'Mini 12': 3 };
+        data.sort((a, b) => {
+            const orderA = escalaoOrder[a.escalao] || 999;
+            const orderB = escalaoOrder[b.escalao] || 999;
+            if (orderA !== orderB) return orderA - orderB;
+            return (a.nome || '').localeCompare(b.nome || '');
+        });
 
         container.innerHTML = '';
         container.innerHTML = '';
