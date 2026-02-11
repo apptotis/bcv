@@ -108,56 +108,54 @@
 
     .jogo-item {
         padding: 10px;
+        margin-bottom: 8px;
+        border-radius: 6px;
+        width: 100%;
+        box-sizing: border-box;
     }
 
-    margin-bottom: 8px;
-    border-radius: 6px;
-    width: 100%;
-    box-sizing: border-box;
-}
+    .jogo-linha-1 {
+        gap: 8px;
+        padding-bottom: 5px;
+        margin-bottom: 5px;
+        font-size: 0.8rem;
+    }
 
-.jogo-linha-1 {
-    gap: 8px;
-    padding-bottom: 5px;
-    margin-bottom: 5px;
-    font-size: 0.8rem;
-}
+    .jogo-data,
+    .jogo-hora {
+        font-size: 0.8rem;
+    }
 
-.jogo-data,
-.jogo-hora {
-    font-size: 0.8rem;
-}
+    .jogo-campo {
+        font-size: 0.75rem;
+        padding: 2px 6px;
+    }
 
-.jogo-campo {
-    font-size: 0.75rem;
-    padding: 2px 6px;
-}
+    .jogo-linha-equipa {
+        gap: 8px;
+        padding: 3px 0;
+        min-height: 36px;
+    }
 
-.jogo-linha-equipa {
-    gap: 8px;
-    padding: 3px 0;
-    min-height: 36px;
-}
+    .jogo-logo {
+        width: 28px;
+        height: 28px;
+    }
 
-.jogo-logo {
-    width: 28px;
-    height: 28px;
-}
+    .jogo-logo-placeholder {
+        width: 28px;
+        height: 28px;
+        font-size: 1rem;
+    }
 
-.jogo-logo-placeholder {
-    width: 28px;
-    height: 28px;
-    font-size: 1rem;
-}
+    .jogo-equipa-nome {
+        font-size: 0.9rem;
+    }
 
-.jogo-equipa-nome {
-    font-size: 0.9rem;
-}
-
-.jogo-resultado {
-    font-size: 1rem;
-    min-width: 22px;
-}
+    .jogo-resultado {
+        font-size: 1rem;
+        min-width: 22px;
+    }
 }
 
 /* Otimizações para telas muito pequenas */
