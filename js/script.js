@@ -26,6 +26,8 @@ document.addEventListener('DOMContentLoaded', () => {
         fetchEquipas();
     } else if (page.includes('jogos') && supabase) {
         fetchJogos();
+    } else if (page.includes('opinioes') && supabase) {
+        initOpinioes();
     } else if (page.includes('equipa') && supabase) { // 'equipa.html' singular
         fetchEquipaDetalhes();
     } else {
@@ -330,5 +332,91 @@ document.addEventListener('DOMContentLoaded', () => {
                 -->
             `;
         }
+    }
+
+    // Opiniões Page Functions
+    function initOpinioes() {
+        fetchOpinioes();
+
+        const form = document.getElementById('opiniao-form');
+        if (form) {
+            form.addEventListener('submit', async (e) => {
+                e.preventDefault();
+                await submitOpiniao();
+            });
+        }
+    }
+
+    async function submitOpiniao() {
+        const nome = document.getElementById('nome').value.trim();
+        const email = document.getElementById('email').value.trim();
+        const opiniao = document.getElementById('opiniao').value.trim();
+
+        if (!nome || !opiniao) {
+            alert('Por favor, preencha os campos obrigatórios.');
+            return;
+        }
+
+        const { data, error } = await supabase
+            .from('opinioes')
+            .insert([{ nome, email: email || null, opiniao }])
+            .select();
+
+        if (error) {
+            console.error('Erro ao enviar opinião:', error);
+            alert('Erro ao enviar opinião. Tente novamente.');
+            return;
+        }
+
+        alert('Opinião enviada com sucesso!');
+        document.getElementById('opiniao-form').reset();
+        fetchOpinioes();
+    }
+
+    async function fetchOpinioes() {
+        const container = document.getElementById('opinioes-list');
+        if (!container) return;
+
+        const { data, error } = await supabase
+            .from('opinioes')
+            .select('*')
+            .order('created_at', { ascending: false });
+
+        if (error) {
+            console.error('Erro ao buscar opiniões:', error);
+            container.innerHTML = '<p class="error">Erro ao carregar opiniões.</p>';
+            return;
+        }
+
+        if (!data || data.length === 0) {
+            container.innerHTML = '<p>Ainda não há opiniões. Seja o primeiro a partilhar!</p>';
+            return;
+        }
+
+        container.innerHTML = '';
+        renderOpinioes(data, container);
+    }
+
+    function renderOpinioes(opinioes, container) {
+        opinioes.forEach(op => {
+            const card = document.createElement('div');
+            card.classList.add('opiniao-card');
+
+            const date = new Date(op.created_at);
+            const dateStr = date.toLocaleDateString('pt-PT', {
+                day: '2-digit',
+                month: '2-digit',
+                year: 'numeric'
+            });
+
+            card.innerHTML = `
+                <div class="opiniao-header">
+                    <strong>${op.nome}</strong>
+                    <span class="opiniao-date">${dateStr}</span>
+                </div>
+                <p class="opiniao-text">${op.opiniao}</p>
+            `;
+            container.appendChild(card);
+        });
     }
 });
