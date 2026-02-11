@@ -858,3 +858,113 @@ h2 {
 .text-center {
     text-align: center;
 }
+
+/* ===== OPINIÕES PAGE ===== */
+.opiniao-form-container {
+    max-width: 600px;
+    margin: 0 auto 40px;
+    background: var(--white);
+    padding: 20px;
+    border-radius: 8px;
+    box-shadow: var(--card-shadow);
+}
+
+.form-group {
+    margin-bottom: 15px;
+}
+
+.form-group label {
+    display: block;
+    margin-bottom: 5px;
+    font-weight: 600;
+    color: var(--secondary-color);
+}
+
+.form-group input,
+.form-group textarea {
+    width: 100%;
+    padding: 10px;
+    border: 1px solid #ddd;
+    border-radius: 6px;
+    font-size: 1rem;
+    font-family: 'Roboto', sans-serif;
+    box-sizing: border-box;
+}
+
+.form-group input:focus,
+.form-group textarea:focus {
+    outline: none;
+    border-color: var(--primary-color);
+}
+
+.form-group textarea {
+    resize: vertical;
+    min-height: 100px;
+}
+
+.btn-submit {
+    width: 100%;
+    padding: 12px;
+    background-color: var(--primary-color);
+    color: var(--white);
+    border: none;
+    border-radius: 6px;
+    font-size: 1rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background-color 0.3s;
+}
+
+.btn-submit:hover {
+    background-color: var(--secondary-color);
+}
+
+#opinioes-list {
+    max-width: 800px;
+    margin: 0 auto;
+}
+
+.opiniao-card {
+    background: var(--white);
+    padding: 15px;
+    margin-bottom: 15px;
+    border-radius: 8px;
+    box-shadow: var(--card-shadow);
+}
+
+.opiniao-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 10px;
+    padding-bottom: 8px;
+    border-bottom: 1px solid #eee;
+}
+
+.opiniao-header strong {
+    color: var(--primary-color);
+    font-size: 1rem;
+}
+
+.opiniao-date {
+    color: #666;
+    font-size: 0.85rem;
+}
+
+.opiniao-text {
+    color: var(--text-color);
+    line-height: 1.6;
+    margin: 0;
+}
+
+@media (max-width: 768px) {
+    .opiniao-form-container {
+        padding: 15px;
+    }
+
+    .opiniao-header {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 5px;
+    }
+}
