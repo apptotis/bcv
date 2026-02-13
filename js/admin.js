@@ -440,6 +440,7 @@ document.addEventListener('DOMContentLoaded', async () => {
 
         const nome = document.getElementById('equipa-nome').value;
         const escalao = document.getElementById('equipa-escalao').value;
+        const genero = document.getElementById('equipa-genero').value;
         const local = document.getElementById('equipa-local').value;
         const desc = document.getElementById('equipa-desc').value;
         const treinadores = document.getElementById('equipa-treinadores').value;
@@ -474,6 +475,7 @@ document.addEventListener('DOMContentLoaded', async () => {
             const updates = {
                 nome,
                 escalao,
+                genero,
                 localizacao: local,
                 descricao: desc,
                 treinadores,
@@ -541,7 +543,7 @@ document.addEventListener('DOMContentLoaded', async () => {
                 <div>
                     <strong>${equipa.nome}</strong> (${equipa.escalao || '-'})
                     <br>
-                    <small>${equipa.treinadores || ''}</small>
+                    <small>${equipa.genero || 'Género não definido'} | ${equipa.treinadores || ''}</small>
                 </div>
                 <div style="display: flex; gap: 5px;">
                     <button class="btn-success btn-sm" onclick="editEquipa('${equipa.id}')">Editar</button>
@@ -565,6 +567,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         // Preencher formulário
         document.getElementById('equipa-nome').value = equipa.nome;
         document.getElementById('equipa-escalao').value = equipa.escalao || '';
+        document.getElementById('equipa-genero').value = equipa.genero || '';
         document.getElementById('equipa-local').value = equipa.localizacao || '';
         document.getElementById('equipa-desc').value = equipa.descricao || '';
         document.getElementById('equipa-treinadores').value = equipa.treinadores || '';
