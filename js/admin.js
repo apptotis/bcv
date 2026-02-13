@@ -444,6 +444,9 @@ document.addEventListener('DOMContentLoaded', async () => {
         const local = document.getElementById('equipa-local').value;
         const desc = document.getElementById('equipa-desc').value;
         const treinadores = document.getElementById('equipa-treinadores').value;
+        const facebookUrl = document.getElementById('equipa-facebook').value;
+        const instagramUrl = document.getElementById('equipa-instagram').value;
+        const websiteUrl = document.getElementById('equipa-website').value;
         const shadowColor = document.getElementById('equipa-shadow-color').value;
         const backgroundOpacity = parseInt(document.getElementById('equipa-background-opacity').value);
         const logoFile = document.getElementById('equipa-logo-file').files[0];
@@ -479,6 +482,9 @@ document.addEventListener('DOMContentLoaded', async () => {
                 localizacao: local,
                 descricao: desc,
                 treinadores,
+                facebook_url: facebookUrl || null,
+                instagram_url: instagramUrl || null,
+                website_url: websiteUrl || null,
                 shadow_color: shadowColor,
                 background_opacity: backgroundOpacity
             };
@@ -571,6 +577,9 @@ document.addEventListener('DOMContentLoaded', async () => {
         document.getElementById('equipa-local').value = equipa.localizacao || '';
         document.getElementById('equipa-desc').value = equipa.descricao || '';
         document.getElementById('equipa-treinadores').value = equipa.treinadores || '';
+        document.getElementById('equipa-facebook').value = equipa.facebook_url || '';
+        document.getElementById('equipa-instagram').value = equipa.instagram_url || '';
+        document.getElementById('equipa-website').value = equipa.website_url || '';
         document.getElementById('equipa-shadow-color').value = equipa.shadow_color || '#3b82f6';
         const opacityValue = equipa.background_opacity || 10;
         document.getElementById('equipa-background-opacity').value = opacityValue;
