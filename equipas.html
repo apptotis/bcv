@@ -42,6 +42,15 @@
     <main id="app-content">
         <section id="equipas" class="page-section active" style="display: block;">
             <h2>Equipas Participantes</h2>
+            <div id="equipas-filter" style="margin-bottom: 20px;">
+                <select id="filter-escalao-genero" class="filter-select">
+                    <option value="">Todas as Equipas</option>
+                    <option value="Mini 8">Mini 8</option>
+                    <option value="Mini 10">Mini 10</option>
+                    <option value="Mini 12|Masculino">Mini 12 Masculinos</option>
+                    <option value="Mini 12|Feminino">Mini 12 Femininos</option>
+                </select>
+            </div>
             <div id="equipas-list" class="grid-container">
                 <p class="loading">A carregar equipas...</p>
             </div>

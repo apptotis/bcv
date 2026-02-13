@@ -54,6 +54,37 @@ document.addEventListener('DOMContentLoaded', () => {
             return;
         }
 
+        // Store data globally for filtering
+        window.allEquipas = data;
+
+        // Initial render
+        renderEquipas(data, container);
+
+        // Add filter event listener
+        const filterSelect = document.getElementById('filter-escalao-genero');
+        if (filterSelect) {
+            filterSelect.addEventListener('change', () => {
+                const filterValue = filterSelect.value;
+                const filtered = filterEquipas(window.allEquipas, filterValue);
+                renderEquipas(filtered, container);
+            });
+        }
+    }
+
+    function filterEquipas(equipas, filterValue) {
+        if (!filterValue) return equipas;
+
+        // Check if filter includes gender (format: "Mini 12|Masculino")
+        if (filterValue.includes('|')) {
+            const [escalao, genero] = filterValue.split('|');
+            return equipas.filter(e => e.escalao === escalao && e.genero === genero);
+        } else {
+            // Filter by escalão only
+            return equipas.filter(e => e.escalao === filterValue);
+        }
+    }
+
+    function renderEquipas(data, container) {
         // Custom sort by escalao: Mini 8, Mini 10, Mini 12, then by name
         const escalaoOrder = { 'Mini 8': 1, 'Mini 10': 2, 'Mini 12': 3 };
         data.sort((a, b) => {
