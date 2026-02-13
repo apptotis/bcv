@@ -369,10 +369,15 @@ document.addEventListener('DOMContentLoaded', () => {
                     const div = document.createElement('div');
                     div.className = 'athlete-card';
                     div.innerHTML = `
-                         ${atleta.foto_url
+                        <div class="athlete-photo">
+                            ${atleta.foto_url
                             ? `<img src="${atleta.foto_url}" alt="${atleta.nome}">`
-                            : '<div style="width:80px;height:80px;background:#eee;border-radius:50%;display:flex;align-items:center;justify-content:center;margin-bottom:10px;font-size:2rem;">👤</div>'}
-                        <strong>${atleta.nome}</strong>
+                            : '<div class="placeholder-photo">👤</div>'}
+                        </div>
+                        <div class="athlete-info">
+                            <h3>${atleta.nome}</h3>
+                            ${atleta.numero ? `<p>Número: ${atleta.numero}</p>` : ''}
+                        </div>
                     `;
                     list.appendChild(div);
                 });

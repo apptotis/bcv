@@ -559,7 +559,7 @@ h2 {
         flex: none;
     }
 
-    /* Athlete Cards - Match Team Card Style */
+    /* Athlete Cards - Match Team Card Style (Horizontal Layout) */
     .athlete-list {
         display: grid;
         grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
@@ -573,15 +573,14 @@ h2 {
         background-position: center;
         background-repeat: no-repeat;
         border-radius: 8px;
-        padding: 20px;
+        padding: 15px;
         box-shadow: var(--card-shadow);
         border: 1px solid #eee;
         display: flex;
-        flex-direction: column;
+        flex-direction: row;
         align-items: center;
         gap: 15px;
         transition: transform 0.2s;
-        text-align: center;
     }
 
     .athlete-card:hover {
@@ -589,34 +588,57 @@ h2 {
         box-shadow: 0 6px 12px rgba(0, 0, 0, 0.15);
     }
 
-    .athlete-card img {
-        width: 100px;
-        height: 100px;
+    .athlete-photo {
+        flex-shrink: 0;
+    }
+
+    .athlete-photo img {
+        width: 80px;
+        height: 80px;
         border-radius: 50%;
         object-fit: cover;
         border: 3px solid var(--white);
         box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
     }
 
-    .athlete-card strong {
+    .placeholder-photo {
+        width: 80px;
+        height: 80px;
+        background: #eee;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 2.5rem;
+        border: 3px solid var(--white);
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    }
+
+    .athlete-info {
+        flex: 1;
+        display: flex;
+        flex-direction: column;
+        gap: 5px;
+    }
+
+    .athlete-info h3 {
+        margin: 0;
         font-size: 1.1rem;
         color: var(--text-color);
         font-weight: 700;
+        line-height: 1.2;
+    }
+
+    .athlete-info p {
+        margin: 0;
+        color: #000;
+        font-size: 0.9rem;
     }
 
     @media (max-width: 768px) {
         .athlete-list {
             grid-template-columns: 1fr;
             gap: 10px;
-        }
-
-        .athlete-card {
-            padding: 15px;
-        }
-
-        .athlete-card img {
-            width: 80px;
-            height: 80px;
         }
     }
 }
