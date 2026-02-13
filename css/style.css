@@ -558,6 +558,67 @@ h2 {
         width: 100%;
         flex: none;
     }
+
+    /* Athlete Cards - Match Team Card Style */
+    .athlete-list {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+        gap: var(--spacing);
+    }
+
+    .athlete-card {
+        background: var(--white);
+        background-image: url('../back_equipas.png');
+        background-size: cover;
+        background-position: center;
+        background-repeat: no-repeat;
+        border-radius: 8px;
+        padding: 20px;
+        box-shadow: var(--card-shadow);
+        border: 1px solid #eee;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 15px;
+        transition: transform 0.2s;
+        text-align: center;
+    }
+
+    .athlete-card:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 6px 12px rgba(0, 0, 0, 0.15);
+    }
+
+    .athlete-card img {
+        width: 100px;
+        height: 100px;
+        border-radius: 50%;
+        object-fit: cover;
+        border: 3px solid var(--white);
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    }
+
+    .athlete-card strong {
+        font-size: 1.1rem;
+        color: var(--text-color);
+        font-weight: 700;
+    }
+
+    @media (max-width: 768px) {
+        .athlete-list {
+            grid-template-columns: 1fr;
+            gap: 10px;
+        }
+
+        .athlete-card {
+            padding: 15px;
+        }
+
+        .athlete-card img {
+            width: 80px;
+            height: 80px;
+        }
+    }
 }
 
 
