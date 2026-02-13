@@ -69,6 +69,14 @@
                     </div>
                 </div>
 
+                <!-- Promotional Video Card -->
+                <div class="video-card" onclick="openVideoPopup()">
+                    <div class="video-card-content">
+                        <div class="play-icon">▶</div>
+                        <p class="video-card-text">🎥 Vídeo Promocional do Torneio</p>
+                    </div>
+                </div>
+
                 <img src="cartaz_facebook.jpg" alt="Cartaz Oficial do Torneio" class="responsive-poster">
                 <p class="dev-credits">Desenvolvido por T0TiS - Developers @ 2026</p>
             </div>
@@ -76,9 +84,36 @@
 
     </main>
 
+    <!-- Video Popup Modal -->
+    <div id="videoModal" class="video-modal" onclick="closeVideoPopup()">
+        <div class="video-modal-content" onclick="event.stopPropagation()">
+            <span class="close-modal" onclick="closeVideoPopup()">&times;</span>
+            <video id="promoVideo" controls>
+                <source src="video_promocional.mp4" type="video/mp4">
+                O seu navegador não suporta a reprodução de vídeo.
+            </video>
+        </div>
+    </div>
+
     <!-- Scripts -->
     <script src="js/config.js"></script>
     <script src="js/script.js"></script>
+    <script>
+        function openVideoPopup() {
+            const modal = document.getElementById('videoModal');
+            const video = document.getElementById('promoVideo');
+            modal.style.display = 'flex';
+            video.play();
+        }
+
+        function closeVideoPopup() {
+            const modal = document.getElementById('videoModal');
+            const video = document.getElementById('promoVideo');
+            modal.style.display = 'none';
+            video.pause();
+            video.currentTime = 0;
+        }
+    </script>
 </body>
 
 </html>
