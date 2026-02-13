@@ -104,6 +104,11 @@
             const video = document.getElementById('promoVideo');
             modal.style.display = 'flex';
             video.play();
+
+            // Auto-close when video ends
+            video.addEventListener('ended', function () {
+                closeVideoPopup();
+            });
         }
 
         function closeVideoPopup() {

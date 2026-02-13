@@ -339,7 +339,7 @@ h2 {
     width: 100%;
     max-width: 600px;
     height: 120px;
-    margin: 15px auto;
+    margin: 5px auto 15px auto;
     border-radius: 12px;
     overflow: hidden;
     background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
