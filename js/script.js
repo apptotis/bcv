@@ -102,6 +102,15 @@ document.addEventListener('DOMContentLoaded', () => {
                 </a>`;
             }
 
+            // Build escalão text with gender
+            let escalaoText = equipa.escalao || '';
+            if (escalaoText && equipa.genero) {
+                const generoText = equipa.genero === 'Masculino' ? 'Masculinos' : 'Femininos';
+                escalaoText = `<strong>${escalaoText}</strong> - ${generoText}`;
+            } else if (escalaoText) {
+                escalaoText = `<strong>${escalaoText}</strong>`;
+            }
+
             // Estrutura atualizada conforme sketch do usuário
             // [LOGO] | [NOME]
             //        | [ESCALÃO]
@@ -113,7 +122,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 <div class="equipa-content-right">
                     <div class="equipa-info">
                         <h3>${equipa.nome}</h3>
-                        <p>${equipa.escalao || ''}</p>
+                        <p>${escalaoText}</p>
                     </div>
                     <div class="equipa-actions">
                         <a href="equipa.html?id=${equipa.id}&view=atletas" class="btn-link" 
