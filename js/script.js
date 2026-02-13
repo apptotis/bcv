@@ -69,14 +69,9 @@ document.addEventListener('DOMContentLoaded', () => {
             const card = document.createElement('div');
             card.classList.add('equipa-card');
 
-            // Apply custom shadow color and background if defined
+            // Apply custom shadow color if defined
             if (equipa.shadow_color) {
                 card.style.boxShadow = `0 10px 15px -3px ${equipa.shadow_color}40, 0 4px 6px -2px ${equipa.shadow_color}60`;
-
-                // Use custom opacity or default to 10%
-                const opacity = equipa.background_opacity || 10;
-                const opacityHex = Math.round((opacity / 100) * 255).toString(16).padStart(2, '0');
-                card.style.backgroundColor = `${equipa.shadow_color}${opacityHex}`;
             }
 
             // Build social media icons HTML
