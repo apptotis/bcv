@@ -577,40 +577,43 @@ h2 {
     width: 32px;
     height: 32px;
     border-radius: 50%;
+    border: 2px solid white;
+    background-color: white;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
     transition: all 0.3s ease;
     text-decoration: none;
 }
 
 .facebook-icon {
     color: #1877f2;
-    background-color: rgba(24, 119, 242, 0.1);
 }
 
 .facebook-icon:hover {
     background-color: #1877f2;
     color: white;
+    border-color: #1877f2;
     transform: scale(1.1);
 }
 
 .instagram-icon {
     color: #e4405f;
-    background-color: rgba(228, 64, 95, 0.1);
 }
 
 .instagram-icon:hover {
     background-color: #e4405f;
     color: white;
+    border-color: #e4405f;
     transform: scale(1.1);
 }
 
 .website-icon {
     color: #666;
-    background-color: rgba(102, 102, 102, 0.1);
 }
 
 .website-icon:hover {
     background-color: #666;
     color: white;
+    border-color: #666;
     transform: scale(1.1);
 }
 
