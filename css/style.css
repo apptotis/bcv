@@ -559,6 +559,57 @@ h2 {
     color: white;
 }
 
+/* Social Media Icons */
+.social-icons {
+    display: flex;
+    gap: 8px;
+    align-items: center;
+}
+
+.social-icon {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    transition: all 0.3s ease;
+    text-decoration: none;
+}
+
+.facebook-icon {
+    color: #1877f2;
+    background-color: rgba(24, 119, 242, 0.1);
+}
+
+.facebook-icon:hover {
+    background-color: #1877f2;
+    color: white;
+    transform: scale(1.1);
+}
+
+.instagram-icon {
+    color: #e4405f;
+    background-color: rgba(228, 64, 95, 0.1);
+}
+
+.instagram-icon:hover {
+    background-color: #e4405f;
+    color: white;
+    transform: scale(1.1);
+}
+
+.website-icon {
+    color: #666;
+    background-color: rgba(102, 102, 102, 0.1);
+}
+
+.website-icon:hover {
+    background-color: #666;
+    color: white;
+    transform: scale(1.1);
+}
+
 /* Ajustes Mobile específicos se necessário, mas o layout acima já é responsive */
 @media (max-width: 480px) {
     .equipa-card {
