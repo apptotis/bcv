@@ -269,7 +269,7 @@ h2 {
     position: relative;
     width: 100%;
     max-width: 600px;
-    height: 250px;
+    height: 150px;
     margin: 15px auto;
     border-radius: 12px;
     overflow: hidden;
@@ -283,7 +283,7 @@ h2 {
     width: 100%;
     height: 100%;
     border: none;
-    filter: brightness(0.7);
+    filter: brightness(0.9);
 }
 
 .location-overlay {
@@ -295,8 +295,8 @@ h2 {
     display: flex;
     align-items: center;
     justify-content: center;
-    background: rgba(0, 0, 0, 0.3);
-    backdrop-filter: blur(2px);
+    background: rgba(0, 0, 0, 0.2);
+    backdrop-filter: blur(1px);
 }
 
 .location-link-card {
@@ -324,7 +324,7 @@ h2 {
 @media (max-width: 768px) {
     .location-card {
         max-width: 100%;
-        height: 200px;
+        height: 120px;
     }
 
     .location-link-card {
