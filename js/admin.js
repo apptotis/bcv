@@ -110,6 +110,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         await loadEquipasAdmin();
         await loadAtletasAdmin(); // Carregar atletas
         await loadJogosAdmin(); // Carregar jogos
+        await loadEventosAdmin(); // Carregar eventos
     }
 
     // Preencher Selects de Equipas
@@ -604,6 +605,159 @@ document.addEventListener('DOMContentLoaded', async () => {
         } else {
             loadEquipasAdmin();
             loadTeamsOptions();
+        }
+    };
+
+    // --- CRUD EVENTOS ---
+    const formEvento = document.getElementById('form-evento');
+    let editingEventoId = null;
+
+    if (formEvento) {
+        formEvento.addEventListener('submit', async (e) => {
+            e.preventDefault();
+
+            const isPublico = document.getElementById('evento-publico').value === 'true';
+            const tipoId = parseInt(document.getElementById('evento-tipo').value);
+            const local = document.getElementById('evento-local').value.trim();
+            const dataHora = document.getElementById('evento-data').value;
+            const tecnicos = document.getElementById('evento-tecnicos').value.trim();
+            const descricao = document.getElementById('evento-descricao').value.trim();
+
+            try {
+                if (!tipoId) throw new Error('Selecione um tipo de evento.');
+                if (!local) throw new Error('Indique o local do evento.');
+                if (!dataHora) throw new Error('Indique a data e hora do evento.');
+
+                const updates = {
+                    is_publico: isPublico,
+                    tipo_evento_id: tipoId,
+                    local,
+                    data_hora: dataHora,
+                    tecnicos: tecnicos || null,
+                    descricao: descricao || null
+                };
+
+                if (editingEventoId) {
+                    const { error } = await supabase.from('eventos').update(updates).eq('id', editingEventoId);
+                    if (error) throw error;
+                    alert('Evento atualizado com sucesso!');
+                } else {
+                    const { error } = await supabase.from('eventos').insert([updates]);
+                    if (error) throw error;
+                    alert('Evento adicionado com sucesso!');
+                }
+
+                formEvento.reset();
+                editingEventoId = null;
+                const btn = formEvento.querySelector('button[type="submit"]');
+                if (btn) btn.textContent = 'Adicionar Evento';
+
+                loadEventosAdmin();
+
+            } catch (err) {
+                console.error(err);
+                alert('Erro: ' + err.message);
+            }
+        });
+    }
+
+    // Mapa de ícones por tipo
+    const adminEventoIcons = {
+        1: '\uD83C\uDFC0', 2: '\uD83D\uDCF8', 3: '\uD83C\uDF7D\uFE0F', 4: '\uD83C\uDF77', 5: '\uD83E\uDD50',
+        6: '\uD83C\uDF88', 7: '\uD83C\uDFCA', 8: '\uD83E\uDDF1', 9: '\uD83C\uDFB6', 10: '\u26A1',
+        11: '\uD83C\uDFC1', 12: '\uD83C\uDF89', 13: '\uD83C\uDF32'
+    };
+
+    const tipoNomes = {
+        1: 'Jogo', 2: 'Sess\u00e3o Fotogr\u00e1fica', 3: 'Almo\u00e7o', 4: 'Jantar', 5: 'Pequeno Almo\u00e7o',
+        6: 'Insufl\u00e1veis', 7: 'Piscina', 8: 'Passeio Muralhas', 9: 'Discoteca',
+        10: 'Jogo Elimina', 11: 'Encerramento', 12: 'Abertura Torneio', 13: 'Arborismo'
+    };
+
+    async function loadEventosAdmin() {
+        const listContainer = document.getElementById('admin-eventos-list');
+        if (!listContainer) return;
+        listContainer.innerHTML = 'Carregando...';
+
+        const { data, error } = await supabase
+            .from('eventos')
+            .select('*')
+            .order('data_hora', { ascending: true });
+
+        if (error) {
+            listContainer.innerHTML = 'Erro ao carregar eventos.';
+            console.error(error);
+            return;
+        }
+
+        listContainer.innerHTML = '';
+        if (!data || data.length === 0) {
+            listContainer.innerHTML = '<p>Nenhum evento criado.</p>';
+            return;
+        }
+
+        data.forEach(evento => {
+            const div = document.createElement('div');
+            div.className = 'admin-list-item';
+            div.style.borderBottom = '1px solid #ccc';
+            div.style.padding = '10px 0';
+            div.style.display = 'flex';
+            div.style.justifyContent = 'space-between';
+            div.style.alignItems = 'center';
+
+            const dataHora = evento.data_hora
+                ? new Date(evento.data_hora).toLocaleString('pt-PT', { day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit' })
+                : 'Data a definir';
+            const icone = adminEventoIcons[evento.tipo_evento_id] || '\uD83D\uDCC5';
+            const tipo = tipoNomes[evento.tipo_evento_id] || 'Evento';
+            const visib = evento.is_publico ? '\uD83D\uDFE2 P\u00fablico' : '\uD83D\uDD34 Privado';
+
+            div.innerHTML = `
+                <div>
+                    <strong>${icone} ${tipo}</strong>
+                    <span style="margin-left:8px;font-size:0.8rem;color:#666">${visib}</span>
+                    <br>
+                    <small>\uD83D\uDCCD ${evento.local} &nbsp; \uD83D\uDDD3\uFE0F ${dataHora}</small>
+                    ${evento.tecnicos ? `<br><small>\uD83D\uDC64 ${evento.tecnicos}</small>` : ''}
+                </div>
+                <div style="display: flex; gap: 5px;">
+                    <button class="btn-success btn-sm" onclick="editEvento('${evento.id}')">Editar</button>
+                    <button class="btn-danger btn-sm" onclick="deleteEvento('${evento.id}')">Excluir</button>
+                </div>
+            `;
+            listContainer.appendChild(div);
+        });
+    }
+
+    window.editEvento = async (id) => {
+        const { data: evento, error } = await supabase.from('eventos').select('*').eq('id', id).single();
+        if (error) { alert('Erro ao buscar evento: ' + error.message); return; }
+
+        document.getElementById('evento-publico').value = String(evento.is_publico);
+        document.getElementById('evento-tipo').value = evento.tipo_evento_id || '';
+        document.getElementById('evento-local').value = evento.local || '';
+        document.getElementById('evento-tecnicos').value = evento.tecnicos || '';
+        document.getElementById('evento-descricao').value = evento.descricao || '';
+
+        if (evento.data_hora) {
+            const date = new Date(evento.data_hora);
+            const local = new Date(date.getTime() - date.getTimezoneOffset() * 60000).toISOString().slice(0, 16);
+            document.getElementById('evento-data').value = local;
+        }
+
+        editingEventoId = id;
+        const btn = formEvento.querySelector('button[type="submit"]');
+        if (btn) btn.textContent = 'Atualizar Evento';
+        formEvento.scrollIntoView({ behavior: 'smooth' });
+    };
+
+    window.deleteEvento = async (id) => {
+        if (!confirm('Tem certeza que deseja apagar este evento?')) return;
+        const { error } = await supabase.from('eventos').delete().eq('id', id);
+        if (error) {
+            alert('Erro ao apagar: ' + error.message);
+        } else {
+            loadEventosAdmin();
         }
     };
 

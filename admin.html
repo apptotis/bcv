@@ -38,6 +38,7 @@
             <button class="tab-btn active" data-tab="tab-equipas">Equipas</button>
             <button class="tab-btn" data-tab="tab-atletas">Atletas</button>
             <button class="tab-btn" data-tab="tab-jogos">Jogos</button>
+            <button class="tab-btn" data-tab="tab-eventos">Eventos</button>
         </div>
 
         <!-- Tab Content -->
@@ -113,6 +114,43 @@
                 <hr>
                 <div id="admin-jogos-list" class="admin-list"></div>
             </div>
+
+            <!-- Eventos Tab -->
+            <div id="tab-eventos" class="tab-pane hidden">
+                <h2>Gerir Eventos</h2>
+                <form id="form-evento" class="admin-form">
+                    <label>Visibilidade:</label>
+                    <select id="evento-publico" required>
+                        <option value="true">Público (visível a todos)</option>
+                        <option value="false">Privado (só técnicos/admins)</option>
+                    </select>
+                    <select id="evento-tipo" required>
+                        <option value="" disabled selected>Selecionar Tipo de Evento</option>
+                        <option value="1">Jogo</option>
+                        <option value="2">Sessão Fotográfica</option>
+                        <option value="3">Almoço</option>
+                        <option value="4">Jantar</option>
+                        <option value="5">Pequeno Almoço</option>
+                        <option value="6">Insufláveis</option>
+                        <option value="7">Piscina</option>
+                        <option value="8">Passeio Muralhas</option>
+                        <option value="9">Discoteca</option>
+                        <option value="10">Jogo Elimina</option>
+                        <option value="11">Encerramento</option>
+                        <option value="12">Abertura Torneio</option>
+                        <option value="13">Arborismo</option>
+                    </select>
+                    <input type="text" id="evento-local" placeholder="Local do Evento" required>
+                    <label>Data e Hora:</label>
+                    <input type="datetime-local" id="evento-data" required>
+                    <input type="text" id="evento-tecnicos" placeholder="Técnicos envolvidos (opcional)">
+                    <textarea id="evento-descricao" placeholder="Descrição (opcional)"></textarea>
+                    <button type="submit" class="btn-submit">Adicionar Evento</button>
+                </form>
+                <hr>
+                <div id="admin-eventos-list" class="admin-list"></div>
+            </div>
+
         </div>
     </div>
 
