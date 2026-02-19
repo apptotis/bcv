@@ -192,6 +192,14 @@ document.addEventListener('DOMContentLoaded', () => {
             return;
         }
 
+        // Ordenar por estado: Em Jogo → Agendado → Terminado → Cancelado
+        const estadoOrdem = { 'Em Jogo': 0, 'Agendado': 1, 'Terminado': 2, 'Cancelado': 3 };
+        data.sort((a, b) => {
+            const oa = estadoOrdem[a.estado] ?? 1;
+            const ob = estadoOrdem[b.estado] ?? 1;
+            return oa - ob;
+        });
+
         // Store data globally for filtering
         window.allJogos = data;
 
