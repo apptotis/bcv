@@ -290,6 +290,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         const equipaCasaId = document.getElementById('jogo-equipa-casa').value;
         const equipaForaId = document.getElementById('jogo-equipa-fora').value;
         const dataHora = document.getElementById('jogo-data').value;
+        const estado = document.getElementById('jogo-estado').value;
         const campo = document.getElementById('jogo-campo').value;
 
         try {
@@ -312,6 +313,7 @@ document.addEventListener('DOMContentLoaded', async () => {
                 equipa_fora_id: equipaForaId,
                 escalao: equipaCasa.escalao,
                 data_hora: dataHora || null,
+                estado: estado || 'Agendado',
                 campo: campo || null
             };
 
@@ -401,6 +403,7 @@ document.addEventListener('DOMContentLoaded', async () => {
 
         document.getElementById('jogo-equipa-casa').value = jogo.equipa_casa_id;
         document.getElementById('jogo-equipa-fora').value = jogo.equipa_fora_id;
+        document.getElementById('jogo-estado').value = jogo.estado || 'Agendado';
 
         // Converter data para formato datetime-local
         if (jogo.data_hora) {

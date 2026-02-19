@@ -176,8 +176,8 @@ document.addEventListener('DOMContentLoaded', () => {
             .from('jogos')
             .select(`
                 *,
-                equipa_casa:equipas!equipa_casa_id(nome, logo_url),
-                equipa_fora:equipas!equipa_fora_id(nome, logo_url)
+                equipa_casa:equipas!equipa_casa_id(nome, logo_url, genero),
+                equipa_fora:equipas!equipa_fora_id(nome, logo_url, genero)
             `)
             .order('data_hora', { ascending: true });
 
@@ -288,18 +288,33 @@ document.addEventListener('DOMContentLoaded', () => {
             const logoFora = jogo.equipa_fora?.logo_url || '';
             const resultadoCasa = jogo.resultado_casa !== null ? jogo.resultado_casa : '-';
             const resultadoFora = jogo.resultado_fora !== null ? jogo.resultado_fora : '-';
+            const genero = jogo.equipa_casa?.genero || jogo.equipa_fora?.genero || '';
+
+            // Estado do jogo
+            const estado = jogo.estado || 'Agendado';
+            const estadoClass = {
+                'Agendado': 'estado-agendado',
+                'Em Jogo': 'estado-em-jogo',
+                'Terminado': 'estado-terminado',
+                'Cancelado': 'estado-cancelado'
+            }[estado] || 'estado-agendado';
+
+            const escalaoGenero = jogo.escalao
+                ? `${jogo.escalao}${genero ? ` · ${genero}` : ''}`
+                : genero || '';
 
             item.innerHTML = `
                 <div class="jogo-linha-1">
                     <span class="jogo-data">${dia}</span>
                     <span class="jogo-hora">${hora}</span>
+                    <span class="jogo-estado ${estadoClass}">${estado}</span>
                     <span class="jogo-campo">${jogo.campo || 'Campo 1'}</span>
                 </div>
                 <div class="jogo-linha-equipa">
                     ${logoCasa ? `<img src="${logoCasa}" alt="${equipaCasa}" class="jogo-logo">` : '<div class="jogo-logo-placeholder">🏀</div>'}
                     <div class="jogo-equipa-info">
                         <div class="jogo-equipa-nome">${equipaCasa}</div>
-                        ${jogo.escalao ? `<div class="jogo-equipa-escalao">${jogo.escalao}</div>` : ''}
+                        ${escalaoGenero ? `<div class="jogo-equipa-escalao">${escalaoGenero}</div>` : ''}
                     </div>
                     <span class="jogo-resultado">${resultadoCasa}</span>
                 </div>
@@ -307,7 +322,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     ${logoFora ? `<img src="${logoFora}" alt="${equipaFora}" class="jogo-logo">` : '<div class="jogo-logo-placeholder">🏀</div>'}
                     <div class="jogo-equipa-info">
                         <div class="jogo-equipa-nome">${equipaFora}</div>
-                        ${jogo.escalao ? `<div class="jogo-equipa-escalao">${jogo.escalao}</div>` : ''}
+                        ${escalaoGenero ? `<div class="jogo-equipa-escalao">${escalaoGenero}</div>` : ''}
                     </div>
                     <span class="jogo-resultado">${resultadoFora}</span>
                 </div>
