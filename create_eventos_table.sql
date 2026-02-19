@@ -56,7 +56,8 @@ INSERT INTO public.tipo_eventos (id, nome) VALUES
     (9,  'Discoteca'),
     (10, 'Jogo Elimina'),
     (11, 'Encerramento'),
-    (12, 'Abertura Torneio')
+    (12, 'Abertura Torneio'),
+    (13, 'Arborismo')
 ON CONFLICT (id) DO NOTHING;
 
 
