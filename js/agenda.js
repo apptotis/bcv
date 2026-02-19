@@ -36,6 +36,13 @@
     btnPin.addEventListener('click', carregarAgenda);
     pinInput.addEventListener('keydown', e => { if (e.key === 'Enter') carregarAgenda(); });
 
+    // Restaurar PIN guardado ao fazer refresh
+    const pinGuardado = sessionStorage.getItem('agenda_pin');
+    if (pinGuardado) {
+        pinInput.value = pinGuardado;
+        carregarAgenda();
+    }
+
     async function carregarAgenda() {
         const pin = pinInput.value.trim();
         if (!pin) { pinError.textContent = 'Introduza o PIN da equipa.'; return; }
@@ -74,6 +81,7 @@
             }
 
             renderAgenda(equipa, jogos || [], eventos || []);
+            sessionStorage.setItem('agenda_pin', pin); // guardar para refresh
 
         } catch (err) {
             pinError.textContent = 'Erro de ligação. Tente novamente.';
@@ -109,6 +117,7 @@
             pinScreen.style.display = 'flex';
             pinInput.value = '';
             pinError.textContent = '';
+            sessionStorage.removeItem('agenda_pin'); // limpar ao voltar
             document.title = 'Agenda da Equipa - Torneio Eurocidade';
         });
 
