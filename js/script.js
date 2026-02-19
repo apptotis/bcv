@@ -199,12 +199,22 @@ document.addEventListener('DOMContentLoaded', () => {
             return;
         }
 
-        // Ordenar por estado: Em Jogo → Agendado → Terminado → Cancelado
+        // Ordenar: 1º data, 2º estado (Em Jogo→Agendado→Terminado→Cancelado), 3º campo
         const estadoOrdem = { 'Em Jogo': 0, 'Agendado': 1, 'Terminado': 2, 'Cancelado': 3 };
         data.sort((a, b) => {
+            // 1. Data
+            const dateA = a.data_hora ? new Date(a.data_hora) : new Date(0);
+            const dateB = b.data_hora ? new Date(b.data_hora) : new Date(0);
+            const dateDiff = dateA - dateB;
+            if (dateDiff !== 0) return dateDiff;
+
+            // 2. Estado
             const oa = estadoOrdem[a.estado] ?? 1;
             const ob = estadoOrdem[b.estado] ?? 1;
-            return oa - ob;
+            if (oa !== ob) return oa - ob;
+
+            // 3. Campo
+            return (a.campo || '').localeCompare(b.campo || '');
         });
 
         // Store data globally for filtering
