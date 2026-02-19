@@ -6,57 +6,160 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="icon" type="image/svg+xml" href="favicon.svg">
     <title>Agenda da Equipa</title>
-    <link rel="stylesheet" href="css/style.css">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <style>
-        body {
-            font-family: 'Inter', sans-serif;
-            background: #f0f4f8;
+        * {
+            box-sizing: border-box;
             margin: 0;
             padding: 0;
         }
 
-        /* Header da equipa */
-        .agenda-header {
+        body {
+            font-family: 'Inter', sans-serif;
+            background: #f0f4f8;
+            min-height: 100vh;
+        }
+
+        /* ── Ecrã de PIN ───────────────────────────────── */
+        #pin-screen {
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
             background: linear-gradient(135deg, #1a3a5c 0%, #2d6a9f 100%);
-            color: #fff;
-            padding: 28px 20px 20px;
+            padding: 24px;
+        }
+
+        .pin-card {
+            background: #fff;
+            border-radius: 16px;
+            padding: 36px 32px;
+            max-width: 360px;
+            width: 100%;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
             text-align: center;
         }
 
-        .agenda-header img.equipa-logo {
-            width: 72px;
-            height: 72px;
+        .pin-card .logo {
+            font-size: 3rem;
+            margin-bottom: 12px;
+        }
+
+        .pin-card h1 {
+            font-size: 1.3rem;
+            font-weight: 700;
+            color: #1a3a5c;
+            margin-bottom: 6px;
+        }
+
+        .pin-card p {
+            font-size: 0.88rem;
+            color: #666;
+            margin-bottom: 24px;
+        }
+
+        .pin-input {
+            width: 100%;
+            padding: 14px;
+            font-size: 1.5rem;
+            font-weight: 700;
+            text-align: center;
+            border: 2px solid #ddd;
+            border-radius: 10px;
+            letter-spacing: 6px;
+            outline: none;
+            transition: border-color 0.2s;
+            appearance: textfield;
+        }
+
+        .pin-input:focus {
+            border-color: #2d6a9f;
+        }
+
+        .pin-btn {
+            width: 100%;
+            margin-top: 14px;
+            padding: 13px;
+            background: linear-gradient(135deg, #1a3a5c, #2d6a9f);
+            color: #fff;
+            border: none;
+            border-radius: 10px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: opacity 0.2s;
+        }
+
+        .pin-btn:hover {
+            opacity: 0.88;
+        }
+
+        .pin-error {
+            margin-top: 12px;
+            color: #c0392b;
+            font-size: 0.85rem;
+            font-weight: 600;
+            min-height: 20px;
+        }
+
+        /* ── Agenda ─────────────────────────────────────── */
+        #agenda-screen {
+            display: none;
+        }
+
+        .agenda-header {
+            background: linear-gradient(135deg, #1a3a5c 0%, #2d6a9f 100%);
+            color: #fff;
+            padding: 24px 20px 18px;
+            text-align: center;
+            position: relative;
+        }
+
+        .btn-voltar {
+            position: absolute;
+            left: 14px;
+            top: 50%;
+            transform: translateY(-50%);
+            background: rgba(255, 255, 255, 0.15);
+            border: none;
+            color: #fff;
+            padding: 6px 12px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 0.85rem;
+        }
+
+        .equipa-logo {
+            width: 64px;
+            height: 64px;
             object-fit: contain;
             border-radius: 50%;
             background: rgba(255, 255, 255, 0.15);
             padding: 6px;
-            margin-bottom: 10px;
+            margin-bottom: 8px;
         }
 
         .agenda-header h1 {
-            margin: 0 0 4px;
-            font-size: 1.4rem;
+            font-size: 1.3rem;
             font-weight: 700;
+            margin-bottom: 2px;
         }
 
-        .agenda-header .equipa-meta {
-            font-size: 0.85rem;
+        .equipa-meta {
+            font-size: 0.82rem;
             opacity: 0.85;
         }
 
-        /* Container principal */
         .agenda-container {
             max-width: 640px;
             margin: 0 auto;
-            padding: 16px 12px 40px;
+            padding: 16px 12px 48px;
         }
 
-        /* Separador de dia */
         .agenda-dia {
             margin: 20px 0 8px;
-            font-size: 0.75rem;
+            font-size: 0.72rem;
             font-weight: 700;
             letter-spacing: 1.2px;
             text-transform: uppercase;
@@ -65,7 +168,6 @@
             padding-bottom: 4px;
         }
 
-        /* Item da agenda */
         .agenda-item {
             display: flex;
             align-items: flex-start;
@@ -100,14 +202,14 @@
 
         .agenda-hora {
             min-width: 46px;
-            font-size: 1.05rem;
+            font-size: 1rem;
             font-weight: 700;
             color: #1a3a5c;
             padding-top: 2px;
         }
 
         .agenda-icone {
-            font-size: 1.4rem;
+            font-size: 1.35rem;
             padding-top: 1px;
         }
 
@@ -117,39 +219,34 @@
 
         .agenda-titulo {
             font-weight: 600;
-            font-size: 0.95rem;
+            font-size: 0.92rem;
             color: #1a1a2e;
         }
 
         .agenda-subtitulo {
-            font-size: 0.82rem;
+            font-size: 0.8rem;
             color: #666;
             margin-top: 2px;
         }
 
-        /* Placar do jogo */
         .jogo-placar {
-            display: inline-flex;
-            align-items: center;
-            gap: 6px;
             margin-top: 4px;
             font-size: 0.85rem;
         }
 
         .jogo-placar .score {
-            font-size: 1.1rem;
+            font-size: 1.05rem;
             font-weight: 700;
             color: #e67e22;
         }
 
-        /* Badge de estado */
         .badge-estado {
             display: inline-block;
-            font-size: 0.7rem;
+            font-size: 0.68rem;
             font-weight: 600;
-            padding: 2px 8px;
+            padding: 2px 7px;
             border-radius: 10px;
-            margin-left: 6px;
+            margin-left: 5px;
         }
 
         .badge-em-jogo {
@@ -172,39 +269,42 @@
             color: #c62828;
         }
 
-        /* Loading / erro */
         .agenda-msg {
             text-align: center;
             color: #888;
             padding: 40px 20px;
             font-size: 0.95rem;
         }
-
-        /* Sem equipa */
-        .sem-equipa {
-            text-align: center;
-            padding: 60px 24px;
-        }
-
-        .sem-equipa h2 {
-            color: #c0392b;
-        }
     </style>
 </head>
 
 <body>
-    <div id="agenda-header-wrap">
-        <div class="agenda-header" id="equipa-header">
-            <div class="agenda-msg">A carregar...</div>
+
+    <!-- Ecrã de PIN -->
+    <div id="pin-screen">
+        <div class="pin-card">
+            <div class="logo">🏀</div>
+            <h1>Agenda da Equipa</h1>
+            <p>Introduza o PIN fornecido pela organização</p>
+            <input type="number" id="pin-input" class="pin-input" placeholder="0000" min="1">
+            <button class="pin-btn" id="btn-pin">Ver Agenda</button>
+            <div id="pin-error" class="pin-error"></div>
         </div>
     </div>
 
-    <div class="agenda-container">
-        <div id="agenda-lista"></div>
+    <!-- Ecrã da Agenda -->
+    <div id="agenda-screen">
+        <div class="agenda-header" id="equipa-header">
+            <button class="btn-voltar" id="btn-voltar">← Voltar</button>
+            <div>A carregar...</div>
+        </div>
+        <div class="agenda-container">
+            <div id="agenda-lista"></div>
+        </div>
     </div>
 
     <script src="js/config.js?v=1"></script>
-    <script src="js/agenda.js?v=1"></script>
+    <script src="js/agenda.js?v=2"></script>
 </body>
 
 </html>
