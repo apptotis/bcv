@@ -449,7 +449,6 @@ document.addEventListener('DOMContentLoaded', async () => {
         const instagramUrl = document.getElementById('equipa-instagram').value;
         const websiteUrl = document.getElementById('equipa-website').value;
         const shadowColor = document.getElementById('equipa-shadow-color').value;
-        const backgroundOpacity = parseInt(document.getElementById('equipa-background-opacity').value);
         const logoFile = document.getElementById('equipa-logo-file').files[0];
         const fotoFile = document.getElementById('equipa-foto-file').files[0];
 
@@ -486,8 +485,7 @@ document.addEventListener('DOMContentLoaded', async () => {
                 facebook_url: facebookUrl || null,
                 instagram_url: instagramUrl || null,
                 website_url: websiteUrl || null,
-                shadow_color: shadowColor,
-                background_opacity: backgroundOpacity
+                shadow_color: shadowColor
             };
             if (logoUrl) updates.logo_url = logoUrl;
             if (fotoUrl) updates.foto_grupo_url = fotoUrl;
@@ -582,9 +580,6 @@ document.addEventListener('DOMContentLoaded', async () => {
         document.getElementById('equipa-instagram').value = equipa.instagram_url || '';
         document.getElementById('equipa-website').value = equipa.website_url || '';
         document.getElementById('equipa-shadow-color').value = equipa.shadow_color || '#3b82f6';
-        const opacityValue = equipa.background_opacity || 10;
-        document.getElementById('equipa-background-opacity').value = opacityValue;
-        document.getElementById('opacity-value').textContent = opacityValue;
 
         // Alterar estado para edição
         editingEquipaId = id;
