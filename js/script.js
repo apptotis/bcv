@@ -172,14 +172,22 @@ document.addEventListener('DOMContentLoaded', () => {
         const container = document.getElementById('jogos-list');
         if (!container) return;
 
-        const { data, error } = await supabase
-            .from('jogos')
-            .select(`
-                *,
-                equipa_casa:equipas!equipa_casa_id(nome, logo_url, genero),
-                equipa_fora:equipas!equipa_fora_id(nome, logo_url, genero)
-            `)
-            .order('data_hora', { ascending: true });
+        // Buscar jogos e TODAS as equipas em paralelo
+        const [{ data, error }, { data: todasEquipas, error: erroEquipas }] = await Promise.all([
+            supabase
+                .from('jogos')
+                .select(`
+                    *,
+                    equipa_casa:equipas!equipa_casa_id(nome, logo_url, genero),
+                    equipa_fora:equipas!equipa_fora_id(nome, logo_url, genero)
+                `)
+                .order('data_hora', { ascending: true }),
+            supabase
+                .from('equipas')
+                .select('nome, escalao, genero')
+                .order('escalao')
+                .order('nome')
+        ]);
 
         if (error) {
             console.error('Erro ao buscar jogos:', error);
@@ -203,8 +211,8 @@ document.addEventListener('DOMContentLoaded', () => {
         // Store data globally for filtering
         window.allJogos = data;
 
-        // Populate filters
-        populateFilters(data);
+        // Populate filters usando TODAS as equipas (não só as que têm jogos)
+        populateFilters(data, todasEquipas || []);
 
         // Initial render
         container.innerHTML = '';
@@ -232,50 +240,33 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     // Populate filters with unique values
-    function populateFilters(jogos) {
-        // Mapa: nome → { escalao, genero } para montar a etiqueta
-        const equipasMap = new Map();
+    function populateFilters(jogos, todasEquipas) {
         const escaloes = new Set();
-
         jogos.forEach(jogo => {
-            if (jogo.equipa_casa?.nome) {
-                equipasMap.set(jogo.equipa_casa.nome, {
-                    escalao: jogo.escalao || '',
-                    genero: jogo.equipa_casa.genero || ''
-                });
-            }
-            if (jogo.equipa_fora?.nome) {
-                equipasMap.set(jogo.equipa_fora.nome, {
-                    escalao: jogo.escalao || '',
-                    genero: jogo.equipa_fora.genero || ''
-                });
-            }
             if (jogo.escalao) escaloes.add(jogo.escalao);
         });
 
         // Helper: abreviatura do escalao+genero → ex: "(10M)", "(12F)", "(8)"
         function abrevEscalao(escalao, genero) {
-            const num = escalao.replace(/\D/g, ''); // "Mini 10" → "10"
+            const num = (escalao || '').replace(/\D/g, ''); // "Mini 10" → "10"
             if (!num) return '';
             const gen = genero === 'Masculino' ? 'M' : genero === 'Feminino' ? 'F' : '';
             return `(${num}${gen})`;
         }
 
-        // Populate equipa filter
+        // Populate equipa filter — usa TODAS as equipas da tabela
         const equipaFilter = document.getElementById('filter-equipa');
-        if (equipaFilter) {
-            Array.from(equipasMap.entries())
-                .sort((a, b) => a[0].localeCompare(b[0]))
-                .forEach(([nome, info]) => {
-                    const option = document.createElement('option');
-                    option.value = nome; // filtro continua a usar o nome
-                    const abrev = abrevEscalao(info.escalao, info.genero);
-                    option.textContent = abrev ? `${nome} ${abrev}` : nome;
-                    equipaFilter.appendChild(option);
-                });
+        if (equipaFilter && todasEquipas.length > 0) {
+            todasEquipas.forEach(equipa => {
+                const option = document.createElement('option');
+                option.value = equipa.nome;
+                const abrev = abrevEscalao(equipa.escalao, equipa.genero);
+                option.textContent = abrev ? `${equipa.nome} ${abrev}` : equipa.nome;
+                equipaFilter.appendChild(option);
+            });
         }
 
-        // Populate escalao filter
+        // Populate escalao filter — baseado nos jogos existentes
         const escalaoFilter = document.getElementById('filter-escalao');
         if (escalaoFilter) {
             Array.from(escaloes).sort().forEach(escalao => {
