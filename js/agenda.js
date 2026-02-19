@@ -156,11 +156,6 @@
         const estado = jogo.estado || 'Agendado';
         const badgeClass = ESTADO_BADGE[estado] || 'badge badge-agendado';
         const campo = jogo.campo ? `🏟️ ${jogo.campo}` : '';
-        const temResultado = jogo.resultado_casa !== null && jogo.resultado_fora !== null
-            && jogo.resultado_casa !== undefined;
-        const placar = temResultado
-            ? `<div class="ag-placar"><span class="score">${jogo.resultado_casa} – ${jogo.resultado_fora}</span></div>`
-            : '';
         return `
         <div class="agenda-card cat-jogo">
             <div class="ag-hora">${hora}</div>
@@ -168,7 +163,6 @@
             <div class="ag-info">
                 <div class="ag-titulo">vs ${adversario} <span class="${badgeClass}">${estado}</span></div>
                 ${campo ? `<div class="ag-sub">${campo}</div>` : ''}
-                ${placar}
             </div>
         </div>`;
     }
