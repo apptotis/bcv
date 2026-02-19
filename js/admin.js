@@ -292,6 +292,10 @@ document.addEventListener('DOMContentLoaded', async () => {
         const dataHora = document.getElementById('jogo-data').value;
         const estado = document.getElementById('jogo-estado').value;
         const campo = document.getElementById('jogo-campo').value;
+        const resultadoCasaRaw = document.getElementById('jogo-resultado-casa').value;
+        const resultadoForaRaw = document.getElementById('jogo-resultado-fora').value;
+        const resultadoCasa = resultadoCasaRaw !== '' ? parseInt(resultadoCasaRaw) : null;
+        const resultadoFora = resultadoForaRaw !== '' ? parseInt(resultadoForaRaw) : null;
 
         try {
             // Validar que as equipas são diferentes
@@ -314,7 +318,9 @@ document.addEventListener('DOMContentLoaded', async () => {
                 escalao: equipaCasa.escalao,
                 data_hora: dataHora || null,
                 estado: estado || 'Agendado',
-                campo: campo || null
+                campo: campo || null,
+                resultado_casa: resultadoCasa,
+                resultado_fora: resultadoFora
             };
 
             if (editingJogoId) {
@@ -495,6 +501,10 @@ document.addEventListener('DOMContentLoaded', async () => {
         }
 
         document.getElementById('jogo-campo').value = jogo.campo || '';
+        const rc = jogo.resultado_casa;
+        const rf = jogo.resultado_fora;
+        document.getElementById('jogo-resultado-casa').value = rc !== null && rc !== undefined ? rc : '';
+        document.getElementById('jogo-resultado-fora').value = rf !== null && rf !== undefined ? rf : '';
 
         editingJogoId = id;
         const btn = formJogo.querySelector('button[type="submit"]');

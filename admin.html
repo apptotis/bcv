@@ -113,6 +113,13 @@
                         <option value="Terminado">Terminado</option>
                         <option value="Cancelado">Cancelado</option>
                     </select>
+                    <div style="display:flex; gap:8px; align-items:center;">
+                        <input type="number" id="jogo-resultado-casa" placeholder="Resultado Casa" min="0"
+                            style="flex:1;">
+                        <span style="font-weight:bold;">–</span>
+                        <input type="number" id="jogo-resultado-fora" placeholder="Resultado Fora" min="0"
+                            style="flex:1;">
+                    </div>
                     <input type="text" id="jogo-campo" placeholder="Campo (Ex: Campo 1)">
                     <button type="submit" class="btn-submit">Agendar Jogo</button>
                 </form>
@@ -188,7 +195,7 @@
     </div>
 
     <script src="js/config.js?v=mobile2"></script>
-    <script src="js/admin.js?v=mobile5"></script>
+    <script src="js/admin.js?v=mobile6"></script>
     <script>
         // Debug info para mobile
         document.addEventListener('DOMContentLoaded', () => {
