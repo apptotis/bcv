@@ -162,8 +162,14 @@
                     <label>Visibilidade:</label>
                     <select id="evento-publico" required>
                         <option value="true">Público (visível a todos)</option>
-                        <option value="false">Privado (só técnicos/admins)</option>
+                        <option value="false">Privado (específico de uma equipa)</option>
                     </select>
+                    <!-- Select de equipa: só visível em eventos privados -->
+                    <div id="evento-equipa-wrap" style="display:none;">
+                        <select id="evento-equipa-id">
+                            <option value="">Selecionar Equipa</option>
+                        </select>
+                    </div>
                     <select id="evento-tipo" required>
                         <option value="" disabled selected>Selecionar Tipo de Evento</option>
                         <option value="1">Jogo</option>
@@ -195,7 +201,7 @@
     </div>
 
     <script src="js/config.js?v=mobile2"></script>
-    <script src="js/admin.js?v=mobile6"></script>
+    <script src="js/admin.js?v=mobile7"></script>
     <script>
         // Debug info para mobile
         document.addEventListener('DOMContentLoaded', () => {

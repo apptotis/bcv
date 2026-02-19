@@ -1,0 +1,210 @@
+<!DOCTYPE html>
+<html lang="pt-PT">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="icon" type="image/svg+xml" href="favicon.svg">
+    <title>Agenda da Equipa</title>
+    <link rel="stylesheet" href="css/style.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background: #f0f4f8;
+            margin: 0;
+            padding: 0;
+        }
+
+        /* Header da equipa */
+        .agenda-header {
+            background: linear-gradient(135deg, #1a3a5c 0%, #2d6a9f 100%);
+            color: #fff;
+            padding: 28px 20px 20px;
+            text-align: center;
+        }
+
+        .agenda-header img.equipa-logo {
+            width: 72px;
+            height: 72px;
+            object-fit: contain;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.15);
+            padding: 6px;
+            margin-bottom: 10px;
+        }
+
+        .agenda-header h1 {
+            margin: 0 0 4px;
+            font-size: 1.4rem;
+            font-weight: 700;
+        }
+
+        .agenda-header .equipa-meta {
+            font-size: 0.85rem;
+            opacity: 0.85;
+        }
+
+        /* Container principal */
+        .agenda-container {
+            max-width: 640px;
+            margin: 0 auto;
+            padding: 16px 12px 40px;
+        }
+
+        /* Separador de dia */
+        .agenda-dia {
+            margin: 20px 0 8px;
+            font-size: 0.75rem;
+            font-weight: 700;
+            letter-spacing: 1.2px;
+            text-transform: uppercase;
+            color: #2d6a9f;
+            border-bottom: 2px solid #2d6a9f;
+            padding-bottom: 4px;
+        }
+
+        /* Item da agenda */
+        .agenda-item {
+            display: flex;
+            align-items: flex-start;
+            gap: 12px;
+            background: #fff;
+            border-radius: 10px;
+            padding: 12px 14px;
+            margin-bottom: 8px;
+            box-shadow: 0 1px 4px rgba(0, 0, 0, 0.07);
+            border-left: 4px solid #ccc;
+        }
+
+        .agenda-item.tipo-jogo {
+            border-left-color: #e67e22;
+        }
+
+        .agenda-item.tipo-refeicao {
+            border-left-color: #27ae60;
+        }
+
+        .agenda-item.tipo-lazer {
+            border-left-color: #8e44ad;
+        }
+
+        .agenda-item.tipo-cerimonia {
+            border-left-color: #2980b9;
+        }
+
+        .agenda-item.tipo-outro {
+            border-left-color: #95a5a6;
+        }
+
+        .agenda-hora {
+            min-width: 46px;
+            font-size: 1.05rem;
+            font-weight: 700;
+            color: #1a3a5c;
+            padding-top: 2px;
+        }
+
+        .agenda-icone {
+            font-size: 1.4rem;
+            padding-top: 1px;
+        }
+
+        .agenda-info {
+            flex: 1;
+        }
+
+        .agenda-titulo {
+            font-weight: 600;
+            font-size: 0.95rem;
+            color: #1a1a2e;
+        }
+
+        .agenda-subtitulo {
+            font-size: 0.82rem;
+            color: #666;
+            margin-top: 2px;
+        }
+
+        /* Placar do jogo */
+        .jogo-placar {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            margin-top: 4px;
+            font-size: 0.85rem;
+        }
+
+        .jogo-placar .score {
+            font-size: 1.1rem;
+            font-weight: 700;
+            color: #e67e22;
+        }
+
+        /* Badge de estado */
+        .badge-estado {
+            display: inline-block;
+            font-size: 0.7rem;
+            font-weight: 600;
+            padding: 2px 8px;
+            border-radius: 10px;
+            margin-left: 6px;
+        }
+
+        .badge-em-jogo {
+            background: #fff3cd;
+            color: #856404;
+        }
+
+        .badge-agendado {
+            background: #e3f2fd;
+            color: #1565c0;
+        }
+
+        .badge-terminado {
+            background: #e8f5e9;
+            color: #2e7d32;
+        }
+
+        .badge-cancelado {
+            background: #fce4ec;
+            color: #c62828;
+        }
+
+        /* Loading / erro */
+        .agenda-msg {
+            text-align: center;
+            color: #888;
+            padding: 40px 20px;
+            font-size: 0.95rem;
+        }
+
+        /* Sem equipa */
+        .sem-equipa {
+            text-align: center;
+            padding: 60px 24px;
+        }
+
+        .sem-equipa h2 {
+            color: #c0392b;
+        }
+    </style>
+</head>
+
+<body>
+    <div id="agenda-header-wrap">
+        <div class="agenda-header" id="equipa-header">
+            <div class="agenda-msg">A carregar...</div>
+        </div>
+    </div>
+
+    <div class="agenda-container">
+        <div id="agenda-lista"></div>
+    </div>
+
+    <script src="js/config.js?v=1"></script>
+    <script src="js/agenda.js?v=1"></script>
+</body>
+
+</html>

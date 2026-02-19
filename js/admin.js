@@ -703,6 +703,30 @@ document.addEventListener('DOMContentLoaded', async () => {
     let editingEventoId = null;
 
     if (formEvento) {
+        // Popular select de equipas para eventos privados
+        supabase.from('equipas').select('id, nome, escalao, genero').order('nome').then(({ data: eqs }) => {
+            const sel = document.getElementById('evento-equipa-id');
+            if (sel && eqs) {
+                eqs.forEach(e => {
+                    const num = (e.escalao || '').replace(/\D/g, '');
+                    const gen = e.genero === 'Masculino' ? 'M' : e.genero === 'Feminino' ? 'F' : '';
+                    const abrev = num ? ` (${num}${gen})` : '';
+                    const opt = document.createElement('option');
+                    opt.value = e.id;
+                    opt.textContent = `${e.nome}${abrev}`;
+                    sel.appendChild(opt);
+                });
+            }
+        });
+
+        // Mostrar/ocultar select de equipa conforme visibilidade
+        const selPublico = document.getElementById('evento-publico');
+        const wrapEquipa = document.getElementById('evento-equipa-wrap');
+        function toggleEquipaWrap() {
+            if (wrapEquipa) wrapEquipa.style.display = selPublico.value === 'false' ? 'block' : 'none';
+        }
+        if (selPublico) { selPublico.addEventListener('change', toggleEquipaWrap); toggleEquipaWrap(); }
+
         formEvento.addEventListener('submit', async (e) => {
             e.preventDefault();
 
@@ -712,11 +736,13 @@ document.addEventListener('DOMContentLoaded', async () => {
             const dataHora = document.getElementById('evento-data').value;
             const tecnicos = document.getElementById('evento-tecnicos').value.trim();
             const descricao = document.getElementById('evento-descricao').value.trim();
+            const equipaId = document.getElementById('evento-equipa-id')?.value || null;
 
             try {
                 if (!tipoId) throw new Error('Selecione um tipo de evento.');
                 if (!local) throw new Error('Indique o local do evento.');
                 if (!dataHora) throw new Error('Indique a data e hora do evento.');
+                if (!isPublico && !equipaId) throw new Error('Evento privado requer uma equipa.');
 
                 const updates = {
                     is_publico: isPublico,
@@ -724,7 +750,8 @@ document.addEventListener('DOMContentLoaded', async () => {
                     local,
                     data_hora: dataHora,
                     tecnicos: tecnicos || null,
-                    descricao: descricao || null
+                    descricao: descricao || null,
+                    equipa_id: isPublico ? null : equipaId
                 };
 
                 if (editingEventoId) {
@@ -738,6 +765,7 @@ document.addEventListener('DOMContentLoaded', async () => {
                 }
 
                 formEvento.reset();
+                toggleEquipaWrap();
                 editingEventoId = null;
                 const btn = formEvento.querySelector('button[type="submit"]');
                 if (btn) btn.textContent = 'Adicionar Evento';
@@ -828,6 +856,13 @@ document.addEventListener('DOMContentLoaded', async () => {
         document.getElementById('evento-local').value = evento.local || '';
         document.getElementById('evento-tecnicos').value = evento.tecnicos || '';
         document.getElementById('evento-descricao').value = evento.descricao || '';
+
+        // Preencher equipa e atualizar visibilidade do select
+        const selEquipa = document.getElementById('evento-equipa-id');
+        if (selEquipa) selEquipa.value = evento.equipa_id || '';
+        const selPub = document.getElementById('evento-publico');
+        const wrap = document.getElementById('evento-equipa-wrap');
+        if (wrap && selPub) wrap.style.display = selPub.value === 'false' ? 'block' : 'none';
 
         if (evento.data_hora) {
             const date = new Date(evento.data_hora);
