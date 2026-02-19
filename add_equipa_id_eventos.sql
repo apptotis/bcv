@@ -5,9 +5,9 @@
 
 -- 1. Adicionar coluna equipa_id (nullable)
 --    NULL = evento global (todas as equipas)
---    UUID = evento específico de uma equipa
+--    BIGINT = evento específico de uma equipa
 ALTER TABLE public.eventos
-ADD COLUMN IF NOT EXISTS equipa_id UUID REFERENCES public.equipas(id) ON DELETE SET NULL;
+ADD COLUMN IF NOT EXISTS equipa_id BIGINT REFERENCES public.equipas(id) ON DELETE SET NULL;
 
 COMMENT ON COLUMN public.eventos.equipa_id IS
   'NULL = evento para todas as equipas; UUID = evento específico desta equipa';
