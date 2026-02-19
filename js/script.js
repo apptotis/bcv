@@ -178,13 +178,13 @@ document.addEventListener('DOMContentLoaded', () => {
                 .from('jogos')
                 .select(`
                     *,
-                    equipa_casa:equipas!equipa_casa_id(nome, logo_url, genero),
-                    equipa_fora:equipas!equipa_fora_id(nome, logo_url, genero)
+                    equipa_casa:equipas!equipa_casa_id(id, nome, logo_url, genero),
+                    equipa_fora:equipas!equipa_fora_id(id, nome, logo_url, genero)
                 `)
                 .order('data_hora', { ascending: true }),
             supabase
                 .from('equipas')
-                .select('nome, escalao, genero')
+                .select('id, nome, escalao, genero')
                 .order('nome')
         ]);
 
@@ -258,7 +258,7 @@ document.addEventListener('DOMContentLoaded', () => {
         if (equipaFilter && todasEquipas.length > 0) {
             todasEquipas.forEach(equipa => {
                 const option = document.createElement('option');
-                option.value = equipa.nome;
+                option.value = equipa.id; // ID único — evita ambiguidade com equipas do mesmo nome
                 const abrev = abrevEscalao(equipa.escalao, equipa.genero);
                 option.textContent = abrev ? `${equipa.nome} ${abrev}` : equipa.nome;
                 equipaFilter.appendChild(option);
@@ -284,8 +284,8 @@ document.addEventListener('DOMContentLoaded', () => {
 
         return jogos.filter(jogo => {
             const matchEquipa = !equipaFilter ||
-                jogo.equipa_casa?.nome === equipaFilter ||
-                jogo.equipa_fora?.nome === equipaFilter;
+                String(jogo.equipa_casa_id) === equipaFilter ||
+                String(jogo.equipa_fora_id) === equipaFilter;
 
             const matchEscalao = !escalaoFilter || jogo.escalao === escalaoFilter;
 
