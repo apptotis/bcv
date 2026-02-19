@@ -444,7 +444,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         const genero = document.getElementById('equipa-genero').value;
         const local = document.getElementById('equipa-local').value;
         const desc = document.getElementById('equipa-desc').value;
-        const treinadores = document.getElementById('equipa-treinadores').value;
+        const tecnico = document.getElementById('equipa-tecnico').value;
         const facebookUrl = document.getElementById('equipa-facebook').value;
         const instagramUrl = document.getElementById('equipa-instagram').value;
         const websiteUrl = document.getElementById('equipa-website').value;
@@ -481,7 +481,7 @@ document.addEventListener('DOMContentLoaded', async () => {
                 genero,
                 localizacao: local,
                 descricao: desc,
-                treinadores,
+                tecnico,
                 facebook_url: facebookUrl || null,
                 instagram_url: instagramUrl || null,
                 website_url: websiteUrl || null,
@@ -548,7 +548,7 @@ document.addEventListener('DOMContentLoaded', async () => {
                 <div>
                     <strong>${equipa.nome}</strong> (${equipa.escalao || '-'})
                     <br>
-                    <small>${equipa.genero || 'Género não definido'} | ${equipa.treinadores || ''}</small>
+                    <small>${equipa.genero || 'Género não definido'} | ${equipa.tecnico || ''}</small>
                 </div>
                 <div style="display: flex; gap: 5px;">
                     <button class="btn-success btn-sm" onclick="editEquipa('${equipa.id}')">Editar</button>
@@ -575,7 +575,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         document.getElementById('equipa-genero').value = equipa.genero || '';
         document.getElementById('equipa-local').value = equipa.localizacao || '';
         document.getElementById('equipa-desc').value = equipa.descricao || '';
-        document.getElementById('equipa-treinadores').value = equipa.treinadores || '';
+        document.getElementById('equipa-tecnico').value = equipa.tecnico || '';
         document.getElementById('equipa-facebook').value = equipa.facebook_url || '';
         document.getElementById('equipa-instagram').value = equipa.instagram_url || '';
         document.getElementById('equipa-website').value = equipa.website_url || '';
