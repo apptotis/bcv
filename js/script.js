@@ -26,6 +26,8 @@ document.addEventListener('DOMContentLoaded', () => {
         fetchEquipas();
     } else if (page.includes('jogos') && supabase) {
         fetchJogos();
+    } else if (page.includes('eventos') && supabase) {
+        fetchEventos();
     } else if (page.includes('opinioes') && supabase) {
         initOpinioes();
     } else if (page.includes('equipa') && supabase) { // 'equipa.html' singular
@@ -483,6 +485,109 @@ document.addEventListener('DOMContentLoaded', () => {
                     <span class="opiniao-date">${dateStr}</span>
                 </div>
                 <p class="opiniao-text">${op.opiniao}</p>
+            `;
+            container.appendChild(card);
+        });
+    }
+
+    // ============================================================
+    // EVENTOS - Eventos públicos
+    // ============================================================
+    async function fetchEventos() {
+        const container = document.getElementById('eventos-list');
+        if (!container) return;
+
+        // Buscar apenas eventos públicos, ordenados por data/hora
+        const { data, error } = await supabase
+            .from('eventos')
+            .select(`
+                *,
+                tipo_evento:tipo_eventos(nome)
+            `)
+            .eq('is_publico', true)
+            .order('data_hora', { ascending: true });
+
+        if (error) {
+            console.error('Erro ao buscar eventos:', error);
+            container.innerHTML = '<p class="error">Erro ao carregar eventos.</p>';
+            return;
+        }
+
+        if (!data || data.length === 0) {
+            container.innerHTML = '<p>Nenhum evento público agendado.</p>';
+            return;
+        }
+
+        window.allEventos = data;
+
+        // Preencher filtro de tipos
+        populateTipoFilter(data);
+
+        // Renderizar
+        container.innerHTML = '';
+        renderEventos(data, container);
+
+        // Listener do filtro
+        const tipoFilter = document.getElementById('filter-tipo-evento');
+        if (tipoFilter) {
+            tipoFilter.addEventListener('change', () => {
+                const val = tipoFilter.value;
+                const filtered = val
+                    ? window.allEventos.filter(e => String(e.tipo_evento_id) === val)
+                    : window.allEventos;
+                container.innerHTML = '';
+                renderEventos(filtered, container);
+            });
+        }
+    }
+
+    function populateTipoFilter(eventos) {
+        const tipoFilter = document.getElementById('filter-tipo-evento');
+        if (!tipoFilter) return;
+
+        const vistos = new Map();
+        eventos.forEach(e => {
+            if (e.tipo_evento_id && !vistos.has(e.tipo_evento_id)) {
+                vistos.set(e.tipo_evento_id, e.tipo_evento?.nome || `Tipo ${e.tipo_evento_id}`);
+            }
+        });
+
+        // Ordenar pelo nome do tipo
+        const sorted = Array.from(vistos.entries()).sort((a, b) => a[1].localeCompare(b[1]));
+        sorted.forEach(([id, nome]) => {
+            const option = document.createElement('option');
+            option.value = id;
+            option.textContent = nome;
+            tipoFilter.appendChild(option);
+        });
+    }
+
+    // Ícones por tipo de evento
+    const eventoIcons = {
+        1: '🏀', 2: '📸', 3: '🍽️', 4: '🍷', 5: '🥐',
+        6: '🎈', 7: '🏊', 8: '🧱', 9: '🎶', 10: '⚡',
+        11: '🏁', 12: '🎉', 13: '🌲'
+    };
+
+    function renderEventos(eventos, container) {
+        eventos.forEach(evento => {
+            const card = document.createElement('div');
+            card.classList.add('evento-card');
+
+            const dataHora = new Date(evento.data_hora);
+            const dia = dataHora.toLocaleDateString('pt-PT', { day: '2-digit', month: '2-digit', year: 'numeric' });
+            const hora = dataHora.toLocaleTimeString('pt-PT', { hour: '2-digit', minute: '2-digit' });
+            const tipoNome = evento.tipo_evento?.nome || 'Evento';
+            const icone = eventoIcons[evento.tipo_evento_id] || '📅';
+
+            card.innerHTML = `
+                <div class="evento-icon">${icone}</div>
+                <div class="evento-info">
+                    <h3 class="evento-tipo">${tipoNome}</h3>
+                    <p class="evento-local">📍 ${evento.local || 'Local a definir'}</p>
+                    <p class="evento-data">🗓️ ${dia} &nbsp; 🕐 ${hora}</p>
+                    ${evento.descricao ? `<p class="evento-descricao">${evento.descricao}</p>` : ''}
+                </div>
             `;
             container.appendChild(card);
         });

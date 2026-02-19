@@ -7,6 +7,7 @@
     <title>Eventos - Torneio Eurocidade</title>
     <link rel="stylesheet" href="css/style.css">
     <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&display=swap" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 </head>
 
 <body>
@@ -41,12 +42,18 @@
     <main id="app-content">
         <section id="eventos" class="page-section active" style="display: block;">
             <h2>Eventos</h2>
-            <div class="content-placeholder">
-                <p>Informação sobre eventos paralelos ao torneio em breve.</p>
+            <div id="eventos-filter">
+                <select id="filter-tipo-evento" class="filter-select">
+                    <option value="">Todos os Tipos</option>
+                </select>
+            </div>
+            <div id="eventos-list" class="eventos-container">
+                <p class="loading">A carregar eventos...</p>
             </div>
         </section>
     </main>
 
+    <script src="js/config.js"></script>
     <script src="js/script.js"></script>
 </body>
 
