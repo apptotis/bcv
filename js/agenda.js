@@ -1,50 +1,38 @@
-// agenda.js — Calendário por equipa com ecrã de PIN
+// agenda.js — Calendário por equipa com ecrã de PIN  v3
 
 (function () {
     const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
-    // ── Ícones e categorias por tipo de evento ───────────────────────────────
     const TIPO_INFO = {
-        1: { icone: '🏀', titulo: 'Jogo', cat: 'tipo-jogo' },
-        2: { icone: '📸', titulo: 'Sessão Fotográfica', cat: 'tipo-lazer' },
-        3: { icone: '🍽️', titulo: 'Almoço', cat: 'tipo-refeicao' },
-        4: { icone: '🌙', titulo: 'Jantar', cat: 'tipo-refeicao' },
-        5: { icone: '☕', titulo: 'Pequeno Almoço', cat: 'tipo-refeicao' },
-        6: { icone: '🎈', titulo: 'Insufláveis', cat: 'tipo-lazer' },
-        7: { icone: '🏊', titulo: 'Piscina', cat: 'tipo-lazer' },
-        8: { icone: '🧱', titulo: 'Passeio Muralhas', cat: 'tipo-lazer' },
-        9: { icone: '🎶', titulo: 'Discoteca', cat: 'tipo-lazer' },
-        10: { icone: '⚡', titulo: 'Jogo Eliminatória', cat: 'tipo-jogo' },
-        11: { icone: '🏁', titulo: 'Encerramento', cat: 'tipo-cerimonia' },
-        12: { icone: '🎉', titulo: 'Abertura do Torneio', cat: 'tipo-cerimonia' },
-        13: { icone: '🌳', titulo: 'Arborismo', cat: 'tipo-lazer' },
+        1: { icone: '🏀', titulo: 'Jogo', cat: 'cat-jogo' },
+        2: { icone: '📸', titulo: 'Sessão Fotográfica', cat: 'cat-lazer' },
+        3: { icone: '🍽️', titulo: 'Almoço', cat: 'cat-refeicao' },
+        4: { icone: '🌙', titulo: 'Jantar', cat: 'cat-refeicao' },
+        5: { icone: '☕', titulo: 'Pequeno Almoço', cat: 'cat-refeicao' },
+        6: { icone: '🎈', titulo: 'Insufláveis', cat: 'cat-lazer' },
+        7: { icone: '🏊', titulo: 'Piscina', cat: 'cat-lazer' },
+        8: { icone: '🧱', titulo: 'Passeio Muralhas', cat: 'cat-lazer' },
+        9: { icone: '🎶', titulo: 'Discoteca', cat: 'cat-lazer' },
+        10: { icone: '⚡', titulo: 'Jogo Eliminatória', cat: 'cat-jogo' },
+        11: { icone: '🏁', titulo: 'Encerramento', cat: 'cat-cerimonia' },
+        12: { icone: '🎉', titulo: 'Abertura do Torneio', cat: 'cat-cerimonia' },
+        13: { icone: '🌳', titulo: 'Arborismo', cat: 'cat-lazer' },
     };
 
     const ESTADO_BADGE = {
-        'Em Jogo': '<span class="badge-estado badge-em-jogo">Em Jogo</span>',
-        'Agendado': '<span class="badge-estado badge-agendado">Agendado</span>',
-        'Terminado': '<span class="badge-estado badge-terminado">Terminado</span>',
-        'Cancelado': '<span class="badge-estado badge-cancelado">Cancelado</span>',
+        'Em Jogo': 'badge badge-em-jogo',
+        'Agendado': 'badge badge-agendado',
+        'Terminado': 'badge badge-terminado',
+        'Cancelado': 'badge badge-cancelado',
     };
 
-    // ── Elementos ────────────────────────────────────────────────────────────
+    // Elementos
     const pinScreen = document.getElementById('pin-screen');
     const agendaScreen = document.getElementById('agenda-screen');
     const pinInput = document.getElementById('pin-input');
     const btnPin = document.getElementById('btn-pin');
     const pinError = document.getElementById('pin-error');
-    const btnVoltar = document.getElementById('btn-voltar');
 
-    // ── Botão Voltar ─────────────────────────────────────────────────────────
-    btnVoltar.addEventListener('click', () => {
-        agendaScreen.style.display = 'none';
-        pinScreen.style.display = 'flex';
-        pinInput.value = '';
-        pinError.textContent = '';
-        document.title = 'Agenda da Equipa';
-    });
-
-    // ── Submeter PIN ─────────────────────────────────────────────────────────
     btnPin.addEventListener('click', carregarAgenda);
     pinInput.addEventListener('keydown', e => { if (e.key === 'Enter') carregarAgenda(); });
 
@@ -52,18 +40,18 @@
         const pin = pinInput.value.trim();
         if (!pin) { pinError.textContent = 'Introduza o PIN da equipa.'; return; }
 
+        const equipaId = parseInt(pin, 10);
+        if (isNaN(equipaId)) { pinError.textContent = 'PIN inválido.'; return; }
+
         pinError.textContent = '';
         btnPin.textContent = 'A carregar...';
         btnPin.disabled = true;
 
-        const equipaId = parseInt(pin, 10);
-        if (isNaN(equipaId)) { mostrarErroPin('PIN inválido.'); return; }
-
         try {
             const [
-                { data: equipa, error: errEquipa },
-                { data: jogos, error: errJogos },
-                { data: eventos, error: errEventos },
+                { data: equipa, error: e1 },
+                { data: jogos, error: e2 },
+                { data: eventos, error: e3 },
             ] = await Promise.all([
                 supabase.from('equipas').select('*').eq('id', equipaId).single(),
                 supabase
@@ -78,55 +66,61 @@
                     .order('data_hora', { ascending: true }),
             ]);
 
-            if (errEquipa || !equipa) { mostrarErroPin('PIN não encontrado. Verifique e tente novamente.'); return; }
+            if (e1 || !equipa) {
+                pinError.textContent = 'PIN não encontrado. Verifique e tente novamente.';
+                btnPin.textContent = 'Ver Agenda';
+                btnPin.disabled = false;
+                return;
+            }
 
             renderAgenda(equipa, jogos || [], eventos || []);
 
         } catch (err) {
-            mostrarErroPin('Erro de ligação. Tente novamente.');
+            pinError.textContent = 'Erro de ligação. Tente novamente.';
             console.error(err);
+            btnPin.textContent = 'Ver Agenda';
+            btnPin.disabled = false;
         }
     }
 
-    function mostrarErroPin(msg) {
-        pinError.textContent = msg;
-        btnPin.textContent = 'Ver Agenda';
-        btnPin.disabled = false;
-    }
-
-    // ── Renderizar agenda ────────────────────────────────────────────────────
     function renderAgenda(equipa, jogos, eventos) {
         // Transição de ecrã
         pinScreen.style.display = 'none';
-        agendaScreen.style.display = 'block';
+        agendaScreen.style.display = 'flex';
         btnPin.textContent = 'Ver Agenda';
         btnPin.disabled = false;
 
-        // Header
-        const escalaoGenero = [equipa.escalao, equipa.genero].filter(Boolean).join(' · ');
-        document.getElementById('equipa-header').innerHTML = `
+        // Banner da equipa
+        const meta = [equipa.escalao, equipa.genero].filter(Boolean).join(' · ');
+        document.getElementById('equipa-banner').innerHTML = `
+            ${equipa.logo_url
+                ? `<img src="${equipa.logo_url}" alt="Logo">`
+                : '<span style="font-size:2rem">🏀</span>'}
+            <div>
+                <div class="equipa-nome">${equipa.nome}</div>
+                ${meta ? `<div class="equipa-sub">${meta}</div>` : ''}
+            </div>
             <button class="btn-voltar" id="btn-voltar">← Voltar</button>
-            ${equipa.logo_url ? `<img class="equipa-logo" src="${equipa.logo_url}" alt="Logo">` : '<div style="font-size:2.5rem;margin-bottom:6px">🏀</div>'}
-            <h1>${equipa.nome}</h1>
-            <div class="equipa-meta">${escalaoGenero}</div>
         `;
+        document.title = `Agenda — ${equipa.nome}`;
+
         document.getElementById('btn-voltar').addEventListener('click', () => {
             agendaScreen.style.display = 'none';
             pinScreen.style.display = 'flex';
             pinInput.value = '';
             pinError.textContent = '';
-            document.title = 'Agenda da Equipa';
+            document.title = 'Agenda da Equipa - Torneio Eurocidade';
         });
-        document.title = `Agenda — ${equipa.nome}`;
 
         // Montar lista unificada
         const items = [];
-
         jogos.forEach(j => {
             if (!j.data_hora) return;
-            items.push({ data_hora: j.data_hora, tipo: 'jogo', jogo: j, ehCasa: j.equipa_casa_id === equipa.id });
+            const adversario = j.equipa_casa_id === equipa.id
+                ? j.equipa_fora?.nome
+                : j.equipa_casa?.nome;
+            items.push({ data_hora: j.data_hora, tipo: 'jogo', jogo: j, adversario: adversario || '?' });
         });
-
         eventos.forEach(e => {
             if (!e.data_hora) return;
             items.push({ data_hora: e.data_hora, tipo: 'evento', evento: e });
@@ -135,16 +129,13 @@
         items.sort((a, b) => new Date(a.data_hora) - new Date(b.data_hora));
 
         const lista = document.getElementById('agenda-lista');
-
         if (items.length === 0) {
-            lista.innerHTML = '<p class="agenda-msg">Nenhum item agendado para esta equipa.</p>';
+            lista.innerHTML = '<p class="agenda-vazio">Nenhum item agendado para esta equipa.</p>';
             return;
         }
 
-        // Renderizar agrupado por dia
         let diaAtual = '';
         const html = [];
-
         items.forEach(item => {
             const dt = new Date(item.data_hora);
             const dia = dt.toLocaleDateString('pt-PT', { weekday: 'long', day: 'numeric', month: 'long' });
@@ -155,53 +146,44 @@
                 const diaLabel = dia.charAt(0).toUpperCase() + dia.slice(1);
                 html.push(`<div class="agenda-dia">📅 ${diaLabel}</div>`);
             }
-
             html.push(item.tipo === 'jogo' ? renderJogo(item, hora) : renderEvento(item, hora));
         });
 
         lista.innerHTML = html.join('');
     }
 
-    function renderJogo({ jogo, ehCasa }, hora) {
-        const casa = jogo.equipa_casa?.nome || '?';
-        const fora = jogo.equipa_fora?.nome || '?';
+    function renderJogo({ jogo, adversario }, hora) {
         const estado = jogo.estado || 'Agendado';
-        const badge = ESTADO_BADGE[estado] || '';
-        const adversario = ehCasa
-            ? `vs <strong>${fora}</strong> <em>(casa)</em>`
-            : `vs <strong>${casa}</strong> <em>(fora)</em>`;
+        const badgeClass = ESTADO_BADGE[estado] || 'badge badge-agendado';
         const campo = jogo.campo ? `🏟️ ${jogo.campo}` : '';
-        const temResultado = jogo.resultado_casa !== null && jogo.resultado_fora !== null;
+        const temResultado = jogo.resultado_casa !== null && jogo.resultado_fora !== null
+            && jogo.resultado_casa !== undefined;
         const placar = temResultado
-            ? `<div class="jogo-placar"><span class="score">${jogo.resultado_casa} – ${jogo.resultado_fora}</span></div>`
+            ? `<div class="ag-placar"><span class="score">${jogo.resultado_casa} – ${jogo.resultado_fora}</span></div>`
             : '';
-
         return `
-        <div class="agenda-item tipo-jogo">
-            <div class="agenda-hora">${hora}</div>
-            <div class="agenda-icone">🏀</div>
-            <div class="agenda-info">
-                <div class="agenda-titulo">Jogo ${badge}</div>
-                <div class="agenda-subtitulo">${adversario}</div>
-                ${campo ? `<div class="agenda-subtitulo">${campo}</div>` : ''}
+        <div class="agenda-card cat-jogo">
+            <div class="ag-hora">${hora}</div>
+            <div class="ag-icon">🏀</div>
+            <div class="ag-info">
+                <div class="ag-titulo">vs ${adversario} <span class="${badgeClass}">${estado}</span></div>
+                ${campo ? `<div class="ag-sub">${campo}</div>` : ''}
                 ${placar}
             </div>
         </div>`;
     }
 
     function renderEvento({ evento }, hora) {
-        const info = TIPO_INFO[evento.tipo_evento_id] || { icone: '📅', titulo: 'Evento', cat: 'tipo-outro' };
+        const info = TIPO_INFO[evento.tipo_evento_id] || { icone: '📅', titulo: 'Evento', cat: 'cat-lazer' };
         const localStr = evento.local ? `📍 ${evento.local}` : '';
-        const descStr = evento.descricao ? `<div class="agenda-subtitulo">${evento.descricao}</div>` : '';
-        const privBadge = !evento.is_publico ? '<span style="font-size:0.68rem;color:#8e44ad;margin-left:5px">🔒</span>' : '';
-
+        const descStr = evento.descricao ? `<div class="ag-sub">${evento.descricao}</div>` : '';
         return `
-        <div class="agenda-item ${info.cat}">
-            <div class="agenda-hora">${hora}</div>
-            <div class="agenda-icone">${info.icone}</div>
-            <div class="agenda-info">
-                <div class="agenda-titulo">${info.titulo}${privBadge}</div>
-                ${localStr ? `<div class="agenda-subtitulo">${localStr}</div>` : ''}
+        <div class="agenda-card ${info.cat}">
+            <div class="ag-hora">${hora}</div>
+            <div class="ag-icon">${info.icone}</div>
+            <div class="ag-info">
+                <div class="ag-titulo">${info.titulo}</div>
+                ${localStr ? `<div class="ag-sub">${localStr}</div>` : ''}
                 ${descStr}
             </div>
         </div>`;

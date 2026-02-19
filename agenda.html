@@ -5,247 +5,245 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="icon" type="image/svg+xml" href="favicon.svg">
-    <title>Agenda da Equipa</title>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+    <title>Agenda da Equipa - Torneio Eurocidade</title>
+    <link rel="stylesheet" href="css/style.css?v=2">
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&display=swap" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <style>
-        * {
-            box-sizing: border-box;
-            margin: 0;
-            padding: 0;
-        }
-
-        body {
-            font-family: 'Inter', sans-serif;
-            background: #f0f4f8;
-            min-height: 100vh;
-        }
-
-        /* ── Ecrã de PIN ───────────────────────────────── */
+        /* ── Ecrã de PIN ─────────────────────────────────── */
         #pin-screen {
-            min-height: 100vh;
             display: flex;
             align-items: center;
             justify-content: center;
-            background: linear-gradient(135deg, #1a3a5c 0%, #2d6a9f 100%);
-            padding: 24px;
+            flex: 1;
+            padding: 32px 16px;
+            background: var(--bg-color);
         }
 
         .pin-card {
-            background: #fff;
-            border-radius: 16px;
-            padding: 36px 32px;
-            max-width: 360px;
+            background: var(--white);
+            border-radius: 12px;
+            padding: 36px 28px;
+            max-width: 340px;
             width: 100%;
-            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
+            box-shadow: var(--card-shadow);
             text-align: center;
         }
 
-        .pin-card .logo {
-            font-size: 3rem;
+        .pin-card .pin-icon {
+            font-size: 2.6rem;
             margin-bottom: 12px;
         }
 
-        .pin-card h1 {
-            font-size: 1.3rem;
+        .pin-card h2 {
+            font-size: 1.2rem;
             font-weight: 700;
-            color: #1a3a5c;
+            color: var(--secondary-color);
             margin-bottom: 6px;
         }
 
         .pin-card p {
-            font-size: 0.88rem;
+            font-size: 0.85rem;
             color: #666;
-            margin-bottom: 24px;
+            margin-bottom: 22px;
         }
 
         .pin-input {
             width: 100%;
-            padding: 14px;
-            font-size: 1.5rem;
+            padding: 13px;
+            font-size: 1.6rem;
             font-weight: 700;
             text-align: center;
             border: 2px solid #ddd;
-            border-radius: 10px;
+            border-radius: 8px;
             letter-spacing: 6px;
             outline: none;
             transition: border-color 0.2s;
-            appearance: textfield;
+            -moz-appearance: textfield;
+        }
+
+        .pin-input::-webkit-outer-spin-button,
+        .pin-input::-webkit-inner-spin-button {
+            -webkit-appearance: none;
         }
 
         .pin-input:focus {
-            border-color: #2d6a9f;
+            border-color: var(--primary-color);
         }
 
         .pin-btn {
             width: 100%;
             margin-top: 14px;
             padding: 13px;
-            background: linear-gradient(135deg, #1a3a5c, #2d6a9f);
-            color: #fff;
+            background: var(--primary-color);
+            color: var(--white);
             border: none;
-            border-radius: 10px;
+            border-radius: 8px;
             font-size: 1rem;
-            font-weight: 600;
+            font-weight: 700;
             cursor: pointer;
-            transition: opacity 0.2s;
+            transition: background 0.2s;
         }
 
         .pin-btn:hover {
-            opacity: 0.88;
+            background: var(--secondary-color);
         }
 
         .pin-error {
-            margin-top: 12px;
-            color: #c0392b;
-            font-size: 0.85rem;
+            margin-top: 10px;
+            color: #c62828;
+            font-size: 0.83rem;
             font-weight: 600;
-            min-height: 20px;
+            min-height: 18px;
         }
 
-        /* ── Agenda ─────────────────────────────────────── */
+        /* ── Ecrã da Agenda ───────────────────────────────── */
         #agenda-screen {
             display: none;
-        }
-
-        .agenda-header {
-            background: linear-gradient(135deg, #1a3a5c 0%, #2d6a9f 100%);
-            color: #fff;
-            padding: 24px 20px 18px;
-            text-align: center;
-            position: relative;
-        }
-
-        .btn-voltar {
-            position: absolute;
-            left: 14px;
-            top: 50%;
-            transform: translateY(-50%);
-            background: rgba(255, 255, 255, 0.15);
-            border: none;
-            color: #fff;
-            padding: 6px 12px;
-            border-radius: 8px;
-            cursor: pointer;
-            font-size: 0.85rem;
-        }
-
-        .equipa-logo {
-            width: 64px;
-            height: 64px;
-            object-fit: contain;
-            border-radius: 50%;
-            background: rgba(255, 255, 255, 0.15);
-            padding: 6px;
-            margin-bottom: 8px;
-        }
-
-        .agenda-header h1 {
-            font-size: 1.3rem;
-            font-weight: 700;
-            margin-bottom: 2px;
-        }
-
-        .equipa-meta {
-            font-size: 0.82rem;
-            opacity: 0.85;
-        }
-
-        .agenda-container {
-            max-width: 640px;
-            margin: 0 auto;
-            padding: 16px 12px 48px;
-        }
-
-        .agenda-dia {
-            margin: 20px 0 8px;
-            font-size: 0.72rem;
-            font-weight: 700;
-            letter-spacing: 1.2px;
-            text-transform: uppercase;
-            color: #2d6a9f;
-            border-bottom: 2px solid #2d6a9f;
-            padding-bottom: 4px;
-        }
-
-        .agenda-item {
-            display: flex;
-            align-items: flex-start;
-            gap: 12px;
-            background: #fff;
-            border-radius: 10px;
-            padding: 12px 14px;
-            margin-bottom: 8px;
-            box-shadow: 0 1px 4px rgba(0, 0, 0, 0.07);
-            border-left: 4px solid #ccc;
-        }
-
-        .agenda-item.tipo-jogo {
-            border-left-color: #e67e22;
-        }
-
-        .agenda-item.tipo-refeicao {
-            border-left-color: #27ae60;
-        }
-
-        .agenda-item.tipo-lazer {
-            border-left-color: #8e44ad;
-        }
-
-        .agenda-item.tipo-cerimonia {
-            border-left-color: #2980b9;
-        }
-
-        .agenda-item.tipo-outro {
-            border-left-color: #95a5a6;
-        }
-
-        .agenda-hora {
-            min-width: 46px;
-            font-size: 1rem;
-            font-weight: 700;
-            color: #1a3a5c;
-            padding-top: 2px;
-        }
-
-        .agenda-icone {
-            font-size: 1.35rem;
-            padding-top: 1px;
-        }
-
-        .agenda-info {
+            flex-direction: column;
             flex: 1;
         }
 
-        .agenda-titulo {
-            font-weight: 600;
-            font-size: 0.92rem;
-            color: #1a1a2e;
+        /* Cabeçalho da equipa */
+        .equipa-banner {
+            background: var(--primary-color);
+            color: var(--white);
+            padding: 18px 16px;
+            display: flex;
+            align-items: center;
+            gap: 14px;
         }
 
-        .agenda-subtitulo {
+        .equipa-banner img {
+            width: 54px;
+            height: 54px;
+            border-radius: 50%;
+            object-fit: contain;
+            background: rgba(255, 255, 255, 0.15);
+            padding: 5px;
+            border: 2px solid var(--accent-color);
+        }
+
+        .equipa-banner .equipa-nome {
+            font-size: 1.15rem;
+            font-weight: 700;
+        }
+
+        .equipa-banner .equipa-sub {
+            font-size: 0.8rem;
+            opacity: 0.85;
+            margin-top: 2px;
+        }
+
+        .btn-voltar {
+            margin-left: auto;
+            background: rgba(255, 255, 255, 0.15);
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            color: var(--white);
+            padding: 6px 14px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 0.83rem;
+            white-space: nowrap;
+        }
+
+        /* Lista da agenda */
+        .agenda-container {
+            padding: 12px 12px 48px;
+            max-width: 680px;
+            margin: 0 auto;
+            width: 100%;
+        }
+
+        .agenda-dia {
+            margin: 18px 0 8px;
+            font-size: 0.7rem;
+            font-weight: 700;
+            letter-spacing: 1.4px;
+            text-transform: uppercase;
+            color: var(--primary-color);
+            border-bottom: 2px solid var(--primary-color);
+            padding-bottom: 4px;
+        }
+
+        /* Cards da agenda — estilo matching com jogo-item do site */
+        .agenda-card {
+            background: var(--white);
+            border-radius: 10px;
+            padding: 12px 14px;
+            margin-bottom: 8px;
+            box-shadow: var(--card-shadow);
+            display: flex;
+            align-items: flex-start;
+            gap: 12px;
+            border-left: 4px solid var(--primary-color);
+        }
+
+        .agenda-card.cat-jogo {
+            border-left-color: var(--accent-color);
+        }
+
+        .agenda-card.cat-refeicao {
+            border-left-color: #2e7d32;
+        }
+
+        .agenda-card.cat-lazer {
+            border-left-color: var(--primary-color);
+        }
+
+        .agenda-card.cat-cerimonia {
+            border-left-color: var(--secondary-color);
+        }
+
+        .ag-hora {
+            min-width: 46px;
+            font-weight: 700;
+            color: var(--secondary-color);
+            font-size: 0.98rem;
+            padding-top: 2px;
+        }
+
+        .ag-icon {
+            font-size: 1.3rem;
+            padding-top: 1px;
+        }
+
+        .ag-info {
+            flex: 1;
+        }
+
+        .ag-titulo {
+            font-weight: 700;
+            font-size: 0.92rem;
+            color: var(--text-color);
+        }
+
+        .ag-sub {
             font-size: 0.8rem;
             color: #666;
             margin-top: 2px;
         }
 
-        .jogo-placar {
+        /* Placar do jogo */
+        .ag-placar {
             margin-top: 4px;
             font-size: 0.85rem;
         }
 
-        .jogo-placar .score {
-            font-size: 1.05rem;
+        .ag-placar .score {
             font-weight: 700;
-            color: #e67e22;
+            color: var(--primary-color);
+            font-size: 1rem;
         }
 
-        .badge-estado {
+        /* Badges de estado */
+        .badge {
             display: inline-block;
-            font-size: 0.68rem;
-            font-weight: 600;
+            font-size: 0.67rem;
+            font-weight: 700;
             padding: 2px 7px;
             border-radius: 10px;
+            vertical-align: middle;
             margin-left: 5px;
         }
 
@@ -255,8 +253,8 @@
         }
 
         .badge-agendado {
-            background: #e3f2fd;
-            color: #1565c0;
+            background: #e8eaf6;
+            color: #3949ab;
         }
 
         .badge-terminado {
@@ -269,42 +267,77 @@
             color: #c62828;
         }
 
-        .agenda-msg {
+        .agenda-vazio {
             text-align: center;
             color: #888;
             padding: 40px 20px;
-            font-size: 0.95rem;
         }
     </style>
 </head>
 
 <body>
+    <!-- Header standard do site -->
+    <header class="main-header">
+        <div class="logo-container">
+            <a href="index.html" style="display:flex;align-items:center;gap:10px;text-decoration:none;color:white;">
+                <img src="Logo_bcv.jpg" alt="Logo BCV" class="site-logo">
+                <h1>Torneio Eurocidade</h1>
+            </a>
+        </div>
+        <button class="menu-toggle" aria-label="Abrir Menu">
+            <span></span><span></span><span></span>
+        </button>
+        <nav class="main-nav">
+            <ul>
+                <li><a href="index.html">Visão Geral</a></li>
+                <li><a href="equipas.html">Equipas</a></li>
+                <li><a href="jogos.html">Jogos</a></li>
+                <li><a href="eventos.html">Eventos</a></li>
+                <li><a href="agenda.html" class="active">Agenda</a></li>
+                <li><a href="patrocinadores.html">Patrocinadores</a></li>
+                <li><a href="onde-comer.html">Onde Comer</a></li>
+                <li><a href="onde-dormir.html">Onde Dormir</a></li>
+                <li><a href="opinioes.html">Opiniões</a></li>
+                <li><a href="contactos.html">Contactos</a></li>
+                <li><a href="admin.html">Admins</a></li>
+            </ul>
+        </nav>
+    </header>
 
-    <!-- Ecrã de PIN -->
-    <div id="pin-screen">
-        <div class="pin-card">
-            <div class="logo">🏀</div>
-            <h1>Agenda da Equipa</h1>
-            <p>Introduza o PIN fornecido pela organização</p>
-            <input type="number" id="pin-input" class="pin-input" placeholder="0000" min="1">
-            <button class="pin-btn" id="btn-pin">Ver Agenda</button>
-            <div id="pin-error" class="pin-error"></div>
-        </div>
-    </div>
+    <main id="app-content" style="display:flex;flex-direction:column;flex:1;">
 
-    <!-- Ecrã da Agenda -->
-    <div id="agenda-screen">
-        <div class="agenda-header" id="equipa-header">
-            <button class="btn-voltar" id="btn-voltar">← Voltar</button>
-            <div>A carregar...</div>
+        <!-- Ecrã de PIN -->
+        <div id="pin-screen">
+            <div class="pin-card">
+                <div class="pin-icon">🏀</div>
+                <h2>Agenda da Equipa</h2>
+                <p>Introduza o PIN fornecido pela organização</p>
+                <input type="number" id="pin-input" class="pin-input" placeholder="0000" min="1">
+                <button class="pin-btn" id="btn-pin">Ver Agenda</button>
+                <div id="pin-error" class="pin-error"></div>
+            </div>
         </div>
-        <div class="agenda-container">
-            <div id="agenda-lista"></div>
+
+        <!-- Ecrã da Agenda -->
+        <div id="agenda-screen">
+            <div class="equipa-banner" id="equipa-banner">
+                <div class="equipa-nome">A carregar...</div>
+            </div>
+            <div class="agenda-container">
+                <div id="agenda-lista"></div>
+            </div>
         </div>
-    </div>
+
+    </main>
 
     <script src="js/config.js?v=1"></script>
-    <script src="js/agenda.js?v=2"></script>
+    <script src="js/agenda.js?v=3"></script>
+    <script>
+        // Menu toggle (igual às outras páginas)
+        const menuToggle = document.querySelector('.menu-toggle');
+        const mainNav = document.querySelector('.main-nav');
+        if (menuToggle) menuToggle.addEventListener('click', () => mainNav.classList.toggle('open'));
+    </script>
 </body>
 
 </html>
