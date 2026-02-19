@@ -347,14 +347,20 @@ document.addEventListener('DOMContentLoaded', async () => {
         const listContainer = document.getElementById('admin-jogos-list');
         listContainer.innerHTML = 'Carregando...';
 
-        const { data, error } = await supabase
-            .from('jogos')
-            .select(`
-                *,
-                equipa_casa:equipas!equipa_casa_id(nome, escalao),
-                equipa_fora:equipas!equipa_fora_id(nome, escalao)
-            `)
-            .order('data_hora', { ascending: true });
+        const [{ data, error }, { data: equipas }] = await Promise.all([
+            supabase
+                .from('jogos')
+                .select(`
+                    *,
+                    equipa_casa:equipas!equipa_casa_id(nome, escalao),
+                    equipa_fora:equipas!equipa_fora_id(nome, escalao)
+                `)
+                .order('data_hora', { ascending: true }),
+            supabase
+                .from('equipas')
+                .select('id, nome, escalao, genero')
+                .order('nome')
+        ]);
 
         if (error) {
             listContainer.innerHTML = 'Erro ao carregar lista de jogos.';
@@ -364,15 +370,29 @@ document.addEventListener('DOMContentLoaded', async () => {
 
         window.allJogosAdmin = data || [];
 
-        // Ligar filtros apenas na primeira carga
+        // Popular select de clubes e ligar filtros (apenas na primeira carga)
         if (!window._filtrosJogosAdmin) {
             window._filtrosJogosAdmin = true;
-            const ids = ['filtro-data', 'filtro-hora', 'filtro-clube', 'filtro-estado'];
-            ids.forEach(id => {
+
+            const selectClube = document.getElementById('filtro-clube');
+            if (selectClube && equipas) {
+                equipas.forEach(e => {
+                    const num = (e.escalao || '').replace(/\D/g, '');
+                    const gen = e.genero === 'Masculino' ? 'M' : e.genero === 'Feminino' ? 'F' : '';
+                    const abrev = num ? ` (${num}${gen})` : '';
+                    const opt = document.createElement('option');
+                    opt.value = e.id;
+                    opt.textContent = `${e.nome}${abrev}`;
+                    selectClube.appendChild(opt);
+                });
+            }
+
+            ['filtro-data', 'filtro-hora', 'filtro-clube', 'filtro-estado'].forEach(id => {
                 const el = document.getElementById(id);
-                if (el) el.addEventListener('input', filtrarERenderizerJogosAdmin);
                 if (el) el.addEventListener('change', filtrarERenderizerJogosAdmin);
             });
+            document.getElementById('filtro-hora')?.addEventListener('input', filtrarERenderizerJogosAdmin);
+
             const btnLimpar = document.getElementById('btn-limpar-filtros');
             if (btnLimpar) btnLimpar.addEventListener('click', () => {
                 document.getElementById('filtro-data').value = '';
@@ -392,7 +412,7 @@ document.addEventListener('DOMContentLoaded', async () => {
 
         const filtroData = document.getElementById('filtro-data')?.value || '';
         const filtroHora = document.getElementById('filtro-hora')?.value || '';
-        const filtroClube = (document.getElementById('filtro-clube')?.value || '').toLowerCase().trim();
+        const filtroClubeId = document.getElementById('filtro-clube')?.value || '';
         const filtroEstado = document.getElementById('filtro-estado')?.value || '';
 
         const filtrados = data.filter(jogo => {
@@ -406,10 +426,10 @@ document.addEventListener('DOMContentLoaded', async () => {
                 const jogoHora = dt.toTimeString().slice(0, 5); // HH:MM
                 if (jogoHora !== filtroHora) return false;
             }
-            if (filtroClube) {
-                const casa = (jogo.equipa_casa?.nome || '').toLowerCase();
-                const fora = (jogo.equipa_fora?.nome || '').toLowerCase();
-                if (!casa.includes(filtroClube) && !fora.includes(filtroClube)) return false;
+            if (filtroClubeId) {
+                // Filtrar por ID único da equipa
+                if (String(jogo.equipa_casa_id) !== filtroClubeId &&
+                    String(jogo.equipa_fora_id) !== filtroClubeId) return false;
             }
             if (filtroEstado) {
                 const estado = jogo.estado || 'Agendado';

@@ -120,12 +120,19 @@
                 <!-- Filtros -->
                 <div id="admin-jogos-filtros"
                     style="display:flex; flex-wrap:wrap; gap:8px; margin-bottom:12px; align-items:center;">
-                    <input type="date" id="filtro-data"
+                    <select id="filtro-data"
                         style="padding:8px; border:1px solid #ddd; border-radius:6px; font-size:0.9rem;">
+                        <option value="">Todas as Datas</option>
+                        <option value="2026-03-28">28/03/2026</option>
+                        <option value="2026-03-29">29/03/2026</option>
+                        <option value="2026-03-30">30/03/2026</option>
+                    </select>
                     <input type="time" id="filtro-hora"
                         style="padding:8px; border:1px solid #ddd; border-radius:6px; font-size:0.9rem;">
-                    <input type="text" id="filtro-clube" placeholder="&#128269; Clube..."
-                        style="padding:8px; border:1px solid #ddd; border-radius:6px; font-size:0.9rem; flex:1; min-width:140px;">
+                    <select id="filtro-clube"
+                        style="padding:8px; border:1px solid #ddd; border-radius:6px; font-size:0.9rem; flex:1; min-width:160px;">
+                        <option value="">Todos os Clubes</option>
+                    </select>
                     <select id="filtro-estado"
                         style="padding:8px; border:1px solid #ddd; border-radius:6px; font-size:0.9rem;">
                         <option value="">Todos os Estados</option>
@@ -181,7 +188,7 @@
     </div>
 
     <script src="js/config.js?v=mobile2"></script>
-    <script src="js/admin.js?v=mobile4"></script>
+    <script src="js/admin.js?v=mobile5"></script>
     <script>
         // Debug info para mobile
         document.addEventListener('DOMContentLoaded', () => {
