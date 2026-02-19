@@ -185,7 +185,6 @@ document.addEventListener('DOMContentLoaded', () => {
             supabase
                 .from('equipas')
                 .select('nome, escalao, genero')
-                .order('escalao')
                 .order('nome')
         ]);
 
