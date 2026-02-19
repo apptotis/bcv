@@ -115,7 +115,7 @@ document.addEventListener('DOMContentLoaded', async () => {
 
     // Preencher Selects de Equipas
     async function loadTeamsOptions() {
-        const { data: equipas, error } = await supabase.from('equipas').select('id, nome, escalao');
+        const { data: equipas, error } = await supabase.from('equipas').select('id, nome, escalao, genero').order('escalao').order('nome');
         if (error) return console.error(error);
 
         const atletaSelect = document.getElementById('atleta-equipa-id');
@@ -128,8 +128,10 @@ document.addEventListener('DOMContentLoaded', async () => {
             equipas.forEach(e => {
                 const opt = document.createElement('option');
                 opt.value = e.id;
-                // Exibe Nome e Escalão
-                opt.textContent = `${e.nome} (${e.escalao || 'Sem Escalão'})`;
+                // Exibe Escalão, Género e Nome
+                const escalao = e.escalao || 'Sem Escalão';
+                const genero = e.genero ? ` ${e.genero}` : '';
+                opt.textContent = `[${escalao}${genero}] ${e.nome}`;
                 sel.appendChild(opt);
             });
         });
