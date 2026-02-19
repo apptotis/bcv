@@ -362,10 +362,69 @@ document.addEventListener('DOMContentLoaded', async () => {
             return;
         }
 
-        listContainer.innerHTML = '';
-        if (data.length === 0) listContainer.innerHTML = '<p>Nenhum jogo agendado.</p>';
+        window.allJogosAdmin = data || [];
 
-        data.forEach(jogo => {
+        // Ligar filtros apenas na primeira carga
+        if (!window._filtrosJogosAdmin) {
+            window._filtrosJogosAdmin = true;
+            const ids = ['filtro-data', 'filtro-hora', 'filtro-clube', 'filtro-estado'];
+            ids.forEach(id => {
+                const el = document.getElementById(id);
+                if (el) el.addEventListener('input', filtrarERenderizerJogosAdmin);
+                if (el) el.addEventListener('change', filtrarERenderizerJogosAdmin);
+            });
+            const btnLimpar = document.getElementById('btn-limpar-filtros');
+            if (btnLimpar) btnLimpar.addEventListener('click', () => {
+                document.getElementById('filtro-data').value = '';
+                document.getElementById('filtro-hora').value = '';
+                document.getElementById('filtro-clube').value = '';
+                document.getElementById('filtro-estado').value = '';
+                filtrarERenderizerJogosAdmin();
+            });
+        }
+
+        filtrarERenderizerJogosAdmin();
+    }
+
+    function filtrarERenderizerJogosAdmin() {
+        const listContainer = document.getElementById('admin-jogos-list');
+        const data = window.allJogosAdmin || [];
+
+        const filtroData = document.getElementById('filtro-data')?.value || '';
+        const filtroHora = document.getElementById('filtro-hora')?.value || '';
+        const filtroClube = (document.getElementById('filtro-clube')?.value || '').toLowerCase().trim();
+        const filtroEstado = document.getElementById('filtro-estado')?.value || '';
+
+        const filtrados = data.filter(jogo => {
+            const dt = jogo.data_hora ? new Date(jogo.data_hora) : null;
+
+            if (filtroData && dt) {
+                const jogoData = dt.toLocaleDateString('en-CA'); // YYYY-MM-DD
+                if (jogoData !== filtroData) return false;
+            }
+            if (filtroHora && dt) {
+                const jogoHora = dt.toTimeString().slice(0, 5); // HH:MM
+                if (jogoHora !== filtroHora) return false;
+            }
+            if (filtroClube) {
+                const casa = (jogo.equipa_casa?.nome || '').toLowerCase();
+                const fora = (jogo.equipa_fora?.nome || '').toLowerCase();
+                if (!casa.includes(filtroClube) && !fora.includes(filtroClube)) return false;
+            }
+            if (filtroEstado) {
+                const estado = jogo.estado || 'Agendado';
+                if (estado !== filtroEstado) return false;
+            }
+            return true;
+        });
+
+        listContainer.innerHTML = '';
+        if (filtrados.length === 0) {
+            listContainer.innerHTML = '<p>Nenhum jogo encontrado com estes filtros.</p>';
+            return;
+        }
+
+        filtrados.forEach(jogo => {
             const div = document.createElement('div');
             div.className = 'admin-list-item';
             div.style.borderBottom = '1px solid #ccc';
@@ -377,12 +436,13 @@ document.addEventListener('DOMContentLoaded', async () => {
             const equipaCasa = jogo.equipa_casa?.nome || 'Equipa desconhecida';
             const equipaFora = jogo.equipa_fora?.nome || 'Equipa desconhecida';
             const dataHora = jogo.data_hora ? new Date(jogo.data_hora).toLocaleString('pt-PT') : 'Data a definir';
+            const estado = jogo.estado || 'Agendado';
 
             div.innerHTML = `
                 <div>
                     <strong>${equipaCasa} vs ${equipaFora}</strong>
                     <br>
-                    <small>${jogo.escalao || ''} | ${dataHora} | ${jogo.campo || 'Campo a definir'}</small>
+                    <small>${jogo.escalao || ''} | ${dataHora} | ${jogo.campo || 'Campo a definir'} | <em>${estado}</em></small>
                 </div>
                 <div style="display: flex; gap: 5px;">
                     <button class="btn-success btn-sm" onclick="editJogo('${jogo.id}')">Editar</button>
