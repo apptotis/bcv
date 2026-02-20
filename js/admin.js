@@ -642,6 +642,7 @@ document.addEventListener('DOMContentLoaded', async () => {
             div.innerHTML = `
                 <div>
                     <strong>${equipa.nome}</strong> (${equipa.escalao || '-'})
+                    <span style="margin-left:8px;background:#4a148c;color:#fff;font-size:0.72rem;font-weight:700;padding:2px 8px;border-radius:10px;">PIN: ${equipa.id}</span>
                     <br>
                     <small>${equipa.genero || 'Género não definido'} | ${equipa.tecnico || ''}</small>
                 </div>
