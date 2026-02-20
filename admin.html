@@ -164,11 +164,10 @@
                         <option value="true">Público (visível a todos)</option>
                         <option value="false">Privado (específico de uma equipa)</option>
                     </select>
-                    <!-- Select de equipa: só visível em eventos privados -->
+                    <!-- Select de equipas: só visível em eventos privados -->
                     <div id="evento-equipa-wrap" style="display:none;">
-                        <label>Equipa (obrigatório para eventos privados):</label>
-                        <select id="evento-equipa-id">
-                            <option value="">Selecionar Equipa</option>
+                        <label>Equipa(s) — toque/clique em várias para selecionar múltiplas:</label>
+                        <select id="evento-equipa-id" multiple size="5" style="height:auto;min-height:90px;">
                         </select>
                     </div>
                     <select id="evento-tipo" required>

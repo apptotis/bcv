@@ -67,10 +67,12 @@
         btnPin.disabled = true;
 
         try {
+            // 1. Buscar equipa, jogos, eventos públicos e relações de eventos privados
             const [
                 { data: equipa, error: e1 },
                 { data: jogos, error: e2 },
-                { data: eventos, error: e3 },
+                { data: eventosPublicos, error: e3 },
+                { data: relacoesPrivadas, error: e4 },
             ] = await Promise.all([
                 supabase.from('equipas').select('*').eq('id', equipaId).single(),
                 supabase
@@ -81,8 +83,12 @@
                 supabase
                     .from('eventos')
                     .select('*')
-                    .or(`is_publico.eq.true,equipa_id.eq.${equipaId}`)
+                    .eq('is_publico', true)
                     .order('data_hora', { ascending: true }),
+                supabase
+                    .from('evento_equipas')
+                    .select('evento_id')
+                    .eq('equipa_id', equipaId)
             ]);
 
             if (e1 || !equipa) {
@@ -92,7 +98,22 @@
                 return;
             }
 
-            renderAgenda(equipa, jogos || [], eventos || []);
+            // 2. Buscar detalhes dos eventos privados (se houver)
+            let eventosPrivados = [];
+            if (relacoesPrivadas && relacoesPrivadas.length > 0) {
+                const ids = relacoesPrivadas.map(r => r.evento_id);
+                const { data: evPriv } = await supabase
+                    .from('eventos')
+                    .select('*')
+                    .in('id', ids)
+                    .order('data_hora', { ascending: true });
+                eventosPrivados = evPriv || [];
+            }
+
+            // 3. Combinar eventos
+            const todosEventos = [...(eventosPublicos || []), ...eventosPrivados];
+
+            renderAgenda(equipa, jogos || [], todosEventos);
             sessionStorage.setItem('agenda_pin', pin);
 
         } catch (err) {

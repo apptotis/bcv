@@ -737,31 +737,52 @@ document.addEventListener('DOMContentLoaded', async () => {
             const dataHora = document.getElementById('evento-data').value;
             const tecnicos = document.getElementById('evento-tecnicos').value.trim();
             const descricao = document.getElementById('evento-descricao').value.trim();
-            const equipaId = document.getElementById('evento-equipa-id')?.value || null;
+
+            // Obter múltiplas equipas selecionadas
+            const selectEquipas = document.getElementById('evento-equipa-id');
+            const equipaIds = Array.from(selectEquipas.selectedOptions).map(opt => opt.value).filter(v => v);
 
             try {
                 if (!tipoId) throw new Error('Selecione um tipo de evento.');
                 if (!local) throw new Error('Indique o local do evento.');
                 if (!dataHora) throw new Error('Indique a data e hora do evento.');
-                if (!isPublico && !equipaId) throw new Error('Evento privado requer uma equipa.');
+                if (!isPublico && equipaIds.length === 0) throw new Error('Evento privado requer pelo menos uma equipa.');
 
-                const updates = {
+                const eventoData = {
                     is_publico: isPublico,
                     tipo_evento_id: tipoId,
                     local,
                     data_hora: dataHora,
                     tecnicos: tecnicos || null,
-                    descricao: descricao || null,
-                    equipa_id: isPublico ? null : equipaId
+                    descricao: descricao || null
                 };
 
+                let eventoId = editingEventoId;
+
                 if (editingEventoId) {
-                    const { error } = await supabase.from('eventos').update(updates).eq('id', editingEventoId);
+                    // Atualizar evento base
+                    const { error } = await supabase.from('eventos').update(eventoData).eq('id', editingEventoId);
                     if (error) throw error;
+
+                    // Atualizar equipas: apagar todas e inserir novas
+                    await supabase.from('evento_equipas').delete().eq('evento_id', editingEventoId);
+                } else {
+                    // Criar novo evento
+                    const { data, error } = await supabase.from('eventos').insert([eventoData]).select().single();
+                    if (error) throw error;
+                    eventoId = data.id;
+                }
+
+                // Inserir equipas na junction table (se privado e houver equipas)
+                if (!isPublico && equipaIds.length > 0) {
+                    const insertData = equipaIds.map(eid => ({ evento_id: eventoId, equipa_id: eid }));
+                    const { error: errJun } = await supabase.from('evento_equipas').insert(insertData);
+                    if (errJun) throw errJun;
+                }
+
+                if (editingEventoId) {
                     alert('Evento atualizado com sucesso!');
                 } else {
-                    const { error } = await supabase.from('eventos').insert([updates]);
-                    if (error) throw error;
                     alert('Evento adicionado com sucesso!');
                 }
 
@@ -770,6 +791,9 @@ document.addEventListener('DOMContentLoaded', async () => {
                 editingEventoId = null;
                 const btn = formEvento.querySelector('button[type="submit"]');
                 if (btn) btn.textContent = 'Adicionar Evento';
+
+                // Limpar seleção do multiselect visual
+                Array.from(selectEquipas.options).forEach(opt => opt.selected = false);
 
                 loadEventosAdmin();
 
@@ -858,9 +882,22 @@ document.addEventListener('DOMContentLoaded', async () => {
         document.getElementById('evento-tecnicos').value = evento.tecnicos || '';
         document.getElementById('evento-descricao').value = evento.descricao || '';
 
-        // Preencher equipa e atualizar visibilidade do select
+        // Preencher equipas (multi-select)
         const selEquipa = document.getElementById('evento-equipa-id');
-        if (selEquipa) selEquipa.value = evento.equipa_id || '';
+        // Limpar seleção anterior
+        Array.from(selEquipa.options).forEach(opt => opt.selected = false);
+
+        if (!evento.is_publico) {
+            // Buscar equipas associadas
+            const { data: relacoes } = await supabase.from('evento_equipas').select('equipa_id').eq('evento_id', id);
+            if (relacoes && relacoes.length > 0) {
+                const ids = relacoes.map(r => String(r.equipa_id));
+                Array.from(selEquipa.options).forEach(opt => {
+                    if (ids.includes(String(opt.value))) opt.selected = true;
+                });
+            }
+        }
+
         const selPub = document.getElementById('evento-publico');
         const wrap = document.getElementById('evento-equipa-wrap');
         if (wrap && selPub) wrap.style.display = selPub.value === 'false' ? 'block' : 'none';
