@@ -59,6 +59,7 @@
             letter-spacing: 6px;
             outline: none;
             transition: border-color 0.2s;
+            appearance: textfield;
             -moz-appearance: textfield;
         }
 
@@ -106,9 +107,9 @@
 
         /* Cabeçalho da equipa */
         .equipa-banner {
-            background: var(--primary-color);
+            background: var(--secondary-color);
             color: var(--white);
-            padding: 18px 16px;
+            padding: 16px;
             display: flex;
             align-items: center;
             gap: 14px;
@@ -122,6 +123,7 @@
             background: rgba(255, 255, 255, 0.15);
             padding: 5px;
             border: 2px solid var(--accent-color);
+            flex-shrink: 0;
         }
 
         .equipa-banner .equipa-nome {
@@ -135,16 +137,19 @@
             margin-top: 2px;
         }
 
+        .btn-voltar-wrap {
+            background: var(--secondary-color);
+            padding: 0 16px 10px;
+        }
+
         .btn-voltar {
-            margin-left: auto;
             background: rgba(255, 255, 255, 0.15);
             border: 1px solid rgba(255, 255, 255, 0.3);
             color: var(--white);
-            padding: 6px 14px;
+            padding: 5px 14px;
             border-radius: 6px;
             cursor: pointer;
-            font-size: 0.83rem;
-            white-space: nowrap;
+            font-size: 0.82rem;
         }
 
         /* Lista da agenda */
@@ -180,7 +185,7 @@
         }
 
         .agenda-card.cat-jogo {
-            border-left-color: var(--accent-color);
+            border-left-color: var(--secondary-color);
         }
 
         .agenda-card.cat-refeicao {
@@ -323,6 +328,9 @@
             <div class="equipa-banner" id="equipa-banner">
                 <div class="equipa-nome">A carregar...</div>
             </div>
+            <div class="btn-voltar-wrap" id="btn-voltar-wrap" style="display:none">
+                <button class="btn-voltar" id="btn-voltar">← Voltar</button>
+            </div>
             <div class="agenda-container">
                 <div id="agenda-lista"></div>
             </div>
@@ -331,7 +339,7 @@
     </main>
 
     <script src="js/config.js?v=1"></script>
-    <script src="js/agenda.js?v=4"></script>
+    <script src="js/agenda.js?v=5"></script>
     <script>
         // Menu toggle (igual às outras páginas)
         const menuToggle = document.querySelector('.menu-toggle');

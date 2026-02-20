@@ -26,12 +26,13 @@
         'Cancelado': 'badge badge-cancelado',
     };
 
-    // Elementos
     const pinScreen = document.getElementById('pin-screen');
     const agendaScreen = document.getElementById('agenda-screen');
     const pinInput = document.getElementById('pin-input');
     const btnPin = document.getElementById('btn-pin');
     const pinError = document.getElementById('pin-error');
+    const btnVoltarWrap = document.getElementById('btn-voltar-wrap');
+    const btnVoltar = document.getElementById('btn-voltar');
 
     btnPin.addEventListener('click', carregarAgenda);
     pinInput.addEventListener('keydown', e => { if (e.key === 'Enter') carregarAgenda(); });
@@ -95,8 +96,22 @@
         // Transição de ecrã
         pinScreen.style.display = 'none';
         agendaScreen.style.display = 'flex';
+        btnVoltarWrap.style.display = 'block';
         btnPin.textContent = 'Ver Agenda';
         btnPin.disabled = false;
+
+        // Listener do botão Voltar (remover duplicados)
+        const novoBtn = btnVoltar.cloneNode(true);
+        btnVoltar.parentNode.replaceChild(novoBtn, btnVoltar);
+        novoBtn.addEventListener('click', () => {
+            agendaScreen.style.display = 'none';
+            btnVoltarWrap.style.display = 'none';
+            pinScreen.style.display = 'flex';
+            pinInput.value = '';
+            pinError.textContent = '';
+            sessionStorage.removeItem('agenda_pin');
+            document.title = 'Agenda da Equipa - Torneio Eurocidade';
+        });
 
         // Banner da equipa
         const meta = [equipa.escalao, equipa.genero].filter(Boolean).join(' · ');
@@ -108,18 +123,8 @@
                 <div class="equipa-nome">${equipa.nome}</div>
                 ${meta ? `<div class="equipa-sub">${meta}</div>` : ''}
             </div>
-            <button class="btn-voltar" id="btn-voltar">← Voltar</button>
         `;
         document.title = `Agenda — ${equipa.nome}`;
-
-        document.getElementById('btn-voltar').addEventListener('click', () => {
-            agendaScreen.style.display = 'none';
-            pinScreen.style.display = 'flex';
-            pinInput.value = '';
-            pinError.textContent = '';
-            sessionStorage.removeItem('agenda_pin'); // limpar ao voltar
-            document.title = 'Agenda da Equipa - Torneio Eurocidade';
-        });
 
         // Montar lista unificada
         const items = [];
