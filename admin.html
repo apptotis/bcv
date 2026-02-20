@@ -167,8 +167,9 @@
                     <!-- Select de equipas: só visível em eventos privados -->
                     <div id="evento-equipa-wrap" style="display:none;">
                         <label>Equipa(s) — toque/clique em várias para selecionar múltiplas:</label>
-                        <select id="evento-equipa-id" multiple size="5" style="height:auto;min-height:90px;">
-                        </select>
+                        <div id="evento-equipa-id-grid" class="checkbox-grid">
+                            <!-- Populated via JS -->
+                        </div>
                     </div>
                     <select id="evento-tipo" required>
                         <option value="" disabled selected>Selecionar Tipo de Evento</option>

@@ -704,18 +704,23 @@ document.addEventListener('DOMContentLoaded', async () => {
     let editingEventoId = null;
 
     if (formEvento) {
-        // Popular select de equipas para eventos privados
+        // Popular grid de checkboxes para eventos privados
         supabase.from('equipas').select('id, nome, escalao, genero').order('nome').then(({ data: eqs }) => {
-            const sel = document.getElementById('evento-equipa-id');
-            if (sel && eqs) {
+            const grid = document.getElementById('evento-equipa-id-grid');
+            if (grid && eqs) {
+                grid.innerHTML = '';
                 eqs.forEach(e => {
                     const num = (e.escalao || '').replace(/\D/g, '');
                     const gen = e.genero === 'Masculino' ? 'M' : e.genero === 'Feminino' ? 'F' : '';
                     const abrev = num ? ` (${num}${gen})` : '';
-                    const opt = document.createElement('option');
-                    opt.value = e.id;
-                    opt.textContent = `${e.nome}${abrev}`;
-                    sel.appendChild(opt);
+
+                    const label = document.createElement('label');
+                    label.className = 'checkbox-item';
+                    label.innerHTML = `
+                        <input type="checkbox" value="${e.id}" name="evento-equipas">
+                        <span>${e.nome}${abrev}</span>
+                    `;
+                    grid.appendChild(label);
                 });
             }
         });
@@ -738,9 +743,9 @@ document.addEventListener('DOMContentLoaded', async () => {
             const tecnicos = document.getElementById('evento-tecnicos').value.trim();
             const descricao = document.getElementById('evento-descricao').value.trim();
 
-            // Obter múltiplas equipas selecionadas
-            const selectEquipas = document.getElementById('evento-equipa-id');
-            const equipaIds = Array.from(selectEquipas.selectedOptions).map(opt => opt.value).filter(v => v);
+            // Obter múltiplas equipas selecionadas (checkboxes)
+            const checkboxes = document.querySelectorAll('input[name="evento-equipas"]:checked');
+            const equipaIds = Array.from(checkboxes).map(cb => cb.value);
 
             try {
                 if (!tipoId) throw new Error('Selecione um tipo de evento.');
@@ -792,8 +797,9 @@ document.addEventListener('DOMContentLoaded', async () => {
                 const btn = formEvento.querySelector('button[type="submit"]');
                 if (btn) btn.textContent = 'Adicionar Evento';
 
-                // Limpar seleção do multiselect visual
-                Array.from(selectEquipas.options).forEach(opt => opt.selected = false);
+                // Limpar seleção do grid
+                const checkboxes = document.querySelectorAll('input[name="evento-equipas"]');
+                checkboxes.forEach(cb => cb.checked = false);
 
                 loadEventosAdmin();
 
@@ -882,18 +888,17 @@ document.addEventListener('DOMContentLoaded', async () => {
         document.getElementById('evento-tecnicos').value = evento.tecnicos || '';
         document.getElementById('evento-descricao').value = evento.descricao || '';
 
-        // Preencher equipas (multi-select)
-        const selEquipa = document.getElementById('evento-equipa-id');
-        // Limpar seleção anterior
-        Array.from(selEquipa.options).forEach(opt => opt.selected = false);
+        // Preencher equipas (checkboxes)
+        const checkboxes = document.querySelectorAll('input[name="evento-equipas"]');
+        checkboxes.forEach(cb => cb.checked = false);
 
         if (!evento.is_publico) {
             // Buscar equipas associadas
             const { data: relacoes } = await supabase.from('evento_equipas').select('equipa_id').eq('evento_id', id);
             if (relacoes && relacoes.length > 0) {
                 const ids = relacoes.map(r => String(r.equipa_id));
-                Array.from(selEquipa.options).forEach(opt => {
-                    if (ids.includes(String(opt.value))) opt.selected = true;
+                checkboxes.forEach(cb => {
+                    if (ids.includes(String(cb.value))) cb.checked = true;
                 });
             }
         }
