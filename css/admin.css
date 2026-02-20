@@ -338,13 +338,13 @@ hr {
 /* Checkbox Grid */
 .checkbox-grid {
     display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+    grid-template-columns: 1fr;
     gap: 10px;
     background: #f9f9f9;
     padding: 15px;
     border: 1px solid var(--border-color);
     border-radius: 6px;
-    max-height: 300px;
+    max-height: 400px;
     overflow-y: auto;
     margin-bottom: 15px;
 }
