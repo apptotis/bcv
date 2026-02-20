@@ -138,8 +138,19 @@
         }
 
         .btn-voltar-wrap {
-            background: var(--secondary-color);
             padding: 0 16px 10px;
+            /* Background herdado do agenda-header-card */
+        }
+
+        /* Container do Header (Logo + Botão) */
+        .agenda-header-card {
+            max-width: 680px;
+            margin: 12px auto 0;
+            width: calc(100% - 24px);
+            border-radius: 12px;
+            overflow: hidden;
+            background: var(--secondary-color);
+            box-shadow: var(--card-shadow);
         }
 
         .btn-voltar {
@@ -325,11 +336,13 @@
 
         <!-- Ecrã da Agenda -->
         <div id="agenda-screen">
-            <div class="equipa-banner" id="equipa-banner">
-                <div class="equipa-nome">A carregar...</div>
-            </div>
-            <div class="btn-voltar-wrap" id="btn-voltar-wrap" style="display:none">
-                <button class="btn-voltar" id="btn-voltar">← Voltar</button>
+            <div class="agenda-header-card">
+                <div class="equipa-banner" id="equipa-banner">
+                    <div class="equipa-nome">A carregar...</div>
+                </div>
+                <div class="btn-voltar-wrap" id="btn-voltar-wrap" style="display:none">
+                    <button class="btn-voltar" id="btn-voltar">← Voltar</button>
+                </div>
             </div>
             <div class="agenda-container">
                 <div id="agenda-lista"></div>
@@ -339,7 +352,7 @@
     </main>
 
     <script src="js/config.js?v=1"></script>
-    <script src="js/agenda.js?v=mobile10"></script>
+    <script src="js/agenda.js?v=mobile11"></script>
     <script>
         // Menu toggle (igual às outras páginas)
         const menuToggle = document.querySelector('.menu-toggle');
