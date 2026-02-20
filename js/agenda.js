@@ -37,6 +37,17 @@
     btnPin.addEventListener('click', carregarAgenda);
     pinInput.addEventListener('keydown', e => { if (e.key === 'Enter') carregarAgenda(); });
 
+    // Botão Voltar — listener único, ligado aqui uma vez só
+    btnVoltar.addEventListener('click', () => {
+        agendaScreen.style.display = 'none';
+        btnVoltarWrap.style.display = 'none';
+        pinScreen.style.display = 'flex';
+        pinInput.value = '';
+        pinError.textContent = '';
+        sessionStorage.removeItem('agenda_pin');
+        document.title = 'Agenda da Equipa - Torneio Eurocidade';
+    });
+
     // Restaurar PIN guardado ao fazer refresh
     const pinGuardado = sessionStorage.getItem('agenda_pin');
     if (pinGuardado) {
@@ -82,7 +93,7 @@
             }
 
             renderAgenda(equipa, jogos || [], eventos || []);
-            sessionStorage.setItem('agenda_pin', pin); // guardar para refresh
+            sessionStorage.setItem('agenda_pin', pin);
 
         } catch (err) {
             pinError.textContent = 'Erro de ligação. Tente novamente.';
@@ -99,19 +110,6 @@
         btnVoltarWrap.style.display = 'block';
         btnPin.textContent = 'Ver Agenda';
         btnPin.disabled = false;
-
-        // Listener do botão Voltar (remover duplicados)
-        const novoBtn = btnVoltar.cloneNode(true);
-        btnVoltar.parentNode.replaceChild(novoBtn, btnVoltar);
-        novoBtn.addEventListener('click', () => {
-            agendaScreen.style.display = 'none';
-            btnVoltarWrap.style.display = 'none';
-            pinScreen.style.display = 'flex';
-            pinInput.value = '';
-            pinError.textContent = '';
-            sessionStorage.removeItem('agenda_pin');
-            document.title = 'Agenda da Equipa - Torneio Eurocidade';
-        });
 
         // Banner da equipa
         const meta = [equipa.escalao, equipa.genero].filter(Boolean).join(' · ');
