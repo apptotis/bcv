@@ -816,7 +816,7 @@ document.addEventListener('DOMContentLoaded', async () => {
 
     // Mapa de ícones por tipo
     const adminEventoIcons = {
-        1: '\uD83C\uDFC0', 2: '\uD83D\uDCF8', 3: '\uD83C\uDF7D\uFE0F', 4: '\uD83C\uDF77', 5: '\uD83E\uDD50',
+        1: '\uD83C\uDFC0', 2: '\uD83D\uDCF8', 3: '\uD83C\uDF7D\uFE0F', 4: '\uD83C\uDF7D\uFE0F', 5: '\uD83C\uDF7D\uFE0F',
         6: '\uD83C\uDF88', 7: '\uD83C\uDFCA', 8: '\uD83E\uDDF1', 9: '\uD83C\uDFB6', 10: '\u26A1',
         11: '\uD83C\uDFC1', 12: '\uD83C\uDF89', 13: '\uD83C\uDF32'
     };
