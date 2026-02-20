@@ -3,7 +3,7 @@
 (function () {
     const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
-    const TIPO_INFO = {
+    let dynamicTipoInfo = {
         1: { icone: '🏀', titulo: 'Jogo', cat: 'cat-jogo' },
         2: { icone: '📸', titulo: 'Sessão Fotográfica', cat: 'cat-lazer' },
         3: { icone: '🍽️', titulo: 'Almoço', cat: 'cat-refeicao' },
@@ -73,6 +73,7 @@
                 { data: jogos, error: e2 },
                 { data: eventosPublicos, error: e3 },
                 { data: relacoesPrivadas, error: e4 },
+                { data: tiposBD, error: e5 },
             ] = await Promise.all([
                 supabase.from('equipas').select('*').eq('id', equipaId).single(),
                 supabase
@@ -88,7 +89,8 @@
                 supabase
                     .from('evento_equipas')
                     .select('evento_id')
-                    .eq('equipa_id', equipaId)
+                    .eq('equipa_id', equipaId),
+                supabase.from('tipo_eventos').select('id, nome')
             ]);
 
             if (e1 || !equipa) {
@@ -98,14 +100,25 @@
                 return;
             }
 
+            // Dinamizar TIPO_INFO com dados da tabela tipo_eventos
+            if (tiposBD) {
+                tiposBD.forEach(t => {
+                    if (dynamicTipoInfo[t.id]) {
+                        dynamicTipoInfo[t.id].titulo = t.nome;
+                    } else {
+                        dynamicTipoInfo[t.id] = { icone: '📅', titulo: t.nome, cat: 'cat-lazer' };
+                    }
+                });
+            }
+
             // 2. Buscar detalhes dos eventos privados (se houver)
             let eventosPrivados = [];
             if (relacoesPrivadas && relacoesPrivadas.length > 0) {
-                const ids = relacoesPrivadas.map(r => r.evento_id);
+                const eventosPrivadosIds = relacoesPrivadas.map(r => r.evento_id);
                 const { data: evPriv } = await supabase
                     .from('eventos')
                     .select('*')
-                    .in('id', ids)
+                    .in('id', eventosPrivadosIds)
                     .order('data_hora', { ascending: true });
                 eventosPrivados = evPriv || [];
             }
@@ -201,7 +214,7 @@
     }
 
     function renderEvento({ evento }, hora) {
-        const info = TIPO_INFO[evento.tipo_evento_id] || { icone: '📅', titulo: 'Evento', cat: 'cat-lazer' };
+        const info = dynamicTipoInfo[evento.tipo_evento_id] || { icone: '📅', titulo: 'Evento', cat: 'cat-lazer' };
 
         let horaHtml = `<span>${hora}</span>`;
         if (evento.data_hora_fim) {

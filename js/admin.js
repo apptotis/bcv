@@ -108,10 +108,11 @@ document.addEventListener('DOMContentLoaded', async () => {
         console.log("Carregando dados do admin...");
         await loadTeamsOptions();
         await loadEquipasAdmin();
-        await loadAtletasAdmin(); // Carregar atletas
-        await loadJogosAdmin(); // Carregar jogos
-        await loadEventosAdmin(); // Carregar eventos
-        await loadGeralAdmin(); // Carregar info geral
+        await loadAtletasAdmin();
+        await loadJogosAdmin();
+        await loadTipoEventos(); // Carregar tipos de evento
+        await loadEventosAdmin();
+        await loadGeralAdmin();
     }
 
     // Preencher Selects de Equipas
@@ -821,11 +822,28 @@ document.addEventListener('DOMContentLoaded', async () => {
         11: '\uD83C\uDFC1', 12: '\uD83C\uDF89', 13: '\uD83C\uDF32'
     };
 
-    const tipoNomes = {
-        1: 'Jogo', 2: 'Sess\u00e3o Fotogr\u00e1fica', 3: 'Almo\u00e7o', 4: 'Jantar', 5: 'Pequeno Almo\u00e7o',
-        6: 'Insufl\u00e1veis', 7: 'Piscina', 8: 'Passeio Muralhas', 9: 'Discoteca',
-        10: 'Jogo Elimina', 11: 'Encerramento', 12: 'Abertura Torneio', 13: 'Arborismo'
-    };
+    let allTipoEventos = []; // Store types globally for names
+
+    async function loadTipoEventos() {
+        const select = document.getElementById('evento-tipo');
+        if (!select) return;
+
+        const { data, error } = await supabase.from('tipo_eventos').select('id, nome').order('id');
+        if (error) {
+            console.error('Erro ao carregar tipos de evento:', error);
+            select.innerHTML = '<option value="" disabled>Erro ao carregar</option>';
+            return;
+        }
+
+        allTipoEventos = data;
+        select.innerHTML = '<option value="" disabled selected>Selecionar Tipo de Evento</option>';
+        data.forEach(t => {
+            const opt = document.createElement('option');
+            opt.value = t.id;
+            opt.textContent = t.nome;
+            select.appendChild(opt);
+        });
+    }
 
     async function loadEventosAdmin() {
         const listContainer = document.getElementById('admin-eventos-list');
@@ -862,7 +880,8 @@ document.addEventListener('DOMContentLoaded', async () => {
                 ? new Date(evento.data_hora).toLocaleString('pt-PT', { day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit' })
                 : 'Data a definir';
             const icone = adminEventoIcons[evento.tipo_evento_id] || '\uD83D\uDCC5';
-            const tipo = tipoNomes[evento.tipo_evento_id] || 'Evento';
+            const tipoObj = allTipoEventos.find(t => t.id === evento.tipo_evento_id);
+            const tipo = tipoObj ? tipoObj.nome : 'Evento';
             const visib = evento.is_publico ? '\uD83D\uDFE2 P\u00fablico' : '\uD83D\uDD34 Privado';
 
             div.innerHTML = `
