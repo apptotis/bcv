@@ -9,6 +9,8 @@
     <link rel="stylesheet" href="css/admin.css">
     <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&display=swap" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.28/jspdf.plugin.autotable.min.js"></script>
 </head>
 
 <body>
@@ -40,6 +42,7 @@
             <button class="tab-btn" data-tab="tab-atletas">Atletas</button>
             <button class="tab-btn" data-tab="tab-jogos">Jogos</button>
             <button class="tab-btn" data-tab="tab-eventos">Eventos</button>
+            <button class="tab-btn" data-tab="tab-geral">Geral</button>
         </div>
 
         <!-- Tab Content -->
@@ -196,6 +199,30 @@
                 </form>
                 <hr>
                 <div id="admin-eventos-list" class="admin-list"></div>
+            </div>
+
+            <!-- Geral Tab -->
+            <div id="tab-geral" class="tab-pane hidden">
+                <h2>Informação Geral</h2>
+                <div class="admin-actions-bar" style="margin-bottom: 20px;">
+                    <button id="btn-export-pdf" class="btn-primary" style="width: auto;">Descarregar Lista de Equipas
+                        (PDF)</button>
+                </div>
+                <div class="admin-table-container">
+                    <table class="admin-table" id="table-equipas-geral">
+                        <thead>
+                            <tr>
+                                <th>ID</th>
+                                <th>Nome</th>
+                                <th>Género</th>
+                                <th>Escalão</th>
+                            </tr>
+                        </thead>
+                        <tbody id="admin-geral-equipas-list">
+                            <!-- Populated via JS -->
+                        </tbody>
+                    </table>
+                </div>
             </div>
 
         </div>

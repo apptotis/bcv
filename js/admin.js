@@ -111,6 +111,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         await loadAtletasAdmin(); // Carregar atletas
         await loadJogosAdmin(); // Carregar jogos
         await loadEventosAdmin(); // Carregar eventos
+        await loadGeralAdmin(); // Carregar info geral
     }
 
     // Preencher Selects de Equipas
@@ -928,5 +929,70 @@ document.addEventListener('DOMContentLoaded', async () => {
             loadEventosAdmin();
         }
     };
+
+    // --- ABA GERAL E EXPORTAÇÃO PDF ---
+    async function loadGeralAdmin() {
+        const listContainer = document.getElementById('admin-geral-equipas-list');
+        if (!listContainer) return;
+
+        const { data: equipas, error } = await supabase
+            .from('equipas')
+            .select('id, nome, genero, escalao')
+            .order('nome');
+
+        if (error) {
+            console.error('Erro ao carregar equipas para info geral:', error);
+            return;
+        }
+
+        window.allEquipasGeral = equipas || [];
+        listContainer.innerHTML = '';
+
+        equipas.forEach(e => {
+            const tr = document.createElement('tr');
+            tr.innerHTML = `
+                <td>${e.id}</td>
+                <td>${e.nome}</td>
+                <td>${e.genero || '-'}</td>
+                <td>${e.escalao || '-'}</td>
+            `;
+            listContainer.appendChild(tr);
+        });
+    }
+
+    const btnExportPdf = document.getElementById('btn-export-pdf');
+    if (btnExportPdf) {
+        btnExportPdf.addEventListener('click', () => {
+            if (!window.allEquipasGeral || window.allEquipasGeral.length === 0) {
+                alert('Nenhuma equipa para exportar.');
+                return;
+            }
+
+            const { jsPDF } = window.jspdf;
+            const doc = new jsPDF();
+
+            doc.setFontSize(18);
+            doc.text('Lista de Equipas - Torneio Eurocidade', 14, 20);
+            doc.setFontSize(11);
+            doc.setTextColor(100);
+
+            const tableData = window.allEquipasGeral.map(e => [
+                String(e.id),
+                e.nome,
+                e.genero || '-',
+                e.escalao || '-'
+            ]);
+
+            doc.autoTable({
+                startY: 30,
+                head: [['ID', 'Nome', 'Género', 'Escalão']],
+                body: tableData,
+                theme: 'striped',
+                headStyles: { fillColor: [74, 20, 140] } // #4a148c
+            });
+
+            doc.save('equipas_torneio.pdf');
+        });
+    }
 
 });
