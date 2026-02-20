@@ -191,8 +191,10 @@
                         <option value="13">Arborismo</option>
                     </select>
                     <input type="text" id="evento-local" placeholder="Local do Evento" required>
-                    <label>Data e Hora:</label>
+                    <label>Data e Hora de Início:</label>
                     <input type="datetime-local" id="evento-data" required>
+                    <label>Data e Hora de Fim (opcional):</label>
+                    <input type="datetime-local" id="evento-data-fim">
                     <input type="text" id="evento-tecnicos" placeholder="Técnicos envolvidos (opcional)">
                     <textarea id="evento-descricao" placeholder="Descrição (opcional)"></textarea>
                     <button type="submit" class="btn-submit">Adicionar Evento</button>
@@ -229,7 +231,7 @@
     </div>
 
     <script src="js/config.js?v=mobile10"></script>
-    <script src="js/admin.js?v=mobile10"></script>
+    <script src="js/admin.js?v=mobile11"></script>
     <script>
         // Debug info para mobile
         document.addEventListener('DOMContentLoaded', () => {

@@ -202,11 +202,19 @@
 
     function renderEvento({ evento }, hora) {
         const info = TIPO_INFO[evento.tipo_evento_id] || { icone: '📅', titulo: 'Evento', cat: 'cat-lazer' };
+
+        let horaDisplay = hora;
+        if (evento.data_hora_fim) {
+            const dtFim = new Date(evento.data_hora_fim);
+            const horaFim = dtFim.toLocaleTimeString('pt-PT', { hour: '2-digit', minute: '2-digit' });
+            horaDisplay = `${hora} - ${horaFim}`;
+        }
+
         const localStr = evento.local ? `📍 ${evento.local}` : '';
         const descStr = evento.descricao ? `<div class="ag-sub">${evento.descricao}</div>` : '';
         return `
         <div class="agenda-card ${info.cat}">
-            <div class="ag-hora">${hora}</div>
+            <div class="ag-hora">${horaDisplay}</div>
             <div class="ag-icon">${info.icone}</div>
             <div class="ag-info">
                 <div class="ag-titulo">${info.titulo}</div>

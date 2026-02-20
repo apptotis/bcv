@@ -741,6 +741,7 @@ document.addEventListener('DOMContentLoaded', async () => {
             const tipoId = parseInt(document.getElementById('evento-tipo').value);
             const local = document.getElementById('evento-local').value.trim();
             const dataHora = document.getElementById('evento-data').value;
+            const dataHoraFim = document.getElementById('evento-data-fim').value;
             const tecnicos = document.getElementById('evento-tecnicos').value.trim();
             const descricao = document.getElementById('evento-descricao').value.trim();
 
@@ -759,6 +760,7 @@ document.addEventListener('DOMContentLoaded', async () => {
                     tipo_evento_id: tipoId,
                     local,
                     data_hora: dataHora,
+                    data_hora_fim: dataHoraFim || null,
                     tecnicos: tecnicos || null,
                     descricao: descricao || null
                 };
@@ -793,6 +795,7 @@ document.addEventListener('DOMContentLoaded', async () => {
                 }
 
                 formEvento.reset();
+                document.getElementById('evento-data-fim').value = '';
                 toggleEquipaWrap();
                 editingEventoId = null;
                 const btn = formEvento.querySelector('button[type="submit"]');
@@ -867,7 +870,7 @@ document.addEventListener('DOMContentLoaded', async () => {
                     <strong>${icone} ${tipo}</strong>
                     <span style="margin-left:8px;font-size:0.8rem;color:#666">${visib}</span>
                     <br>
-                    <small>\uD83D\uDCCD ${evento.local} &nbsp; \uD83D\uDDD3\uFE0F ${dataHora}</small>
+                    <small>\uD83D\uDCCD ${evento.local} &nbsp; \uD83D\uDDD3\uFE0F ${dataHora}${evento.data_hora_fim ? ` - ${new Date(evento.data_hora_fim).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}` : ''}</small>
                     ${evento.tecnicos ? `<br><small>\uD83D\uDC64 ${evento.tecnicos}</small>` : ''}
                 </div>
                 <div style="display: flex; gap: 5px;">
@@ -912,6 +915,14 @@ document.addEventListener('DOMContentLoaded', async () => {
             const date = new Date(evento.data_hora);
             const local = new Date(date.getTime() - date.getTimezoneOffset() * 60000).toISOString().slice(0, 16);
             document.getElementById('evento-data').value = local;
+        }
+
+        if (evento.data_hora_fim) {
+            const date = new Date(evento.data_hora_fim);
+            const local = new Date(date.getTime() - date.getTimezoneOffset() * 60000).toISOString().slice(0, 16);
+            document.getElementById('evento-data-fim').value = local;
+        } else {
+            document.getElementById('evento-data-fim').value = '';
         }
 
         editingEventoId = id;
