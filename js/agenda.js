@@ -169,14 +169,14 @@
     function renderJogo({ jogo, adversario }, hora) {
         const estado = jogo.estado || 'Agendado';
         const badgeClass = ESTADO_BADGE[estado] || 'badge badge-agendado';
-        const campo = jogo.campo ? `🏟️ ${jogo.campo}` : '';
+        const campo = jogo.campo || '';
         return `
         <div class="agenda-card cat-jogo">
             <div class="ag-hora">${hora}</div>
             <div class="ag-icon">🏀</div>
             <div class="ag-info">
-                <div class="ag-titulo">vs ${adversario} <span class="${badgeClass}">${estado}</span></div>
-                ${campo ? `<div class="ag-sub">${campo}</div>` : ''}
+                <div class="ag-titulo">vs ${adversario}</div>
+                ${campo ? `<div class="ag-sub">${campo} <span class="${badgeClass}">${estado}</span></div>` : `<div class="ag-sub"><span class="${badgeClass}">${estado}</span></div>`}
             </div>
         </div>`;
     }
