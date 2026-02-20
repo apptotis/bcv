@@ -13,9 +13,9 @@
         7: { icone: '🏊', titulo: 'Piscina', cat: 'cat-lazer' },
         8: { icone: '🧱', titulo: 'Passeio Muralhas', cat: 'cat-lazer' },
         9: { icone: '🎶', titulo: 'Discoteca', cat: 'cat-lazer' },
-        10: { icone: '⚡', titulo: 'Jogo Eliminatória', cat: 'cat-jogo' },
+        10: { icone: '⚡', titulo: 'Jogo Elimina', cat: 'cat-jogo' },
         11: { icone: '🏁', titulo: 'Encerramento', cat: 'cat-cerimonia' },
-        12: { icone: '🎉', titulo: 'Abertura do Torneio', cat: 'cat-cerimonia' },
+        12: { icone: '🎉', titulo: 'Abertura Torneio', cat: 'cat-cerimonia' },
         13: { icone: '🌳', titulo: 'Arborismo', cat: 'cat-lazer' },
     };
 
