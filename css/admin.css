@@ -354,7 +354,7 @@ hr {
     align-items: center;
     gap: 8px;
     background: var(--white);
-    padding: 8px 12px;
+    padding: 4px 10px;
     border-radius: 4px;
     border: 1px solid #eee;
     cursor: pointer;
@@ -367,6 +367,7 @@ hr {
 }
 
 .checkbox-item input[type="checkbox"] {
+    display: inline-block !important;
     width: 18px !important;
     height: 18px !important;
     margin-bottom: 0 !important;
