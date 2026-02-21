@@ -408,10 +408,10 @@ h2 {
     }
 
     .video-btn {
-        width: 55px;
-        /* Bolas maiores no mobile */
-        height: 55px;
-        font-size: 2rem;
+        width: 65px;
+        /* Ainda maiores para garantir visibilidade */
+        height: 65px;
+        font-size: 2.2rem;
     }
 
     .video-card-content {
