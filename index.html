@@ -70,11 +70,16 @@
                     </div>
                 </div>
 
-                <!-- Promotional Video Card -->
-                <div class="video-card" onclick="openVideoPopup()">
+                <!-- Promotional Videos Card -->
+                <div class="video-card">
                     <div class="video-card-content">
-                        <div class="play-icon">▶</div>
-                        <p class="video-card-text">Vídeo Promocional</p>
+                        <p class="video-card-text">Vídeos Promocionais</p>
+                        <div class="video-buttons">
+                            <button class="video-btn" onclick="openVideoPopup('video_promocional.mp4')"
+                                aria-label="Ver vídeo 1">🏀</button>
+                            <button class="video-btn" onclick="openVideoPopup('video_promocional_2.mp4')"
+                                aria-label="Ver vídeo 2">🏀</button>
+                        </div>
                     </div>
                 </div>
 
@@ -100,16 +105,20 @@
     <script src="js/config.js"></script>
     <script src="js/script.js"></script>
     <script>
-        function openVideoPopup() {
+        function openVideoPopup(videoSrc) {
             const modal = document.getElementById('videoModal');
             const video = document.getElementById('promoVideo');
+
+            // Atualizar o source do vídeo
+            video.src = videoSrc;
+
             modal.style.display = 'flex';
             video.play();
 
             // Auto-close when video ends
-            video.addEventListener('ended', function () {
+            video.onended = function () {
                 closeVideoPopup();
-            });
+            };
         }
 
         function closeVideoPopup() {
