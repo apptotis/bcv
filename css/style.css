@@ -367,30 +367,56 @@ h2 {
 }
 
 .video-btn {
-    background: var(--white);
-    border: none;
+    background: rgba(255, 255, 255, 0.15);
+    /* Efeito transparente */
+    backdrop-filter: blur(4px);
+    border: 2px solid rgba(255, 255, 255, 0.4);
+    /* Mascara/Borda em torno da bola */
     border-radius: 50%;
-    width: 45px;
-    height: 45px;
-    font-size: 1.5rem;
+    width: 50px;
+    height: 50px;
+    font-size: 1.8rem;
     display: flex;
     align-items: center;
     justify-content: center;
     cursor: pointer;
-    transition: all 0.2s ease;
-    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2);
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+    padding: 0;
 }
 
 .video-btn:hover {
-    transform: scale(1.15) rotate(15deg);
-    background: var(--accent-color);
+    transform: scale(1.2) rotate(15deg);
+    background: rgba(255, 255, 255, 0.3);
+    border-color: var(--accent-color);
+    box-shadow: 0 0 15px var(--accent-color);
 }
 
 .video-card-text {
     color: var(--white);
     font-size: 1.2rem;
-    font-weight: bold;
+    font-weight: 700;
     margin: 0;
+    letter-spacing: 0.5px;
+}
+
+/* Ajustes mobile específicos */
+@media (max-width: 480px) {
+    .video-card-text {
+        font-size: 0.95rem;
+        /* Texto menor no mobile */
+    }
+
+    .video-btn {
+        width: 55px;
+        /* Bolas maiores no mobile */
+        height: 55px;
+        font-size: 2rem;
+    }
+
+    .video-card-content {
+        padding: 0 15px;
+    }
 }
 
 /* Video Modal */
