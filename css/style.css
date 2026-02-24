@@ -591,919 +591,920 @@ h2 {
         width: 100%;
         flex: none;
     }
+}
 
-    /* Athlete Cards - Match Team Card Style (Horizontal Layout) */
+/* Athlete Cards - Match Team Card Style (Horizontal Layout) */
+.athlete-list {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+    gap: var(--spacing);
+}
+
+.athlete-card {
+    background: var(--white);
+    background-image: url('../back_equipas.png');
+    background-size: cover;
+    background-position: center;
+    background-repeat: no-repeat;
+    border-radius: 8px;
+    padding: 15px;
+    box-shadow: var(--card-shadow);
+    border: 1px solid #eee;
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    gap: 15px;
+    transition: transform 0.2s;
+    text-align: left;
+}
+
+.athlete-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 12px rgba(0, 0, 0, 0.15);
+}
+
+.athlete-photo {
+    flex-shrink: 0;
+}
+
+.athlete-photo img {
+    width: 80px;
+    height: 80px;
+    border-radius: 50%;
+    object-fit: cover;
+    background-color: #fff;
+    border: none;
+}
+
+.placeholder-photo {
+    width: 80px;
+    height: 80px;
+    background: #fff;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 2.5rem;
+}
+
+.athlete-content-right {
+    display: flex;
+    flex-direction: column;
+    flex: 1;
+    align-items: flex-start;
+}
+
+.athlete-info {
+    margin-bottom: 0;
+    text-align: left;
+}
+
+.athlete-card h3 {
+    font-size: 1.1rem;
+    color: var(--secondary-color);
+    margin: 0;
+    line-height: 1.2;
+    font-weight: 700;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.athlete-number {
+    color: var(--primary-color);
+    font-weight: 900;
+    background: rgba(0, 0, 0, 0.05);
+    padding: 2px 6px;
+    border-radius: 4px;
+    font-size: 1rem;
+}
+
+.staff-role {
+    font-size: 0.85rem;
+    color: #666;
+    font-weight: 400;
+    font-style: italic;
+}
+
+.athlete-card p {
+    color: #000;
+    font-size: 0.9rem;
+    margin: 0;
+}
+
+@media (max-width: 768px) {
     .athlete-list {
-        display: grid;
-        grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
-        gap: var(--spacing);
+        grid-template-columns: 1fr;
+        gap: 10px;
+    }
+}
+
+
+.equipa-card {
+    background: var(--white);
+    background-image: url('../back_equipas.png');
+    background-size: cover;
+    background-position: center;
+    background-repeat: no-repeat;
+    border-radius: 8px;
+    padding: 15px;
+    box-shadow: var(--card-shadow);
+    border: 1px solid #eee;
+    display: flex;
+    flex-direction: row;
+    /* Sempre linha, mesmo em desktop se quiser, mas foco é mobile */
+    align-items: center;
+    gap: 15px;
+    transition: transform 0.2s;
+}
+
+.equipa-card:hover {
+    transform: translateY(-3px);
+}
+
+.equipa-logo {
+    flex-shrink: 0;
+}
+
+.equipa-logo img {
+    width: 80px;
+    height: 80px;
+    object-fit: contain;
+    border-radius: 50%;
+    background-color: #fff;
+}
+
+.equipa-content-right {
+    display: flex;
+    flex-direction: column;
+    flex: 1;
+    align-items: flex-start;
+    /* Alinhado à esquerda como no desenho */
+}
+
+.equipa-info {
+    margin-bottom: 8px;
+    text-align: left;
+}
+
+.equipa-card h3 {
+    font-size: 1.1rem;
+    color: var(--secondary-color);
+    margin: 0;
+    line-height: 1.2;
+    font-weight: 700;
+}
+
+.equipa-card p {
+    color: #000;
+    font-size: 0.9rem;
+    margin: 0;
+}
+
+.equipa-actions {
+    display: flex;
+    gap: 10px;
+}
+
+.btn-link {
+    font-size: 0.8rem;
+    padding: 6px 15px;
+    background-color: var(--white);
+    color: var(--primary-color);
+    text-decoration: none;
+    border-radius: 20px;
+    font-weight: bold;
+    text-transform: uppercase;
+    border: 1px solid var(--primary-color);
+    transition: all 0.3s;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+}
+
+.btn-link:hover {
+    background-color: var(--primary-color);
+    color: var(--white);
+}
+
+/* Custom color buttons will override via inline styles */
+.btn-link[style*="--team-color"]:hover {
+    background-color: var(--team-color) !important;
+    color: var(--white) !important;
+}
+
+/* ===== ESTILOS PARA JOGOS ===== */
+.jogo-item {
+    background: var(--white);
+    border-radius: 8px;
+    padding: 10px;
+    box-shadow: var(--card-shadow);
+    border: 1px solid #eee;
+    transition: transform 0.2s;
+}
+
+.jogo-item:hover {
+    transform: translateY(-3px);
+}
+
+/* Linha 1: Data, Hora, Campo */
+.jogo-linha-1 {
+    display: flex;
+    gap: 10px;
+    align-items: center;
+    padding-bottom: 6px;
+    border-bottom: 1px solid #e0e0e0;
+    margin-bottom: 6px;
+    font-weight: 600;
+    color: var(--primary-color);
+}
+
+.jogo-data,
+.jogo-hora {
+    font-size: 0.9rem;
+}
+
+.jogo-campo {
+    font-size: 0.85rem;
+    margin-left: auto;
+    background: var(--accent-color);
+    padding: 3px 10px;
+    border-radius: 12px;
+    color: var(--text-color);
+}
+
+/* Badge de estado do jogo */
+.jogo-estado {
+    font-size: 0.75rem;
+    font-weight: 700;
+    padding: 2px 9px;
+    border-radius: 12px;
+    text-transform: uppercase;
+    letter-spacing: 0.03em;
+    flex-shrink: 0;
+}
+
+.estado-agendado {
+    background: #e3f2fd !important;
+    color: #1565c0 !important;
+}
+
+.estado-em-jogo {
+    background: #e8f5e9 !important;
+    color: #2e7d32 !important;
+    animation: pulseEstado 1.5s infinite;
+}
+
+.estado-terminado {
+    background: #f5f5f5 !important;
+    color: #757575 !important;
+}
+
+.estado-cancelado {
+    background: #fce4ec !important;
+    color: #c62828 !important;
+}
+
+@keyframes pulseEstado {
+
+    0%,
+    100% {
+        opacity: 1;
     }
 
-    .athlete-card {
-        background: var(--white);
-        background-image: url('../back_equipas.png');
-        background-size: cover;
-        background-position: center;
-        background-repeat: no-repeat;
-        border-radius: 8px;
-        padding: 15px;
-        box-shadow: var(--card-shadow);
-        border: 1px solid #eee;
-        display: flex;
-        flex-direction: row;
-        align-items: center;
-        gap: 15px;
-        transition: transform 0.2s;
-        text-align: left;
+    50% {
+        opacity: 0.6;
     }
+}
 
-    .athlete-card:hover {
-        transform: translateY(-2px);
-        box-shadow: 0 6px 12px rgba(0, 0, 0, 0.15);
-    }
+/* Linhas 2 e 3: Equipas */
+.jogo-linha-equipa {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 4px 0;
+}
 
-    .athlete-photo {
-        flex-shrink: 0;
-    }
+.jogo-logo {
+    width: 35px;
+    height: 35px;
+    object-fit: contain;
+    border-radius: 4px;
+    flex-shrink: 0;
+}
 
-    .athlete-photo img {
-        width: 80px;
-        height: 80px;
-        border-radius: 50%;
-        object-fit: cover;
-        background-color: #fff;
-        border: none;
-    }
+.jogo-logo-placeholder {
+    width: 35px;
+    height: 35px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.2rem;
+    background: var(--bg-color);
+    border-radius: 4px;
+    flex-shrink: 0;
+}
 
-    .placeholder-photo {
-        width: 80px;
-        height: 80px;
-        background: #fff;
-        border-radius: 50%;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        font-size: 2.5rem;
-    }
+.jogo-equipa-info {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+}
 
-    .athlete-content-right {
-        display: flex;
-        flex-direction: column;
-        flex: 1;
-        align-items: flex-start;
-    }
+.jogo-equipa-nome {
+    font-weight: 500;
+    font-size: 1rem;
+    line-height: 1.2;
+}
 
-    .athlete-info {
-        margin-bottom: 0;
-        text-align: left;
-    }
+.jogo-equipa-escalao {
+    font-size: 0.8rem;
+    color: #666;
+    font-weight: 400;
+}
 
-    .athlete-card h3 {
-        font-size: 1.1rem;
-        color: var(--secondary-color);
-        margin: 0;
-        line-height: 1.2;
-        font-weight: 700;
-        display: flex;
-        align-items: center;
-        gap: 8px;
+.jogo-resultado {
+    font-size: 1.2rem;
+    font-weight: bold;
+    color: var(--primary-color);
+    min-width: 30px;
+    text-align: center;
+    flex-shrink: 0;
+}
 
-        .athlete-number {
-            color: var(--primary-color);
-            font-weight: 900;
-            background: rgba(0, 0, 0, 0.05);
-            padding: 2px 6px;
-            border-radius: 4px;
-            font-size: 1rem;
-        }
+.btn-info {
+    border-color: #28a745;
+    color: #28a745;
+}
 
-        .staff-role {
-            font-size: 0.85rem;
-            color: #666;
-            font-weight: 400;
-            font-style: italic;
-        }
+.btn-info:hover {
+    background-color: #28a745;
+    color: white;
+}
 
-        .athlete-card p {
-            color: #000;
-            font-size: 0.9rem;
-            margin: 0;
-        }
+/* Social Media Icons */
+.social-icons {
+    display: flex;
+    gap: 8px;
+    align-items: center;
+}
 
-        @media (max-width: 768px) {
-            .athlete-list {
-                grid-template-columns: 1fr;
-                gap: 10px;
-            }
-        }
-    }
+.social-icon {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    border: 2px solid white;
+    background-color: white;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    transition: all 0.3s ease;
+    text-decoration: none;
+}
 
+.facebook-icon {
+    color: #1877f2;
+}
 
+.facebook-icon:hover {
+    background-color: #1877f2;
+    color: white;
+    border-color: #1877f2;
+    transform: scale(1.1);
+}
+
+.instagram-icon {
+    color: #e4405f;
+}
+
+.instagram-icon:hover {
+    background-color: #e4405f;
+    color: white;
+    border-color: #e4405f;
+    transform: scale(1.1);
+}
+
+.website-icon {
+    color: #666;
+}
+
+.website-icon:hover {
+    background-color: #666;
+    color: white;
+    border-color: #666;
+    transform: scale(1.1);
+}
+
+/* Ajustes Mobile específicos se necessário, mas o layout acima já é responsive */
+@media (max-width: 480px) {
     .equipa-card {
-        background: var(--white);
-        background-image: url('../back_equipas.png');
-        background-size: cover;
-        background-position: center;
-        background-repeat: no-repeat;
-        border-radius: 8px;
-        padding: 15px;
-        box-shadow: var(--card-shadow);
-        border: 1px solid #eee;
-        display: flex;
-        flex-direction: row;
-        /* Sempre linha, mesmo em desktop se quiser, mas foco é mobile */
-        align-items: center;
-        gap: 15px;
-        transition: transform 0.2s;
-    }
-
-    .equipa-card:hover {
-        transform: translateY(-3px);
-    }
-
-    .equipa-logo {
-        flex-shrink: 0;
+        padding: 10px;
     }
 
     .equipa-logo img {
-        width: 80px;
-        height: 80px;
-        object-fit: contain;
-        border-radius: 50%;
-        background-color: #fff;
-    }
-
-    .equipa-content-right {
-        display: flex;
-        flex-direction: column;
-        flex: 1;
-        align-items: flex-start;
-        /* Alinhado à esquerda como no desenho */
-    }
-
-    .equipa-info {
-        margin-bottom: 8px;
-        text-align: left;
-    }
-
-    .equipa-card h3 {
-        font-size: 1.1rem;
-        color: var(--secondary-color);
-        margin: 0;
-        line-height: 1.2;
-        font-weight: 700;
-    }
-
-    .equipa-card p {
-        color: #000;
-        font-size: 0.9rem;
-        margin: 0;
-    }
-
-    .equipa-actions {
-        display: flex;
-        gap: 10px;
+        width: 60px;
+        height: 60px;
     }
 
     .btn-link {
-        font-size: 0.8rem;
-        padding: 6px 15px;
-        background-color: var(--white);
-        color: var(--primary-color);
-        text-decoration: none;
-        border-radius: 20px;
-        font-weight: bold;
-        text-transform: uppercase;
-        border: 1px solid var(--primary-color);
-        transition: all 0.3s;
-        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
-    }
-
-    .btn-link:hover {
-        background-color: var(--primary-color);
-        color: var(--white);
-    }
-
-    /* Custom color buttons will override via inline styles */
-    .btn-link[style*="--team-color"]:hover {
-        background-color: var(--team-color) !important;
-        color: var(--white) !important;
-    }
-
-    /* ===== ESTILOS PARA JOGOS ===== */
-    .jogo-item {
-        background: var(--white);
-        border-radius: 8px;
-        padding: 10px;
-        box-shadow: var(--card-shadow);
-        border: 1px solid #eee;
-        transition: transform 0.2s;
-    }
-
-    .jogo-item:hover {
-        transform: translateY(-3px);
-    }
-
-    /* Linha 1: Data, Hora, Campo */
-    .jogo-linha-1 {
-        display: flex;
-        gap: 10px;
-        align-items: center;
-        padding-bottom: 6px;
-        border-bottom: 1px solid #e0e0e0;
-        margin-bottom: 6px;
-        font-weight: 600;
-        color: var(--primary-color);
-    }
-
-    .jogo-data,
-    .jogo-hora {
-        font-size: 0.9rem;
-    }
-
-    .jogo-campo {
-        font-size: 0.85rem;
-        margin-left: auto;
-        background: var(--accent-color);
-        padding: 3px 10px;
-        border-radius: 12px;
-        color: var(--text-color);
-    }
-
-    /* Badge de estado do jogo */
-    .jogo-estado {
+        padding: 5px 12px;
         font-size: 0.75rem;
-        font-weight: 700;
-        padding: 2px 9px;
-        border-radius: 12px;
-        text-transform: uppercase;
-        letter-spacing: 0.03em;
-        flex-shrink: 0;
     }
+}
 
-    .estado-agendado {
-        background: #e3f2fd !important;
-        color: #1565c0 !important;
-    }
+/* Estilos para Jogos */
+.jogo-item {
+    background: var(--white);
+    border-radius: 8px;
+    padding: 15px;
+    box-shadow: var(--card-shadow);
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    border-left: 5px solid var(--primary-color);
+}
 
-    .estado-em-jogo {
-        background: #e8f5e9 !important;
-        color: #2e7d32 !important;
-        animation: pulseEstado 1.5s infinite;
-    }
+.jogo-info {
+    display: flex;
+    justify-content: space-between;
+    font-size: 0.9rem;
+    color: #666;
+    border-bottom: 1px solid #eee;
+    padding-bottom: 8px;
+    margin-bottom: 8px;
+}
 
-    .estado-terminado {
-        background: #f5f5f5 !important;
-        color: #757575 !important;
-    }
+.jogo-placar {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 15px;
+    font-weight: bold;
+    font-size: 1.1rem;
+}
 
-    .estado-cancelado {
-        background: #fce4ec !important;
-        color: #c62828 !important;
-    }
+.equipa-nome {
+    flex: 1;
+    text-align: center;
+}
 
-    @keyframes pulseEstado {
+.placar {
+    background: #eee;
+    padding: 2px 8px;
+    border-radius: 4px;
+    min-width: 30px;
+    text-align: center;
+}
 
-        0%,
-        100% {
-            opacity: 1;
-        }
+.x {
+    color: var(--accent-color);
+    font-size: 0.9rem;
+}
 
-        50% {
-            opacity: 0.6;
-        }
-    }
+/* Error message */
+.error {
+    color: red;
+    background: #fee;
+    padding: 10px;
+    border-radius: 4px;
+    text-align: center;
+}
 
-    /* Linhas 2 e 3: Equipas */
-    .jogo-linha-equipa {
-        display: flex;
-        align-items: center;
-        gap: 12px;
-        padding: 4px 0;
-    }
+/* Footer */
 
-    .jogo-logo {
-        width: 35px;
-        height: 35px;
-        object-fit: contain;
-        border-radius: 4px;
-        flex-shrink: 0;
-    }
+/* --- ADMIN PAINEL --- */
+#admin-panel {
+    width: 100%;
+    /* Ocupar largura total disponível, alinhado com o menu/header */
+    max-width: 100%;
+    margin: 0 auto;
+    padding: 0;
+    /* Remove padding extra do container para alinhar com header */
+}
 
-    .jogo-logo-placeholder {
-        width: 35px;
-        height: 35px;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        font-size: 1.2rem;
-        background: var(--bg-color);
-        border-radius: 4px;
-        flex-shrink: 0;
-    }
+.login-box {
+    max-width: 400px;
+    margin: 0 auto;
+    padding: 20px;
+    background: var(--white);
+    border-radius: 8px;
+    box-shadow: var(--card-shadow);
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+}
 
-    .jogo-equipa-info {
-        flex: 1;
-        display: flex;
-        flex-direction: column;
-        gap: 2px;
-    }
+/* ... (mantendo login-box input e admin-header inalterados se não precisar) ... */
 
-    .jogo-equipa-nome {
-        font-weight: 500;
-        font-size: 1rem;
-        line-height: 1.2;
-    }
+/* Forms Admin */
+.admin-form {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+    background: #fff;
+    padding: 20px;
+    border-radius: 8px;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+    margin-bottom: 20px;
+    width: 100%;
+    /* Força largura total explicitamente */
+}
 
-    .jogo-equipa-escalao {
-        font-size: 0.8rem;
-        color: #666;
-        font-weight: 400;
-    }
+/* Abas Content */
+.tab-content,
+.tab-pane {
+    width: 100%;
+    /* Garante que as abas ocupem tudo */
+}
 
-    .jogo-resultado {
-        font-size: 1.2rem;
-        font-weight: bold;
-        color: var(--primary-color);
-        min-width: 30px;
-        text-align: center;
-        flex-shrink: 0;
-    }
+/* ... (inputs) ... */
 
-    .btn-info {
-        border-color: #28a745;
-        color: #28a745;
-    }
+/* Inputs do Admin - FORÇAR LARGURA TOTAL */
+.admin-form input,
+.admin-form select,
+.admin-form textarea {
+    padding: 10px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    font-family: inherit;
+    width: 100% !important;
+    /* Força largura total */
+    max-width: 100% !important;
+    box-sizing: border-box !important;
+}
 
-    .btn-info:hover {
-        background-color: #28a745;
-        color: white;
-    }
+.admin-form .row {
+    display: block !important;
+    /* Simplifica para bloco */
+    width: 100% !important;
+    margin-bottom: 0;
+}
 
-    /* Social Media Icons */
-    .social-icons {
-        display: flex;
-        gap: 8px;
-        align-items: center;
-    }
+.admin-form .row>* {
+    width: 100% !important;
+    max-width: 100% !important;
+    box-sizing: border-box !important;
+}
 
-    .social-icon {
-        display: inline-flex;
-        align-items: center;
-        justify-content: center;
-        width: 32px;
-        height: 32px;
-        border-radius: 50%;
-        border: 2px solid white;
-        background-color: white;
-        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-        transition: all 0.3s ease;
-        text-decoration: none;
-    }
+.btn-success {
+    background: #388e3c;
+    color: white;
+    border: none;
+    padding: 12px;
+    border-radius: 4px;
+    cursor: pointer;
+    font-weight: bold;
+}
 
-    .facebook-icon {
-        color: #1877f2;
-    }
+.error-msg {
+    color: red;
+    font-size: 0.9rem;
+    text-align: center;
+}
 
-    .facebook-icon:hover {
-        background-color: #1877f2;
-        color: white;
-        border-color: #1877f2;
-        transform: scale(1.1);
-    }
+/* Admin Header Fix */
+.admin-header h2 {
+    margin-bottom: 0;
+    /* Remove margem para alinhar com botão */
+    border-bottom: none;
+    /* Remove borda se desejar limpar */
+}
 
-    .instagram-icon {
-        color: #e4405f;
-    }
+/* Admin List Items (Card Style) */
+.admin-list-item {
+    background: white;
+    border: 1px solid #eee;
+    border-radius: 8px;
+    /* Card style */
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+    /* Sombra suave */
+    padding: 15px;
+    margin-bottom: 10px;
+    /* Espaço entre cards */
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 10px;
+}
 
-    .instagram-icon:hover {
-        background-color: #e4405f;
-        color: white;
-        border-color: #e4405f;
-        transform: scale(1.1);
-    }
+.admin-list-item-content {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    flex: 1;
+}
 
-    .website-icon {
-        color: #666;
-    }
+.admin-list-actions {
+    display: flex;
+    gap: 5px;
+}
 
-    .website-icon:hover {
-        background-color: #666;
-        color: white;
-        border-color: #666;
-        transform: scale(1.1);
-    }
-
-    /* Ajustes Mobile específicos se necessário, mas o layout acima já é responsive */
-    @media (max-width: 480px) {
-        .equipa-card {
-            padding: 10px;
-        }
-
-        .equipa-logo img {
-            width: 60px;
-            height: 60px;
-        }
-
-        .btn-link {
-            padding: 5px 12px;
-            font-size: 0.75rem;
-        }
-    }
-
-    /* Estilos para Jogos */
-    .jogo-item {
-        background: var(--white);
-        border-radius: 8px;
-        padding: 15px;
-        box-shadow: var(--card-shadow);
-        display: flex;
-        flex-direction: column;
-        gap: 10px;
-        border-left: 5px solid var(--primary-color);
-    }
-
-    .jogo-info {
-        display: flex;
-        justify-content: space-between;
-        font-size: 0.9rem;
-        color: #666;
-        border-bottom: 1px solid #eee;
-        padding-bottom: 8px;
-        margin-bottom: 8px;
-    }
-
-    .jogo-placar {
-        display: flex;
-        justify-content: center;
-        align-items: center;
-        gap: 15px;
-        font-weight: bold;
-        font-size: 1.1rem;
-    }
-
-    .equipa-nome {
-        flex: 1;
-        text-align: center;
-    }
-
-    .placar {
-        background: #eee;
-        padding: 2px 8px;
-        border-radius: 4px;
-        min-width: 30px;
-        text-align: center;
-    }
-
-    .x {
-        color: var(--accent-color);
-        font-size: 0.9rem;
-    }
-
-    /* Error message */
-    .error {
-        color: red;
-        background: #fee;
-        padding: 10px;
-        border-radius: 4px;
-        text-align: center;
-    }
-
-    /* Footer */
-
-    /* --- ADMIN PAINEL --- */
-    #admin-panel {
-        width: 100%;
-        /* Ocupar largura total disponível, alinhado com o menu/header */
-        max-width: 100%;
-        margin: 0 auto;
-        padding: 0;
-        /* Remove padding extra do container para alinhar com header */
-    }
-
-    .login-box {
-        max-width: 400px;
-        margin: 0 auto;
-        padding: 20px;
-        background: var(--white);
-        border-radius: 8px;
-        box-shadow: var(--card-shadow);
-        display: flex;
-        flex-direction: column;
-        gap: 15px;
-    }
-
-    /* ... (mantendo login-box input e admin-header inalterados se não precisar) ... */
-
-    /* Forms Admin */
-    .admin-form {
-        display: flex;
-        flex-direction: column;
-        gap: 15px;
-        background: #fff;
-        padding: 20px;
-        border-radius: 8px;
-        box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
-        margin-bottom: 20px;
-        width: 100%;
-        /* Força largura total explicitamente */
-    }
-
-    /* Abas Content */
-    .tab-content,
-    .tab-pane {
-        width: 100%;
-        /* Garante que as abas ocupem tudo */
-    }
-
-    /* ... (inputs) ... */
-
-    /* Inputs do Admin - FORÇAR LARGURA TOTAL */
-    .admin-form input,
-    .admin-form select,
-    .admin-form textarea {
-        padding: 10px;
-        border: 1px solid #ddd;
-        border-radius: 4px;
-        font-family: inherit;
-        width: 100% !important;
-        /* Força largura total */
-        max-width: 100% !important;
-        box-sizing: border-box !important;
-    }
-
-    .admin-form .row {
-        display: block !important;
-        /* Simplifica para bloco */
-        width: 100% !important;
-        margin-bottom: 0;
-    }
-
-    .admin-form .row>* {
-        width: 100% !important;
-        max-width: 100% !important;
-        box-sizing: border-box !important;
-    }
-
-    .btn-success {
-        background: #388e3c;
-        color: white;
-        border: none;
-        padding: 12px;
-        border-radius: 4px;
-        cursor: pointer;
-        font-weight: bold;
-    }
-
-    .error-msg {
-        color: red;
-        font-size: 0.9rem;
-        text-align: center;
-    }
-
-    /* Admin Header Fix */
-    .admin-header h2 {
-        margin-bottom: 0;
-        /* Remove margem para alinhar com botão */
-        border-bottom: none;
-        /* Remove borda se desejar limpar */
-    }
-
-    /* Admin List Items (Card Style) */
+/* Mobile/Tablet adjustment for admin list */
+@media (max-width: 600px) {
     .admin-list-item {
-        background: white;
-        border: 1px solid #eee;
-        border-radius: 8px;
-        /* Card style */
-        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
-        /* Sombra suave */
-        padding: 15px;
-        margin-bottom: 10px;
-        /* Espaço entre cards */
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-        gap: 10px;
-    }
-
-    .admin-list-item-content {
-        display: flex;
-        align-items: center;
-        gap: 10px;
-        flex: 1;
+        flex-direction: column;
+        align-items: flex-start;
     }
 
     .admin-list-actions {
-        display: flex;
-        gap: 5px;
+        width: 100%;
+        justify-content: flex-end;
+        /* Botões à direita mas em linha nova */
+        margin-top: 5px;
     }
+}
 
-    /* Mobile/Tablet adjustment for admin list */
-    @media (max-width: 600px) {
-        .admin-list-item {
-            flex-direction: column;
-            align-items: flex-start;
-        }
+/* --- DETALHES DA EQUIPA --- */
+#equipa-header {
+    margin-bottom: 20px;
+    padding: 15px;
+    background: white;
+    border-radius: 4px;
+    box-shadow: var(--card-shadow);
+    border: 1px solid #eee;
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    gap: 20px;
+}
 
-        .admin-list-actions {
-            width: 100%;
-            justify-content: flex-end;
-            /* Botões à direita mas em linha nova */
-            margin-top: 5px;
-        }
-    }
+#equipa-header img {
+    width: 80px;
+    height: 80px;
+    object-fit: contain;
+    margin-bottom: 0;
+}
 
-    /* --- DETALHES DA EQUIPA --- */
-    #equipa-header {
-        margin-bottom: 20px;
-        padding: 15px;
-        background: white;
-        border-radius: 4px;
-        box-shadow: var(--card-shadow);
-        border: 1px solid #eee;
-        display: flex;
-        flex-direction: row;
-        align-items: center;
-        gap: 20px;
-    }
+.equipa-header-info {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+}
 
-    #equipa-header img {
-        width: 80px;
-        height: 80px;
-        object-fit: contain;
-        margin-bottom: 0;
-    }
+#equipa-header h2 {
+    margin: 0;
+    color: var(--secondary-color);
+    font-size: 1.3rem;
+    border: none;
+}
 
-    .equipa-header-info {
-        display: flex;
-        flex-direction: column;
-        align-items: flex-start;
-    }
+#equipa-header p {
+    color: #666;
+    font-size: 1rem;
+    margin: 0;
+}
 
-    #equipa-header h2 {
-        margin: 0;
-        color: var(--secondary-color);
-        font-size: 1.3rem;
-        border: none;
-    }
+/* Lista de Atletas (Mobile Friendly - Rectangular) */
+.athlete-list {
+    display: flex;
+    flex-direction: column;
+    gap: var(--spacing);
+}
 
-    #equipa-header p {
-        color: #666;
-        font-size: 1rem;
-        margin: 0;
-    }
+.athlete-card {
+    background: white;
+    padding: 15px;
+    border-radius: 4px;
+    box-shadow: var(--card-shadow);
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    gap: 20px;
+    border: 1px solid #eee;
+}
 
-    /* Lista de Atletas (Mobile Friendly - Rectangular) */
-    .athlete-list {
-        display: flex;
-        flex-direction: column;
-        gap: var(--spacing);
-    }
+.athlete-card img {
+    width: 60px;
+    height: 60px;
+    border-radius: 50%;
+    object-fit: cover;
+    background-color: #eee;
+    margin-bottom: 0;
+}
 
-    .athlete-card {
-        background: white;
-        padding: 15px;
-        border-radius: 4px;
-        box-shadow: var(--card-shadow);
-        display: flex;
-        flex-direction: row;
-        align-items: center;
-        gap: 20px;
-        border: 1px solid #eee;
-    }
+.athlete-card strong {
+    color: var(--text-color);
+    font-size: 1.1rem;
+}
 
-    .athlete-card img {
-        width: 60px;
-        height: 60px;
-        border-radius: 50%;
-        object-fit: cover;
-        background-color: #eee;
-        margin-bottom: 0;
-    }
+.mt-4 {
+    margin-top: 1.5rem;
+}
 
-    .athlete-card strong {
-        color: var(--text-color);
-        font-size: 1.1rem;
-    }
+.text-center {
+    text-align: center;
+}
 
-    .mt-4 {
-        margin-top: 1.5rem;
-    }
+/* ===== OPINIÕES PAGE ===== */
+.opiniao-form-container {
+    max-width: 600px;
+    margin: 0 auto 40px;
+    background: var(--white);
+    padding: 20px;
+    border-radius: 8px;
+    box-shadow: var(--card-shadow);
+}
 
-    .text-center {
-        text-align: center;
-    }
+.form-group {
+    margin-bottom: 15px;
+}
 
-    /* ===== OPINIÕES PAGE ===== */
+.form-group label {
+    display: block;
+    margin-bottom: 5px;
+    font-weight: 600;
+    color: var(--secondary-color);
+}
+
+.form-group input,
+.form-group textarea {
+    width: 100%;
+    padding: 10px;
+    border: 1px solid #ddd;
+    border-radius: 6px;
+    font-size: 1rem;
+    font-family: 'Roboto', sans-serif;
+    box-sizing: border-box;
+}
+
+.form-group input:focus,
+.form-group textarea:focus {
+    outline: none;
+    border-color: var(--primary-color);
+}
+
+.form-group textarea {
+    resize: vertical;
+    min-height: 100px;
+}
+
+.btn-submit {
+    width: 100%;
+    padding: 12px;
+    background-color: var(--primary-color);
+    color: var(--white);
+    border: none;
+    border-radius: 6px;
+    font-size: 1rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background-color 0.3s;
+}
+
+.btn-submit:hover {
+    background-color: var(--secondary-color);
+}
+
+#opinioes-list {
+    max-width: 800px;
+    margin: 0 auto;
+}
+
+.opiniao-card {
+    background: var(--white);
+    padding: 15px;
+    margin-bottom: 15px;
+    border-radius: 8px;
+    box-shadow: var(--card-shadow);
+}
+
+.opiniao-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 10px;
+    padding-bottom: 8px;
+    border-bottom: 1px solid #eee;
+}
+
+.opiniao-header strong {
+    color: var(--primary-color);
+    font-size: 1rem;
+}
+
+.opiniao-date {
+    color: #666;
+    font-size: 0.85rem;
+}
+
+.opiniao-text {
+    color: var(--text-color);
+    line-height: 1.6;
+    margin: 0;
+}
+
+@media (max-width: 768px) {
     .opiniao-form-container {
-        max-width: 600px;
-        margin: 0 auto 40px;
-        background: var(--white);
-        padding: 20px;
-        border-radius: 8px;
-        box-shadow: var(--card-shadow);
-    }
-
-    .form-group {
-        margin-bottom: 15px;
-    }
-
-    .form-group label {
-        display: block;
-        margin-bottom: 5px;
-        font-weight: 600;
-        color: var(--secondary-color);
-    }
-
-    .form-group input,
-    .form-group textarea {
-        width: 100%;
-        padding: 10px;
-        border: 1px solid #ddd;
-        border-radius: 6px;
-        font-size: 1rem;
-        font-family: 'Roboto', sans-serif;
-        box-sizing: border-box;
-    }
-
-    .form-group input:focus,
-    .form-group textarea:focus {
-        outline: none;
-        border-color: var(--primary-color);
-    }
-
-    .form-group textarea {
-        resize: vertical;
-        min-height: 100px;
-    }
-
-    .btn-submit {
-        width: 100%;
-        padding: 12px;
-        background-color: var(--primary-color);
-        color: var(--white);
-        border: none;
-        border-radius: 6px;
-        font-size: 1rem;
-        font-weight: 600;
-        cursor: pointer;
-        transition: background-color 0.3s;
-    }
-
-    .btn-submit:hover {
-        background-color: var(--secondary-color);
-    }
-
-    #opinioes-list {
-        max-width: 800px;
-        margin: 0 auto;
-    }
-
-    .opiniao-card {
-        background: var(--white);
         padding: 15px;
-        margin-bottom: 15px;
-        border-radius: 8px;
-        box-shadow: var(--card-shadow);
     }
 
     .opiniao-header {
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-        margin-bottom: 10px;
-        padding-bottom: 8px;
-        border-bottom: 1px solid #eee;
-    }
-
-    .opiniao-header strong {
-        color: var(--primary-color);
-        font-size: 1rem;
-    }
-
-    .opiniao-date {
-        color: #666;
-        font-size: 0.85rem;
-    }
-
-    .opiniao-text {
-        color: var(--text-color);
-        line-height: 1.6;
-        margin: 0;
-    }
-
-    @media (max-width: 768px) {
-        .opiniao-form-container {
-            padding: 15px;
-        }
-
-        .opiniao-header {
-            flex-direction: column;
-            align-items: flex-start;
-            gap: 5px;
-        }
-    }
-
-    /* ===== ESTILOS PARA EVENTOS ===== */
-    #eventos-filter {
-        display: flex;
-        gap: 10px;
-        margin-bottom: 15px;
-        flex-wrap: wrap;
-    }
-
-    .eventos-container {
-        display: grid;
-        grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
-        gap: var(--spacing);
-    }
-
-    @media (max-width: 768px) {
-        .eventos-container {
-            grid-template-columns: 1fr;
-            gap: 10px;
-        }
-    }
-
-    .evento-card {
-        background: var(--white);
-        border-radius: 10px;
-        padding: 16px;
-        box-shadow: var(--card-shadow);
-        border: 1px solid #eee;
-        display: flex;
-        flex-direction: row;
-        align-items: flex-start;
-        gap: 14px;
-        transition: transform 0.2s, box-shadow 0.2s;
-        border-left: 4px solid var(--primary-color);
-    }
-
-    .evento-card:hover {
-        transform: translateY(-3px);
-        box-shadow: 0 6px 16px rgba(0, 0, 0, 0.12);
-    }
-
-    .evento-icon {
-        font-size: 2.2rem;
-        flex-shrink: 0;
-        width: 48px;
-        height: 48px;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        background: #f3e5f5;
-        border-radius: 50%;
-    }
-
-    .evento-info {
-        flex: 1;
-        display: flex;
         flex-direction: column;
-        gap: 4px;
+        align-items: flex-start;
+        gap: 5px;
     }
+}
 
-    .evento-tipo {
-        font-size: 1rem;
-        font-weight: 700;
-        color: var(--secondary-color);
-        margin: 0;
-        line-height: 1.2;
-    }
+/* ===== ESTILOS PARA EVENTOS ===== */
+#eventos-filter {
+    display: flex;
+    gap: 10px;
+    margin-bottom: 15px;
+    flex-wrap: wrap;
+}
 
-    .evento-local {
-        font-size: 0.88rem;
-        color: #555;
-        margin: 0;
-    }
+.eventos-container {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+    gap: var(--spacing);
+}
 
-    .evento-data {
-        font-size: 0.88rem;
-        color: var(--primary-color);
-        font-weight: 600;
-        margin: 0;
+@media (max-width: 768px) {
+    .eventos-container {
+        grid-template-columns: 1fr;
+        gap: 10px;
     }
+}
 
-    .evento-descricao {
-        font-size: 0.85rem;
-        color: var(--text-color);
-        margin: 4px 0 0 0;
-        line-height: 1.5;
-        border-top: 1px solid #eee;
-        padding-top: 6px;
-    }
+.evento-card {
+    background: var(--white);
+    border-radius: 10px;
+    padding: 16px;
+    box-shadow: var(--card-shadow);
+    border: 1px solid #eee;
+    display: flex;
+    flex-direction: row;
+    align-items: flex-start;
+    gap: 14px;
+    transition: transform 0.2s, box-shadow 0.2s;
+    border-left: 4px solid var(--primary-color);
+}
 
-    /* Background específico para página de contactos */
-    body.contactos-page {
-        background-image: linear-gradient(rgba(255, 255, 255, 0.7), rgba(255, 255, 255, 0.7)), url('../back_001.jpg');
-        background-size: cover;
-        background-position: center;
-        background-repeat: no-repeat;
-        background-attachment: scroll;
-        /* Fixed is problematic on mobile */
-    }
+.evento-card:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 6px 16px rgba(0, 0, 0, 0.12);
+}
 
-    body.contactos-page #app-content {
-        background: transparent;
-    }
+.evento-icon {
+    font-size: 2.2rem;
+    flex-shrink: 0;
+    width: 48px;
+    height: 48px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: #f3e5f5;
+    border-radius: 50%;
+}
+
+.evento-info {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+.evento-tipo {
+    font-size: 1rem;
+    font-weight: 700;
+    color: var(--secondary-color);
+    margin: 0;
+    line-height: 1.2;
+}
+
+.evento-local {
+    font-size: 0.88rem;
+    color: #555;
+    margin: 0;
+}
+
+.evento-data {
+    font-size: 0.88rem;
+    color: var(--primary-color);
+    font-weight: 600;
+    margin: 0;
+}
+
+.evento-descricao {
+    font-size: 0.85rem;
+    color: var(--text-color);
+    margin: 4px 0 0 0;
+    line-height: 1.5;
+    border-top: 1px solid #eee;
+    padding-top: 6px;
+}
+
+/* Background específico para página de contactos */
+body.contactos-page {
+    background-image: linear-gradient(rgba(255, 255, 255, 0.7), rgba(255, 255, 255, 0.7)), url('../back_001.jpg');
+    background-size: cover;
+    background-position: center;
+    background-repeat: no-repeat;
+    background-attachment: scroll;
+    /* Fixed is problematic on mobile */
+}
+
+body.contactos-page #app-content {
+    background: transparent;
+}
 }
