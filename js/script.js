@@ -511,7 +511,11 @@ document.addEventListener('DOMContentLoaded', () => {
                         if (teamStyle) div.setAttribute('style', teamStyle);
 
                         const isStaff = (atleta.funcao || '').trim().toLowerCase() !== 'jogador' && (atleta.funcao || '').trim() !== '';
-                        const tagNumero = (atleta.numero !== undefined && atleta.numero !== null) ? `<span class="athlete-number">#${atleta.numero}</span> ` : '';
+                        // More robust check for jersey number
+                        let tagNumero = '';
+                        if (atleta.numero !== undefined && atleta.numero !== null && atleta.numero !== '') {
+                            tagNumero = `<span class="athlete-number">#${atleta.numero}</span> `;
+                        }
 
                         div.innerHTML = `
                             <div class="athlete-photo">
@@ -521,7 +525,7 @@ document.addEventListener('DOMContentLoaded', () => {
                                 <div class="athlete-info">
                                     <h3>
                                         ${tagNumero}
-                                        ${atleta.nome}
+                                        <span>${atleta.nome}</span>
                                         ${isStaff ? `<span class="staff-role">(${atleta.funcao})</span>` : ''}
                                     </h3>
                                 </div>
