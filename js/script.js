@@ -427,8 +427,7 @@ document.addEventListener('DOMContentLoaded', () => {
                         </div>
                         <div class="athlete-content-right">
                             <div class="athlete-info">
-                                <h3>${atleta.nome}</h3>
-                                ${atleta.numero ? `<p>Número: ${atleta.numero}</p>` : ''}
+                                <h3>${atleta.numero ? `<span class="athlete-number">#${atleta.numero}</span> ` : ''}${atleta.nome}</h3>
                             </div>
                         </div>
                     `;
