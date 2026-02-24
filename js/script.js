@@ -404,7 +404,7 @@ document.addEventListener('DOMContentLoaded', () => {
         headerFn.className = 'equipa-card';
 
         // Build shadow and background style
-        let headerStyle = `margin-bottom: 30px; background-image: url('${bgUrl}'); background-size: cover; background-position: center; background-repeat: no-repeat;`;
+        let headerStyle = `margin-bottom: 30px; background-image: url('${bgUrl}'); background-size: cover; background-position: center; background-repeat: no-repeat; border-radius: 15px;`;
         if (equipa.shadow_color) {
             headerStyle += `box-shadow: 0 10px 15px -3px ${equipa.shadow_color}40, 0 4px 6px -2px ${equipa.shadow_color}60;`;
         }
@@ -490,7 +490,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
                     // Create dynamic style for the card: club color background at 50% opacity overlayed on texture
                     const colorAlpha = hexToRgba(teamColor, 0.5);
-                    const teamStyle = `background-image: linear-gradient(${colorAlpha}, ${colorAlpha}), url('${bgUrl}'); background-size: cover; background-position: center; background-repeat: no-repeat; box-shadow: 0 10px 15px -3px ${teamColor}40, 0 4px 6px -2px ${teamColor}60;`;
+                    const teamStyle = `background-image: linear-gradient(${colorAlpha}, ${colorAlpha}), url('${bgUrl}'); background-size: cover; background-position: center; background-repeat: no-repeat; border-radius: 15px; box-shadow: 0 10px 15px -3px ${teamColor}40, 0 4px 6px -2px ${teamColor}60;`;
 
                     list.forEach(atleta => {
                         const div = document.createElement('div');
