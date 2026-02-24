@@ -597,7 +597,7 @@ h2 {
 .athlete-list {
     display: grid;
     grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
-    gap: var(--spacing);
+    gap: 10px;
 }
 
 .athlete-card {
@@ -696,7 +696,7 @@ h2 {
 @media (max-width: 768px) {
     .athlete-list {
         grid-template-columns: 1fr;
-        gap: 10px;
+        gap: 5px;
     }
 }
 
