@@ -386,15 +386,29 @@ document.addEventListener('DOMContentLoaded', () => {
             return;
         }
 
+        // Helper to handle hex colors with alpha safely
+        const hexToRgba = (hex, alpha) => {
+            if (!hex || hex[0] !== '#') return `rgba(255, 255, 255, ${alpha})`;
+            let h = hex.slice(1);
+            if (h.length === 3) h = h.split('').map(s => s + s).join('');
+            const r = parseInt(h.slice(0, 2), 16);
+            const g = parseInt(h.slice(2, 4), 16);
+            const b = parseInt(h.slice(4, 6), 16);
+            return `rgba(${r}, ${g}, ${b}, ${alpha})`;
+        };
+
+        const bgUrl = 'back_equipas.png';
+        const teamColor = equipa.shadow_color || '#6a1b9a';
+
         // Render Header (Layout Horizontal/Card - matching equipas.html)
         headerFn.className = 'equipa-card';
-        headerFn.style.marginBottom = '30px';
-        headerFn.style.backgroundImage = "url('back_equipas.png')";
 
-        // Apply custom shadow color if defined
+        // Build shadow and background style
+        let headerStyle = `margin-bottom: 30px; background-image: url('${bgUrl}'); background-size: cover; background-position: center; background-repeat: no-repeat;`;
         if (equipa.shadow_color) {
-            headerFn.style.boxShadow = `0 10px 15px -3px ${equipa.shadow_color}40, 0 4px 6px -2px ${equipa.shadow_color}60`;
+            headerStyle += `box-shadow: 0 10px 15px -3px ${equipa.shadow_color}40, 0 4px 6px -2px ${equipa.shadow_color}60;`;
         }
+        headerFn.setAttribute('style', headerStyle);
 
         // Build social media icons HTML (copy logic from renderEquipas)
         let socialIcons = '';
@@ -475,17 +489,8 @@ document.addEventListener('DOMContentLoaded', () => {
                     const container = contentFn.querySelector(`.${listClass}`);
 
                     // Create dynamic style for the card: club color background at 50% opacity overlayed on texture
-                    let teamStyle = '';
-                    if (equipa.shadow_color) {
-                        // Create RGB from hex if possible, or just use rgba with the hex if browser supports it (most modern do)
-                        const color = equipa.shadow_color;
-                        teamStyle = `background-image: linear-gradient(rgba(255,255,255,0.2), rgba(255,255,255,0.2)), linear-gradient(${color}80, ${color}80), url('back_equipas.png');`;
-                        teamStyle += `background-size: cover; background-position: center;`;
-                        teamStyle += `box-shadow: 0 10px 15px -3px ${color}40, 0 4px 6px -2px ${color}60;`;
-                    } else {
-                        teamStyle = `background-image: linear-gradient(rgba(200,200,200,0.5), rgba(200,200,200,0.5)), url('back_equipas.png');`;
-                        teamStyle += `background-size: cover; background-position: center;`;
-                    }
+                    const colorAlpha = hexToRgba(teamColor, 0.5);
+                    const teamStyle = `background-image: linear-gradient(${colorAlpha}, ${colorAlpha}), url('${bgUrl}'); background-size: cover; background-position: center; background-repeat: no-repeat; box-shadow: 0 10px 15px -3px ${teamColor}40, 0 4px 6px -2px ${teamColor}60;`;
 
                     list.forEach(atleta => {
                         const div = document.createElement('div');
