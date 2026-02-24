@@ -473,12 +473,21 @@ document.addEventListener('DOMContentLoaded', () => {
                     if (list.length === 0) return;
                     contentFn.innerHTML += `<h3 class="text-center mb-3 ${listClass === 'staff-list' ? 'mt-5' : ''}">${title}</h3><div class="athlete-list ${listClass}"></div>`;
                     const container = contentFn.querySelector(`.${listClass}`);
-                    const teamShadow = equipa.shadow_color ? `box-shadow: 0 10px 15px -3px ${equipa.shadow_color}40, 0 4px 6px -2px ${equipa.shadow_color}60;` : '';
+
+                    // Create dynamic style for the card: club color background at 50% opacity
+                    let teamStyle = '';
+                    if (equipa.shadow_color) {
+                        // Using hex + 80 for roughly 50% alpha
+                        teamStyle = `background-color: ${equipa.shadow_color}80; background-image: none;`;
+                        teamStyle += `box-shadow: 0 10px 15px -3px ${equipa.shadow_color}40, 0 4px 6px -2px ${equipa.shadow_color}60;`;
+                    } else {
+                        teamStyle = 'background-image: none; background-color: rgba(200, 200, 200, 0.5);';
+                    }
 
                     list.forEach(atleta => {
                         const div = document.createElement('div');
                         div.className = 'athlete-card';
-                        if (teamShadow) div.setAttribute('style', teamShadow);
+                        if (teamStyle) div.setAttribute('style', teamStyle);
                         const isStaff = atleta.funcao && atleta.funcao !== 'Jogador';
 
                         div.innerHTML = `

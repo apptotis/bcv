@@ -662,7 +662,7 @@ h2 {
 
 .athlete-card h3 {
     font-size: 0.95rem;
-    color: var(--secondary-color);
+    color: #000;
     margin: 0;
     line-height: 1.2;
     font-weight: 700;
@@ -672,9 +672,9 @@ h2 {
 }
 
 .athlete-number {
-    color: var(--primary-color);
+    color: #000;
     font-weight: 900;
-    background: rgba(0, 0, 0, 0.05);
+    background: rgba(0, 0, 0, 0.1);
     padding: 1px 5px;
     border-radius: 4px;
     font-size: 0.85rem;
