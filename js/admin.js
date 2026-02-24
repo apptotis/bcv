@@ -318,7 +318,7 @@ document.addEventListener('DOMContentLoaded', async () => {
                 equipa_casa_id: equipaCasaId,
                 equipa_fora_id: equipaForaId,
                 escalao: equipaCasa.escalao,
-                data_hora: dataHora || null,
+                data_hora: dataHora ? new Date(dataHora).toISOString() : null,
                 estado: estado || 'Agendado',
                 campo: campo || null,
                 resultado_casa: resultadoCasa,
@@ -496,10 +496,12 @@ document.addEventListener('DOMContentLoaded', async () => {
         // Converter data para formato datetime-local
         if (jogo.data_hora) {
             const date = new Date(jogo.data_hora);
-            const localDateTime = new Date(date.getTime() - date.getTimezoneOffset() * 60000)
-                .toISOString()
-                .slice(0, 16);
-            document.getElementById('jogo-data').value = localDateTime;
+            const year = date.getFullYear();
+            const month = String(date.getMonth() + 1).padStart(2, '0');
+            const day = String(date.getDate()).padStart(2, '0');
+            const hours = String(date.getHours()).padStart(2, '0');
+            const minutes = String(date.getMinutes()).padStart(2, '0');
+            document.getElementById('jogo-data').value = `${year}-${month}-${day}T${hours}:${minutes}`;
         }
 
         document.getElementById('jogo-campo').value = jogo.campo || '';
@@ -760,8 +762,8 @@ document.addEventListener('DOMContentLoaded', async () => {
                     is_publico: isPublico,
                     tipo_evento_id: tipoId,
                     local,
-                    data_hora: dataHora,
-                    data_hora_fim: dataHoraFim || null,
+                    data_hora: dataHora ? new Date(dataHora).toISOString() : null,
+                    data_hora_fim: dataHoraFim ? new Date(dataHoraFim).toISOString() : null,
                     tecnicos: tecnicos || null,
                     descricao: descricao || null
                 };
