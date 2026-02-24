@@ -511,9 +511,9 @@ document.addEventListener('DOMContentLoaded', () => {
                         if (teamStyle) div.setAttribute('style', teamStyle);
 
                         const isStaff = (atleta.funcao || '').trim().toLowerCase() !== 'jogador' && (atleta.funcao || '').trim() !== '';
-                        // More robust check for jersey number
+                        // Even more robust check for jersey number
                         let tagNumero = '';
-                        if (atleta.numero !== undefined && atleta.numero !== null && atleta.numero !== '') {
+                        if (atleta.numero === 0 || (atleta.numero && String(atleta.numero).trim() !== '')) {
                             tagNumero = `<span class="athlete-number">#${atleta.numero}</span> `;
                         }
 
