@@ -159,7 +159,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     </div>
                     <div class="equipa-actions">
                         <a href="equipa.html?id=${equipa.id}&view=atletas" class="btn-link" 
-                           style="${equipa.shadow_color ? `--team-color: ${equipa.shadow_color}; border-color: ${equipa.shadow_color};` : ''}">Atletas</a>
+                           style="${equipa.shadow_color ? `--team-color: ${equipa.shadow_color}; border-color: ${equipa.shadow_color};` : ''}">Plantel</a>
                         ${socialIcons ? `<div class="social-icons">${socialIcons}</div>` : ''}
                     </div>
                 </div>

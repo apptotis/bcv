@@ -616,6 +616,7 @@ h2 {
     gap: 15px;
     transition: transform 0.2s;
     text-align: left;
+    min-height: 110px;
 }
 
 .athlete-card:hover {
