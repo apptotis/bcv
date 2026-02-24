@@ -147,6 +147,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         e.preventDefault();
 
         const nome = document.getElementById('atleta-nome').value;
+        const numero = document.getElementById('atleta-numero').value;
         const equipaId = document.getElementById('atleta-equipa-id').value;
         const fotoFile = document.getElementById('atleta-foto-file').files[0];
 
@@ -173,7 +174,8 @@ document.addEventListener('DOMContentLoaded', async () => {
             // Insert Database
             const updates = {
                 nome,
-                equipa_id: equipaId
+                equipa_id: equipaId,
+                numero: numero ? parseInt(numero) : null
             };
             if (fotoUrl) updates.foto_url = fotoUrl;
 
@@ -239,7 +241,7 @@ document.addEventListener('DOMContentLoaded', async () => {
                     ? `<img src="${atleta.foto_url}" style="width: 40px; height: 40px; border-radius: 50%; object-fit: cover;">`
                     : '<div style="width: 40px; height: 40px; background: #eee; border-radius: 50%;"></div>'}
                     <div>
-                        <strong>${atleta.nome}</strong>
+                        <strong>${atleta.nome} ${atleta.numero ? `<span style="color: #666;">(#${atleta.numero})</span>` : ''}</strong>
                         <br>
                         <small>${nomeEquipa}</small>
                     </div>
@@ -262,6 +264,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         }
 
         document.getElementById('atleta-nome').value = atleta.nome;
+        document.getElementById('atleta-numero').value = atleta.numero || '';
         document.getElementById('atleta-equipa-id').value = atleta.equipa_id;
 
         editingAtletaId = id;
