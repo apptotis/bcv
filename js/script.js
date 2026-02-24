@@ -412,18 +412,24 @@ document.addEventListener('DOMContentLoaded', () => {
             } else {
                 contentFn.innerHTML = `<h3 class="text-center mb-3">Plantel</h3><div class="athlete-list"></div>`;
                 const list = contentFn.querySelector('.athlete-list');
+                const teamShadow = equipa.shadow_color ? `box-shadow: 0 10px 15px -3px ${equipa.shadow_color}40, 0 4px 6px -2px ${equipa.shadow_color}60;` : '';
+
                 atletas.forEach(atleta => {
                     const div = document.createElement('div');
                     div.className = 'athlete-card';
+                    if (teamShadow) div.setAttribute('style', teamShadow);
+
                     div.innerHTML = `
                         <div class="athlete-photo">
                             ${atleta.foto_url
                             ? `<img src="${atleta.foto_url}" alt="${atleta.nome}">`
                             : '<div class="placeholder-photo">👤</div>'}
                         </div>
-                        <div class="athlete-info">
-                            <h3>${atleta.nome}</h3>
-                            ${atleta.numero ? `<p>Número: ${atleta.numero}</p>` : ''}
+                        <div class="athlete-content-right">
+                            <div class="athlete-info">
+                                <h3>${atleta.nome}</h3>
+                                ${atleta.numero ? `<p>Número: ${atleta.numero}</p>` : ''}
+                            </div>
                         </div>
                     `;
                     list.appendChild(div);

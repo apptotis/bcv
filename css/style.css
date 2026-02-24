@@ -614,6 +614,7 @@ h2 {
         align-items: center;
         gap: 15px;
         transition: transform 0.2s;
+        text-align: left;
     }
 
     .athlete-card:hover {
@@ -630,42 +631,45 @@ h2 {
         height: 80px;
         border-radius: 50%;
         object-fit: cover;
-        border: 3px solid var(--white);
-        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+        background-color: #fff;
+        border: none;
     }
 
     .placeholder-photo {
         width: 80px;
         height: 80px;
-        background: #eee;
+        background: #fff;
         border-radius: 50%;
         display: flex;
         align-items: center;
         justify-content: center;
         font-size: 2.5rem;
-        border: 3px solid var(--white);
-        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    }
+
+    .athlete-content-right {
+        display: flex;
+        flex-direction: column;
+        flex: 1;
+        align-items: flex-start;
     }
 
     .athlete-info {
-        flex: 1;
-        display: flex;
-        flex-direction: column;
-        gap: 5px;
+        margin-bottom: 0;
+        text-align: left;
     }
 
-    .athlete-info h3 {
-        margin: 0;
+    .athlete-card h3 {
         font-size: 1.1rem;
-        color: var(--text-color);
-        font-weight: 700;
+        color: var(--secondary-color);
+        margin: 0;
         line-height: 1.2;
+        font-weight: 700;
     }
 
-    .athlete-info p {
-        margin: 0;
+    .athlete-card p {
         color: #000;
         font-size: 0.9rem;
+        margin: 0;
     }
 
     @media (max-width: 768px) {
