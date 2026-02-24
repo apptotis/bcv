@@ -477,26 +477,41 @@ document.addEventListener('DOMContentLoaded', () => {
             } else if (atletas.length === 0) {
                 contentFn.innerHTML = '<p class="text-center">Nenhum atleta registado nesta equipa.</p>';
             } else {
-                const jogadores = atletas.filter(a => !a.funcao || a.funcao === 'Jogador');
-                const staff = atletas.filter(a => a.funcao && a.funcao !== 'Jogador');
+                // Robust filtering: everyone whose function is NOT 'Jogador' is staff
+                // Also handle potential nulls/trimming
+                const jogadores = atletas.filter(a => {
+                    const fn = (a.funcao || '').trim().toLowerCase();
+                    return fn === '' || fn === 'jogador';
+                });
+                const staff = atletas.filter(a => {
+                    const fn = (a.funcao || '').trim().toLowerCase();
+                    return fn !== '' && fn !== 'jogador';
+                });
 
                 contentFn.innerHTML = '';
+                const colorAlpha = hexToRgba(teamColor, 0.5);
+                const teamStyle = `background-image: linear-gradient(${colorAlpha}, ${colorAlpha}), url('${bgUrl}'); background-size: cover; background-position: center; background-repeat: no-repeat; border-radius: 15px; box-shadow: 0 10px 15px -3px ${teamColor}40, 0 4px 6px -2px ${teamColor}60;`;
 
                 // Helper to render sections
-                const renderCards = (list, title, listClass) => {
+                const renderSection = (list, title, listClass) => {
                     if (list.length === 0) return;
-                    contentFn.innerHTML += `<h3 class="text-center mb-3 ${listClass === 'staff-list' ? 'mt-5' : ''}">${title}</h3><div class="athlete-list ${listClass}"></div>`;
-                    const container = contentFn.querySelector(`.${listClass}`);
 
-                    // Create dynamic style for the card: club color background at 50% opacity overlayed on texture
-                    const colorAlpha = hexToRgba(teamColor, 0.5);
-                    const teamStyle = `background-image: linear-gradient(${colorAlpha}, ${colorAlpha}), url('${bgUrl}'); background-size: cover; background-position: center; background-repeat: no-repeat; border-radius: 15px; box-shadow: 0 10px 15px -3px ${teamColor}40, 0 4px 6px -2px ${teamColor}60;`;
+                    const titleEl = document.createElement('h3');
+                    titleEl.className = `text-center mb-3 ${listClass === 'staff-list' ? 'mt-5' : ''}`;
+                    titleEl.textContent = title;
+                    contentFn.appendChild(titleEl);
+
+                    const listDiv = document.createElement('div');
+                    listDiv.className = `athlete-list ${listClass}`;
+                    contentFn.appendChild(listDiv);
 
                     list.forEach(atleta => {
                         const div = document.createElement('div');
                         div.className = 'athlete-card';
                         if (teamStyle) div.setAttribute('style', teamStyle);
-                        const isStaff = atleta.funcao && atleta.funcao !== 'Jogador';
+
+                        const isStaff = (atleta.funcao || '').trim().toLowerCase() !== 'jogador' && (atleta.funcao || '').trim() !== '';
+                        const tagNumero = (atleta.numero !== undefined && atleta.numero !== null) ? `<span class="athlete-number">#${atleta.numero}</span> ` : '';
 
                         div.innerHTML = `
                             <div class="athlete-photo">
@@ -505,19 +520,19 @@ document.addEventListener('DOMContentLoaded', () => {
                             <div class="athlete-content-right">
                                 <div class="athlete-info">
                                     <h3>
-                                        ${atleta.numero ? `<span class="athlete-number">#${atleta.numero}</span> ` : ''}
+                                        ${tagNumero}
                                         ${atleta.nome}
                                         ${isStaff ? `<span class="staff-role">(${atleta.funcao})</span>` : ''}
                                     </h3>
                                 </div>
                             </div>
                         `;
-                        container.appendChild(div);
+                        listDiv.appendChild(div);
                     });
                 };
 
-                renderCards(jogadores, 'Plantel', 'jogs-list');
-                renderCards(staff, 'Equipa Técnica', 'staff-list');
+                renderSection(jogadores, 'Plantel', 'jogs-list');
+                renderSection(staff, 'Equipa Técnica', 'staff-list');
             }
 
         } else if (view === 'jogos') {
