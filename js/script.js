@@ -474,14 +474,17 @@ document.addEventListener('DOMContentLoaded', () => {
                     contentFn.innerHTML += `<h3 class="text-center mb-3 ${listClass === 'staff-list' ? 'mt-5' : ''}">${title}</h3><div class="athlete-list ${listClass}"></div>`;
                     const container = contentFn.querySelector(`.${listClass}`);
 
-                    // Create dynamic style for the card: club color background at 50% opacity
+                    // Create dynamic style for the card: club color background at 50% opacity overlayed on texture
                     let teamStyle = '';
                     if (equipa.shadow_color) {
-                        // Using hex + 80 for roughly 50% alpha
-                        teamStyle = `background-color: ${equipa.shadow_color}80; background-image: none;`;
-                        teamStyle += `box-shadow: 0 10px 15px -3px ${equipa.shadow_color}40, 0 4px 6px -2px ${equipa.shadow_color}60;`;
+                        // Create RGB from hex if possible, or just use rgba with the hex if browser supports it (most modern do)
+                        const color = equipa.shadow_color;
+                        teamStyle = `background-image: linear-gradient(rgba(255,255,255,0.2), rgba(255,255,255,0.2)), linear-gradient(${color}80, ${color}80), url('back_equipas.png');`;
+                        teamStyle += `background-size: cover; background-position: center;`;
+                        teamStyle += `box-shadow: 0 10px 15px -3px ${color}40, 0 4px 6px -2px ${color}60;`;
                     } else {
-                        teamStyle = 'background-image: none; background-color: rgba(200, 200, 200, 0.5);';
+                        teamStyle = `background-image: linear-gradient(rgba(200,200,200,0.5), rgba(200,200,200,0.5)), url('back_equipas.png');`;
+                        teamStyle += `background-size: cover; background-position: center;`;
                     }
 
                     list.forEach(atleta => {
