@@ -410,29 +410,44 @@ document.addEventListener('DOMContentLoaded', () => {
             } else if (atletas.length === 0) {
                 contentFn.innerHTML = '<p class="text-center">Nenhum atleta registado nesta equipa.</p>';
             } else {
-                contentFn.innerHTML = `<h3 class="text-center mb-3">Plantel</h3><div class="athlete-list"></div>`;
-                const list = contentFn.querySelector('.athlete-list');
-                const teamShadow = equipa.shadow_color ? `box-shadow: 0 10px 15px -3px ${equipa.shadow_color}40, 0 4px 6px -2px ${equipa.shadow_color}60;` : '';
+                const jogadores = atletas.filter(a => !a.funcao || a.funcao === 'Jogador');
+                const staff = atletas.filter(a => a.funcao && a.funcao !== 'Jogador');
 
-                atletas.forEach(atleta => {
-                    const div = document.createElement('div');
-                    div.className = 'athlete-card';
-                    if (teamShadow) div.setAttribute('style', teamShadow);
+                contentFn.innerHTML = '';
 
-                    div.innerHTML = `
-                        <div class="athlete-photo">
-                            ${atleta.foto_url
-                            ? `<img src="${atleta.foto_url}" alt="${atleta.nome}">`
-                            : '<div class="placeholder-photo">👤</div>'}
-                        </div>
-                        <div class="athlete-content-right">
-                            <div class="athlete-info">
-                                <h3>${atleta.numero ? `<span class="athlete-number">#${atleta.numero}</span> ` : ''}${atleta.nome}</h3>
+                // Helper to render sections
+                const renderCards = (list, title, listClass) => {
+                    if (list.length === 0) return;
+                    contentFn.innerHTML += `<h3 class="text-center mb-3 ${listClass === 'staff-list' ? 'mt-5' : ''}">${title}</h3><div class="athlete-list ${listClass}"></div>`;
+                    const container = contentFn.querySelector(`.${listClass}`);
+                    const teamShadow = equipa.shadow_color ? `box-shadow: 0 10px 15px -3px ${equipa.shadow_color}40, 0 4px 6px -2px ${equipa.shadow_color}60;` : '';
+
+                    list.forEach(atleta => {
+                        const div = document.createElement('div');
+                        div.className = 'athlete-card';
+                        if (teamShadow) div.setAttribute('style', teamShadow);
+                        const isStaff = atleta.funcao && atleta.funcao !== 'Jogador';
+
+                        div.innerHTML = `
+                            <div class="athlete-photo">
+                                ${atleta.foto_url ? `<img src="${atleta.foto_url}" alt="${atleta.nome}">` : '<div class="placeholder-photo">👤</div>'}
                             </div>
-                        </div>
-                    `;
-                    list.appendChild(div);
-                });
+                            <div class="athlete-content-right">
+                                <div class="athlete-info">
+                                    <h3>
+                                        ${atleta.numero ? `<span class="athlete-number">#${atleta.numero}</span> ` : ''}
+                                        ${atleta.nome}
+                                        ${isStaff ? `<span class="staff-role">(${atleta.funcao})</span>` : ''}
+                                    </h3>
+                                </div>
+                            </div>
+                        `;
+                        container.appendChild(div);
+                    });
+                };
+
+                renderCards(jogadores, 'Plantel', 'jogs-list');
+                renderCards(staff, 'Equipa Técnica', 'staff-list');
             }
 
         } else if (view === 'jogos') {
