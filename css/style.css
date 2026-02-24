@@ -702,11 +702,7 @@ h2 {
 
 
 .equipa-card {
-    background-color: var(--white);
-    background-image: url('../back_equipas.png');
-    background-size: cover;
-    background-position: center;
-    background-repeat: no-repeat;
+    background: var(--white) url('../back_equipas.png') no-repeat center/cover;
     border-radius: 8px;
     padding: 15px;
     box-shadow: var(--card-shadow);

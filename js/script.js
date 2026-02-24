@@ -389,6 +389,7 @@ document.addEventListener('DOMContentLoaded', () => {
         // Render Header (Layout Horizontal/Card - matching equipas.html)
         headerFn.className = 'equipa-card';
         headerFn.style.marginBottom = '30px';
+        headerFn.style.backgroundImage = "url('back_equipas.png')";
 
         // Apply custom shadow color if defined
         if (equipa.shadow_color) {
