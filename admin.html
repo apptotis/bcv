@@ -105,6 +105,17 @@
                     <button type="submit" class="btn-submit">Adicionar Atleta</button>
                 </form>
                 <hr>
+                <!-- Filtros Atletas -->
+                <div id="admin-atletas-filtros"
+                    style="display:flex; flex-wrap:wrap; gap:8px; margin-bottom:12px; align-items:center;">
+                    <select id="filtro-atleta-equipa"
+                        style="padding:8px; border:1px solid #ddd; border-radius:6px; font-size:0.9rem; flex:1; min-width:200px;">
+                        <option value="">Filtrar por Equipa (Todas)</option>
+                    </select>
+                    <button id="btn-limpar-filtros-atletas" type="button"
+                        style="padding:8px 14px; border-radius:6px; font-size:0.9rem; cursor:pointer; background:#eee; border:1px solid #ddd;">&#10005;
+                        Limpar</button>
+                </div>
                 <div id="admin-atletas-list" class="admin-list"></div>
             </div>
 

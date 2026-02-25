@@ -123,9 +123,11 @@ document.addEventListener('DOMContentLoaded', async () => {
         const atletaSelect = document.getElementById('atleta-equipa-id');
         const casaSelect = document.getElementById('jogo-equipa-casa');
         const foraSelect = document.getElementById('jogo-equipa-fora');
+        const filtroAtletaSelect = document.getElementById('filtro-atleta-equipa');
 
         // Limpar e popular
         [atletaSelect, casaSelect, foraSelect].forEach(sel => {
+            if (!sel) return;
             sel.innerHTML = '<option value="" disabled selected>Selecionar Equipa</option>';
             equipas.forEach(e => {
                 const opt = document.createElement('option');
@@ -137,6 +139,19 @@ document.addEventListener('DOMContentLoaded', async () => {
                 sel.appendChild(opt);
             });
         });
+
+        // Popular filtro de atletas
+        if (filtroAtletaSelect) {
+            filtroAtletaSelect.innerHTML = '<option value="">Filtrar por Equipa (Todas)</option>';
+            equipas.forEach(e => {
+                const opt = document.createElement('option');
+                opt.value = e.id;
+                const escalao = e.escalao || 'Sem Escalão';
+                const genero = e.genero ? ` ${e.genero}` : '';
+                opt.textContent = `[${escalao}${genero}] ${e.nome}`;
+                filtroAtletaSelect.appendChild(opt);
+            });
+        }
     }
 
     // --- CRUD ATLETAS ---
@@ -211,7 +226,7 @@ document.addEventListener('DOMContentLoaded', async () => {
 
     async function loadAtletasAdmin() {
         const listContainer = document.getElementById('admin-atletas-list');
-        listContainer.innerHTML = 'Carregando...';
+        if (listContainer) listContainer.innerHTML = 'Carregando...';
 
         const { data, error } = await supabase
             .from('atletas')
@@ -219,15 +234,53 @@ document.addEventListener('DOMContentLoaded', async () => {
             .order('created_at', { ascending: false });
 
         if (error) {
-            listContainer.innerHTML = 'Erro ao carregar lista de atletas.';
+            if (listContainer) listContainer.innerHTML = 'Erro ao carregar lista de atletas.';
             console.error(error);
             return;
         }
 
-        listContainer.innerHTML = '';
-        if (data.length === 0) listContainer.innerHTML = '<p>Nenhum atleta cadastrado.</p>';
+        window.allAtletasAdmin = data || [];
 
-        data.forEach(atleta => {
+        // Ligar filtros de atletas (apenas na primeira carga)
+        if (!window._filtrosAtletasAdmin) {
+            window._filtrosAtletasAdmin = true;
+
+            const filtroAtletaEquipa = document.getElementById('filtro-atleta-equipa');
+            if (filtroAtletaEquipa) {
+                filtroAtletaEquipa.addEventListener('change', filtrarERenderizerAtletasAdmin);
+            }
+
+            const btnLimpar = document.getElementById('btn-limpar-filtros-atletas');
+            if (btnLimpar) {
+                btnLimpar.addEventListener('click', () => {
+                    if (filtroAtletaEquipa) filtroAtletaEquipa.value = '';
+                    filtrarERenderizerAtletasAdmin();
+                });
+            }
+        }
+
+        filtrarERenderizerAtletasAdmin();
+    }
+
+    function filtrarERenderizerAtletasAdmin() {
+        const listContainer = document.getElementById('admin-atletas-list');
+        if (!listContainer) return;
+
+        const data = window.allAtletasAdmin || [];
+        const filtroEquipaId = document.getElementById('filtro-atleta-equipa')?.value || '';
+
+        const filtrados = data.filter(atleta => {
+            if (filtroEquipaId && String(atleta.equipa_id) !== filtroEquipaId) return false;
+            return true;
+        });
+
+        listContainer.innerHTML = '';
+        if (filtrados.length === 0) {
+            listContainer.innerHTML = data.length === 0 ? '<p>Nenhum atleta cadastrado.</p>' : '<p>Nenhum atleta encontrado com este filtro.</p>';
+            return;
+        }
+
+        filtrados.forEach(atleta => {
             const div = document.createElement('div');
             div.className = 'admin-list-item';
             div.style.borderBottom = '1px solid #ccc';
