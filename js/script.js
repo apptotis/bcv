@@ -397,7 +397,7 @@ document.addEventListener('DOMContentLoaded', () => {
             return `rgba(${r}, ${g}, ${b}, ${alpha})`;
         };
 
-        const bgUrl = 'back_equipas.png';
+        const bgUrl = 'back_plantel.png';
         const teamColor = equipa.shadow_color || '#6a1b9a';
 
         // Render Header (Layout Horizontal/Card - matching equipas.html)

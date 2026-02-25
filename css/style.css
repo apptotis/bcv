@@ -602,7 +602,7 @@ h2 {
 
 .athlete-card {
     background: var(--white);
-    background-image: url('../back_equipas.png');
+    background-image: url('../back_plantel.png');
     background-size: cover;
     background-position: center;
     background-repeat: no-repeat;
