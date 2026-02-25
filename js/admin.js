@@ -176,10 +176,12 @@ document.addEventListener('DOMContentLoaded', async () => {
             const updates = {
                 nome,
                 equipa_id: equipaId,
-                numero: numero ? parseInt(numero) : null,
+                numero: (numero !== '' && numero !== null) ? parseInt(numero) : null,
                 funcao: funcao || 'Jogador'
             };
             if (fotoUrl) updates.foto_url = fotoUrl;
+
+            console.log('Enviando updates para atleta:', updates);
 
             if (editingAtletaId) {
                 // UPDATE
@@ -243,7 +245,7 @@ document.addEventListener('DOMContentLoaded', async () => {
                     ? `<img src="${atleta.foto_url}" style="width: 40px; height: 40px; border-radius: 50%; object-fit: cover;">`
                     : '<div style="width: 40px; height: 40px; background: #eee; border-radius: 50%;"></div>'}
                     <div>
-                        <strong>${atleta.nome} ${atleta.numero ? `<span style="color: #666;">(#${atleta.numero})</span>` : ''}</strong>
+                        <strong>${atleta.nome} ${(atleta.numero !== null && atleta.numero !== undefined) ? `<span style="color: #666;">(#${atleta.numero})</span>` : ''}</strong>
                         <br>
                         <small>${atleta.funcao || 'Jogador'} - ${nomeEquipa}</small>
                     </div>
@@ -266,7 +268,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         }
 
         document.getElementById('atleta-nome').value = atleta.nome;
-        document.getElementById('atleta-numero').value = atleta.numero || '';
+        document.getElementById('atleta-numero').value = (atleta.numero !== null && atleta.numero !== undefined) ? atleta.numero : '';
         document.getElementById('atleta-funcao').value = atleta.funcao || 'Jogador';
         document.getElementById('atleta-equipa-id').value = atleta.equipa_id;
 
