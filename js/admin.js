@@ -163,7 +163,10 @@ document.addEventListener('DOMContentLoaded', async () => {
 
         const nome = document.getElementById('atleta-nome').value;
         const numero = document.getElementById('atleta-numero').value;
-        const funcao = document.getElementById('atleta-funcao').value;
+        const funcaoSelect = document.getElementById('atleta-funcao');
+        const funcaoCustomInput = document.getElementById('atleta-funcao-custom');
+        const funcaoCustomWrap = document.getElementById('atleta-funcao-custom-wrap');
+        const funcao = funcaoSelect.value === 'Outro' ? funcaoCustomInput.value : funcaoSelect.value;
         const equipaId = document.getElementById('atleta-equipa-id').value;
         const fotoFile = document.getElementById('atleta-foto-file').files[0];
 
@@ -215,6 +218,9 @@ document.addEventListener('DOMContentLoaded', async () => {
             editingAtletaId = null;
             const btn = formAtleta.querySelector('button[type="submit"]');
             if (btn) btn.textContent = "Adicionar Atleta";
+
+            // Reset custom field wrap
+            if (funcaoCustomWrap) funcaoCustomWrap.classList.add('hidden');
 
             loadAtletasAdmin(); // Atualiza lista
 
@@ -322,7 +328,19 @@ document.addEventListener('DOMContentLoaded', async () => {
 
         document.getElementById('atleta-nome').value = atleta.nome;
         document.getElementById('atleta-numero').value = (atleta.numero !== null && atleta.numero !== undefined) ? atleta.numero : '';
-        document.getElementById('atleta-funcao').value = atleta.funcao || 'Jogador';
+        const funcaoSelect = document.getElementById('atleta-funcao');
+        const predefinedFunctions = ["Jogador", "Treinador", "Treinador Adjunto", "Team Manager", "Fisioterapeuta"];
+
+        if (predefinedFunctions.includes(atleta.funcao)) {
+            funcaoSelect.value = atleta.funcao;
+            document.getElementById('atleta-funcao-custom-wrap').classList.add('hidden');
+            document.getElementById('atleta-funcao-custom').value = '';
+        } else {
+            funcaoSelect.value = 'Outro';
+            document.getElementById('atleta-funcao-custom-wrap').classList.remove('hidden');
+            document.getElementById('atleta-funcao-custom').value = atleta.funcao || '';
+        }
+
         document.getElementById('atleta-equipa-id').value = atleta.equipa_id;
 
         editingAtletaId = id;
@@ -797,6 +815,19 @@ document.addEventListener('DOMContentLoaded', async () => {
             if (wrapEquipa) wrapEquipa.style.display = selPublico.value === 'false' ? 'block' : 'none';
         }
         if (selPublico) { selPublico.addEventListener('change', toggleEquipaWrap); toggleEquipaWrap(); }
+
+        // --- LÓGICA DE FUNÇÃO CUSTOM (ATLETAS) ---
+        const atletaFuncaoSelect = document.getElementById('atleta-funcao');
+        const atletaFuncaoCustomWrap = document.getElementById('atleta-funcao-custom-wrap');
+        if (atletaFuncaoSelect && atletaFuncaoCustomWrap) {
+            atletaFuncaoSelect.addEventListener('change', () => {
+                if (atletaFuncaoSelect.value === 'Outro') {
+                    atletaFuncaoCustomWrap.classList.remove('hidden');
+                } else {
+                    atletaFuncaoCustomWrap.classList.add('hidden');
+                }
+            });
+        }
 
         formEvento.addEventListener('submit', async (e) => {
             e.preventDefault();
