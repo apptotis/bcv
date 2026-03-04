@@ -132,6 +132,7 @@ document.addEventListener('DOMContentLoaded', async () => {
             let matchEstado;
             if (estadoFilt === 'todos') matchEstado = true;
             else if (estadoFilt === 'terminado') matchEstado = terminado;
+            else if (estadoFilt === 'em-jogo') matchEstado = j.estado === 'Em Jogo';
             else matchEstado = !terminado;
 
             const matchCampo = !campoFilt || j.campo === campoFilt;
