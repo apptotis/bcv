@@ -201,7 +201,7 @@ document.addEventListener('DOMContentLoaded', async () => {
                     <div class="op-jogo-meta">
                         ${jogo.escalao ? `<strong>${jogo.escalao}</strong> &middot; ` : ''}
                         ${dataStr}${horaStr ? ` &middot; ${horaStr}` : ''}
-                        ${jogo.campo ? ` &middot; <strong>${jogo.campo}</strong>` : ''}
+                        ${jogo.campo ? ` &middot; <span class="op-campo-badge">${jogo.campo}</span>` : ''}
                     </div>
                     <span class="op-badge ${badgeClass}">${estado}</span>
                 </div>
