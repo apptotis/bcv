@@ -96,31 +96,27 @@ document.addEventListener('DOMContentLoaded', async () => {
 
         window._opAllJogos = data;
 
-        // Popular filtro de horas
-        populateHoraFilter(data);
+        // Popular filtro de campos
+        populateCampoFilter(data);
 
         // Ligar filtros (só na primeira carga)
         if (!window._opFiltrosLigados) {
             window._opFiltrosLigados = true;
             document.getElementById('op-filter-estado').addEventListener('change', renderJogos);
-            document.getElementById('op-filter-hora').addEventListener('change', renderJogos);
+            document.getElementById('op-filter-campo').addEventListener('change', renderJogos);
         }
 
         renderJogos();
     }
 
-    function populateHoraFilter(jogos) {
-        const sel = document.getElementById('op-filter-hora');
-        const horas = [...new Set(
-            jogos
-                .filter(j => j.data_hora)
-                .map(j => new Date(j.data_hora).toLocaleTimeString('pt-PT', { hour: '2-digit', minute: '2-digit' }))
-        )].sort();
+    function populateCampoFilter(jogos) {
+        const sel = document.getElementById('op-filter-campo');
+        const campos = [...new Set(jogos.map(j => j.campo).filter(Boolean))].sort();
         while (sel.options.length > 1) sel.remove(1);
-        horas.forEach(h => {
+        campos.forEach(c => {
             const opt = document.createElement('option');
-            opt.value = h;
-            opt.textContent = h;
+            opt.value = c;
+            opt.textContent = c;
             sel.appendChild(opt);
         });
     }
@@ -129,7 +125,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         const container = document.getElementById('op-jogos-list');
         const allJogos = window._opAllJogos || [];
         const estadoFilt = document.getElementById('op-filter-estado')?.value || '';
-        const horaFilt = document.getElementById('op-filter-hora')?.value || '';
+        const campoFilt = document.getElementById('op-filter-campo')?.value || '';
 
         const filtered = allJogos.filter(j => {
             const terminado = j.estado === 'Terminado' || j.estado === 'Cancelado';
@@ -138,12 +134,8 @@ document.addEventListener('DOMContentLoaded', async () => {
             else if (estadoFilt === 'terminado') matchEstado = terminado;
             else matchEstado = !terminado;
 
-            let matchHora = true;
-            if (horaFilt && j.data_hora) {
-                const jogoHora = new Date(j.data_hora).toLocaleTimeString('pt-PT', { hour: '2-digit', minute: '2-digit' });
-                matchHora = jogoHora === horaFilt;
-            }
-            return matchEstado && matchHora;
+            const matchCampo = !campoFilt || j.campo === campoFilt;
+            return matchEstado && matchCampo;
         });
 
         container.innerHTML = '';
