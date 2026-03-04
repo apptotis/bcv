@@ -180,15 +180,22 @@ document.addEventListener('DOMContentLoaded', async () => {
 
             card.innerHTML = `
                 <div class="op-jogo-header">
-                    <div>
-                        <div class="op-jogo-equipas">${casaNome} vs ${foraNome}</div>
-                        <div class="op-jogo-meta">
-                            ${jogo.escalao ? `<strong>${jogo.escalao}</strong> · ` : ''}
-                            ${dataStr}${horaStr ? ` · ${horaStr}` : ''}
-                            ${jogo.campo ? ` · ${jogo.campo}` : ''}
-                        </div>
+                    <div class="op-jogo-meta">
+                        ${jogo.escalao ? `<strong>${jogo.escalao}</strong> &middot; ` : ''}
+                        ${dataStr}${horaStr ? ` &middot; ${horaStr}` : ''}
+                        ${jogo.campo ? ` &middot; <strong>${jogo.campo}</strong>` : ''}
                     </div>
                     <span class="op-badge ${badgeClass}">${estado}</span>
+                </div>
+                <div class="op-equipa-row">
+                    <span class="op-equipa-nome">${casaNome}</span>
+                    <input class="op-resultado-input" type="number" min="0" placeholder="−"
+                        data-id="${jogo.id}" data-side="casa" value="${rc}">
+                </div>
+                <div class="op-equipa-row">
+                    <span class="op-equipa-nome">${foraNome}</span>
+                    <input class="op-resultado-input" type="number" min="0" placeholder="−"
+                        data-id="${jogo.id}" data-side="fora" value="${rf}">
                 </div>
                 <div class="op-controls">
                     <select class="op-estado-select" data-id="${jogo.id}">
@@ -197,13 +204,6 @@ document.addEventListener('DOMContentLoaded', async () => {
                         <option value="Terminado" ${estado === 'Terminado' ? 'selected' : ''}>Terminado</option>
                         <option value="Cancelado" ${estado === 'Cancelado' ? 'selected' : ''}>Cancelado</option>
                     </select>
-                    <div class="op-resultado-group">
-                        <input class="op-resultado-input" type="number" min="0" placeholder="−"
-                            data-id="${jogo.id}" data-side="casa" value="${rc}">
-                        <span class="op-sep">–</span>
-                        <input class="op-resultado-input" type="number" min="0" placeholder="−"
-                            data-id="${jogo.id}" data-side="fora" value="${rf}">
-                    </div>
                     <button class="op-save-btn" data-id="${jogo.id}">Guardar</button>
                     <span class="op-feedback" data-id="${jogo.id}" style="display:none"></span>
                 </div>
