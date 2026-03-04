@@ -84,39 +84,36 @@ document.addEventListener('DOMContentLoaded', async () => {
             return;
         }
 
-        // Ordenar: terminados/cancelados no fim
+        // Ordenar: terminados/cancelados no fim; dentro de cada grupo por campo crescente
         const isTerminado = (j) => j.estado === 'Terminado' || j.estado === 'Cancelado';
         data.sort((a, b) => {
             if (isTerminado(a) !== isTerminado(b)) return isTerminado(a) ? 1 : -1;
-            const da = a.data_hora ? new Date(a.data_hora) : new Date(0);
-            const db = b.data_hora ? new Date(b.data_hora) : new Date(0);
-            return da - db;
+            return (a.campo || '').localeCompare(b.campo || '');
         });
 
         window._opAllJogos = data;
 
-        // Popular filtro de escalões
-        populateEscalaoFilter(data);
+        // Popular filtro de campos
+        populateCampoFilter(data);
 
         // Ligar filtros (só na primeira carga)
         if (!window._opFiltrosLigados) {
             window._opFiltrosLigados = true;
             document.getElementById('op-filter-estado').addEventListener('change', renderJogos);
-            document.getElementById('op-filter-escalao').addEventListener('change', renderJogos);
+            document.getElementById('op-filter-campo').addEventListener('change', renderJogos);
         }
 
         renderJogos();
     }
 
-    function populateEscalaoFilter(jogos) {
-        const sel = document.getElementById('op-filter-escalao');
-        const escaloes = [...new Set(jogos.map(j => j.escalao).filter(Boolean))].sort();
-        // Remover opções antigas (exceto a primeira)
+    function populateCampoFilter(jogos) {
+        const sel = document.getElementById('op-filter-campo');
+        const campos = [...new Set(jogos.map(j => j.campo).filter(Boolean))].sort();
         while (sel.options.length > 1) sel.remove(1);
-        escaloes.forEach(e => {
+        campos.forEach(c => {
             const opt = document.createElement('option');
-            opt.value = e;
-            opt.textContent = e;
+            opt.value = c;
+            opt.textContent = c;
             sel.appendChild(opt);
         });
     }
@@ -125,7 +122,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         const container = document.getElementById('op-jogos-list');
         const allJogos = window._opAllJogos || [];
         const estadoFilt = document.getElementById('op-filter-estado')?.value || '';
-        const escalaoFilt = document.getElementById('op-filter-escalao')?.value || '';
+        const campoFilt = document.getElementById('op-filter-campo')?.value || '';
 
         const filtered = allJogos.filter(j => {
             const terminado = j.estado === 'Terminado' || j.estado === 'Cancelado';
@@ -134,8 +131,8 @@ document.addEventListener('DOMContentLoaded', async () => {
             else if (estadoFilt === 'terminado') matchEstado = terminado;
             else matchEstado = !terminado;
 
-            const matchEscalao = !escalaoFilt || j.escalao === escalaoFilt;
-            return matchEstado && matchEscalao;
+            const matchCampo = !campoFilt || j.campo === campoFilt;
+            return matchEstado && matchCampo;
         });
 
         container.innerHTML = '';
