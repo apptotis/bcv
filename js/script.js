@@ -199,21 +199,25 @@ document.addEventListener('DOMContentLoaded', () => {
             return;
         }
 
-        // Ordenar: 1º data, 2º estado (Em Jogo→Agendado→Terminado→Cancelado), 3º campo
+        // Ordenar: Terminado/Cancelado sempre no fim; dentro de cada grupo por data e estado
         const estadoOrdem = { 'Em Jogo': 0, 'Agendado': 1, 'Terminado': 2, 'Cancelado': 3 };
+        const isTerminado = (j) => j.estado === 'Terminado' || j.estado === 'Cancelado';
         data.sort((a, b) => {
-            // 1. Data
+            // 1. Terminados/Cancelados sempre no fim
+            if (isTerminado(a) !== isTerminado(b)) return isTerminado(a) ? 1 : -1;
+
+            // 2. Data
             const dateA = a.data_hora ? new Date(a.data_hora) : new Date(0);
             const dateB = b.data_hora ? new Date(b.data_hora) : new Date(0);
             const dateDiff = dateA - dateB;
             if (dateDiff !== 0) return dateDiff;
 
-            // 2. Estado
+            // 3. Estado
             const oa = estadoOrdem[a.estado] ?? 1;
             const ob = estadoOrdem[b.estado] ?? 1;
             if (oa !== ob) return oa - ob;
 
-            // 3. Campo
+            // 4. Campo
             return (a.campo || '').localeCompare(b.campo || '');
         });
 
@@ -230,22 +234,17 @@ document.addEventListener('DOMContentLoaded', () => {
         // Add filter event listeners
         const equipaFilter = document.getElementById('filter-equipa');
         const escalaoFilter = document.getElementById('filter-escalao');
+        const estadoFilter = document.getElementById('filter-estado');
 
-        if (equipaFilter) {
-            equipaFilter.addEventListener('change', () => {
-                const filtered = filterJogos(window.allJogos);
-                container.innerHTML = '';
-                renderJogos(filtered, container);
-            });
-        }
+        const applyFilters = () => {
+            const filtered = filterJogos(window.allJogos);
+            container.innerHTML = '';
+            renderJogos(filtered, container);
+        };
 
-        if (escalaoFilter) {
-            escalaoFilter.addEventListener('change', () => {
-                const filtered = filterJogos(window.allJogos);
-                container.innerHTML = '';
-                renderJogos(filtered, container);
-            });
-        }
+        if (equipaFilter) equipaFilter.addEventListener('change', applyFilters);
+        if (escalaoFilter) escalaoFilter.addEventListener('change', applyFilters);
+        if (estadoFilter) estadoFilter.addEventListener('change', applyFilters);
     }
 
     // Populate filters with unique values
@@ -291,6 +290,7 @@ document.addEventListener('DOMContentLoaded', () => {
     function filterJogos(jogos) {
         const equipaFilter = document.getElementById('filter-equipa')?.value || '';
         const escalaoFilter = document.getElementById('filter-escalao')?.value || '';
+        const estadoFilter = document.getElementById('filter-estado')?.value || '';
 
         return jogos.filter(jogo => {
             const matchEquipa = !equipaFilter ||
@@ -299,7 +299,17 @@ document.addEventListener('DOMContentLoaded', () => {
 
             const matchEscalao = !escalaoFilter || jogo.escalao === escalaoFilter;
 
-            return matchEquipa && matchEscalao;
+            const terminado = jogo.estado === 'Terminado' || jogo.estado === 'Cancelado';
+            let matchEstado;
+            if (estadoFilter === 'todos') {
+                matchEstado = true; // mostrar tudo
+            } else if (estadoFilter === 'terminado') {
+                matchEstado = terminado; // só terminados/cancelados
+            } else {
+                matchEstado = !terminado; // por defeito: só ativos
+            }
+
+            return matchEquipa && matchEscalao && matchEstado;
         });
     }
 
