@@ -1,0 +1,262 @@
+<!DOCTYPE html>
+<html lang="pt-PT">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="icon" type="image/svg+xml" href="favicon.svg">
+    <title>Operador de Jogos - Torneio Eurocidade</title>
+    <link rel="stylesheet" href="css/admin.css">
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&display=swap" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <style>
+        /* Estilos adicionais para a página de operador */
+        .op-jogo-card {
+            background: #fff;
+            border-radius: 12px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.10);
+            margin-bottom: 16px;
+            padding: 16px;
+            border-left: 5px solid #ccc;
+            transition: border-color 0.2s;
+        }
+
+        .op-jogo-card.estado-agendado {
+            border-left-color: #2196F3;
+        }
+
+        .op-jogo-card.estado-em-jogo {
+            border-left-color: #4CAF50;
+        }
+
+        .op-jogo-card.estado-terminado {
+            border-left-color: #9E9E9E;
+        }
+
+        .op-jogo-card.estado-cancelado {
+            border-left-color: #f44336;
+        }
+
+        .op-jogo-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            flex-wrap: wrap;
+            gap: 8px;
+            margin-bottom: 12px;
+        }
+
+        .op-jogo-equipas {
+            font-size: 1.05rem;
+            font-weight: 700;
+            color: #1a1a2e;
+        }
+
+        .op-jogo-meta {
+            font-size: 0.82rem;
+            color: #666;
+            margin-top: 2px;
+        }
+
+        .op-badge {
+            display: inline-block;
+            padding: 3px 10px;
+            border-radius: 20px;
+            font-size: 0.78rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .op-badge.agendado {
+            background: #e3f2fd;
+            color: #1565C0;
+        }
+
+        .op-badge.em-jogo {
+            background: #e8f5e9;
+            color: #2E7D32;
+        }
+
+        .op-badge.terminado {
+            background: #f5f5f5;
+            color: #616161;
+        }
+
+        .op-badge.cancelado {
+            background: #ffebee;
+            color: #c62828;
+        }
+
+        .op-controls {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            align-items: center;
+            margin-top: 12px;
+            padding-top: 12px;
+            border-top: 1px solid #eee;
+        }
+
+        .op-estado-select {
+            flex: 1;
+            min-width: 160px;
+            padding: 8px 10px;
+            border-radius: 8px;
+            border: 1.5px solid #ddd;
+            font-size: 0.95rem;
+            background: #f9f9f9;
+            cursor: pointer;
+        }
+
+        .op-resultado-group {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .op-resultado-input {
+            width: 60px;
+            padding: 8px;
+            border-radius: 8px;
+            border: 1.5px solid #ddd;
+            font-size: 1rem;
+            font-weight: 700;
+            text-align: center;
+            background: #f9f9f9;
+        }
+
+        .op-sep {
+            font-weight: 900;
+            font-size: 1.1rem;
+            color: #999;
+        }
+
+        .op-save-btn {
+            padding: 8px 18px;
+            background: #4a148c;
+            color: #fff;
+            border: none;
+            border-radius: 8px;
+            font-size: 0.9rem;
+            font-weight: 700;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+
+        .op-save-btn:hover {
+            background: #6a1b9a;
+        }
+
+        .op-save-btn:active {
+            background: #38006b;
+        }
+
+        .op-save-btn.saving {
+            background: #aaa;
+            cursor: not-allowed;
+        }
+
+        .op-success-msg {
+            font-size: 0.82rem;
+            color: #2E7D32;
+            font-weight: 700;
+            animation: fadeout 2s forwards;
+        }
+
+        @keyframes fadeout {
+            0% {
+                opacity: 1;
+            }
+
+            60% {
+                opacity: 1;
+            }
+
+            100% {
+                opacity: 0;
+            }
+        }
+
+        #op-jogos-container {
+            max-width: 700px;
+            margin: 0 auto;
+            padding: 0 12px 40px;
+        }
+
+        #op-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background: #4a148c;
+            color: white;
+            padding: 14px 20px;
+            margin-bottom: 20px;
+        }
+
+        #op-header h1 {
+            font-size: 1.15rem;
+            margin: 0;
+        }
+
+        #op-filter-bar {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            margin-bottom: 16px;
+        }
+
+        #op-filter-bar select {
+            flex: 1;
+            min-width: 140px;
+            padding: 8px 10px;
+            border-radius: 8px;
+            border: 1.5px solid #ddd;
+            font-size: 0.9rem;
+        }
+    </style>
+</head>
+
+<body>
+    <!-- Login Container -->
+    <div id="admin-login-container">
+        <div class="login-card">
+            <h2>Operador de Jogos</h2>
+            <form id="login-form">
+                <input type="email" id="admin-email" placeholder="Email" required autocomplete="email">
+                <input type="password" id="admin-password" placeholder="Senha" required autocomplete="current-password">
+                <button type="submit" id="btn-login" class="btn-primary">Entrar</button>
+            </form>
+            <p id="login-error" class="error-msg hidden"></p>
+        </div>
+    </div>
+
+    <!-- Painel Operador -->
+    <div id="op-panel" class="hidden">
+        <div id="op-header">
+            <h1>🏀 Operador de Jogos</h1>
+            <button id="btn-logout" class="btn-logout">Sair</button>
+        </div>
+
+        <div id="op-jogos-container">
+            <div id="op-filter-bar">
+                <select id="op-filter-estado">
+                    <option value="">Jogos Ativos</option>
+                    <option value="terminado">Terminados/Cancelados</option>
+                    <option value="todos">Todos os Jogos</option>
+                </select>
+                <select id="op-filter-escalao">
+                    <option value="">Todos os Escalões</option>
+                </select>
+            </div>
+            <div id="op-jogos-list">
+                <p class="loading">A carregar jogos...</p>
+            </div>
+        </div>
+    </div>
+
+    <script src="js/config.js?v=mobile21"></script>
+    <script src="js/operador.js?v=1"></script>
+</body>
+
+</html>
