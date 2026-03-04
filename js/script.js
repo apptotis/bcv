@@ -762,12 +762,18 @@ document.addEventListener('DOMContentLoaded', () => {
             const tipoNome = evento.tipo_evento?.nome || 'Evento';
             const icone = eventoIcons[evento.tipo_evento_id] || '📅';
 
+            let horaStr = hora;
+            if (evento.data_hora_fim) {
+                const horaFim = new Date(evento.data_hora_fim).toLocaleTimeString('pt-PT', { hour: '2-digit', minute: '2-digit' });
+                horaStr = `${hora} – ${horaFim}`;
+            }
+
             card.innerHTML = `
                 <div class="evento-icon">${icone}</div>
                 <div class="evento-info">
                     <h3 class="evento-tipo">${tipoNome}</h3>
                     <p class="evento-local">📍 ${evento.local || 'Local a definir'}</p>
-                    <p class="evento-data">🗓️ ${dia} &nbsp; 🕐 ${hora}</p>
+                    <p class="evento-data">🗓️ ${dia} &nbsp; 🕐 ${horaStr}</p>
                     ${evento.descricao ? `<p class="evento-descricao">${evento.descricao}</p>` : ''}
                 </div>
             `;
