@@ -107,6 +107,23 @@ document.addEventListener('DOMContentLoaded', async () => {
         }
 
         renderJogos();
+
+        // Realtime: escutar alterações de outros operadores
+        if (!window._opRealtimeChannel) {
+            window._opRealtimeChannel = supabase
+                .channel('operador-jogos-realtime')
+                .on('postgres_changes',
+                    { event: 'UPDATE', schema: 'public', table: 'jogos' },
+                    (payload) => {
+                        const idx = (window._opAllJogos || []).findIndex(j => j.id === payload.new.id);
+                        if (idx !== -1) {
+                            window._opAllJogos[idx] = { ...window._opAllJogos[idx], ...payload.new };
+                        }
+                        renderJogos();
+                    }
+                )
+                .subscribe();
+        }
     }
 
     function populateCampoFilter(jogos) {

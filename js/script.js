@@ -245,6 +245,24 @@ document.addEventListener('DOMContentLoaded', () => {
         if (equipaFilter) equipaFilter.addEventListener('change', applyFilters);
         if (escalaoFilter) escalaoFilter.addEventListener('change', applyFilters);
         if (estadoFilter) estadoFilter.addEventListener('change', applyFilters);
+
+        // Realtime: atualizar automaticamente quando o operador guarda um resultado
+        supabase
+            .channel('jogos-publico-realtime')
+            .on('postgres_changes',
+                { event: 'UPDATE', schema: 'public', table: 'jogos' },
+                (payload) => {
+                    const idx = window.allJogos.findIndex(j => j.id === payload.new.id);
+                    if (idx !== -1) {
+                        // Preservar os dados joinés (equipa_casa, equipa_fora) e atualizar o resto
+                        window.allJogos[idx] = { ...window.allJogos[idx], ...payload.new };
+                    }
+                    const filtered = filterJogos(window.allJogos);
+                    container.innerHTML = '';
+                    renderJogos(filtered, container);
+                }
+            )
+            .subscribe();
     }
 
     // Populate filters with unique values
