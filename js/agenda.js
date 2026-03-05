@@ -71,20 +71,14 @@
             const [
                 { data: equipa, error: e1 },
                 { data: jogos, error: e2 },
-                { data: eventosPublicos, error: e3 },
-                { data: relacoesPrivadas, error: e4 },
-                { data: tiposBD, error: e5 },
+                { data: relacoesPrivadas, error: e3 },
+                { data: tiposBD, error: e4 },
             ] = await Promise.all([
                 supabase.from('equipas').select('*').eq('id', equipaId).single(),
                 supabase
                     .from('jogos')
                     .select(`*, equipa_casa:equipas!equipa_casa_id(id,nome,logo_url), equipa_fora:equipas!equipa_fora_id(id,nome,logo_url)`)
                     .or(`equipa_casa_id.eq.${equipaId},equipa_fora_id.eq.${equipaId}`)
-                    .order('data_hora', { ascending: true }),
-                supabase
-                    .from('eventos')
-                    .select('*')
-                    .eq('is_publico', true)
                     .order('data_hora', { ascending: true }),
                 supabase
                     .from('evento_equipas')
@@ -123,8 +117,8 @@
                 eventosPrivados = evPriv || [];
             }
 
-            // 3. Combinar eventos
-            const todosEventos = [...(eventosPublicos || []), ...eventosPrivados];
+            // 3. Apenas eventos privados da equipa
+            const todosEventos = eventosPrivados;
 
             renderAgenda(equipa, jogos || [], todosEventos);
             sessionStorage.setItem('agenda_pin', pin);
