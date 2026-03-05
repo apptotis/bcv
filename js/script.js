@@ -319,12 +319,12 @@ document.addEventListener('DOMContentLoaded', () => {
 
             const terminado = jogo.estado === 'Terminado' || jogo.estado === 'Cancelado';
             let matchEstado;
-            if (estadoFilter === 'todos') {
-                matchEstado = true; // mostrar tudo
-            } else if (estadoFilter === 'terminado') {
-                matchEstado = terminado; // só terminados/cancelados
+            if (estadoFilter === 'terminado') {
+                matchEstado = terminado;
+            } else if (estadoFilter === 'em-jogo') {
+                matchEstado = jogo.estado === 'Em Jogo';
             } else {
-                matchEstado = !terminado; // por defeito: só ativos
+                matchEstado = true; // todos (default)
             }
 
             return matchEquipa && matchEscalao && matchEstado;
