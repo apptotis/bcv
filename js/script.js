@@ -747,7 +747,7 @@ document.addEventListener('DOMContentLoaded', () => {
     // Ícones por tipo de evento
     const eventoIcons = {
         1: '🏀', 2: '📸', 3: '🍽️', 4: '🍷', 5: '🥐',
-        6: '🏀', 7: '🏊', 8: '🚶', 9: '🎶', 10: '⚡',
+        6: '🏀', 7: '🌳', 8: '🚶', 9: '🎶', 10: '⚡',
         11: '🏆', 12: '🎉', 13: '🌲'
     };
 

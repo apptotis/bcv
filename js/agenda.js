@@ -10,7 +10,7 @@
         4: { icone: '🍽️', titulo: 'Jantar', cat: 'cat-refeicao' },
         5: { icone: '🍽️', titulo: 'Pequeno Almoço', cat: 'cat-refeicao' },
         6: { icone: '🎈', titulo: 'Insufláveis', cat: 'cat-lazer' },
-        7: { icone: '🏊', titulo: 'Piscina', cat: 'cat-lazer' },
+        7: { icone: '🌳', titulo: 'Piscina', cat: 'cat-lazer' },
         8: { icone: '🚶', titulo: 'Passeio Muralhas', cat: 'cat-lazer' },
         9: { icone: '🎶', titulo: 'Discoteca', cat: 'cat-lazer' },
         10: { icone: '⚡', titulo: 'Jogo Elimina', cat: 'cat-jogo' },
