@@ -920,6 +920,7 @@ document.addEventListener('DOMContentLoaded', async () => {
 
     async function loadTipoEventos() {
         const select = document.getElementById('evento-tipo');
+        const filtroTipo = document.getElementById('filtro-evento-tipo');
         if (!select) return;
 
         const { data, error } = await supabase.from('tipo_eventos').select('id, nome').order('id');
@@ -931,11 +932,20 @@ document.addEventListener('DOMContentLoaded', async () => {
 
         allTipoEventos = data;
         select.innerHTML = '<option value="" disabled selected>Selecionar Tipo de Evento</option>';
+        if (filtroTipo) filtroTipo.innerHTML = '<option value="">Todos os Tipos</option>';
+
         data.forEach(t => {
             const opt = document.createElement('option');
             opt.value = t.id;
             opt.textContent = t.nome;
             select.appendChild(opt);
+
+            if (filtroTipo) {
+                const optFiltro = document.createElement('option');
+                optFiltro.value = t.id;
+                optFiltro.textContent = t.nome;
+                filtroTipo.appendChild(optFiltro);
+            }
         });
     }
 
@@ -955,13 +965,65 @@ document.addEventListener('DOMContentLoaded', async () => {
             return;
         }
 
+        window.allEventosAdmin = data || [];
+
+        // Ligar filtros apenas na primeira carga
+        if (!window._filtrosEventosAdmin) {
+            window._filtrosEventosAdmin = true;
+
+            ['filtro-evento-tipo', 'filtro-evento-data', 'filtro-evento-hora'].forEach(id => {
+                const el = document.getElementById(id);
+                if (el) el.addEventListener('change', filtrarERenderizarEventosAdmin);
+            });
+            document.getElementById('filtro-evento-hora')?.addEventListener('input', filtrarERenderizarEventosAdmin);
+
+            const btnLimpar = document.getElementById('btn-limpar-filtros-eventos');
+            if (btnLimpar) btnLimpar.addEventListener('click', () => {
+                document.getElementById('filtro-evento-tipo').value = '';
+                document.getElementById('filtro-evento-data').value = '';
+                document.getElementById('filtro-evento-hora').value = '';
+                filtrarERenderizarEventosAdmin();
+            });
+        }
+
+        filtrarERenderizarEventosAdmin();
+    }
+
+    function filtrarERenderizarEventosAdmin() {
+        const listContainer = document.getElementById('admin-eventos-list');
+        if (!listContainer) return;
+        const data = window.allEventosAdmin || [];
+
+        const filtroTipo = document.getElementById('filtro-evento-tipo')?.value || '';
+        const filtroData = document.getElementById('filtro-evento-data')?.value || '';
+        const filtroHora = document.getElementById('filtro-evento-hora')?.value || '';
+
+        const filtrados = data.filter(evento => {
+            const dt = evento.data_hora ? new Date(evento.data_hora) : null;
+
+            if (filtroTipo) {
+                if (String(evento.tipo_evento_id) !== filtroTipo) return false;
+            }
+            if (filtroData && dt) {
+                // Obter a data local como string (YYYY-MM-DD)
+                const eventoData = dt.toLocaleDateString('en-CA');
+                if (eventoData !== filtroData) return false;
+            }
+            if (filtroHora && dt) {
+                // Obter a hora local como string (HH:MM)
+                const eventoHora = dt.toTimeString().slice(0, 5);
+                if (eventoHora !== filtroHora) return false;
+            }
+            return true;
+        });
+
         listContainer.innerHTML = '';
-        if (!data || data.length === 0) {
-            listContainer.innerHTML = '<p>Nenhum evento criado.</p>';
+        if (filtrados.length === 0) {
+            listContainer.innerHTML = '<p>Nenhum evento encontrado com estes filtros.</p>';
             return;
         }
 
-        data.forEach(evento => {
+        filtrados.forEach(evento => {
             const div = document.createElement('div');
             div.className = 'admin-list-item';
             div.style.borderBottom = '1px solid #ccc';

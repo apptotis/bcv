@@ -211,6 +211,21 @@
                     <button type="submit" class="btn-submit">Adicionar Evento</button>
                 </form>
                 <hr>
+                <!-- Filtros Eventos -->
+                <div id="admin-eventos-filtros"
+                    style="display:flex; flex-wrap:wrap; gap:8px; margin-bottom:12px; align-items:center;">
+                    <select id="filtro-evento-tipo"
+                        style="padding:8px; border:1px solid #ddd; border-radius:6px; font-size:0.9rem; flex:1; min-width:160px;">
+                        <option value="">Todos os Tipos</option>
+                    </select>
+                    <input type="date" id="filtro-evento-data"
+                        style="padding:8px; border:1px solid #ddd; border-radius:6px; font-size:0.9rem;">
+                    <input type="time" id="filtro-evento-hora"
+                        style="padding:8px; border:1px solid #ddd; border-radius:6px; font-size:0.9rem;">
+                    <button id="btn-limpar-filtros-eventos" type="button"
+                        style="padding:8px 14px; border-radius:6px; font-size:0.9rem; cursor:pointer; background:#eee; border:1px solid #ddd;">&#10005;
+                        Limpar</button>
+                </div>
                 <div id="admin-eventos-list" class="admin-list"></div>
             </div>
 
