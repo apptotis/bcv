@@ -33,13 +33,33 @@
             gap: 8px;
         }
 
-        .info-contact-row {
-            display: flex;
-            align-items: center;
-            gap: 10px;
-            margin-bottom: 8px;
+        .info-contact-item {
+            margin-bottom: 16px;
             font-size: 0.95rem;
             color: var(--text-color);
+            line-height: 1.4;
+        }
+
+        .info-contact-item .contact-name {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            margin-bottom: 2px;
+        }
+
+        .info-contact-item .contact-detail {
+            margin-left: 28px;
+            color: #555;
+        }
+
+        .info-contact-item a {
+            color: var(--primary-color);
+            text-decoration: none;
+            font-weight: 500;
+        }
+
+        .info-contact-item a:hover {
+            text-decoration: underline;
         }
 
         .info-contact-row a {
@@ -174,24 +194,34 @@
                 <!-- Bloco 1: Organização -->
                 <div class="info-block">
                     <h2>🏢 Organização e Contactos</h2>
-                    <div class="info-contact-row">
-                        📞 <strong>Bruno Fernandes</strong> - <a href="tel:+351963836846">963 836 846</a> (Coord.
-                        técnico da formação BC Valença)
+
+                    <div class="info-contact-item">
+                        <div class="contact-name">📞 <strong>Bruno Fernandes</strong></div>
+                        <div class="contact-detail"><a href="tel:+351963836846">963 836 846</a></div>
+                        <div class="contact-detail" style="font-size: 0.85rem;">(Coord. técnico da formação BC Valença)
+                        </div>
                     </div>
-                    <div class="info-contact-row">
-                        📞 <strong>Michael da Costa</strong> - <a href="tel:+351934296831">934 296 831</a> (Presidente
-                        BC Valença)
+
+                    <div class="info-contact-item">
+                        <div class="contact-name">📞 <strong>Michael da Costa</strong></div>
+                        <div class="contact-detail"><a href="tel:+351934296831">934 296 831</a></div>
+                        <div class="contact-detail" style="font-size: 0.85rem;">(Presidente BC Valença)</div>
                     </div>
-                    <div class="info-contact-row">
-                        📞 <strong>Henrique Moreira</strong> - <a href="tel:+351913433112">913 433 112</a>
-                        (Vice-Presidente BC Valença)
+
+                    <div class="info-contact-item">
+                        <div class="contact-name">📞 <strong>Henrique Moreira</strong></div>
+                        <div class="contact-detail"><a href="tel:+351913433112">913 433 112</a></div>
+                        <div class="contact-detail" style="font-size: 0.85rem;">(Vice-Presidente BC Valença)</div>
                     </div>
-                    <div class="info-contact-row">
-                        📞 <strong>Osvaldo Lages</strong> - <a href="tel:+351966893139">966 893 139</a> (Diretor BC
-                        Valença)
+
+                    <div class="info-contact-item">
+                        <div class="contact-name">📞 <strong>Osvaldo Lages</strong></div>
+                        <div class="contact-detail"><a href="tel:+351966893139">966 893 139</a></div>
+                        <div class="contact-detail" style="font-size: 0.85rem;">(Diretor BC Valença)</div>
                     </div>
-                    <div class="info-contact-row" style="margin-top: 10px;">
-                        📧 <a href="mailto:torneio@exemple.pt">torneio@exemple.pt</a>
+
+                    <div class="info-contact-item" style="margin-top: 16px;">
+                        <div class="contact-name">📧 <a href="mailto:torneio@exemple.pt">torneio@exemple.pt</a></div>
                     </div>
                 </div>
 
