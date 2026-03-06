@@ -16,7 +16,7 @@
         10: { icone: '⚡', titulo: 'Jogo Elimina', cat: 'cat-jogo' },
         11: { icone: '🏁', titulo: 'Encerramento', cat: 'cat-cerimonia' },
         12: { icone: '🎉', titulo: 'Abertura Torneio', cat: 'cat-cerimonia' },
-        13: { icone: '🌳', titulo: 'Arborismo', cat: 'cat-lazer' },
+        13: { icone: '📋', titulo: 'Arborismo', cat: 'cat-lazer' },
     };
 
     const ESTADO_BADGE = {
