@@ -97,7 +97,8 @@ document.addEventListener('DOMContentLoaded', () => {
         });
 
         container.innerHTML = '';
-        container.innerHTML = '';
+        const fragment = document.createDocumentFragment();
+
         data.forEach(equipa => {
             const card = document.createElement('div');
             card.classList.add('equipa-card');
@@ -150,7 +151,7 @@ document.addEventListener('DOMContentLoaded', () => {
             //        | [BTN] [ICONS]
             card.innerHTML = `
                 <div class="equipa-logo">
-                    ${equipa.logo_url ? `<img src="${equipa.logo_url}" alt="${equipa.nome}">` : '<div class="placeholder-logo" style="font-size:2rem">🏀</div>'}
+                    ${equipa.logo_url ? `<img src="${equipa.logo_url}" alt="${equipa.nome}" loading="lazy">` : '<div class="placeholder-logo" style="font-size:2rem">🏀</div>'}
                 </div>
                 <div class="equipa-content-right">
                     <div class="equipa-info">
@@ -164,8 +165,9 @@ document.addEventListener('DOMContentLoaded', () => {
                     </div>
                 </div>
             `;
-            container.appendChild(card);
+            fragment.appendChild(card);
         });
+        container.appendChild(fragment);
     }
 
     async function fetchJogos() {
@@ -332,6 +334,7 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     function renderJogos(jogos, container) {
+        const fragment = document.createDocumentFragment();
         jogos.forEach(jogo => {
             const item = document.createElement('div');
             item.classList.add('jogo-item');
@@ -369,7 +372,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     <span class="jogo-campo">${jogo.campo || 'Campo 1'}</span>
                 </div>
                 <div class="jogo-linha-equipa">
-                    ${logoCasa ? `<img src="${logoCasa}" alt="${equipaCasa}" class="jogo-logo">` : '<div class="jogo-logo-placeholder">🏀</div>'}
+                    ${logoCasa ? `<img src="${logoCasa}" alt="${equipaCasa}" class="jogo-logo" loading="lazy">` : '<div class="jogo-logo-placeholder">🏀</div>'}
                     <div class="jogo-equipa-info">
                         <div class="jogo-equipa-nome">${equipaCasa}</div>
                         ${escalaoGenero ? `<div class="jogo-equipa-escalao">${escalaoGenero}</div>` : ''}
@@ -377,7 +380,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     <span class="jogo-resultado">${resultadoCasa}</span>
                 </div>
                 <div class="jogo-linha-equipa">
-                    ${logoFora ? `<img src="${logoFora}" alt="${equipaFora}" class="jogo-logo">` : '<div class="jogo-logo-placeholder">🏀</div>'}
+                    ${logoFora ? `<img src="${logoFora}" alt="${equipaFora}" class="jogo-logo" loading="lazy">` : '<div class="jogo-logo-placeholder">🏀</div>'}
                     <div class="jogo-equipa-info">
                         <div class="jogo-equipa-nome">${equipaFora}</div>
                         ${escalaoGenero ? `<div class="jogo-equipa-escalao">${escalaoGenero}</div>` : ''}
@@ -385,8 +388,9 @@ document.addEventListener('DOMContentLoaded', () => {
                     <span class="jogo-resultado">${resultadoFora}</span>
                 </div>
             `;
-            container.appendChild(item);
+            fragment.appendChild(item);
         });
+        container.appendChild(fragment);
     }
 
     async function fetchEquipaDetalhes() {
