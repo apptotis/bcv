@@ -820,11 +820,6 @@ document.addEventListener('DOMContentLoaded', () => {
             const card = document.createElement('div');
             card.className = 'patrocinador-card';
 
-            // Badges para Comer e Dormir
-            let badges = '';
-            if (p.comer) badges += '<span class="badge badge-comer">🍽️ Comer</span>';
-            if (p.dormir) badges += '<span class="badge badge-dormir">🛏️ Dormir</span>';
-
             // Social & Maps
             let links = '';
             if (p.google_maps_url) {
@@ -844,7 +839,6 @@ document.addEventListener('DOMContentLoaded', () => {
                 <div class="sponsor-details">
                     <div class="sponsor-header">
                         <h3>${p.nome}</h3>
-                        <div class="sponsor-badges">${badges}</div>
                     </div>
                     <p class="sponsor-type">${p.tipo_servico || ''}</p>
                     <p class="sponsor-address">${p.morada || ''} ${p.codigo_postal ? `(${p.codigo_postal})` : ''}</p>
