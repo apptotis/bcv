@@ -32,6 +32,8 @@ document.addEventListener('DOMContentLoaded', () => {
         initOpinioes();
     } else if (page.includes('equipa') && supabase) { // 'equipa.html' singular
         fetchEquipaDetalhes();
+    } else if (page.includes('patrocinadores') && supabase) {
+        fetchPatrocinadores();
     } else {
         console.log("Nenhuma lógica específica para esta página ou Supabase não iniciado.");
     }
@@ -783,5 +785,79 @@ document.addEventListener('DOMContentLoaded', () => {
             `;
             container.appendChild(card);
         });
+    }
+
+    // ============================================================
+    // PATROCINADORES - Listagem de patrocinadores
+    // ============================================================
+    async function fetchPatrocinadores() {
+        const container = document.getElementById('patrocinadores-list');
+        if (!container) return;
+
+        const { data, error } = await supabase
+            .from('patrocinadores')
+            .select('*')
+            .order('nome', { ascending: true });
+
+        if (error) {
+            console.error('Erro ao buscar patrocinadores:', error);
+            container.innerHTML = '<p class="error">Erro ao carregar patrocinadores.</p>';
+            return;
+        }
+
+        if (!data || data.length === 0) {
+            container.innerHTML = '<p>Inserindo patrocinadores em breve...</p>';
+            return;
+        }
+
+        container.innerHTML = '';
+        renderPatrocinadores(data, container);
+    }
+
+    function renderPatrocinadores(data, container) {
+        const fragment = document.createDocumentFragment();
+
+        data.forEach(p => {
+            const card = document.createElement('div');
+            card.className = 'patrocinador-card';
+
+            // Badges para Comer e Dormir
+            let badges = '';
+            if (p.comer) badges += '<span class="badge badge-comer">🍽️ Comer</span>';
+            if (p.dormir) badges += '<span class="badge badge-dormir">🛏️ Dormir</span>';
+
+            // Social & Maps
+            let links = '';
+            if (p.google_maps_url) {
+                links += `<a href="${p.google_maps_url}" target="_blank" class="sponsor-link maps-link" title="Localização Google Maps">📍 Google Maps</a>`;
+            }
+            if (p.facebook) {
+                links += `<a href="${p.facebook}" target="_blank" class="sponsor-link link-fb" title="Facebook">Facebook</a>`;
+            }
+            if (p.instagram) {
+                links += `<a href="${p.instagram}" target="_blank" class="sponsor-link link-ig" title="Instagram">Instagram</a>`;
+            }
+
+            card.innerHTML = `
+                <div class="sponsor-logo">
+                    ${p.logo_url ? `<img src="${p.logo_url}" alt="${p.nome}" loading="lazy">` : '<div class="sponsor-logo-placeholder">💎</div>'}
+                </div>
+                <div class="sponsor-details">
+                    <div class="sponsor-header">
+                        <h3>${p.nome}</h3>
+                        <div class="sponsor-badges">${badges}</div>
+                    </div>
+                    <p class="sponsor-type">${p.tipo_servico || ''}</p>
+                    <p class="sponsor-address">${p.morada || ''} ${p.codigo_postal ? `(${p.codigo_postal})` : ''}</p>
+                    ${p.telefone ? `<p class="sponsor-tel">📞 ${p.telefone}</p>` : ''}
+                    <div class="sponsor-footer">
+                        ${links}
+                    </div>
+                </div>
+            `;
+            fragment.appendChild(card);
+        });
+
+        container.appendChild(fragment);
     }
 });
