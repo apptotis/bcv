@@ -17,22 +17,21 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     // 2. Lógica Específica por Página
-    const path = window.location.pathname;
-    const page = path.split("/").pop();
-    console.log("Current path:", path, "Detected page:", page);
+    const path = window.location.pathname.toLowerCase();
+    console.log("Current path:", path);
 
-    if (page.includes('equipas') && supabase) {
+    if (path.includes('equipas') && supabase) {
         console.log("Iniciando fetchEquipas...");
         fetchEquipas();
-    } else if (page.includes('jogos') && supabase) {
+    } else if (path.includes('jogos') && supabase) {
         fetchJogos();
-    } else if (page.includes('eventos') && supabase) {
+    } else if (path.includes('eventos') && supabase) {
         fetchEventos();
-    } else if (page.includes('opinioes') && supabase) {
+    } else if (path.includes('opinioes') && supabase) {
         initOpinioes();
-    } else if (page.includes('equipa') && supabase) { // 'equipa.html' singular
+    } else if (path.includes('equipa') && !path.includes('equipas') && supabase) { // 'equipa.html' singular
         fetchEquipaDetalhes();
-    } else if (page.includes('patrocinadores') && supabase) {
+    } else if (path.includes('patrocinadores') && supabase) {
         fetchPatrocinadores();
     } else {
         console.log("Nenhuma lógica específica para esta página ou Supabase não iniciado.");
