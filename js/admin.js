@@ -112,6 +112,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         await loadJogosAdmin();
         await loadTipoEventos(); // Carregar tipos de evento
         await loadEventosAdmin();
+        await loadPatrocinadoresAdmin();
         await loadGeralAdmin();
     }
 
@@ -1180,5 +1181,161 @@ document.addEventListener('DOMContentLoaded', async () => {
             doc.save('equipas_torneio.pdf');
         });
     }
+
+    // --- CRUD PATROCINADORES ---
+    const formPatrocinador = document.getElementById('form-patrocinador');
+    let editingPatrocinadorId = null;
+
+    if (formPatrocinador) {
+        formPatrocinador.addEventListener('submit', async (e) => {
+            e.preventDefault();
+
+            const nome = document.getElementById('patrocinador-nome').value;
+            const tipo = document.getElementById('patrocinador-tipo').value;
+            const morada = document.getElementById('patrocinador-morada').value;
+            const cp = document.getElementById('patrocinador-cp').value;
+            const telefone = document.getElementById('patrocinador-telefone').value;
+            const facebook = document.getElementById('patrocinador-facebook').value;
+            const instagram = document.getElementById('patrocinador-instagram').value;
+            const maps = document.getElementById('patrocinador-maps').value;
+            const comer = document.getElementById('patrocinador-comer').checked;
+            const dormir = document.getElementById('patrocinador-dormir').checked;
+            const logoFile = document.getElementById('patrocinador-logo-file').files[0];
+
+            let logoUrl = null;
+
+            try {
+                // Upload Logo if exists
+                if (logoFile) {
+                    const fileName = `patrocinador_${Date.now()}_${logoFile.name.replace(/\s/g, '_')}`;
+                    const { data, error } = await supabase.storage.from('logos').upload(fileName, logoFile);
+                    if (error) throw error;
+                    const { data: publicData } = supabase.storage.from('logos').getPublicUrl(fileName);
+                    logoUrl = publicData.publicUrl;
+                }
+
+                const updates = {
+                    nome,
+                    tipo_servico: tipo,
+                    morada,
+                    codigo_postal: cp || null,
+                    telefone,
+                    facebook,
+                    instagram,
+                    google_maps_url: maps,
+                    comer,
+                    dormir
+                };
+
+                if (logoUrl) updates.logo_url = logoUrl;
+
+                if (editingPatrocinadorId) {
+                    const { error } = await supabase.from('patrocinadores').update(updates).eq('id', editingPatrocinadorId);
+                    if (error) throw error;
+                    alert('Patrocinador atualizado com sucesso!');
+                } else {
+                    const { error } = await supabase.from('patrocinadores').insert([updates]);
+                    if (error) throw error;
+                    alert('Patrocinador adicionado com sucesso!');
+                }
+
+                formPatrocinador.reset();
+                editingPatrocinadorId = null;
+                formPatrocinador.querySelector('button[type="submit"]').textContent = 'Adicionar Patrocinador';
+                loadPatrocinadoresAdmin();
+
+            } catch (err) {
+                console.error(err);
+                alert('Erro: ' + err.message);
+            }
+        });
+    }
+
+    async function loadPatrocinadoresAdmin() {
+        const listContainer = document.getElementById('admin-patrocinadores-list');
+        if (!listContainer) return;
+
+        listContainer.innerHTML = 'Carregando...';
+
+        const { data, error } = await supabase
+            .from('patrocinadores')
+            .select('*')
+            .order('nome');
+
+        if (error) {
+            listContainer.innerHTML = 'Erro ao carregar patrocinadores.';
+            console.error(error);
+            return;
+        }
+
+        listContainer.innerHTML = '';
+        if (data.length === 0) {
+            listContainer.innerHTML = '<p>Nenhum patrocinador cadastrado.</p>';
+            return;
+        }
+
+        data.forEach(p => {
+            const div = document.createElement('div');
+            div.className = 'admin-list-item';
+            div.style.borderBottom = '1px solid #ccc';
+            div.style.padding = '10px 0';
+            div.style.display = 'flex';
+            div.style.justifyContent = 'space-between';
+            div.style.alignItems = 'center';
+
+            div.innerHTML = `
+                <div style="display: flex; align-items: center; gap: 10px;">
+                    ${p.logo_url 
+                        ? `<img src="${p.logo_url}" style="width: 40px; height: 40px; object-fit: contain;">` 
+                        : '<div style="width: 40px; height: 40px; background: #eee; border-radius: 4px;"></div>'}
+                    <div>
+                        <strong>${p.nome}</strong> (${p.tipo_servico || 'Sem tipo'})
+                        <br>
+                        <small>${p.morada || ''} | ${p.telefone || ''}</small>
+                        <br>
+                        <small>Comer: ${p.comer ? 'Sim' : 'Não'} | Dormir: ${p.dormir ? 'Sim' : 'Não'}</small>
+                    </div>
+                </div>
+                <div style="display: flex; gap: 5px;">
+                    <button class="btn-success btn-sm" onclick="editPatrocinador('${p.id}')">Editar</button>
+                    <button class="btn-danger btn-sm" onclick="deletePatrocinador('${p.id}')">Excluir</button>
+                </div>
+            `;
+            listContainer.appendChild(div);
+        });
+    }
+
+    window.editPatrocinador = async (id) => {
+        const { data: p, error } = await supabase.from('patrocinadores').select('*').eq('id', id).single();
+        if (error) {
+            alert('Erro ao buscar patrocinador: ' + error.message);
+            return;
+        }
+
+        document.getElementById('patrocinador-nome').value = p.nome;
+        document.getElementById('patrocinador-tipo').value = p.tipo_servico || '';
+        document.getElementById('patrocinador-morada').value = p.morada || '';
+        document.getElementById('patrocinador-cp').value = p.codigo_postal || '';
+        document.getElementById('patrocinador-telefone').value = p.telefone || '';
+        document.getElementById('patrocinador-facebook').value = p.facebook || '';
+        document.getElementById('patrocinador-instagram').value = p.instagram || '';
+        document.getElementById('patrocinador-maps').value = p.google_maps_url || '';
+        document.getElementById('patrocinador-comer').checked = p.comer;
+        document.getElementById('patrocinador-dormir').checked = p.dormir;
+
+        editingPatrocinadorId = id;
+        formPatrocinador.querySelector('button[type="submit"]').textContent = 'Atualizar Patrocinador';
+        formPatrocinador.scrollIntoView({ behavior: 'smooth' });
+    };
+
+    window.deletePatrocinador = async (id) => {
+        if (!confirm('Tem certeza que deseja apagar este patrocinador?')) return;
+        const { error } = await supabase.from('patrocinadores').delete().eq('id', id);
+        if (error) {
+            alert('Erro ao apagar: ' + error.message);
+        } else {
+            loadPatrocinadoresAdmin();
+        }
+    };
 
 });

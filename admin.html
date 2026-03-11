@@ -1,4 +1,4 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="pt-PT">
 
 <head>
@@ -42,6 +42,7 @@
             <button class="tab-btn" data-tab="tab-atletas">Atletas</button>
             <button class="tab-btn" data-tab="tab-jogos">Jogos</button>
             <button class="tab-btn" data-tab="tab-eventos">Eventos</button>
+            <button class="tab-btn" data-tab="tab-patrocinadores">Patrocinadores</button>
             <button class="tab-btn" data-tab="tab-geral">Geral</button>
         </div>
 
@@ -227,6 +228,37 @@
                         Limpar</button>
                 </div>
                 <div id="admin-eventos-list" class="admin-list"></div>
+            </div>
+
+            <!-- Patrocinadores Tab -->
+            <div id="tab-patrocinadores" class="tab-pane hidden">
+                <h2>Gerir Patrocinadores</h2>
+                <form id="form-patrocinador" class="admin-form">
+                    <input type="text" id="patrocinador-nome" placeholder="Nome do Patrocinador" required>
+                    <input type="text" id="patrocinador-tipo" placeholder="Tipo de Serviço (Ex: Restaurante, Hotel)">
+                    <input type="text" id="patrocinador-morada" placeholder="Morada">
+                    <input type="text" id="patrocinador-cp" placeholder="Código Postal (xxxx-xxx)" pattern="\d{4}-\d{3}">
+                    <input type="tel" id="patrocinador-telefone" placeholder="Telefone">
+                    <input type="url" id="patrocinador-facebook" placeholder="Facebook URL">
+                    <input type="url" id="patrocinador-instagram" placeholder="Instagram URL">
+                    <input type="url" id="patrocinador-maps" placeholder="Google Maps URL">
+                    
+                    <div style="display: flex; gap: 20px; align-items: center; margin: 10px 0;">
+                        <label style="display: flex; align-items: center; gap: 5px;">
+                            <input type="checkbox" id="patrocinador-comer"> Comer (s/n)
+                        </label>
+                        <label style="display: flex; align-items: center; gap: 5px;">
+                            <input type="checkbox" id="patrocinador-dormir"> Dormir (s/n)
+                        </label>
+                    </div>
+
+                    <label>Logo do Patrocinador:</label>
+                    <input type="file" id="patrocinador-logo-file" accept="image/*">
+                    
+                    <button type="submit" class="btn-submit">Adicionar Patrocinador</button>
+                </form>
+                <hr>
+                <div id="admin-patrocinadores-list" class="admin-list"></div>
             </div>
 
             <!-- Geral Tab -->
