@@ -1521,6 +1521,7 @@ body.contactos-page {
 body.contactos-page #app-content {
     background: transparent;
 }
+
 /* ===== PATROCINADORES ===== */
 .patrocinadores-list {
     display: grid;
@@ -1538,10 +1539,10 @@ body.contactos-page #app-content {
     padding: 15px;
     box-shadow: 0 4px 15px rgba(106, 27, 154, 0.1);
     display: flex;
-    gap: 15px;
+    flex-direction: column;
+    gap: 10px;
     transition: transform 0.2s, box-shadow 0.2s;
     border: 1px solid rgba(106, 27, 154, 0.1);
-    align-items: center;
 }
 
 .patrocinador-card:hover {
@@ -1549,10 +1550,17 @@ body.contactos-page #app-content {
     box-shadow: 0 8px 25px rgba(106, 27, 154, 0.2);
 }
 
+.sponsor-main-info {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    width: 100%;
+}
+
 .sponsor-logo {
     flex-shrink: 0;
-    width: 80px;
-    height: 80px;
+    width: 70px;
+    height: 70px;
     background: white;
     border-radius: 8px;
     padding: 5px;
@@ -1568,61 +1576,30 @@ body.contactos-page #app-content {
     object-fit: contain;
 }
 
-.sponsor-logo-placeholder {
-    font-size: 2rem;
-}
-
-.sponsor-details {
+.sponsor-name-container {
     flex: 1;
-    display: flex;
-    flex-direction: column;
-    gap: 4px;
 }
 
-.sponsor-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: flex-start;
-    gap: 10px;
-}
-
-.sponsor-header h3 {
-    font-size: 1.1rem;
+.sponsor-name-container h3 {
+    font-size: 1.15rem;
     color: var(--secondary-color);
     margin: 0;
-}
-
-.sponsor-badges {
-    display: flex;
-    gap: 5px;
-    flex-wrap: wrap;
-}
-
-.badge {
-    font-size: 0.7rem;
-    padding: 2px 8px;
-    border-radius: 12px;
-    font-weight: bold;
-    text-transform: uppercase;
-}
-
-.badge-comer {
-    background-color: #e8f5e9;
-    color: #2e7d32;
-    border: 1px solid #c8e6c9;
-}
-
-.badge-dormir {
-    background-color: #e3f2fd;
-    color: #1565c0;
-    border: 1px solid #bbdefb;
+    line-height: 1.2;
 }
 
 .sponsor-type {
     font-size: 0.85rem;
     color: #666;
     font-style: italic;
-    margin: 0;
+    margin: 2px 0 0 0;
+}
+
+.sponsor-details {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    border-top: 1px solid rgba(106, 27, 154, 0.05);
+    padding-top: 8px;
 }
 
 .sponsor-address, .sponsor-tel {
@@ -1640,7 +1617,7 @@ body.contactos-page #app-content {
 
 .sponsor-link {
     font-size: 0.75rem;
-    padding: 4px 10px;
+    padding: 4px 12px;
     background: white;
     border: 1px solid var(--primary-color);
     color: var(--primary-color);
@@ -1668,10 +1645,9 @@ body.contactos-page #app-content {
 }
 
 @media (max-width: 480px) {
-    .patrocinador-card {
-        flex-direction: column;
-        align-items: flex-start;
-        padding: 12px;
+    .patrocinadores-list {
+        grid-template-columns: 1fr;
+        gap: 15px;
     }
     
     .sponsor-logo {
@@ -1679,44 +1655,7 @@ body.contactos-page #app-content {
         height: 60px;
     }
     
-    .sponsor-header {
-        flex-direction: column;
-        gap: 5px;
-    }
-}
-
-/* Ajustes para alinhar nome com logo */
-.patrocinador-card {
-    flex-direction: column;
-    align-items: flex-start;
-}
-
-.sponsor-main-info {
-    display: flex;
-    align-items: center;
-    gap: 15px;
-    width: 100%;
-    margin-bottom: 10px;
-}
-
-.sponsor-name-container {
-    flex: 1;
-}
-
-.sponsor-name-container h3 {
-    margin: 0;
-    font-size: 1.2rem;
-    color: var(--secondary-color);
-}
-
-.sponsor-details {
-    width: 100%;
-    padding-left: 0;
-}
-
-@media (min-width: 768px) {
-    .patrocinador-card {
-        /* Em desktop mantemos o logo ao lado de todos os detalhes se preferir, 
-           mas o pedido foi foco no alinhamento vertical logo/nome */
+    .sponsor-name-container h3 {
+        font-size: 1.05rem;
     }
 }
