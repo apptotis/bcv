@@ -843,7 +843,8 @@ document.addEventListener('DOMContentLoaded', () => {
                     </div>
                 </div>
                 <div class="sponsor-details">
-                    <p class="sponsor-address">${p.morada || ''} ${p.codigo_postal ? `(${p.codigo_postal})` : ''}</p>
+                    <p class="sponsor-address">${p.morada || ''}</p>
+                    ${p.codigo_postal ? `<p class="sponsor-zip">CP: ${p.codigo_postal}</p>` : ''}
                     ${p.telefone ? `<p class="sponsor-tel">📞 ${p.telefone}</p>` : ''}
                     <div class="sponsor-footer">
                         ${links}
