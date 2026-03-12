@@ -833,14 +833,16 @@ document.addEventListener('DOMContentLoaded', () => {
             }
 
             card.innerHTML = `
-                <div class="sponsor-logo">
-                    ${p.logo_url ? `<img src="${p.logo_url}" alt="${p.nome}" loading="lazy">` : '<div class="sponsor-logo-placeholder">💎</div>'}
+                <div class="sponsor-main-info">
+                    <div class="sponsor-logo">
+                        ${p.logo_url ? `<img src="${p.logo_url}" alt="${p.nome}" loading="lazy">` : '<div class="sponsor-logo-placeholder">💎</div>'}
+                    </div>
+                    <div class="sponsor-name-container">
+                        <h3>${p.nome}</h3>
+                        <p class="sponsor-type">${p.tipo_servico || ''}</p>
+                    </div>
                 </div>
                 <div class="sponsor-details">
-                    <div class="sponsor-header">
-                        <h3>${p.nome}</h3>
-                    </div>
-                    <p class="sponsor-type">${p.tipo_servico || ''}</p>
                     <p class="sponsor-address">${p.morada || ''} ${p.codigo_postal ? `(${p.codigo_postal})` : ''}</p>
                     ${p.telefone ? `<p class="sponsor-tel">📞 ${p.telefone}</p>` : ''}
                     <div class="sponsor-footer">

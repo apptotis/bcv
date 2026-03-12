@@ -1684,3 +1684,39 @@ body.contactos-page #app-content {
         gap: 5px;
     }
 }
+
+/* Ajustes para alinhar nome com logo */
+.patrocinador-card {
+    flex-direction: column;
+    align-items: flex-start;
+}
+
+.sponsor-main-info {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    width: 100%;
+    margin-bottom: 10px;
+}
+
+.sponsor-name-container {
+    flex: 1;
+}
+
+.sponsor-name-container h3 {
+    margin: 0;
+    font-size: 1.2rem;
+    color: var(--secondary-color);
+}
+
+.sponsor-details {
+    width: 100%;
+    padding-left: 0;
+}
+
+@media (min-width: 768px) {
+    .patrocinador-card {
+        /* Em desktop mantemos o logo ao lado de todos os detalhes se preferir, 
+           mas o pedido foi foco no alinhamento vertical logo/nome */
+    }
+}
