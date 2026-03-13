@@ -80,6 +80,22 @@
                     <button type="submit" class="btn-submit">Adicionar Equipa</button>
                 </form>
                 <hr>
+                <!-- Filtros Equipas -->
+                <div id="admin-equipas-filtros"
+                    style="display:flex; flex-wrap:wrap; gap:8px; margin-bottom:12px; align-items:center;">
+                    <input type="text" id="filtro-equipa-nome" placeholder="Pesquisar por nome..." 
+                        style="padding:8px; border:1px solid #ddd; border-radius:6px; font-size:0.9rem; flex:2; min-width:200px;">
+                    <select id="filtro-equipa-escalao"
+                        style="padding:8px; border:1px solid #ddd; border-radius:6px; font-size:0.9rem; flex:1; min-width:150px;">
+                        <option value="">Todos os Escalões</option>
+                        <option value="Mini 8">Mini 8</option>
+                        <option value="Mini 10">Mini 10</option>
+                        <option value="Mini 12">Mini 12</option>
+                    </select>
+                    <button id="btn-limpar-filtros-equipas" type="button"
+                        style="padding:8px 14px; border-radius:6px; font-size:0.9rem; cursor:pointer; background:#eee; border:1px solid #ddd;">&#10005;
+                        Limpar</button>
+                </div>
                 <div id="admin-equipas-list" class="admin-list"></div>
             </div>
 

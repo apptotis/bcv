@@ -711,10 +711,52 @@ document.addEventListener('DOMContentLoaded', async () => {
             return;
         }
 
-        listContainer.innerHTML = '';
-        if (data.length === 0) listContainer.innerHTML = '<p>Nenhuma equipa cadastrada.</p>';
+        window.allEquipasAdmin = data || [];
 
-        data.forEach(equipa => {
+        // Ligar filtros de equipas (apenas na primeira carga)
+        if (!window._filtrosEquipasAdmin) {
+            window._filtrosEquipasAdmin = true;
+
+            const filtroNome = document.getElementById('filtro-equipa-nome');
+            const filtroEscalao = document.getElementById('filtro-equipa-escalao');
+
+            if (filtroNome) filtroNome.addEventListener('input', filtrarERenderizerEquipasAdmin);
+            if (filtroEscalao) filtroEscalao.addEventListener('change', filtrarERenderizerEquipasAdmin);
+
+            const btnLimpar = document.getElementById('btn-limpar-filtros-equipas');
+            if (btnLimpar) {
+                btnLimpar.addEventListener('click', () => {
+                    if (filtroNome) filtroNome.value = '';
+                    if (filtroEscalao) filtroEscalao.value = '';
+                    filtrarERenderizerEquipasAdmin();
+                });
+            }
+        }
+
+        filtrarERenderizerEquipasAdmin();
+    }
+
+    function filtrarERenderizerEquipasAdmin() {
+        const listContainer = document.getElementById('admin-equipas-list');
+        if (!listContainer) return;
+
+        const data = window.allEquipasAdmin || [];
+        const filtroNome = document.getElementById('filtro-equipa-nome')?.value.toLowerCase() || '';
+        const filtroEscalao = document.getElementById('filtro-equipa-escalao')?.value || '';
+
+        const filtrados = data.filter(equipa => {
+            if (filtroNome && !equipa.nome.toLowerCase().includes(filtroNome)) return false;
+            if (filtroEscalao && equipa.escalao !== filtroEscalao) return false;
+            return true;
+        });
+
+        listContainer.innerHTML = '';
+        if (filtrados.length === 0) {
+            listContainer.innerHTML = data.length === 0 ? '<p>Nenhuma equipa cadastrada.</p>' : '<p>Nenhuma equipa encontrada com estes filtros.</p>';
+            return;
+        }
+
+        filtrados.forEach(equipa => {
             const div = document.createElement('div');
             div.className = 'admin-list-item';
             div.style.borderBottom = '1px solid #ccc';
