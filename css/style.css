@@ -791,20 +791,20 @@ h2 {
 /* Team Group Photo Styles */
 .equipa-photo-container {
     width: 100%;
-    border-radius: 15px;
+    border-radius: 12px;
     overflow: hidden;
     margin-bottom: 20px;
     box-shadow: var(--card-shadow);
-    position: relative;
-    background-color: #eee;
+    background-color: transparent;
+    padding: 0; /* Ensure no padding */
 }
 
 .equipa-photo-img {
     width: 100%;
     height: auto;
     display: block;
-    object-fit: cover;
-    max-height: 500px; /* Limit height on desktop */
+    object-fit: cover; /* Fill the area */
+    max-height: none; /* Let it be as tall as needed, or set a high limit */
 }
 
 @media (max-width: 768px) {

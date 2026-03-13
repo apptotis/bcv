@@ -436,7 +436,7 @@ document.addEventListener('DOMContentLoaded', () => {
         // Render Header (Layout Horizontal/Card - matching equipas.html)
         if (equipa.foto_grupo_url) {
             headerFn.className = 'equipa-photo-container';
-            headerFn.style = ''; // Reset inline styles
+            headerFn.removeAttribute('style'); // Complete reset
         } else {
             headerFn.className = 'equipa-card';
             // Build shadow and background style
