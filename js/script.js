@@ -434,14 +434,18 @@ document.addEventListener('DOMContentLoaded', () => {
         const teamColor = equipa.shadow_color || '#6a1b9a';
 
         // Render Header (Layout Horizontal/Card - matching equipas.html)
-        headerFn.className = 'equipa-card';
-
-        // Build shadow and background style
-        let headerStyle = `margin-bottom: 30px; background-image: url('${bgUrl}'); background-size: cover; background-position: center; background-repeat: no-repeat; border-radius: 15px;`;
-        if (equipa.shadow_color) {
-            headerStyle += `box-shadow: 0 10px 15px -3px ${equipa.shadow_color}40, 0 4px 6px -2px ${equipa.shadow_color}60;`;
+        if (equipa.foto_grupo_url) {
+            headerFn.className = 'equipa-photo-container';
+            headerFn.style = ''; // Reset inline styles
+        } else {
+            headerFn.className = 'equipa-card';
+            // Build shadow and background style
+            let headerStyle = `margin-bottom: 30px; background-image: url('${bgUrl}'); background-size: cover; background-position: center; background-repeat: no-repeat; border-radius: 15px;`;
+            if (equipa.shadow_color) {
+                headerStyle += `box-shadow: 0 10px 15px -3px ${equipa.shadow_color}40, 0 4px 6px -2px ${equipa.shadow_color}60;`;
+            }
+            headerFn.setAttribute('style', headerStyle);
         }
-        headerFn.setAttribute('style', headerStyle);
 
         // Build social media icons HTML (copy logic from renderEquipas)
         let socialIcons = '';
@@ -480,20 +484,35 @@ document.addEventListener('DOMContentLoaded', () => {
             escalaoText = `<strong>${escalaoText}</strong>`;
         }
 
-        headerFn.innerHTML = `
-            <div class="equipa-logo">
-                ${equipa.logo_url ? `<img src="${equipa.logo_url}" alt="${equipa.nome}">` : '<div class="placeholder-logo" style="font-size:2rem">🏀</div>'}
-            </div>
-            <div class="equipa-content-right">
-                <div class="equipa-info">
-                    <h3>${equipa.nome}</h3>
-                    <p>${escalaoText}</p>
+        if (equipa.foto_grupo_url) {
+            headerFn.innerHTML = `
+                <img src="${equipa.foto_grupo_url}" alt="${equipa.nome}" class="equipa-photo-img">
+                <div class="equipa-photo-overlay">
+                    <div class="equipa-photo-title">
+                        <h2>${equipa.nome}</h2>
+                        <p>${escalaoText}</p>
+                    </div>
+                    <div class="equipa-actions">
+                        ${socialIcons ? `<div class="social-icons">${socialIcons}</div>` : ''}
+                    </div>
                 </div>
-                <div class="equipa-actions">
-                    ${socialIcons ? `<div class="social-icons">${socialIcons}</div>` : ''}
+            `;
+        } else {
+            headerFn.innerHTML = `
+                <div class="equipa-logo">
+                    ${equipa.logo_url ? `<img src="${equipa.logo_url}" alt="${equipa.nome}">` : '<div class="placeholder-logo" style="font-size:2rem">🏀</div>'}
                 </div>
-            </div>
-        `;
+                <div class="equipa-content-right">
+                    <div class="equipa-info">
+                        <h3>${equipa.nome}</h3>
+                        <p>${escalaoText}</p>
+                    </div>
+                    <div class="equipa-actions">
+                        ${socialIcons ? `<div class="social-icons">${socialIcons}</div>` : ''}
+                    </div>
+                </div>
+            `;
+        }
 
         contentFn.innerHTML = '<p class="loading">A carregar...</p>';
 
