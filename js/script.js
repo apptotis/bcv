@@ -487,15 +487,6 @@ document.addEventListener('DOMContentLoaded', () => {
         if (equipa.foto_grupo_url) {
             headerFn.innerHTML = `
                 <img src="${equipa.foto_grupo_url}" alt="${equipa.nome}" class="equipa-photo-img">
-                <div class="equipa-photo-overlay">
-                    <div class="equipa-photo-title">
-                        <h2>${equipa.nome}</h2>
-                        <p>${escalaoText}</p>
-                    </div>
-                    <div class="equipa-actions">
-                        ${socialIcons ? `<div class="social-icons">${socialIcons}</div>` : ''}
-                    </div>
-                </div>
             `;
         } else {
             headerFn.innerHTML = `

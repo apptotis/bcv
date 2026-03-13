@@ -807,51 +807,9 @@ h2 {
     max-height: 500px; /* Limit height on desktop */
 }
 
-.equipa-photo-overlay {
-    position: absolute;
-    bottom: 0;
-    left: 0;
-    right: 0;
-    padding: 20px;
-    background: linear-gradient(transparent, rgba(0,0,0,0.8));
-    color: white;
-    display: flex;
-    justify-content: space-between;
-    align-items: flex-end;
-}
-
-.equipa-photo-title h2 {
-    margin: 0;
-    border: none;
-    color: white;
-    font-size: 1.8rem;
-    text-shadow: 2px 2px 4px rgba(0,0,0,0.5);
-}
-
-.equipa-photo-title p {
-    margin: 0;
-    font-size: 1.1rem;
-    opacity: 0.9;
-}
-
 @media (max-width: 768px) {
     .equipa-photo-img {
         max-height: 300px;
-    }
-    
-    .equipa-photo-overlay {
-        flex-direction: column;
-        align-items: flex-start;
-        gap: 10px;
-        padding: 15px;
-    }
-    
-    .equipa-photo-title h2 {
-        font-size: 1.4rem;
-    }
-    
-    .equipa-photo-title p {
-        font-size: 0.9rem;
     }
 }
 
