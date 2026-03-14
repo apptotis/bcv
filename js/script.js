@@ -277,12 +277,23 @@ document.addEventListener('DOMContentLoaded', () => {
             return `(${num}${gen})`;
         }
 
+        // Populate equipa filter — usa TODAS as equipas da tabela
+        const equipaFilter = document.getElementById('filter-equipa');
         if (equipaFilter && todasEquipas.length > 0) {
+            todasEquipas.forEach(equipa => {
+                const option = document.createElement('option');
+                option.value = equipa.id; // ID único — evita ambiguidade com equipas do mesmo nome
+                const abrev = abrevEscalao(equipa.escalao, equipa.genero);
+                option.textContent = abrev ? `${equipa.nome} ${abrev}` : equipa.nome;
+                equipaFilter.appendChild(option);
+            });
+        }
     }
 
     // Filter games based on selected filters
     function filterJogos(jogos) {
         const equipaFilter = document.getElementById('filter-equipa')?.value || '';
+        const estadoFilter = document.getElementById('filter-estado')?.value || '';
         return jogos.filter(jogo => {
             const matchEquipa = !equipaFilter ||
                 String(jogo.equipa_casa_id) === equipaFilter ||
