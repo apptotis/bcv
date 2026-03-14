@@ -236,7 +236,6 @@ document.addEventListener('DOMContentLoaded', () => {
 
         // Add filter event listeners
         const equipaFilter = document.getElementById('filter-equipa');
-        const escalaoFilter = document.getElementById('filter-escalao');
         const estadoFilter = document.getElementById('filter-estado');
 
         const applyFilters = () => {
@@ -246,7 +245,6 @@ document.addEventListener('DOMContentLoaded', () => {
         };
 
         if (equipaFilter) equipaFilter.addEventListener('change', applyFilters);
-        if (escalaoFilter) escalaoFilter.addEventListener('change', applyFilters);
         if (estadoFilter) estadoFilter.addEventListener('change', applyFilters);
 
         // Realtime: atualizar automaticamente quando o operador guarda um resultado
@@ -270,10 +268,6 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // Populate filters with unique values
     function populateFilters(jogos, todasEquipas) {
-        const escaloes = new Set();
-        jogos.forEach(jogo => {
-            if (jogo.escalao) escaloes.add(jogo.escalao);
-        });
 
         // Helper: abreviatura do escalao+genero → ex: "(10M)", "(12F)", "(8)"
         function abrevEscalao(escalao, genero) {
@@ -283,42 +277,16 @@ document.addEventListener('DOMContentLoaded', () => {
             return `(${num}${gen})`;
         }
 
-        // Populate equipa filter — usa TODAS as equipas da tabela
-        const equipaFilter = document.getElementById('filter-equipa');
         if (equipaFilter && todasEquipas.length > 0) {
-            todasEquipas.forEach(equipa => {
-                const option = document.createElement('option');
-                option.value = equipa.id; // ID único — evita ambiguidade com equipas do mesmo nome
-                const abrev = abrevEscalao(equipa.escalao, equipa.genero);
-                option.textContent = abrev ? `${equipa.nome} ${abrev}` : equipa.nome;
-                equipaFilter.appendChild(option);
-            });
-        }
-
-        // Populate escalao filter — baseado nos jogos existentes
-        const escalaoFilter = document.getElementById('filter-escalao');
-        if (escalaoFilter) {
-            Array.from(escaloes).sort().forEach(escalao => {
-                const option = document.createElement('option');
-                option.value = escalao;
-                option.textContent = escalao;
-                escalaoFilter.appendChild(option);
-            });
-        }
     }
 
     // Filter games based on selected filters
     function filterJogos(jogos) {
         const equipaFilter = document.getElementById('filter-equipa')?.value || '';
-        const escalaoFilter = document.getElementById('filter-escalao')?.value || '';
-        const estadoFilter = document.getElementById('filter-estado')?.value || '';
-
         return jogos.filter(jogo => {
             const matchEquipa = !equipaFilter ||
                 String(jogo.equipa_casa_id) === equipaFilter ||
                 String(jogo.equipa_fora_id) === equipaFilter;
-
-            const matchEscalao = !escalaoFilter || jogo.escalao === escalaoFilter;
 
             const terminado = jogo.estado === 'Terminado' || jogo.estado === 'Cancelado';
             let matchEstado;
@@ -330,7 +298,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 matchEstado = true; // todos (default)
             }
 
-            return matchEquipa && matchEscalao && matchEstado;
+            return matchEquipa && matchEstado;
         });
     }
 
