@@ -631,7 +631,7 @@ h2 {
 .athlete-photo img {
     width: 25px;
     height: 25px;
-    border-radius: 50%;
+    border-radius: 8px; /* Changed from 50% to rounded squares */
     object-fit: cover;
     background-color: #fff;
     border: none;
@@ -791,8 +791,8 @@ h2 {
 /* Team Group Photo Styles */
 .equipa-photo-container {
     width: 100% !important;
-    border-radius: 12px;
-    overflow: hidden;
+    border-radius: 20px !important; /* Increased for better visibility */
+    overflow: hidden !important;
     margin-bottom: 20px;
     box-shadow: var(--card-shadow);
     background-color: transparent;
