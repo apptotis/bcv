@@ -402,22 +402,28 @@ h2 {
     letter-spacing: 0.5px;
 }
 
-/* Ajustes mobile específicos */
 @media (max-width: 480px) {
+    .video-card-content {
+        flex-direction: column;
+        justify-content: center;
+        align-items: center;
+        padding: 15px 0;
+        gap: 10px;
+    }
+
     .video-card-text {
-        font-size: 0.95rem;
-        /* Texto menor no mobile */
+        font-size: 1.1rem;
+        margin-bottom: 5px;
     }
 
     .video-btn {
-        width: 65px;
-        /* Ainda maiores para garantir visibilidade */
-        height: 65px;
-        font-size: 2.2rem;
+        width: 60px;
+        height: 60px;
+        font-size: 2rem;
     }
 
-    .video-card-content {
-        padding: 0 15px;
+    .video-buttons {
+        gap: 10px;
     }
 }
 
