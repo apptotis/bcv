@@ -402,28 +402,31 @@ h2 {
     letter-spacing: 0.5px;
 }
 
-@media (max-width: 480px) {
+@media (max-width: 600px) {
     .video-card-content {
-        flex-direction: column;
-        justify-content: center;
-        align-items: center;
-        padding: 15px 0;
-        gap: 10px;
+        flex-direction: column !important;
+        justify-content: center !important;
+        align-items: center !important;
+        padding: 15px 0 !important;
+        gap: 15px !important;
+        text-align: center;
     }
 
     .video-card-text {
-        font-size: 1.1rem;
+        font-size: 1.15rem;
         margin-bottom: 5px;
+        text-align: center;
     }
 
     .video-btn {
-        width: 60px;
-        height: 60px;
-        font-size: 2rem;
+        width: 65px;
+        height: 65px;
+        font-size: 2.2rem;
     }
 
     .video-buttons {
-        gap: 10px;
+        gap: 15px;
+        justify-content: center;
     }
 }
 
