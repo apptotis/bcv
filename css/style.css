@@ -1636,7 +1636,7 @@ body.contactos-page #app-content {
     padding-top: 8px;
 }
 
-.sponsor-address, .sponsor-tel {
+.sponsor-address, .sponsor-zip, .sponsor-tel {
     font-size: 0.85rem;
     margin: 0;
     color: #444;
