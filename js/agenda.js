@@ -178,8 +178,8 @@
         const html = [];
         items.forEach(item => {
             const dt = new Date(item.data_hora);
-            const dia = dt.toLocaleDateString('pt-PT', { weekday: 'long', day: 'numeric', month: 'long' });
-            const hora = dt.toLocaleTimeString('pt-PT', { hour: '2-digit', minute: '2-digit' });
+            const dia = dt.toLocaleDateString('pt-PT', { weekday: 'long', day: 'numeric', month: 'long', timeZone: 'Europe/Lisbon' });
+            const hora = dt.toLocaleTimeString('pt-PT', { hour: '2-digit', minute: '2-digit', timeZone: 'Europe/Lisbon' });
 
             if (dia !== diaAtual) {
                 diaAtual = dia;
@@ -213,7 +213,7 @@
         let horaHtml = `<span>${hora}</span>`;
         if (evento.data_hora_fim) {
             const dtFim = new Date(evento.data_hora_fim);
-            const horaFim = dtFim.toLocaleTimeString('pt-PT', { hour: '2-digit', minute: '2-digit' });
+            const horaFim = dtFim.toLocaleTimeString('pt-PT', { hour: '2-digit', minute: '2-digit', timeZone: 'Europe/Lisbon' });
             horaHtml = `<span>${hora}</span><span class="ag-hora-fim">${horaFim}</span>`;
         }
 

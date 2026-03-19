@@ -507,11 +507,12 @@ document.addEventListener('DOMContentLoaded', async () => {
             const dt = jogo.data_hora ? new Date(jogo.data_hora) : null;
 
             if (filtroData && dt) {
-                const jogoData = dt.toLocaleDateString('en-CA'); // YYYY-MM-DD
+                const jogoData = dt.toLocaleDateString('en-CA', { timeZone: 'Europe/Lisbon' }); // YYYY-MM-DD em PT
                 if (jogoData !== filtroData) return false;
             }
             if (filtroHora && dt) {
-                const jogoHora = dt.toTimeString().slice(0, 5); // HH:MM
+                // Obter a hora local de Portugal como string (HH:MM)
+                const jogoHora = dt.toLocaleTimeString('pt-PT', { hour: '2-digit', minute: '2-digit', hour12: false, timeZone: 'Europe/Lisbon' });
                 if (jogoHora !== filtroHora) return false;
             }
             if (filtroClubeId) {
@@ -543,7 +544,7 @@ document.addEventListener('DOMContentLoaded', async () => {
 
             const equipaCasa = jogo.equipa_casa?.nome || 'Equipa desconhecida';
             const equipaFora = jogo.equipa_fora?.nome || 'Equipa desconhecida';
-            const dataHora = jogo.data_hora ? new Date(jogo.data_hora).toLocaleString('pt-PT') : 'Data a definir';
+            const dataHora = jogo.data_hora ? new Date(jogo.data_hora).toLocaleString('pt-PT', { timeZone: 'Europe/Lisbon' }) : 'Data a definir';
             const estado = jogo.estado || 'Agendado';
 
             div.innerHTML = `
@@ -1048,13 +1049,13 @@ document.addEventListener('DOMContentLoaded', async () => {
                 if (String(evento.tipo_evento_id) !== filtroTipo) return false;
             }
             if (filtroData && dt) {
-                // Obter a data local como string (YYYY-MM-DD)
-                const eventoData = dt.toLocaleDateString('en-CA');
+                // Obter a data local de Portugal como string (YYYY-MM-DD)
+                const eventoData = dt.toLocaleDateString('en-CA', { timeZone: 'Europe/Lisbon' });
                 if (eventoData !== filtroData) return false;
             }
             if (filtroHora && dt) {
-                // Obter a hora local como string (HH:MM)
-                const eventoHora = dt.toTimeString().slice(0, 5);
+                // Obter a hora local de Portugal como string (HH:MM)
+                const eventoHora = dt.toLocaleTimeString('pt-PT', { hour: '2-digit', minute: '2-digit', hour12: false, timeZone: 'Europe/Lisbon' });
                 if (eventoHora !== filtroHora) return false;
             }
             return true;
@@ -1076,7 +1077,7 @@ document.addEventListener('DOMContentLoaded', async () => {
             div.style.alignItems = 'center';
 
             const dataHora = evento.data_hora
-                ? new Date(evento.data_hora).toLocaleString('pt-PT', { day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit' })
+                ? new Date(evento.data_hora).toLocaleString('pt-PT', { day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit', timeZone: 'Europe/Lisbon' })
                 : 'Data a definir';
             const icone = adminEventoIcons[evento.tipo_evento_id] || '\uD83D\uDCC5';
             const tipoObj = allTipoEventos.find(t => t.id === evento.tipo_evento_id);
@@ -1088,7 +1089,7 @@ document.addEventListener('DOMContentLoaded', async () => {
                     <strong>${icone} ${tipo}</strong>
                     <span style="margin-left:8px;font-size:0.8rem;color:#666">${visib}</span>
                     <br>
-                    <small>\uD83D\uDCCD ${evento.local} &nbsp; \uD83D\uDDD3\uFE0F ${dataHora}${evento.data_hora_fim ? ` - ${new Date(evento.data_hora_fim).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}` : ''}</small>
+                    <small>\uD83D\uDCCD ${evento.local} &nbsp; \uD83D\uDDD3\uFE0F ${dataHora}${evento.data_hora_fim ? ` - ${new Date(evento.data_hora_fim).toLocaleTimeString('pt-PT', { hour: '2-digit', minute: '2-digit', timeZone: 'Europe/Lisbon' })}` : ''}</small>
                     ${evento.tecnicos ? `<br><small>\uD83D\uDC64 ${evento.tecnicos}</small>` : ''}
                 </div>
                 <div style="display: flex; gap: 5px;">

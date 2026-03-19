@@ -320,8 +320,8 @@ document.addEventListener('DOMContentLoaded', () => {
             item.classList.add('jogo-item');
 
             const date = new Date(jogo.data_hora);
-            const dia = date.toLocaleDateString('pt-PT', { day: '2-digit', month: '2-digit' });
-            const hora = date.toLocaleTimeString('pt-PT', { hour: '2-digit', minute: '2-digit' });
+            const dia = date.toLocaleDateString('pt-PT', { day: '2-digit', month: '2-digit', timeZone: 'Europe/Lisbon' });
+            const hora = date.toLocaleTimeString('pt-PT', { hour: '2-digit', minute: '2-digit', timeZone: 'Europe/Lisbon' });
 
             const equipaCasa = jogo.equipa_casa?.nome || 'Equipa A';
             const equipaFora = jogo.equipa_fora?.nome || 'Equipa B';
@@ -652,7 +652,8 @@ document.addEventListener('DOMContentLoaded', () => {
             const dateStr = date.toLocaleDateString('pt-PT', {
                 day: '2-digit',
                 month: '2-digit',
-                year: 'numeric'
+                year: 'numeric',
+                timeZone: 'Europe/Lisbon'
             });
 
             card.innerHTML = `
@@ -751,14 +752,14 @@ document.addEventListener('DOMContentLoaded', () => {
             card.classList.add('evento-card');
 
             const dataHora = new Date(evento.data_hora);
-            const dia = dataHora.toLocaleDateString('pt-PT', { day: '2-digit', month: '2-digit', year: 'numeric' });
-            const hora = dataHora.toLocaleTimeString('pt-PT', { hour: '2-digit', minute: '2-digit' });
+            const dia = dataHora.toLocaleDateString('pt-PT', { day: '2-digit', month: '2-digit', year: 'numeric', timeZone: 'Europe/Lisbon' });
+            const hora = dataHora.toLocaleTimeString('pt-PT', { hour: '2-digit', minute: '2-digit', timeZone: 'Europe/Lisbon' });
             const tipoNome = evento.tipo_evento?.nome || 'Evento';
             const icone = eventoIcons[evento.tipo_evento_id] || '📅';
 
             let horaStr = hora;
             if (evento.data_hora_fim) {
-                const horaFim = new Date(evento.data_hora_fim).toLocaleTimeString('pt-PT', { hour: '2-digit', minute: '2-digit' });
+                const horaFim = new Date(evento.data_hora_fim).toLocaleTimeString('pt-PT', { hour: '2-digit', minute: '2-digit', timeZone: 'Europe/Lisbon' });
                 horaStr = `${hora} – ${horaFim}`;
             }
 

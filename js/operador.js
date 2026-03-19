@@ -188,8 +188,8 @@ document.addEventListener('DOMContentLoaded', async () => {
             let horaStr = '';
             if (jogo.data_hora) {
                 const dt = new Date(jogo.data_hora);
-                dataStr = dt.toLocaleDateString('pt-PT', { day: '2-digit', month: '2-digit' });
-                horaStr = dt.toLocaleTimeString('pt-PT', { hour: '2-digit', minute: '2-digit' });
+                dataStr = dt.toLocaleDateString('pt-PT', { day: '2-digit', month: '2-digit', timeZone: 'Europe/Lisbon' });
+                horaStr = dt.toLocaleTimeString('pt-PT', { hour: '2-digit', minute: '2-digit', timeZone: 'Europe/Lisbon' });
             }
 
             const card = document.createElement('div');
