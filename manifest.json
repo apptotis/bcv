@@ -1,0 +1,17 @@
+{
+  "name": "Torneio Eurocidade 2026",
+  "short_name": "Torneio Eurocidade",
+  "start_url": "index.html",
+  "display": "standalone",
+  "background_color": "#4a148c",
+  "theme_color": "#4a148c",
+  "description": "Aplicação oficial do Torneio Basket Club de Valença - Eurocidade 2026",
+  "icons": [
+    {
+      "src": "Logo_bcv.jpg",
+      "sizes": "192x192 512x512",
+      "type": "image/jpeg",
+      "purpose": "any maskable"
+    }
+  ]
+}
