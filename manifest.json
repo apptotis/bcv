@@ -11,7 +11,13 @@
       "src": "Logo_bcv.jpg",
       "sizes": "192x192 512x512",
       "type": "image/jpeg",
-      "purpose": "any maskable"
+      "purpose": "maskable"
+    },
+    {
+      "src": "cartaz_facebook.jpg",
+      "sizes": "1024x1024",
+      "type": "image/jpeg",
+      "purpose": "any"
     }
   ]
 }
