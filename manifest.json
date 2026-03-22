@@ -8,7 +8,7 @@
   "description": "Aplicação oficial do Torneio Basket Club de Valença - Eurocidade 2026",
   "icons": [
     {
-      "src": "cartaz_facebook.jpg",
+      "src": "cartaz_square.jpg",
       "sizes": "192x192 512x512 1024x1024",
       "type": "image/jpeg",
       "purpose": "any"
