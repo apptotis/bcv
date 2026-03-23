@@ -69,8 +69,8 @@ document.addEventListener('DOMContentLoaded', async () => {
             .from('jogos')
             .select(`
                 *,
-                equipa_casa:equipas!equipa_casa_id(id, nome, logo_url),
-                equipa_fora:equipas!equipa_fora_id(id, nome, logo_url)
+                equipa_casa:equipas!equipa_casa_id(id, nome, logo_url, genero),
+                equipa_fora:equipas!equipa_fora_id(id, nome, logo_url, genero)
             `)
             .order('data_hora', { ascending: true });
 
@@ -208,7 +208,7 @@ document.addEventListener('DOMContentLoaded', async () => {
                 <div class="op-equipa-row">
                     <span class="op-equipa-nome">
                         ${casaNome}
-                        ${(jogo.escalao || jogo.genero) ? `<span class="op-equipa-sub">${[jogo.escalao, jogo.genero].filter(Boolean).join(' · ')}</span>` : ''}
+                        ${(jogo.escalao || jogo.equipa_casa?.genero) ? `<span class="op-equipa-sub">${[jogo.escalao, jogo.equipa_casa?.genero].filter(Boolean).join(' · ')}</span>` : ''}
                     </span>
                     <input class="op-resultado-input" type="number" min="0" placeholder="−"
                         data-id="${jogo.id}" data-side="casa" value="${rc}">
@@ -216,7 +216,7 @@ document.addEventListener('DOMContentLoaded', async () => {
                 <div class="op-equipa-row">
                     <span class="op-equipa-nome">
                         ${foraNome}
-                        ${(jogo.escalao || jogo.genero) ? `<span class="op-equipa-sub">${[jogo.escalao, jogo.genero].filter(Boolean).join(' · ')}</span>` : ''}
+                        ${(jogo.escalao || jogo.equipa_fora?.genero) ? `<span class="op-equipa-sub">${[jogo.escalao, jogo.equipa_fora?.genero].filter(Boolean).join(' · ')}</span>` : ''}
                     </span>
                     <input class="op-resultado-input" type="number" min="0" placeholder="−"
                         data-id="${jogo.id}" data-side="fora" value="${rf}">
