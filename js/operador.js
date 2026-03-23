@@ -206,12 +206,18 @@ document.addEventListener('DOMContentLoaded', async () => {
                     <span class="op-badge ${badgeClass}">${estado}</span>
                 </div>
                 <div class="op-equipa-row">
-                    <span class="op-equipa-nome">${casaNome}</span>
+                    <span class="op-equipa-nome">
+                        ${casaNome}
+                        ${(jogo.escalao || jogo.genero) ? `<span class="op-equipa-sub">${[jogo.escalao, jogo.genero].filter(Boolean).join(' · ')}</span>` : ''}
+                    </span>
                     <input class="op-resultado-input" type="number" min="0" placeholder="−"
                         data-id="${jogo.id}" data-side="casa" value="${rc}">
                 </div>
                 <div class="op-equipa-row">
-                    <span class="op-equipa-nome">${foraNome}</span>
+                    <span class="op-equipa-nome">
+                        ${foraNome}
+                        ${(jogo.escalao || jogo.genero) ? `<span class="op-equipa-sub">${[jogo.escalao, jogo.genero].filter(Boolean).join(' · ')}</span>` : ''}
+                    </span>
                     <input class="op-resultado-input" type="number" min="0" placeholder="−"
                         data-id="${jogo.id}" data-side="fora" value="${rf}">
                 </div>
