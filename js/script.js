@@ -230,18 +230,62 @@ document.addEventListener('DOMContentLoaded', () => {
         // Populate filters usando TODAS as equipas (não só as que têm jogos)
         populateFilters(data, todasEquipas || []);
 
+        // Context for lazy loading
+        window.jogosPageContext = {
+            page: 1,
+            perPage: 20,
+            filtered: data
+        };
+
+        const renderPaginated = (resetContent = false) => {
+            const list = window.jogosPageContext.filtered;
+            
+            if (resetContent) {
+                container.innerHTML = '';
+                const end = window.jogosPageContext.page * window.jogosPageContext.perPage;
+                const toRender = list.slice(0, end);
+                renderJogos(toRender, container);
+            } else {
+                const start = (window.jogosPageContext.page - 1) * window.jogosPageContext.perPage;
+                const end = start + window.jogosPageContext.perPage;
+                const toRender = list.slice(start, end);
+                renderJogos(toRender, container);
+            }
+
+            let btnContainer = document.getElementById('load-more-container');
+            if (!btnContainer) {
+                btnContainer = document.createElement('div');
+                btnContainer.id = 'load-more-container';
+                btnContainer.style.textAlign = 'center';
+                btnContainer.style.marginTop = '20px';
+                btnContainer.style.marginBottom = '20px';
+                container.parentNode.insertBefore(btnContainer, container.nextSibling);
+            }
+
+            const currentEnd = window.jogosPageContext.page * window.jogosPageContext.perPage;
+            if (currentEnd < list.length) {
+                btnContainer.innerHTML = '<button id="btn-load-more" class="btn" style="padding: 10px 20px; border-radius: 8px; font-weight: bold; cursor: pointer; background-color: var(--primary-color, #4a148c); color: white; border: none; box-shadow: 0 4px 6px rgba(0,0,0,0.1);">Mostrar mais jogos</button>';
+                document.getElementById('btn-load-more').addEventListener('click', () => {
+                    window.jogosPageContext.page++;
+                    renderPaginated(false);
+                });
+            } else {
+                btnContainer.innerHTML = '';
+            }
+        };
+
         // Initial render
         container.innerHTML = '';
-        renderJogos(data, container);
+        renderPaginated(true);
 
         // Add filter event listeners
         const equipaFilter = document.getElementById('filter-equipa');
         const estadoFilter = document.getElementById('filter-estado');
 
         const applyFilters = () => {
-            const filtered = filterJogos(window.allJogos);
-            container.innerHTML = '';
-            renderJogos(filtered, container);
+            window.jogosPageContext.filtered = filterJogos(window.allJogos);
+            window.jogosPageContext.page = 1;
+            renderPaginated(true);
         };
 
         if (equipaFilter) equipaFilter.addEventListener('change', applyFilters);
@@ -258,9 +302,8 @@ document.addEventListener('DOMContentLoaded', () => {
                         // Preservar os dados joinés (equipa_casa, equipa_fora) e atualizar o resto
                         window.allJogos[idx] = { ...window.allJogos[idx], ...payload.new };
                     }
-                    const filtered = filterJogos(window.allJogos);
-                    container.innerHTML = '';
-                    renderJogos(filtered, container);
+                    window.jogosPageContext.filtered = filterJogos(window.allJogos);
+                    renderPaginated(true);
                 }
             )
             .subscribe();
