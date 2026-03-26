@@ -842,8 +842,51 @@ document.addEventListener('DOMContentLoaded', () => {
             return;
         }
 
+        window.patrocinadoresContext = {
+            page: 1,
+            perPage: 20,
+            data: data
+        };
+
+        const renderPaginated = (resetContent = false) => {
+            const list = window.patrocinadoresContext.data;
+            
+            if (resetContent) {
+                container.innerHTML = '';
+                const end = window.patrocinadoresContext.page * window.patrocinadoresContext.perPage;
+                const toRender = list.slice(0, end);
+                renderPatrocinadores(toRender, container);
+            } else {
+                const start = (window.patrocinadoresContext.page - 1) * window.patrocinadoresContext.perPage;
+                const end = start + window.patrocinadoresContext.perPage;
+                const toRender = list.slice(start, end);
+                renderPatrocinadores(toRender, container);
+            }
+
+            let btnContainer = document.getElementById('load-more-patrocinadores');
+            if (!btnContainer) {
+                btnContainer = document.createElement('div');
+                btnContainer.id = 'load-more-patrocinadores';
+                btnContainer.style.textAlign = 'center';
+                btnContainer.style.marginTop = '20px';
+                btnContainer.style.marginBottom = '20px';
+                container.parentNode.insertBefore(btnContainer, container.nextSibling);
+            }
+
+            const currentEnd = window.patrocinadoresContext.page * window.patrocinadoresContext.perPage;
+            if (currentEnd < list.length) {
+                btnContainer.innerHTML = '<button id="btn-load-more-patroc" class="btn" style="padding: 10px 20px; border-radius: 8px; font-weight: bold; cursor: pointer; background-color: var(--primary-color, #4a148c); color: white; border: none; box-shadow: 0 4px 6px rgba(0,0,0,0.1);">Mostrar Mais</button>';
+                document.getElementById('btn-load-more-patroc').addEventListener('click', () => {
+                    window.patrocinadoresContext.page++;
+                    renderPaginated(false);
+                });
+            } else {
+                btnContainer.innerHTML = '';
+            }
+        };
+
         container.innerHTML = '';
-        renderPatrocinadores(data, container);
+        renderPaginated(true);
     }
 
     function renderPatrocinadores(data, container) {
