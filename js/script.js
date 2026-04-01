@@ -1,9 +1,13 @@
 document.addEventListener('DOMContentLoaded', () => {
-    // Inicializar Supabase se as credenciais estiverem presentes
+    // Inicializar Supabase se localmente disponível (CDN carregado) e credenciais presentes
     let supabase;
     if (typeof SUPABASE_URL !== 'undefined' && typeof SUPABASE_ANON_KEY !== 'undefined' && SUPABASE_ANON_KEY !== 'SUA_SUPABASE_ANON_KEY_AQUI') {
-        supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
-        console.log("Supabase inicializado!");
+        if (window.supabase && typeof window.supabase.createClient === 'function') {
+            supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+            console.log("Supabase inicializado!");
+        } else {
+            console.warn("Supabase script não carregado. Algumas funcionalidades podem estar indisponíveis.");
+        }
     }
 
     // 1. Menu Mobile Toggle (Comum a todas as páginas)
