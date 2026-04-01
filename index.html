@@ -8,6 +8,56 @@
     <title>Torneio Basket Club de Valença</title>
     <link rel="stylesheet" href="css/style.css?v=1.9">
     <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&display=swap" rel="stylesheet">
+    <style>
+        .gallery-card {
+            background-image: linear-gradient(rgba(0, 0, 0, 0.4), rgba(0, 0, 0, 0.6)), url('gallery_bg.png');
+            background-size: cover;
+            background-position: center;
+            border-radius: 15px;
+            padding: 40px 20px;
+            text-align: center;
+            color: white;
+            margin-bottom: 30px;
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.3);
+            transition: transform 0.3s ease;
+        }
+
+        .gallery-card:hover {
+            transform: translateY(-5px);
+        }
+
+        .gallery-card h2 {
+            font-size: 2rem;
+            margin-bottom: 10px;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
+        }
+
+        .gallery-card p {
+            font-size: 1.1rem;
+            margin-bottom: 25px;
+            opacity: 0.9;
+        }
+
+        .btn-gallery {
+            display: inline-block;
+            background-color: #ff9800;
+            color: white;
+            padding: 12px 30px;
+            border-radius: 25px;
+            text-decoration: none;
+            font-weight: bold;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            box-shadow: 0 4px 10px rgba(255, 152, 0, 0.4);
+            transition: all 0.3s ease;
+        }
+
+        .btn-gallery:hover {
+            background-color: #f57c00;
+            box-shadow: 0 6px 15px rgba(255, 152, 0, 0.6);
+            transform: scale(1.05);
+        }
+    </style>
     <link rel="manifest" href="manifest.json">
     <meta name="theme-color" content="#4a148c">
     <link rel="apple-touch-icon" href="Logo_bcv.jpg">
@@ -49,8 +99,11 @@
         <!-- Seção Visão Geral -->
         <section id="visao-geral" class="page-section active">
             <div class="poster-container">
-
-
+                <div class="gallery-card">
+                    <h2>Recorde os Melhores Momentos</h2>
+                    <p>Galeria de Fotos XXII Torneio Eurocidade</p>
+                    <a href="https://fotos.bcv.pt" target="_blank" class="btn-gallery">Ver Galeria</a>
+                </div>
 
                 <img src="cartaz_facebook.jpg" alt="Cartaz Oficial do Torneio" class="responsive-poster">
 
