@@ -181,7 +181,9 @@ h2 {
 .poster-container {
     text-align: center;
     width: 100%;
-    padding: 10px;
+    max-width: 600px;
+    margin: 5px auto;
+    padding: 0 10px;
     display: flex;
     flex-direction: column;
     justify-content: center;
@@ -189,14 +191,14 @@ h2 {
 }
 
 .responsive-poster {
+    width: 100%;
     max-width: 100%;
     max-height: calc(100vh - 250px);
-    /* Ajuste maior para caber títulos */
-    width: auto;
     height: auto;
     object-fit: contain;
     border-radius: 8px;
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+    margin: 10px 0;
 }
 
 .event-title {
@@ -338,10 +340,10 @@ h2 {
 .video-card {
     position: relative;
     width: 100%;
-    max-width: 600px;
+    max-width: 100%;
     min-height: 110px;
     padding: 10px 0;
-    margin: 5px auto 15px auto;
+    margin: 5px 0 15px 0;
     border-radius: 12px;
     overflow: hidden;
     background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
