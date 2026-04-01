@@ -280,7 +280,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
         // Add filter event listeners
         const equipaFilter = document.getElementById('filter-equipa');
-        const estadoFilter = document.getElementById('filter-estado');
+
 
         const applyFilters = () => {
             window.jogosPageContext.filtered = filterJogos(window.allJogos);
@@ -289,7 +289,7 @@ document.addEventListener('DOMContentLoaded', () => {
         };
 
         if (equipaFilter) equipaFilter.addEventListener('change', applyFilters);
-        if (estadoFilter) estadoFilter.addEventListener('change', applyFilters);
+
 
         // Realtime: atualizar automaticamente quando o operador guarda um resultado
         supabase
@@ -336,21 +336,11 @@ document.addEventListener('DOMContentLoaded', () => {
     // Filter games based on selected filters
     function filterJogos(jogos) {
         const equipaFilter = document.getElementById('filter-equipa')?.value || '';
-        const estadoFilter = document.getElementById('filter-estado')?.value || '';
         return jogos.filter(jogo => {
             const matchEquipa = !equipaFilter ||
                 String(jogo.equipa_casa_id) === equipaFilter ||
                 String(jogo.equipa_fora_id) === equipaFilter;
-
-            const terminado = jogo.estado === 'Terminado' || jogo.estado === 'Cancelado';
-            let matchEstado;
-            if (estadoFilter === 'terminado') {
-                matchEstado = terminado;
-            } else if (estadoFilter === 'em-jogo') {
-                matchEstado = jogo.estado === 'Em Jogo';
-            } else {
-                matchEstado = true; // todos (default)
-            }
+            const matchEstado = true;
 
             return matchEquipa && matchEstado;
         });
