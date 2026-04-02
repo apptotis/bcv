@@ -46,6 +46,7 @@
             <button class="tab-btn" data-tab="tab-jogos">Jogos</button>
             <button class="tab-btn" data-tab="tab-eventos">Eventos</button>
             <button class="tab-btn" data-tab="tab-patrocinadores">Patrocinadores</button>
+            <button class="tab-btn" data-tab="tab-galeria">Galeria</button>
             <button class="tab-btn" data-tab="tab-geral">Geral</button>
         </div>
 
@@ -278,6 +279,46 @@
                 </form>
                 <hr>
                 <div id="admin-patrocinadores-list" class="admin-list"></div>
+            </div>
+
+            <!-- Galeria Tab -->
+            <div id="tab-galeria" class="tab-pane hidden">
+                <h2>Gerir Galeria de Fotos</h2>
+                <div id="album-form-container">
+                    <form id="form-album" class="admin-form">
+                        <input type="hidden" id="album-id">
+                        <input type="text" id="album-titulo" placeholder="Título do Álbum (Ex: Final Mini 12)" required>
+                        <label>Foto de Capa do Álbum (Opcional):</label>
+                        <input type="file" id="album-capa-file" accept="image/*">
+                        <button type="submit" id="btn-save-album" class="btn-submit">Criar Álbum</button>
+                        <button type="button" id="btn-cancel-album" class="hidden" style="margin-top:10px; background:#666;">Cancelar Edição</button>
+                    </form>
+                </div>
+
+                <!-- Gestão de Fotos dentro de um Álbum (Inicialmente escondido) -->
+                <div id="album-photos-manager" class="hidden" style="background:#f9f9f9; padding:20px; border-radius:10px; border:2px solid var(--primary-color); margin-bottom:30px;">
+                    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:15px;">
+                        <h3 id="current-album-name">Gerir Fotos</h3>
+                        <button onclick="closePhotoManager()" style="background:#666; padding:5px 12px; border-radius:5px; color:white; border:none; cursor:pointer;">Fechar</button>
+                    </div>
+                    
+                    <form id="form-upload-fotos" class="admin-form" style="background:white; border:1px dashed #ccc; padding:15px;">
+                        <input type="hidden" id="manage-album-id">
+                        <label>Adicionar Fotos (Pode selecionar várias):</label>
+                        <input type="file" id="galeria-fotos-files" accept="image/*" multiple required>
+                        <button type="submit" class="btn-submit" style="background-color: #2e7d32;">Fazer Upload das Fotos</button>
+                        <div id="upload-progress" class="hidden" style="margin-top:10px; font-weight:bold; color:var(--primary-color);">A carregar...</div>
+                    </form>
+
+                    <div id="album-photos-list" style="display:grid; grid-template-columns:repeat(auto-fill, minmax(120px, 1fr)); gap:10px; margin-top:20px;">
+                        <!-- Fotos do álbum aqui -->
+                    </div>
+                </div>
+
+                <hr>
+                <div id="admin-albuns-list" class="admin-list">
+                    <p class="loading">A carregar álbuns...</p>
+                </div>
             </div>
 
             <!-- Geral Tab -->

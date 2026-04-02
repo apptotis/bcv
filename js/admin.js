@@ -113,6 +113,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         await loadTipoEventos(); // Carregar tipos de evento
         await loadEventosAdmin();
         await loadPatrocinadoresAdmin();
+        await loadAlbunsAdmin(); // Carregar álbuns da galeria
         await loadGeralAdmin();
     }
 
@@ -1381,4 +1382,236 @@ document.addEventListener('DOMContentLoaded', async () => {
         }
     };
 
+    // --- CRUD GALERIA / ÁLBUNS ---
+    const formAlbum = document.getElementById('form-album');
+    let editingAlbumId = null;
+
+    if (formAlbum) {
+        formAlbum.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const titulo = document.getElementById('album-titulo').value;
+            const capaFile = document.getElementById('album-capa-file').files[0];
+            const btn = document.getElementById('btn-save-album');
+            
+            btn.disabled = true;
+            btn.textContent = 'A guardar...';
+
+            try {
+                let capaUrl = null;
+                if (capaFile) {
+                    const fileName = `capa_${Date.now()}_${capaFile.name.replace(/\s/g, '_')}`;
+                    const { data, error } = await supabase.storage.from('fotos').upload(fileName, capaFile);
+                    if (error) throw error;
+                    const { data: publicData } = supabase.storage.from('fotos').getPublicUrl(fileName);
+                    capaUrl = publicData.publicUrl;
+                }
+
+                const updates = { titulo };
+                if (capaUrl) updates.capa_url = capaUrl;
+
+                if (editingAlbumId) {
+                    const { error } = await supabase.from('albuns').update(updates).eq('id', editingAlbumId);
+                    if (error) throw error;
+                    alert("Álbum atualizado!");
+                } else {
+                    const { error } = await supabase.from('albuns').insert([updates]);
+                    if (error) throw error;
+                    alert("Álbum criado!");
+                }
+
+                resetAlbumForm();
+                loadAlbunsAdmin();
+            } catch (err) {
+                console.error(err);
+                alert("Erro ao guardar álbum: " + err.message);
+            } finally {
+                btn.disabled = false;
+                btn.textContent = editingAlbumId ? 'Atualizar Álbum' : 'Criar Álbum';
+            }
+        });
+    }
+
+    document.getElementById('btn-cancel-album')?.addEventListener('click', resetAlbumForm);
+
+    function resetAlbumForm() {
+        formAlbum?.reset();
+        editingAlbumId = null;
+        document.getElementById('album-id').value = '';
+        document.getElementById('btn-save-album').textContent = 'Criar Álbum';
+        document.getElementById('btn-cancel-album').classList.add('hidden');
+    }
+
+    async function loadAlbunsAdmin() {
+        const listContainer = document.getElementById('admin-albuns-list');
+        if (!listContainer) return;
+
+        listContainer.innerHTML = 'Carregando...';
+
+        const { data, error } = await supabase.from('albuns').select('*').order('created_at', { ascending: false });
+
+        if (error) {
+            listContainer.innerHTML = 'Erro ao carregar álbuns.';
+            return;
+        }
+
+        listContainer.innerHTML = '';
+        if (data.length === 0) {
+            listContainer.innerHTML = '<p>Nenhum álbum criado.</p>';
+            return;
+        }
+
+        data.forEach(album => {
+            const div = document.createElement('div');
+            div.className = 'admin-list-item';
+            div.style.borderBottom = '1px solid #ccc';
+            div.style.padding = '15px 0';
+            div.style.display = 'flex';
+            div.style.justifyContent = 'space-between';
+            div.style.alignItems = 'center';
+
+            div.innerHTML = `
+                <div style="display: flex; align-items: center; gap: 15px;">
+                    ${album.capa_url 
+                        ? `<img src="${album.capa_url}" style="width: 60px; height: 40px; object-fit: cover; border-radius: 4px;">` 
+                        : '<div style="width: 60px; height: 40px; background: #eee; border-radius: 4px; display:flex; align-items:center; justify-content:center;">📁</div>'}
+                    <div>
+                        <strong>${album.titulo}</strong>
+                        <br>
+                        <small>ID: ${album.id}</small>
+                    </div>
+                </div>
+                <div style="display: flex; gap: 8px;">
+                    <button class="btn-primary btn-sm" onclick="openPhotoManager(${album.id}, '${album.titulo.replace(/'/g, "\\'")}')">Gerir Fotos</button>
+                    <button class="btn-success btn-sm" onclick="editAlbum(${album.id}, '${album.titulo.replace(/'/g, "\\'")}')">Editar</button>
+                    <button class="btn-danger btn-sm" onclick="deleteAlbum(${album.id})">Apagar</button>
+                </div>
+            `;
+            listContainer.appendChild(div);
+        });
+    }
+
+    window.editAlbum = (id, titulo) => {
+        editingAlbumId = id;
+        document.getElementById('album-id').value = id;
+        document.getElementById('album-titulo').value = titulo;
+        document.getElementById('btn-save-album').textContent = 'Atualizar Álbum';
+        document.getElementById('btn-cancel-album').classList.remove('hidden');
+        formAlbum.scrollIntoView({ behavior: 'smooth' });
+    };
+
+    window.deleteAlbum = async (id) => {
+        if (!confirm("Tem certeza? Isto apagará o álbum e TODAS as suas fotos.")) return;
+        const { error } = await supabase.from('albuns').delete().eq('id', id);
+        if (error) alert("Erro: " + error.message);
+        else loadAlbunsAdmin();
+    };
+
+    // --- GESTÃO DE FOTOS ---
+    window.openPhotoManager = async (albumId, titulo) => {
+        document.getElementById('album-form-container').classList.add('hidden');
+        document.getElementById('admin-albuns-list').classList.add('hidden');
+        
+        const manager = document.getElementById('album-photos-manager');
+        manager.classList.remove('hidden');
+        document.getElementById('manage-album-id').value = albumId;
+        document.getElementById('current-album-name').textContent = `Fotos de: ${titulo}`;
+        
+        loadAlbumPhotos(albumId);
+    };
+
+    window.closePhotoManager = () => {
+        document.getElementById('album-photos-manager').classList.add('hidden');
+        document.getElementById('album-form-container').classList.remove('hidden');
+        document.getElementById('admin-albuns-list').classList.remove('hidden');
+    };
+
+    async function loadAlbumPhotos(albumId) {
+        const container = document.getElementById('album-photos-list');
+        container.innerHTML = 'Carregando fotos...';
+
+        const { data, error } = await supabase
+            .from('fotos_galeria')
+            .select('*')
+            .eq('album_id', albumId)
+            .order('created_at', { ascending: false });
+
+        if (error) {
+            container.innerHTML = 'Erro ao carregar fotos.';
+            return;
+        }
+
+        container.innerHTML = '';
+        if (data.length === 0) {
+            container.innerHTML = '<p style="grid-column: 1/-1;">Este álbum ainda não tem fotos.</p>';
+        }
+
+        data.forEach(foto => {
+            const div = document.createElement('div');
+            div.style.position = 'relative';
+            div.innerHTML = `
+                <img src="${foto.url}" style="width:100%; aspect-ratio:1; object-fit:cover; border-radius:5px;">
+                <button onclick="deleteFoto('${foto.id}', '${foto.url}')" style="position:absolute; top:5px; right:5px; background:rgba(255,0,0,0.8); color:white; border:none; border-radius:50%; width:24px; height:24px; cursor:pointer; display:flex; align-items:center; justify-content:center; font-size:12px;">&times;</button>
+            `;
+            container.appendChild(div);
+        });
+    }
+
+    const formUploadFotos = document.getElementById('form-upload-fotos');
+    if (formUploadFotos) {
+        formUploadFotos.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const albumId = document.getElementById('manage-album-id').value;
+            const files = document.getElementById('galeria-fotos-files').files;
+            const progress = document.getElementById('upload-progress');
+            
+            if (!files.length) return;
+
+            progress.classList.remove('hidden');
+            progress.textContent = `A carregar 0/${files.length}...`;
+
+            try {
+                for (let i = 0; i < files.length; i++) {
+                    const file = files[i];
+                    progress.textContent = `A carregar ${i + 1}/${files.length}...`;
+                    
+                    const fileName = `galeria_${albumId}_${Date.now()}_${file.name.replace(/\s/g, '_')}`;
+                    const { data, error } = await supabase.storage.from('fotos').upload(fileName, file);
+                    
+                    if (error) {
+                        console.error("Erro upload:", error);
+                        continue;
+                    }
+
+                    const { data: publicData } = supabase.storage.from('fotos').getPublicUrl(fileName);
+                    const url = publicData.publicUrl;
+
+                    await supabase.from('fotos_galeria').insert([{ album_id: albumId, url: url }]);
+                }
+                
+                alert("Upload concluído!");
+                formUploadFotos.reset();
+                loadAlbumPhotos(albumId);
+            } catch (err) {
+                console.error(err);
+                alert("Erro no upload: " + err.message);
+            } finally {
+                progress.classList.add('hidden');
+            }
+        });
+    }
+
+    window.deleteFoto = async (id, url) => {
+        if (!confirm("Apagar esta foto?")) return;
+        
+        // Em teoria deveríamos apagar do Storage também, mas por segurança 
+        // ou simplicidade vamos apagar apenas da DB primeiro ou extrair o nome do ficheiro.
+        // Opcional: Apagar do Storage (precisa do path/nome relativo)
+        
+        const { error } = await supabase.from('fotos_galeria').delete().eq('id', id);
+        if (error) alert("Erro: " + error.message);
+        else {
+            const albumId = document.getElementById('manage-album-id').value;
+            loadAlbumPhotos(albumId);
+        }
+    };
 });

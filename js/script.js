@@ -931,12 +931,16 @@ document.addEventListener('DOMContentLoaded', () => {
     // ============================================================
     // GALERIA - Álbuns e Slider
     // ============================================================
-    function initGaleria() {
-        if (typeof galeriaData === 'undefined') {
-            console.error('Dados da galeria não encontrados.');
+    // ============================================================
+    // GALERIA - Álbuns e Slider
+    // ============================================================
+    async function initGaleria() {
+        if (!supabase) {
+            console.error('Supabase não iniciado.');
             return;
         }
-        renderAlbums();
+
+        await fetchAlbuns();
         
         // Listeners globais para o slider
         document.getElementById('btn-prev')?.addEventListener('click', () => navigateSlider(-1));
@@ -951,39 +955,76 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
-    function renderAlbums() {
+    async function fetchAlbuns() {
         const container = document.getElementById('albums-container');
         if (!container) return;
-        
+
+        // Buscar álbuns e contar fotos (usando left join ou count se possível, mas aqui vamos buscar álbuns primeiro)
+        const { data: albuns, error } = await supabase
+            .from('albuns')
+            .select(`
+                *,
+                fotos_count:fotos_galeria(count)
+            `)
+            .order('created_at', { ascending: false });
+
+        if (error) {
+            console.error('Erro ao buscar álbuns:', error);
+            container.innerHTML = '<p>Erro ao carregar galeria.</p>';
+            return;
+        }
+
         container.innerHTML = '';
+        if (!albuns || albuns.length === 0) {
+            container.innerHTML = '<p>As fotos do torneio estarão disponíveis em breve.</p>';
+            return;
+        }
+
         const fragment = document.createDocumentFragment();
-        
-        galeriaData.forEach(album => {
+        albuns.forEach(album => {
             const card = document.createElement('div');
             card.className = 'album-card';
             card.onclick = () => openAlbum(album.id);
             
+            const count = album.fotos_count?.[0]?.count || 0;
+            const capa = album.capa_url || 'favicon.svg';
+
             card.innerHTML = `
-                <img src="${album.fundo}" alt="${album.titulo}" loading="lazy">
+                <img src="${capa}" alt="${album.titulo}" loading="lazy">
                 <div class="album-info">
                     <h3>${album.titulo}</h3>
-                    <span class="album-count">${album.fotos.length} fotos</span>
+                    <span class="album-count">${count} fotos</span>
                 </div>
             `;
             fragment.appendChild(card);
         });
-        
         container.appendChild(fragment);
     }
 
     window.currentAlbum = null;
     window.currentPhotoIndex = 0;
 
-    window.openAlbum = function(albumId) {
-        const album = galeriaData.find(a => a.id === albumId);
-        if (!album) return;
-        
-        window.currentAlbum = album;
+    window.openAlbum = async function(albumId) {
+        // Buscar título do álbum e suas fotos
+        const [albumRes, fotosRes] = await Promise.all([
+            supabase.from('albuns').select('titulo').eq('id', albumId).single(),
+            supabase.from('fotos_galeria').select('url').eq('album_id', albumId).order('created_at', { ascending: true })
+        ]);
+
+        if (albumRes.error || fotosRes.error) {
+            alert("Erro ao abrir álbum.");
+            return;
+        }
+
+        const album = albumRes.data;
+        const fotos = fotosRes.data;
+
+        if (!fotos || fotos.length === 0) {
+            alert("Este álbum ainda não tem fotos.");
+            return;
+        }
+
+        window.currentAlbum = { ...album, fotos: fotos.map(f => f.url) };
         window.currentPhotoIndex = 0;
         
         const overlay = document.getElementById('slider-overlay');
@@ -993,7 +1034,7 @@ document.addEventListener('DOMContentLoaded', () => {
         title.textContent = album.titulo;
         container.innerHTML = '';
         
-        album.fotos.forEach((foto, index) => {
+        window.currentAlbum.fotos.forEach((foto, index) => {
             const slide = document.createElement('div');
             slide.className = 'slide';
             slide.innerHTML = `<img src="${foto}" alt="Foto ${index + 1}" loading="lazy">`;
@@ -1001,7 +1042,7 @@ document.addEventListener('DOMContentLoaded', () => {
         });
         
         overlay.classList.add('active');
-        document.body.style.overflow = 'hidden'; // Bloquear scroll do fundo
+        document.body.style.overflow = 'hidden';
         updateSlider();
     };
 
