@@ -37,6 +37,8 @@ document.addEventListener('DOMContentLoaded', () => {
         fetchEquipaDetalhes();
     } else if (path.includes('patrocinadores') && supabase) {
         fetchPatrocinadores();
+    } else if (path.includes('galeria')) {
+        initGaleria();
     } else {
         console.log("Nenhuma lógica específica para esta página ou Supabase não iniciado.");
     }
@@ -925,5 +927,109 @@ document.addEventListener('DOMContentLoaded', () => {
         });
 
         container.appendChild(fragment);
+    }
+    // ============================================================
+    // GALERIA - Álbuns e Slider
+    // ============================================================
+    function initGaleria() {
+        if (typeof galeriaData === 'undefined') {
+            console.error('Dados da galeria não encontrados.');
+            return;
+        }
+        renderAlbums();
+        
+        // Listeners globais para o slider
+        document.getElementById('btn-prev')?.addEventListener('click', () => navigateSlider(-1));
+        document.getElementById('btn-next')?.addEventListener('click', () => navigateSlider(1));
+        
+        // Teclado
+        document.addEventListener('keydown', (e) => {
+            if (!document.getElementById('slider-overlay').classList.contains('active')) return;
+            if (e.key === 'ArrowLeft') navigateSlider(-1);
+            if (e.key === 'ArrowRight') navigateSlider(1);
+            if (e.key === 'Escape') closeGallery();
+        });
+    }
+
+    function renderAlbums() {
+        const container = document.getElementById('albums-container');
+        if (!container) return;
+        
+        container.innerHTML = '';
+        const fragment = document.createDocumentFragment();
+        
+        galeriaData.forEach(album => {
+            const card = document.createElement('div');
+            card.className = 'album-card';
+            card.onclick = () => openAlbum(album.id);
+            
+            card.innerHTML = `
+                <img src="${album.fundo}" alt="${album.titulo}" loading="lazy">
+                <div class="album-info">
+                    <h3>${album.titulo}</h3>
+                    <span class="album-count">${album.fotos.length} fotos</span>
+                </div>
+            `;
+            fragment.appendChild(card);
+        });
+        
+        container.appendChild(fragment);
+    }
+
+    window.currentAlbum = null;
+    window.currentPhotoIndex = 0;
+
+    window.openAlbum = function(albumId) {
+        const album = galeriaData.find(a => a.id === albumId);
+        if (!album) return;
+        
+        window.currentAlbum = album;
+        window.currentPhotoIndex = 0;
+        
+        const overlay = document.getElementById('slider-overlay');
+        const container = document.getElementById('slider-container');
+        const title = document.getElementById('slider-album-title');
+        
+        title.textContent = album.titulo;
+        container.innerHTML = '';
+        
+        album.fotos.forEach((foto, index) => {
+            const slide = document.createElement('div');
+            slide.className = 'slide';
+            slide.innerHTML = `<img src="${foto}" alt="Foto ${index + 1}" loading="lazy">`;
+            container.appendChild(slide);
+        });
+        
+        overlay.classList.add('active');
+        document.body.style.overflow = 'hidden'; // Bloquear scroll do fundo
+        updateSlider();
+    };
+
+    window.closeGallery = function() {
+        const overlay = document.getElementById('slider-overlay');
+        overlay.classList.remove('active');
+        document.body.style.overflow = '';
+    };
+
+    function navigateSlider(direction) {
+        if (!window.currentAlbum) return;
+        
+        const newIndex = window.currentPhotoIndex + direction;
+        if (newIndex >= 0 && newIndex < window.currentAlbum.fotos.length) {
+            window.currentPhotoIndex = newIndex;
+            updateSlider();
+        }
+    }
+
+    function updateSlider() {
+        const container = document.getElementById('slider-container');
+        const footer = document.getElementById('slider-footer');
+        const slides = container.querySelectorAll('.slide');
+        
+        if (slides[window.currentPhotoIndex]) {
+            slides[window.currentPhotoIndex].scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'start' });
+        }
+        
+        footer.textContent = `${window.currentPhotoIndex + 1} de ${window.currentAlbum.fotos.length}`;
     }
 });
