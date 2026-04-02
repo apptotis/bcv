@@ -935,12 +935,19 @@ document.addEventListener('DOMContentLoaded', () => {
     // GALERIA - Álbuns e Slider
     // ============================================================
     async function initGaleria() {
+        const container = document.getElementById('albums-container');
         if (!supabase) {
             console.error('Supabase não iniciado.');
+            if (container) container.innerHTML = '<p class="error">Erro: Supabase não inicializado. Verifique a sua ligação ou configurações.</p>';
             return;
         }
 
-        await fetchAlbuns();
+        try {
+            await fetchAlbuns();
+        } catch (err) {
+            console.error('Erro ao inicializar galeria:', err);
+            if (container) container.innerHTML = '<p class="error">Erro ao carregar a galeria. Por favor, tente novamente.</p>';
+        }
         
         // Listeners globais para o slider
         document.getElementById('btn-prev')?.addEventListener('click', () => navigateSlider(-1));
@@ -959,18 +966,15 @@ document.addEventListener('DOMContentLoaded', () => {
         const container = document.getElementById('albums-container');
         if (!container) return;
 
-        // Buscar álbuns e contar fotos (usando left join ou count se possível, mas aqui vamos buscar álbuns primeiro)
+        // Simplificando a query para maior compatibilidade
         const { data: albuns, error } = await supabase
             .from('albuns')
-            .select(`
-                *,
-                fotos_count:fotos_galeria(count)
-            `)
+            .select('*')
             .order('created_at', { ascending: false });
 
         if (error) {
             console.error('Erro ao buscar álbuns:', error);
-            container.innerHTML = '<p>Erro ao carregar galeria.</p>';
+            container.innerHTML = '<p class="error">Erro ao carregar álbuns.</p>';
             return;
         }
 
@@ -980,24 +984,32 @@ document.addEventListener('DOMContentLoaded', () => {
             return;
         }
 
+        // Para mostrar a contagem, vamos buscar as contagens separadamente ou apenas ocultar se der erro
         const fragment = document.createDocumentFragment();
-        albuns.forEach(album => {
+        
+        for (const album of albuns) {
+            // Buscar contagem de fotos para cada álbum (opcional - simplificado para evitar erros no mobile)
+            const { count, error: countErr } = await supabase
+                .from('fotos_galeria')
+                .select('*', { count: 'exact', head: true })
+                .eq('album_id', album.id);
+
             const card = document.createElement('div');
             card.className = 'album-card';
             card.onclick = () => openAlbum(album.id);
             
-            const count = album.fotos_count?.[0]?.count || 0;
+            const countText = countErr ? '' : `${count || 0} fotos`;
             const capa = album.capa_url || 'favicon.svg';
 
             card.innerHTML = `
                 <img src="${capa}" alt="${album.titulo}" loading="lazy">
                 <div class="album-info">
                     <h3>${album.titulo}</h3>
-                    <span class="album-count">${count} fotos</span>
+                    <span class="album-count">${countText}</span>
                 </div>
             `;
             fragment.appendChild(card);
-        });
+        }
         container.appendChild(fragment);
     }
 
