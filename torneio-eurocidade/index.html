@@ -1,0 +1,206 @@
+<!DOCTYPE html>
+<html lang="pt-PT">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="icon" type="image/svg+xml" href="favicon.svg">
+    <title>Torneio Basket Club de Valença</title>
+    <link rel="stylesheet" href="css/style.css?v=1.9">
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&display=swap" rel="stylesheet">
+    <style>
+        .gallery-card {
+            background: linear-gradient(135deg, #4a148c, #7b1fa2);
+            border-radius: 12px;
+            padding: 20px;
+            text-align: center;
+            color: white;
+            margin: 5px 0 15px 0;
+            width: 100%;
+            max-width: 100%;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+            transition: transform 0.3s ease;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            min-height: 110px;
+        }
+
+        .gallery-card:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 6px 16px rgba(0, 0, 0, 0.25);
+        }
+
+        .gallery-card h2 {
+            font-size: 1.2rem;
+            margin-bottom: 5px;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
+            font-weight: 700;
+            color: white;
+            border-bottom: none;
+        }
+
+        .gallery-card p {
+            font-size: 0.9rem;
+            margin-bottom: 15px;
+            opacity: 0.9;
+        }
+
+        .btn-gallery {
+            display: inline-block;
+            background-color: #ff9800;
+            color: white;
+            padding: 8px 20px;
+            border-radius: 20px;
+            text-decoration: none;
+            font-weight: bold;
+            text-transform: uppercase;
+            font-size: 0.8rem;
+            letter-spacing: 0.5px;
+            box-shadow: 0 4px 10px rgba(255, 152, 0, 0.4);
+            transition: all 0.3s ease;
+        }
+
+        @media (min-width: 600px) {
+            .gallery-card {
+                flex-direction: row;
+                justify-content: space-between;
+                padding: 0 25px;
+                text-align: left;
+            }
+
+            .gallery-card-text-container {
+                display: flex;
+                flex-direction: column;
+            }
+
+            .gallery-card h2 {
+                margin-bottom: 2px;
+            }
+
+            .gallery-card p {
+                margin-bottom: 0;
+            }
+        }
+        .btn-gallery:hover {
+            background-color: #f57c00;
+            box-shadow: 0 6px 15px rgba(255, 152, 0, 0.6);
+            transform: scale(1.05);
+        }
+    </style>
+    <link rel="manifest" href="manifest.json">
+    <meta name="theme-color" content="#4a148c">
+    <link rel="apple-touch-icon" href="Logo_bcv.jpg">
+    <!-- Supabase via CDN (Optional in Home) -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+</head>
+
+<body>
+
+    <!-- Header / Menu -->
+    <header class="main-header">
+        <div class="logo-container">
+            <a href="index.html"
+                style="display: flex; align-items: center; gap: 10px; text-decoration: none; color: white;">
+                <img src="Logo_bcv.jpg" alt="Logo BCV" class="site-logo">
+                <h1>Torneio Eurocidade</h1>
+            </a>
+        </div>
+        <button class="menu-toggle" aria-label="Abrir Menu">
+            <span></span>
+            <span></span>
+            <span></span>
+        </button>
+        <nav class="main-nav">
+            <ul>
+                <li><a href="index.html" class="active">Visão Geral</a></li>
+                <li><a href="equipas.html">Equipas Participantes</a></li>
+                <li><a href="jogos.html">Resultados dos Jogos</a></li>
+                <li><a href="galeria.html">Galeria de Fotos</a></li>
+                <li><a href="informacao.html">Informa&#231;&#227;o e Regulamentos</a></li>
+                <li><a href="patrocinadores.html">Patrocinadores</a></li>
+                <li><a href="agenda.html">Agenda Tecnica</a></li>
+            </ul>
+        </nav>
+    </header>
+
+    <!-- Conteúdo Principal -->
+    <main id="app-content">
+
+        <!-- Seção Visão Geral -->
+        <section id="visao-geral" class="page-section active">
+            <div class="poster-container">
+                <div class="gallery-card">
+                    <div class="gallery-card-text-container">
+                        <h2>Recorde os Melhores Momentos</h2>
+                        <p>Galeria de Fotos XXII Torneio Eurocidade</p>
+                    </div>
+                    <a href="galeria.html" class="btn-gallery">Ver Galeria</a>
+                </div>
+
+                <img src="cartaz_facebook.jpg" alt="Cartaz Oficial do Torneio" class="responsive-poster">
+
+                <!-- Promotional Videos Card -->
+                <div class="video-card">
+                    <div class="video-card-content">
+                        <p class="video-card-text">Videos Torneio Eurocidade 2025</p>
+                        <div class="video-buttons">
+                            <button class="video-btn" onclick="openVideoPopup('video_promocional.mp4')"
+                                aria-label="Ver vídeo 1">🏀</button>
+                            <button class="video-btn" onclick="openVideoPopup('video_promocional_2.mp4')"
+                                aria-label="Ver vídeo 2">🏀</button>
+                            <button class="video-btn" onclick="openVideoPopup('https://mndbyptvuaqasctphmgm.supabase.co/storage/v1/object/public/fotos/video_promo3.mp4')"
+                                aria-label="Ver vídeo 3">🏀</button>
+                        </div>
+                    </div>
+                </div>
+
+                <p class="dev-credits"><a href="https://totis.pt/" target="_blank" style="text-decoration: none; color: inherit;">Desenvolvido por T0TiS@2026</a></p>
+            </div>
+        </section>
+
+    </main>
+
+    <!-- Video Popup Modal -->
+    <div id="videoModal" class="video-modal" onclick="closeVideoPopup()">
+        <div class="video-modal-content" onclick="event.stopPropagation()">
+            <span class="close-modal" onclick="closeVideoPopup()">&times;</span>
+            <video id="promoVideo" controls>
+                <source src="video_promocional.mp4" type="video/mp4">
+                O seu navegador não suporta a reprodução de vídeo.
+            </video>
+        </div>
+    </div>
+
+    <!-- Scripts -->
+    <script src="js/config.js?v=mobile20"></script>
+    <script src="js/script.js?v=opt1"></script>
+    <script>
+        function openVideoPopup(videoSrc) {
+            const modal = document.getElementById('videoModal');
+            const video = document.getElementById('promoVideo');
+
+            // Atualizar o source do vídeo
+            video.src = videoSrc;
+
+            modal.style.display = 'flex';
+            video.play();
+
+            // Auto-close when video ends
+            video.onended = function () {
+                closeVideoPopup();
+            };
+        }
+
+        function closeVideoPopup() {
+            const modal = document.getElementById('videoModal');
+            const video = document.getElementById('promoVideo');
+            modal.style.display = 'none';
+            video.pause();
+            video.currentTime = 0;
+        }
+    </script>
+</body>
+
+</html>

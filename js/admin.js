@@ -1,1390 +1,471 @@
-document.addEventListener('DOMContentLoaded', async () => {
-    // Inicializar Supabase (Mesma lógica do script.js, mas focada no admin)
-    let supabase;
-    if (typeof SUPABASE_URL !== 'undefined' && typeof SUPABASE_ANON_KEY !== 'undefined' && SUPABASE_ANON_KEY !== 'SUA_SUPABASE_ANON_KEY_AQUI') {
-        supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
-    } else {
-        console.warn("Supabase não configurado no admin.js");
-        return;
-    }
+/**
+ * Lógica do Painel de Administração Principal do BCV
+ */
 
-    // Elementos DOM Auth
+document.addEventListener('DOMContentLoaded', async () => {
+    // 1. Inicializar Supabase a partir do config.js
+    const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+    // 2. Elementos DOM
     const loginContainer = document.getElementById('admin-login-container');
     const adminPanel = document.getElementById('admin-panel');
-    const emailInput = document.getElementById('admin-email');
-    const passwordInput = document.getElementById('admin-password');
-    const loginBtn = document.getElementById('btn-login');
-    const logoutBtn = document.getElementById('btn-logout');
+    const loginForm = document.getElementById('login-form');
     const loginError = document.getElementById('login-error');
+    const btnLogout = document.getElementById('btn-logout');
+    const btnLogin = document.getElementById('btn-login');
+    const adminNameSpan = document.getElementById('admin-name');
 
-    // Elementos DOM Abas
-    const tabBtns = document.querySelectorAll('.tab-btn');
-    const tabPanes = document.querySelectorAll('.tab-pane');
-
-    // --- AUTENTICAÇÃO ---
-
-    // Verificar sessão atual
-    const { data: { session } } = await supabase.auth.getSession();
-    updateUI(session);
-
-    // Listener para mudanças de auth
-    supabase.auth.onAuthStateChange((event, session) => {
-        updateUI(session);
-    });
-
-    function updateUI(session) {
+    // 3. Verificar Sessão Atual no arranque
+    async function checkSession() {
+        const { data: { session }, error } = await supabase.auth.getSession();
+        
         if (session) {
-            loginContainer.classList.add('hidden');
-            adminPanel.classList.remove('hidden');
-            loadAdminData(); // Carregar dados do dashboard
+            verifyAdminRole(session.user);
         } else {
-            loginContainer.classList.remove('hidden');
-            adminPanel.classList.add('hidden');
+            showLogin();
         }
     }
 
+    // 4. Verificar Permissões (Role)
+    async function verifyAdminRole(user) {
+        try {
+            // Consultar a tabela public.users para verificar o role
+            const { data: profile, error } = await supabase
+                .from('users')
+                .select('nome, role')
+                .eq('id', user.id)
+                .single();
 
-    // Login - usar submit do form para funcionar no mobile
-    const loginForm = document.getElementById('login-form');
-    if (loginForm) {
-        loginForm.addEventListener('submit', async (e) => {
-            e.preventDefault(); // Prevenir reload da página
+            if (error) throw error;
 
-            const email = emailInput.value;
-            const password = passwordInput.value;
-            loginError.classList.add('hidden');
+            const allowedRoles = ['admin', 'editor', 'treinador'];
 
-            if (!email || !password) {
-                showError("Preencha email e senha.");
+            if (profile && allowedRoles.includes(profile.role)) {
+                // Acesso permitido
+                if (adminNameSpan) {
+                    adminNameSpan.textContent = profile.nome || 'Utilizador';
+                }
+                
+                // Configurar permissões de visualização consoante o role
+                setupRolePermissions(profile.role);
+                
+                showAdminPanel();
+            } else {
+                // Tem sessão mas o role não é permitido
+                throw new Error("Acesso Negado: Não tem permissões para aceder a este portal.");
+            }
+        } catch (error) {
+            console.error("Erro na verificação de role:", error);
+            showError(error.message);
+            await supabase.auth.signOut();
+            showLogin();
+        }
+    }
+
+    // Ocultar ou mostrar menus dependendo do role
+    function setupRolePermissions(role) {
+        const usersTabBtn = document.querySelector('[data-tab="tab-users"]');
+        const configTabBtn = document.querySelector('[data-tab="tab-config"]');
+        const galeriaTabBtn = document.querySelector('[data-tab="tab-galeria"]');
+        
+        // Restaurar a visibilidade por defeito (para o caso de troca de contas)
+        if (usersTabBtn) usersTabBtn.closest('li').style.display = 'block';
+        if (configTabBtn) configTabBtn.closest('li').style.display = 'block';
+        if (galeriaTabBtn) galeriaTabBtn.closest('li').style.display = 'block';
+
+        if (role !== 'admin') {
+            // Esconder os separadores sensíveis para quem não é admin
+            if (usersTabBtn) usersTabBtn.closest('li').style.display = 'none';
+            if (configTabBtn) configTabBtn.closest('li').style.display = 'none';
+        }
+
+        // Galeria: Apenas admin e editor
+        if (role !== 'admin' && role !== 'editor') {
+            if (galeriaTabBtn) galeriaTabBtn.closest('li').style.display = 'none';
+        }
+    }
+
+    // 5. Função de Login
+    loginForm.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        
+        const email = document.getElementById('admin-email').value;
+        const password = document.getElementById('admin-password').value;
+        
+        // Estado de loading
+        btnLogin.textContent = "A Autenticar...";
+        btnLogin.disabled = true;
+        hideError();
+
+        try {
+            const { data, error } = await supabase.auth.signInWithPassword({
+                email: email,
+                password: password
+            });
+
+            if (error) throw error;
+
+            if (data.user) {
+                // Após o login, vamos verificar se tem o role correto
+                await verifyAdminRole(data.user);
+            }
+        } catch (error) {
+            showError("Credenciais inválidas ou acesso negado.");
+        } finally {
+            btnLogin.textContent = "Aceder";
+            btnLogin.disabled = false;
+        }
+    });
+
+    // 6. Função de Logout
+    btnLogout.addEventListener('click', async () => {
+        await supabase.auth.signOut();
+        showLogin();
+    });
+
+    // Utilitários de Interface
+    function showLogin() {
+        loginContainer.classList.remove('hidden');
+        adminPanel.classList.add('hidden');
+        
+        // Limpar os campos do login
+        document.getElementById('admin-password').value = '';
+    }
+
+    function resetTabsToDashboard() {
+        const tabBtns = document.querySelectorAll('.tab-btn');
+        const tabPanes = document.querySelectorAll('.tab-pane');
+        
+        // Remover estado ativo de tudo
+        tabBtns.forEach(b => b.classList.remove('active'));
+        tabPanes.forEach(p => p.classList.add('hidden'));
+        
+        // Ativar o Dashboard
+        const dashBtn = document.querySelector('[data-tab="tab-dashboard"]');
+        const dashPane = document.getElementById('tab-dashboard');
+        
+        if (dashBtn) dashBtn.classList.add('active');
+        if (dashPane) dashPane.classList.remove('hidden');
+    }
+
+    function showAdminPanel() {
+        loginContainer.classList.add('hidden');
+        adminPanel.classList.remove('hidden');
+        
+        // Forçar sempre a abertura no Dashboard para evitar bugs de ecrãs escondidos
+        resetTabsToDashboard();
+        
+        // Carregar a lista de aniversariantes do dia
+        loadDashboardAniversariantes();
+    }
+
+    async function loadDashboardAniversariantes() {
+        const container = document.getElementById('dashboard-aniversariantes');
+        if (!container) return;
+        
+        try {
+            // Obter todos os atletas que tenham data_nascimento
+            const { data: atletas, error } = await supabase
+                .from('atletasbcv')
+                .select('nome, foto, equipa, data_nascimento')
+                .not('data_nascimento', 'is', null);
+
+            if (error) {
+                if (error.code === '42P01') {
+                    container.innerHTML = '<div style="color: #a0a0ab;">(Tabela de atletas ainda não criada)</div>';
+                } else {
+                    container.innerHTML = '<div style="color: #ff5252;">Erro ao carregar dados.</div>';
+                }
                 return;
             }
 
-            const { data, error } = await supabase.auth.signInWithPassword({
-                email,
-                password
+            const hoje = new Date();
+            const diaHoje = hoje.getDate();
+            const mesHoje = hoje.getMonth() + 1; // 0-11 -> 1-12
+
+            const aniversariantesHoje = atletas.filter(atleta => {
+                const dataNasc = new Date(atleta.data_nascimento);
+                return dataNasc.getDate() === diaHoje && (dataNasc.getMonth() + 1) === mesHoje;
             });
 
-            if (error) {
-                showError("Erro: " + error.message);
-            } else {
-                // Sucesso - o listener cuidará da UI
-                emailInput.value = '';
-                passwordInput.value = '';
+            container.innerHTML = '';
+
+            if (aniversariantesHoje.length === 0) {
+                container.innerHTML = '<div style="color: #a0a0ab; padding: 10px; background: rgba(255,255,255,0.05); border-radius: 8px;">Nenhum atleta celebra o aniversário hoje.</div>';
+                return;
             }
-        });
+
+            aniversariantesHoje.forEach(atleta => {
+                // Calcular idade
+                const dataNasc = new Date(atleta.data_nascimento);
+                let idade = hoje.getFullYear() - dataNasc.getFullYear();
+                
+                const item = document.createElement('div');
+                item.style.display = 'flex';
+                item.style.alignItems = 'center';
+                item.style.gap = '15px';
+                item.style.padding = '10px';
+                item.style.background = 'rgba(255,255,255,0.05)';
+                item.style.borderRadius = '8px';
+
+                const fotoHtml = atleta.foto 
+                    ? `<img src="${atleta.foto}" style="width: 50px; height: 50px; object-fit: cover; border-radius: 50%;">` 
+                    : '<div style="width: 50px; height: 50px; background: rgba(255,255,255,0.1); border-radius: 50%; display:flex; align-items:center; justify-content:center; font-size: 1.5rem;">👤</div>';
+
+                item.innerHTML = `
+                    ${fotoHtml}
+                    <div>
+                        <div style="font-weight: bold; font-size: 1.1rem; color: #fff;">${atleta.nome} 🎉</div>
+                        <div style="color: #a0a0ab; font-size: 0.9rem;">${atleta.equipa} • ${idade} anos</div>
+                    </div>
+                `;
+                container.appendChild(item);
+            });
+
+        } catch (error) {
+            console.error("Erro ao verificar aniversariantes:", error);
+            container.innerHTML = '<div style="color: #ff5252;">Erro ao verificar aniversários.</div>';
+        }
     }
-
-
-    // Logout
-    logoutBtn.addEventListener('click', async () => {
-        await supabase.auth.signOut();
-        window.location.href = 'index.html'; // Redirecionar para página principal
-    });
 
     function showError(msg) {
         loginError.textContent = msg;
         loginError.classList.remove('hidden');
     }
 
-    // --- NAVEGAÇÃO DE ABAS ---
+    function hideError() {
+        loginError.classList.add('hidden');
+    }
+
+    // ==========================================
+    // 7. Lógica de Tabs (Menu Lateral)
+    // ==========================================
+    const tabBtns = document.querySelectorAll('.tab-btn');
+    const tabPanes = document.querySelectorAll('.tab-pane');
+
     tabBtns.forEach(btn => {
-        btn.addEventListener('click', () => {
-            // Remover active de tudo
+        btn.addEventListener('click', (e) => {
+            e.preventDefault();
+            
+            // Remover active de todos
             tabBtns.forEach(b => b.classList.remove('active'));
-            tabPanes.forEach(p => p.classList.remove('active'));
             tabPanes.forEach(p => p.classList.add('hidden'));
 
-            // Ativar atual
+            // Ativar o clicado
             btn.classList.add('active');
-            const tabId = btn.getAttribute('data-tab');
-            const targetPane = document.getElementById(tabId);
-            targetPane.classList.remove('hidden');
-            targetPane.classList.add('active');
+            const targetId = btn.getAttribute('data-tab');
+            document.getElementById(targetId).classList.remove('hidden');
+
+            if (targetId === 'tab-users') {
+                loadUsers();
+                if (typeof resetUserForm === 'function') resetUserForm();
+            }
+
+            if (targetId === 'tab-galeria') {
+                if (typeof loadAlbunsAdmin === 'function') loadAlbunsAdmin();
+            }
+
+            if (targetId === 'tab-atletas') {
+                if (typeof loadAtletas === 'function') loadAtletas();
+                if (typeof resetAtletaForm === 'function') resetAtletaForm();
+            }
         });
     });
 
-    // --- CARREGAMENTO DE DADOS (Início) ---
-    async function loadAdminData() {
-        console.log("Carregando dados do admin...");
-        await loadTeamsOptions();
-        await loadEquipasAdmin();
-        await loadAtletasAdmin();
-        await loadJogosAdmin();
-        await loadTipoEventos(); // Carregar tipos de evento
-        await loadEventosAdmin();
-        await loadPatrocinadoresAdmin();
-        await loadAlbunsAdmin(); // Carregar álbuns da galeria
-        await loadGeralAdmin();
-    }
-
-    // Preencher Selects de Equipas
-    async function loadTeamsOptions() {
-        const { data: equipas, error } = await supabase.from('equipas').select('id, nome, escalao, genero').order('escalao').order('nome');
-        if (error) return console.error(error);
-
-        const atletaSelect = document.getElementById('atleta-equipa-id');
-        const casaSelect = document.getElementById('jogo-equipa-casa');
-        const foraSelect = document.getElementById('jogo-equipa-fora');
-        const filtroAtletaSelect = document.getElementById('filtro-atleta-equipa');
-
-        // Limpar e popular
-        [atletaSelect, casaSelect, foraSelect].forEach(sel => {
-            if (!sel) return;
-            sel.innerHTML = '<option value="" disabled selected>Selecionar Equipa</option>';
-            equipas.forEach(e => {
-                const opt = document.createElement('option');
-                opt.value = e.id;
-                // Exibe Escalão, Género e Nome
-                const escalao = e.escalao || 'Sem Escalão';
-                const genero = e.genero ? ` ${e.genero}` : '';
-                opt.textContent = `[${escalao}${genero}] ${e.nome}`;
-                sel.appendChild(opt);
-            });
-        });
-
-        // Popular filtro de atletas
-        if (filtroAtletaSelect) {
-            filtroAtletaSelect.innerHTML = '<option value="">Filtrar por Equipa (Todas)</option>';
-            equipas.forEach(e => {
-                const opt = document.createElement('option');
-                opt.value = e.id;
-                const escalao = e.escalao || 'Sem Escalão';
-                const genero = e.genero ? ` ${e.genero}` : '';
-                opt.textContent = `[${escalao}${genero}] ${e.nome}`;
-                filtroAtletaSelect.appendChild(opt);
-            });
-        }
-    }
-
-    // --- CRUD ATLETAS ---
-    const formAtleta = document.getElementById('form-atleta');
-    let editingAtletaId = null; // Estado para edição
-
-    formAtleta.addEventListener('submit', async (e) => {
-        e.preventDefault();
-
-        const nome = document.getElementById('atleta-nome').value;
-        const numero = document.getElementById('atleta-numero').value;
-        const funcaoSelect = document.getElementById('atleta-funcao');
-        const funcaoCustomInput = document.getElementById('atleta-funcao-custom');
-        const funcaoCustomWrap = document.getElementById('atleta-funcao-custom-wrap');
-        const funcao = funcaoSelect.value === 'Outro' ? funcaoCustomInput.value : funcaoSelect.value;
-        const equipaId = document.getElementById('atleta-equipa-id').value;
-        const fotoFile = document.getElementById('atleta-foto-file').files[0];
-
-        let fotoUrl = null;
-
-        try {
-            if (!equipaId) throw new Error("Selecione uma equipa.");
-
-            // Upload Foto
-            if (fotoFile) {
-                const fileName = `atleta_${Date.now()}_${fotoFile.name.replace(/\s/g, '_')}`;
-
-                // Usando mesmo bucket 'fotos' ou poderia ser um novo 'atletas'
-                const { data, error } = await supabase.storage
-                    .from('fotos')
-                    .upload(fileName, fotoFile);
-
-                if (error) throw error;
-
-                const { data: publicData } = supabase.storage.from('fotos').getPublicUrl(fileName);
-                fotoUrl = publicData.publicUrl;
-            }
-
-            // Insert Database
-            const updates = {
-                nome,
-                equipa_id: equipaId,
-                numero: (numero !== '' && numero !== null) ? parseInt(numero) : null,
-                funcao: funcao || 'Jogador'
-            };
-            if (fotoUrl) updates.foto_url = fotoUrl;
-
-            console.log('Enviando updates para atleta:', updates);
-
-            if (editingAtletaId) {
-                // UPDATE
-                const { error } = await supabase.from('atletas').update(updates).eq('id', editingAtletaId);
-                if (error) throw error;
-                alert("Atleta atualizado com sucesso!");
+    // ==========================================
+    // Mostrar/Ocultar Palavra-Passe
+    // ==========================================
+    const togglePasswordBtns = document.querySelectorAll('.toggle-password');
+    togglePasswordBtns.forEach(btn => {
+        btn.addEventListener('click', () => {
+            const targetId = btn.getAttribute('data-target');
+            const input = document.getElementById(targetId);
+            
+            if (input.type === 'password') {
+                input.type = 'text';
+                btn.textContent = '🔒';
             } else {
-                // INSERT
-                const { error } = await supabase.from('atletas').insert([updates]);
-                if (error) throw error;
-                alert("Atleta adicionado com sucesso!");
+                input.type = 'password';
+                btn.textContent = '👁️';
             }
-
-            // Reset
-            formAtleta.reset();
-            editingAtletaId = null;
-            const btn = formAtleta.querySelector('button[type="submit"]');
-            if (btn) btn.textContent = "Adicionar Atleta";
-
-            // Reset custom field wrap
-            if (funcaoCustomWrap) funcaoCustomWrap.classList.add('hidden');
-
-            loadAtletasAdmin(); // Atualiza lista
-
-        } catch (err) {
-            console.error(err);
-            alert("Erro: " + err.message);
-        }
+        });
     });
 
-    async function loadAtletasAdmin() {
-        const listContainer = document.getElementById('admin-atletas-list');
-        if (listContainer) listContainer.innerHTML = 'Carregando...';
+    // ==========================================
+    // 8. Gestão de Utilizadores (Criar, Editar, Apagar)
+    // ==========================================
+    const usersTableBody = document.getElementById('users-table-body');
+    const formCreateUser = document.getElementById('form-create-user');
+    const createUserMsg = document.getElementById('create-user-msg');
+    const btnCreateUser = document.getElementById('btn-create-user');
+    const btnCancelEdit = document.getElementById('btn-cancel-edit');
+    const formUserTitle = document.getElementById('form-user-title');
+    const editUserIdInput = document.getElementById('edit-user-id');
+    const passwordHint = document.getElementById('password-hint');
+    const passwordInput = document.getElementById('new-user-password');
 
-        const { data, error } = await supabase
-            .from('atletas')
-            .select('*, equipas(nome, escalao)')
-            .order('created_at', { ascending: false });
-
-        if (error) {
-            if (listContainer) listContainer.innerHTML = 'Erro ao carregar lista de atletas.';
-            console.error(error);
-            return;
-        }
-
-        window.allAtletasAdmin = data || [];
-
-        // Ligar filtros de atletas (apenas na primeira carga)
-        if (!window._filtrosAtletasAdmin) {
-            window._filtrosAtletasAdmin = true;
-
-            const filtroAtletaEquipa = document.getElementById('filtro-atleta-equipa');
-            if (filtroAtletaEquipa) {
-                filtroAtletaEquipa.addEventListener('change', filtrarERenderizerAtletasAdmin);
-            }
-
-            const btnLimpar = document.getElementById('btn-limpar-filtros-atletas');
-            if (btnLimpar) {
-                btnLimpar.addEventListener('click', () => {
-                    if (filtroAtletaEquipa) filtroAtletaEquipa.value = '';
-                    filtrarERenderizerAtletasAdmin();
-                });
-            }
-        }
-
-        filtrarERenderizerAtletasAdmin();
+    function resetUserForm() {
+        if(formCreateUser) formCreateUser.reset();
+        editUserIdInput.value = '';
+        formUserTitle.textContent = 'Criar Novo Utilizador';
+        btnCreateUser.textContent = 'Criar Utilizador';
+        btnCancelEdit.classList.add('hidden');
+        passwordHint.style.display = 'none';
+        passwordInput.required = true;
+        document.getElementById('new-user-email').disabled = false;
+        if(createUserMsg) createUserMsg.classList.add('hidden');
     }
 
-    function filtrarERenderizerAtletasAdmin() {
-        const listContainer = document.getElementById('admin-atletas-list');
-        if (!listContainer) return;
-
-        const data = window.allAtletasAdmin || [];
-        const filtroEquipaId = document.getElementById('filtro-atleta-equipa')?.value || '';
-
-        const filtrados = data.filter(atleta => {
-            if (filtroEquipaId && String(atleta.equipa_id) !== filtroEquipaId) return false;
-            return true;
-        });
-
-        listContainer.innerHTML = '';
-        if (filtrados.length === 0) {
-            listContainer.innerHTML = data.length === 0 ? '<p>Nenhum atleta cadastrado.</p>' : '<p>Nenhum atleta encontrado com este filtro.</p>';
-            return;
-        }
-
-        filtrados.forEach(atleta => {
-            const div = document.createElement('div');
-            div.className = 'admin-list-item';
-            div.style.borderBottom = '1px solid #ccc';
-            div.style.padding = '10px 0';
-            div.style.display = 'flex';
-            div.style.justifyContent = 'space-between';
-            div.style.alignItems = 'center';
-
-            // Tratamento caso a equipa tenha sido deletada
-            const nomeEquipa = atleta.equipas ? `${atleta.equipas.nome} (${atleta.equipas.escalao})` : 'Equipa desconhecida';
-
-            div.innerHTML = `
-                <div style="display: flex; align-items: center; gap: 10px;">
-                    ${atleta.foto_url
-                    ? `<img src="${atleta.foto_url}" style="width: 40px; height: 40px; border-radius: 50%; object-fit: cover;">`
-                    : '<div style="width: 40px; height: 40px; background: #eee; border-radius: 50%;"></div>'}
-                    <div>
-                        <strong>${atleta.nome} ${(atleta.numero !== null && atleta.numero !== undefined) ? `<span style="color: #666;">(#${atleta.numero})</span>` : ''}</strong>
-                        <br>
-                        <small>${atleta.funcao || 'Jogador'} - ${nomeEquipa}</small>
-                    </div>
-                </div>
-                <div style="display: flex; gap: 5px;">
-                    <button class="btn-success btn-sm" onclick="editAtleta('${atleta.id}')">Editar</button>
-                    <button class="btn-danger btn-sm" onclick="deleteAtleta('${atleta.id}')">Excluir</button>
-                </div>
-            `;
-            listContainer.appendChild(div);
-        });
+    if (btnCancelEdit) {
+        btnCancelEdit.addEventListener('click', resetUserForm);
     }
 
-    // Função Global de Edição de Atleta
-    window.editAtleta = async (id) => {
-        const { data: atleta, error } = await supabase.from('atletas').select('*').eq('id', id).single();
-        if (error) {
-            alert("Erro ao buscar atleta: " + error.message);
-            return;
-        }
-
-        document.getElementById('atleta-nome').value = atleta.nome;
-        document.getElementById('atleta-numero').value = (atleta.numero !== null && atleta.numero !== undefined) ? atleta.numero : '';
-        const funcaoSelect = document.getElementById('atleta-funcao');
-        const predefinedFunctions = ["Jogador", "Treinador", "Treinador Adjunto", "Team Manager", "Fisioterapeuta"];
-
-        if (predefinedFunctions.includes(atleta.funcao)) {
-            funcaoSelect.value = atleta.funcao;
-            document.getElementById('atleta-funcao-custom-wrap').classList.add('hidden');
-            document.getElementById('atleta-funcao-custom').value = '';
-        } else {
-            funcaoSelect.value = 'Outro';
-            document.getElementById('atleta-funcao-custom-wrap').classList.remove('hidden');
-            document.getElementById('atleta-funcao-custom').value = atleta.funcao || '';
-        }
-
-        document.getElementById('atleta-equipa-id').value = atleta.equipa_id;
-
-        editingAtletaId = id;
-        const btn = formAtleta.querySelector('button[type="submit"]');
-        if (btn) btn.textContent = "Atualizar Atleta";
-
-        formAtleta.scrollIntoView({ behavior: 'smooth' });
-    };
-
-    window.deleteAtleta = async (id) => {
-        if (!confirm("Tem certeza que deseja apagar este atleta?")) return;
-
-        const { error } = await supabase.from('atletas').delete().eq('id', id);
-        if (error) {
-            alert("Erro ao apagar: " + error.message);
-        } else {
-            loadAtletasAdmin();
-        }
-    };
-
-    // --- CRUD JOGOS ---
-    const formJogo = document.getElementById('form-jogo');
-    let editingJogoId = null;
-
-    formJogo.addEventListener('submit', async (e) => {
-        e.preventDefault();
-
-        const equipaCasaId = document.getElementById('jogo-equipa-casa').value;
-        const equipaForaId = document.getElementById('jogo-equipa-fora').value;
-        const dataHora = document.getElementById('jogo-data').value;
-        const estado = document.getElementById('jogo-estado').value;
-        const campo = document.getElementById('jogo-campo').value;
-        const resultadoCasaRaw = document.getElementById('jogo-resultado-casa').value;
-        const resultadoForaRaw = document.getElementById('jogo-resultado-fora').value;
-        const resultadoCasa = resultadoCasaRaw !== '' ? parseInt(resultadoCasaRaw) : null;
-        const resultadoFora = resultadoForaRaw !== '' ? parseInt(resultadoForaRaw) : null;
-
+    async function loadUsers() {
         try {
-            // Validar que as equipas são diferentes
-            if (equipaCasaId === equipaForaId) {
-                throw new Error("As equipas devem ser diferentes!");
-            }
-
-            // Buscar escalão da equipa casa (assumindo que ambas são do mesmo escalão)
-            const { data: equipaCasa, error: errorEquipa } = await supabase
-                .from('equipas')
-                .select('escalao')
-                .eq('id', equipaCasaId)
-                .single();
-
-            if (errorEquipa) throw errorEquipa;
-
-            const updates = {
-                equipa_casa_id: equipaCasaId,
-                equipa_fora_id: equipaForaId,
-                escalao: equipaCasa.escalao,
-                data_hora: dataHora ? new Date(dataHora).toISOString() : null,
-                estado: estado || 'Agendado',
-                campo: campo || null,
-                resultado_casa: resultadoCasa,
-                resultado_fora: resultadoFora
-            };
-
-            if (editingJogoId) {
-                // UPDATE
-                const { error } = await supabase.from('jogos').update(updates).eq('id', editingJogoId);
-                if (error) throw error;
-                alert("Jogo atualizado com sucesso!");
-            } else {
-                // INSERT
-                const { error } = await supabase.from('jogos').insert([updates]);
-                if (error) throw error;
-                alert("Jogo agendado com sucesso!");
-            }
-
-            // Reset
-            formJogo.reset();
-            editingJogoId = null;
-            const btn = formJogo.querySelector('button[type="submit"]');
-            if (btn) btn.textContent = "Agendar Jogo";
-
-            loadJogosAdmin();
-
-        } catch (err) {
-            console.error(err);
-            alert("Erro: " + err.message);
-        }
-    });
-
-    async function loadJogosAdmin() {
-        const listContainer = document.getElementById('admin-jogos-list');
-        listContainer.innerHTML = 'Carregando...';
-
-        const [{ data, error }, { data: equipas }] = await Promise.all([
-            supabase
-                .from('jogos')
-                .select(`
-                    *,
-                    equipa_casa:equipas!equipa_casa_id(nome, escalao),
-                    equipa_fora:equipas!equipa_fora_id(nome, escalao)
-                `)
-                .order('data_hora', { ascending: true }),
-            supabase
-                .from('equipas')
-                .select('id, nome, escalao, genero')
-                .order('nome')
-        ]);
-
-        if (error) {
-            listContainer.innerHTML = 'Erro ao carregar lista de jogos.';
-            console.error(error);
-            return;
-        }
-
-        window.allJogosAdmin = data || [];
-
-        // Popular select de clubes e ligar filtros (apenas na primeira carga)
-        if (!window._filtrosJogosAdmin) {
-            window._filtrosJogosAdmin = true;
-
-            const selectClube = document.getElementById('filtro-clube');
-            if (selectClube && equipas) {
-                equipas.forEach(e => {
-                    const num = (e.escalao || '').replace(/\D/g, '');
-                    const gen = e.genero === 'Masculino' ? 'M' : e.genero === 'Feminino' ? 'F' : '';
-                    const abrev = num ? ` (${num}${gen})` : '';
-                    const opt = document.createElement('option');
-                    opt.value = e.id;
-                    opt.textContent = `${e.nome}${abrev}`;
-                    selectClube.appendChild(opt);
-                });
-            }
-
-            ['filtro-data', 'filtro-hora', 'filtro-clube', 'filtro-estado'].forEach(id => {
-                const el = document.getElementById(id);
-                if (el) el.addEventListener('change', filtrarERenderizerJogosAdmin);
-            });
-            document.getElementById('filtro-hora')?.addEventListener('input', filtrarERenderizerJogosAdmin);
-
-            const btnLimpar = document.getElementById('btn-limpar-filtros');
-            if (btnLimpar) btnLimpar.addEventListener('click', () => {
-                document.getElementById('filtro-data').value = '';
-                document.getElementById('filtro-hora').value = '';
-                document.getElementById('filtro-clube').value = '';
-                document.getElementById('filtro-estado').value = '';
-                filtrarERenderizerJogosAdmin();
-            });
-        }
-
-        filtrarERenderizerJogosAdmin();
-    }
-
-    function filtrarERenderizerJogosAdmin() {
-        const listContainer = document.getElementById('admin-jogos-list');
-        const data = window.allJogosAdmin || [];
-
-        const filtroData = document.getElementById('filtro-data')?.value || '';
-        const filtroHora = document.getElementById('filtro-hora')?.value || '';
-        const filtroClubeId = document.getElementById('filtro-clube')?.value || '';
-        const filtroEstado = document.getElementById('filtro-estado')?.value || '';
-
-        const filtrados = data.filter(jogo => {
-            const dt = jogo.data_hora ? new Date(jogo.data_hora) : null;
-
-            if (filtroData && dt) {
-                const jogoData = dt.toLocaleDateString('en-CA', { timeZone: 'Europe/Lisbon' }); // YYYY-MM-DD em PT
-                if (jogoData !== filtroData) return false;
-            }
-            if (filtroHora && dt) {
-                // Obter a hora local de Portugal como string (HH:MM)
-                const jogoHora = dt.toLocaleTimeString('pt-PT', { hour: '2-digit', minute: '2-digit', hour12: false, timeZone: 'Europe/Lisbon' });
-                if (jogoHora !== filtroHora) return false;
-            }
-            if (filtroClubeId) {
-                // Filtrar por ID único da equipa
-                if (String(jogo.equipa_casa_id) !== filtroClubeId &&
-                    String(jogo.equipa_fora_id) !== filtroClubeId) return false;
-            }
-            if (filtroEstado) {
-                const estado = jogo.estado || 'Agendado';
-                if (estado !== filtroEstado) return false;
-            }
-            return true;
-        });
-
-        listContainer.innerHTML = '';
-        if (filtrados.length === 0) {
-            listContainer.innerHTML = '<p>Nenhum jogo encontrado com estes filtros.</p>';
-            return;
-        }
-
-        filtrados.forEach(jogo => {
-            const div = document.createElement('div');
-            div.className = 'admin-list-item';
-            div.style.borderBottom = '1px solid #ccc';
-            div.style.padding = '10px 0';
-            div.style.display = 'flex';
-            div.style.justifyContent = 'space-between';
-            div.style.alignItems = 'center';
-
-            const equipaCasa = jogo.equipa_casa?.nome || 'Equipa desconhecida';
-            const equipaFora = jogo.equipa_fora?.nome || 'Equipa desconhecida';
-            const dataHora = jogo.data_hora ? new Date(jogo.data_hora).toLocaleString('pt-PT', { timeZone: 'Europe/Lisbon' }) : 'Data a definir';
-            const estado = jogo.estado || 'Agendado';
-
-            div.innerHTML = `
-                <div>
-                    <strong>${equipaCasa} vs ${equipaFora}</strong>
-                    <br>
-                    <small>${jogo.escalao || ''} | ${dataHora} | ${jogo.campo || 'Campo a definir'} | <em>${estado}</em></small>
-                </div>
-                <div style="display: flex; gap: 5px;">
-                    <button class="btn-success btn-sm" onclick="editJogo('${jogo.id}')">Editar</button>
-                    <button class="btn-danger btn-sm" onclick="deleteJogo('${jogo.id}')">Excluir</button>
-                </div>
-            `;
-            listContainer.appendChild(div);
-        });
-    }
-
-    // Função Global de Edição de Jogo
-    window.editJogo = async (id) => {
-        const { data: jogo, error } = await supabase.from('jogos').select('*').eq('id', id).single();
-        if (error) {
-            alert("Erro ao buscar jogo: " + error.message);
-            return;
-        }
-
-        document.getElementById('jogo-equipa-casa').value = jogo.equipa_casa_id;
-        document.getElementById('jogo-equipa-fora').value = jogo.equipa_fora_id;
-        document.getElementById('jogo-estado').value = jogo.estado || 'Agendado';
-
-        // Converter data para formato datetime-local
-        if (jogo.data_hora) {
-            const date = new Date(jogo.data_hora);
-            const year = date.getFullYear();
-            const month = String(date.getMonth() + 1).padStart(2, '0');
-            const day = String(date.getDate()).padStart(2, '0');
-            const hours = String(date.getHours()).padStart(2, '0');
-            const minutes = String(date.getMinutes()).padStart(2, '0');
-            document.getElementById('jogo-data').value = `${year}-${month}-${day}T${hours}:${minutes}`;
-        }
-
-        document.getElementById('jogo-campo').value = jogo.campo || '';
-        const rc = jogo.resultado_casa;
-        const rf = jogo.resultado_fora;
-        document.getElementById('jogo-resultado-casa').value = rc !== null && rc !== undefined ? rc : '';
-        document.getElementById('jogo-resultado-fora').value = rf !== null && rf !== undefined ? rf : '';
-
-        editingJogoId = id;
-        const btn = formJogo.querySelector('button[type="submit"]');
-        if (btn) btn.textContent = "Atualizar Jogo";
-
-        formJogo.scrollIntoView({ behavior: 'smooth' });
-    };
-
-    window.deleteJogo = async (id) => {
-        if (!confirm("Tem certeza que deseja apagar este jogo?")) return;
-
-        const { error } = await supabase.from('jogos').delete().eq('id', id);
-        if (error) {
-            alert("Erro ao apagar: " + error.message);
-        } else {
-            loadJogosAdmin();
-        }
-    };
-
-    // --- CRUD EQUIPAS ---
-    const formEquipa = document.getElementById('form-equipa');
-    let editingEquipaId = null; // Estado para edição
-
-    // Carregar lista de equipas ao iniciar
-    loadEquipasAdmin();
-
-    formEquipa.addEventListener('submit', async (e) => {
-        e.preventDefault();
-
-        const nome = document.getElementById('equipa-nome').value;
-        const escalao = document.getElementById('equipa-escalao').value;
-        const genero = document.getElementById('equipa-genero').value;
-        const local = document.getElementById('equipa-local').value;
-        const desc = document.getElementById('equipa-desc').value;
-        const tecnico = document.getElementById('equipa-tecnico').value;
-        const facebookUrl = document.getElementById('equipa-facebook').value;
-        const instagramUrl = document.getElementById('equipa-instagram').value;
-        const websiteUrl = document.getElementById('equipa-website').value;
-        const shadowColor = document.getElementById('equipa-shadow-color').value;
-        const logoFile = document.getElementById('equipa-logo-file').files[0];
-        const fotoFile = document.getElementById('equipa-foto-file').files[0];
-
-        let logoUrl = null;
-        let fotoUrl = null;
-
-        try {
-            // 1. Upload Logo (se existir)
-            if (logoFile) {
-                const fileName = `logo_${Date.now()}_${logoFile.name.replace(/\s/g, '_')}`;
-                const { data, error } = await supabase.storage.from('logos').upload(fileName, logoFile);
-                if (error) throw error;
-                const { data: publicData } = supabase.storage.from('logos').getPublicUrl(fileName);
-                logoUrl = publicData.publicUrl;
-            }
-
-            // 2. Upload Foto de Grupo (se existir)
-            if (fotoFile) {
-                const fileName = `grupo_${Date.now()}_${fotoFile.name.replace(/\s/g, '_')}`;
-                const { data, error } = await supabase.storage.from('fotos').upload(fileName, fotoFile);
-                if (error) throw error;
-                const { data: publicData } = supabase.storage.from('fotos').getPublicUrl(fileName);
-                fotoUrl = publicData.publicUrl;
-            }
-
-            // 3. Montar Objeto de Dados
-            const updates = {
-                nome,
-                escalao,
-                genero,
-                localizacao: local,
-                descricao: desc,
-                tecnico,
-                facebook_url: facebookUrl || null,
-                instagram_url: instagramUrl || null,
-                website_url: websiteUrl || null,
-                shadow_color: shadowColor
-            };
-            if (logoUrl) updates.logo_url = logoUrl;
-            if (fotoUrl) updates.foto_grupo_url = fotoUrl;
-
-            // 4. Insert ou Update
-            if (editingEquipaId) {
-                // UPDATE
-                const { error } = await supabase.from('equipas').update(updates).eq('id', editingEquipaId);
-                if (error) throw error;
-                alert("Equipa atualizada com sucesso!");
-            } else {
-                // INSERT
-                const { error } = await supabase.from('equipas').insert([updates]);
-                if (error) throw error;
-                alert("Equipa criada com sucesso!");
-            }
-
-            // Reset
-            formEquipa.reset();
-            editingEquipaId = null;
-            const btn = formEquipa.querySelector('button[type="submit"]');
-            if (btn) btn.textContent = "Adicionar Equipa";
-
-            loadEquipasAdmin();
-            loadTeamsOptions();
-
-        } catch (err) {
-            console.error(err);
-            alert("Erro: " + err.message);
-        }
-    });
-
-    async function loadEquipasAdmin() {
-        const listContainer = document.getElementById('admin-equipas-list');
-        listContainer.innerHTML = 'Carregando...';
-
-        const { data, error } = await supabase
-            .from('equipas')
-            .select('*')
-            .order('created_at', { ascending: false });
-
-        if (error) {
-            listContainer.innerHTML = 'Erro ao carregar lista.';
-            return;
-        }
-
-        window.allEquipasAdmin = data || [];
-
-        // Ligar filtros de equipas (apenas na primeira carga)
-        if (!window._filtrosEquipasAdmin) {
-            window._filtrosEquipasAdmin = true;
-
-            const filtroNome = document.getElementById('filtro-equipa-nome');
-            const filtroEscalao = document.getElementById('filtro-equipa-escalao');
-
-            if (filtroNome) filtroNome.addEventListener('input', filtrarERenderizerEquipasAdmin);
-            if (filtroEscalao) filtroEscalao.addEventListener('change', filtrarERenderizerEquipasAdmin);
-
-            const btnLimpar = document.getElementById('btn-limpar-filtros-equipas');
-            if (btnLimpar) {
-                btnLimpar.addEventListener('click', () => {
-                    if (filtroNome) filtroNome.value = '';
-                    if (filtroEscalao) filtroEscalao.value = '';
-                    filtrarERenderizerEquipasAdmin();
-                });
-            }
-        }
-
-        filtrarERenderizerEquipasAdmin();
-    }
-
-    function filtrarERenderizerEquipasAdmin() {
-        const listContainer = document.getElementById('admin-equipas-list');
-        if (!listContainer) return;
-
-        const data = window.allEquipasAdmin || [];
-        const filtroNome = document.getElementById('filtro-equipa-nome')?.value.toLowerCase() || '';
-        const filtroEscalao = document.getElementById('filtro-equipa-escalao')?.value || '';
-
-        const filtrados = data.filter(equipa => {
-            if (filtroNome && !equipa.nome.toLowerCase().includes(filtroNome)) return false;
-            if (filtroEscalao && equipa.escalao !== filtroEscalao) return false;
-            return true;
-        });
-
-        listContainer.innerHTML = '';
-        if (filtrados.length === 0) {
-            listContainer.innerHTML = data.length === 0 ? '<p>Nenhuma equipa cadastrada.</p>' : '<p>Nenhuma equipa encontrada com estes filtros.</p>';
-            return;
-        }
-
-        filtrados.forEach(equipa => {
-            const div = document.createElement('div');
-            div.className = 'admin-list-item';
-            div.style.borderBottom = '1px solid #ccc';
-            div.style.padding = '10px 0';
-            div.style.display = 'flex';
-            div.style.justifyContent = 'space-between';
-            div.style.alignItems = 'center';
-
-            div.innerHTML = `
-                <div>
-                    <strong>${equipa.nome}</strong> (${equipa.escalao || '-'})
-                    <span style="margin-left:8px;background:#4a148c;color:#fff;font-size:0.72rem;font-weight:700;padding:2px 8px;border-radius:10px;">PIN: ${equipa.id}</span>
-                    <br>
-                    <small>${equipa.genero || 'Género não definido'} | ${equipa.tecnico || ''}</small>
-                </div>
-                <div style="display: flex; gap: 5px;">
-                    <button class="btn-success btn-sm" onclick="editEquipa('${equipa.id}')">Editar</button>
-                    <button class="btn-danger btn-sm" onclick="deleteEquipa('${equipa.id}')">Excluir</button>
-                </div>
-            `;
-            listContainer.appendChild(div);
-        });
-    }
-
-    // Função Global de Edição
-    window.editEquipa = async (id) => {
-        // Buscar dados atuais da equipa
-        const { data: equipa, error } = await supabase.from('equipas').select('*').eq('id', id).single();
-
-        if (error) {
-            alert("Erro ao buscar equipa: " + error.message);
-            return;
-        }
-
-        // Preencher formulário
-        document.getElementById('equipa-nome').value = equipa.nome;
-        document.getElementById('equipa-escalao').value = equipa.escalao || '';
-        document.getElementById('equipa-genero').value = equipa.genero || '';
-        document.getElementById('equipa-local').value = equipa.localizacao || '';
-        document.getElementById('equipa-desc').value = equipa.descricao || '';
-        document.getElementById('equipa-tecnico').value = equipa.tecnico || '';
-        document.getElementById('equipa-facebook').value = equipa.facebook_url || '';
-        document.getElementById('equipa-instagram').value = equipa.instagram_url || '';
-        document.getElementById('equipa-website').value = equipa.website_url || '';
-        document.getElementById('equipa-shadow-color').value = equipa.shadow_color || '#3b82f6';
-
-        // Alterar estado para edição
-        editingEquipaId = id;
-        const btn = formEquipa.querySelector('button[type="submit"]');
-        if (btn) btn.textContent = "Atualizar Equipa";
-
-        // Scroll para o topo do form para facilitar
-        formEquipa.scrollIntoView({ behavior: 'smooth' });
-    };
-
-    // Função Global para deletar
-    window.deleteEquipa = async (id) => {
-        if (!confirm("Tem certeza que deseja apagar esta equipa?")) return;
-
-        const { error } = await supabase.from('equipas').delete().eq('id', id);
-        if (error) {
-            alert("Erro ao apagar: " + error.message);
-        } else {
-            loadEquipasAdmin();
-            loadTeamsOptions();
-        }
-    };
-
-    // --- CRUD EVENTOS ---
-    const formEvento = document.getElementById('form-evento');
-    let editingEventoId = null;
-
-    if (formEvento) {
-        // Popular grid de checkboxes para eventos privados
-        supabase.from('equipas').select('id, nome, escalao, genero').order('nome').then(({ data: eqs }) => {
-            const grid = document.getElementById('evento-equipa-id-grid');
-            if (grid && eqs) {
-                grid.innerHTML = '';
-                eqs.forEach(e => {
-                    const num = (e.escalao || '').replace(/\D/g, '');
-                    const gen = e.genero === 'Masculino' ? 'M' : e.genero === 'Feminino' ? 'F' : '';
-                    const abrev = num ? ` (${num}${gen})` : '';
-
-                    const label = document.createElement('label');
-                    label.className = 'checkbox-item';
-                    label.innerHTML = `
-                        <input type="checkbox" value="${e.id}" name="evento-equipas">
-                        <span>${e.nome}${abrev}</span>
-                    `;
-                    grid.appendChild(label);
-                });
-            }
-        });
-
-        // Mostrar/ocultar select de equipa conforme visibilidade
-        const selPublico = document.getElementById('evento-publico');
-        const wrapEquipa = document.getElementById('evento-equipa-wrap');
-        function toggleEquipaWrap() {
-            if (wrapEquipa) wrapEquipa.style.display = selPublico.value === 'false' ? 'block' : 'none';
-        }
-        if (selPublico) { selPublico.addEventListener('change', toggleEquipaWrap); toggleEquipaWrap(); }
-
-        // --- LÓGICA DE FUNÇÃO CUSTOM (ATLETAS) ---
-        const atletaFuncaoSelect = document.getElementById('atleta-funcao');
-        const atletaFuncaoCustomWrap = document.getElementById('atleta-funcao-custom-wrap');
-        if (atletaFuncaoSelect && atletaFuncaoCustomWrap) {
-            atletaFuncaoSelect.addEventListener('change', () => {
-                if (atletaFuncaoSelect.value === 'Outro') {
-                    atletaFuncaoCustomWrap.classList.remove('hidden');
-                } else {
-                    atletaFuncaoCustomWrap.classList.add('hidden');
-                }
-            });
-        }
-
-        formEvento.addEventListener('submit', async (e) => {
-            e.preventDefault();
-
-            const isPublico = document.getElementById('evento-publico').value === 'true';
-            const tipoId = parseInt(document.getElementById('evento-tipo').value);
-            const local = document.getElementById('evento-local').value.trim();
-            const dataHora = document.getElementById('evento-data').value;
-            const dataHoraFim = document.getElementById('evento-data-fim').value;
-            const tecnicos = document.getElementById('evento-tecnicos').value.trim();
-            const descricao = document.getElementById('evento-descricao').value.trim();
-
-            // Obter múltiplas equipas selecionadas (checkboxes)
-            const checkboxes = document.querySelectorAll('input[name="evento-equipas"]:checked');
-            const equipaIds = Array.from(checkboxes).map(cb => cb.value);
-
-            try {
-                if (!tipoId) throw new Error('Selecione um tipo de evento.');
-                if (!local) throw new Error('Indique o local do evento.');
-                if (!dataHora) throw new Error('Indique a data e hora do evento.');
-                if (!isPublico && equipaIds.length === 0) throw new Error('Evento privado requer pelo menos uma equipa.');
-
-                const eventoData = {
-                    is_publico: isPublico,
-                    tipo_evento_id: tipoId,
-                    local,
-                    data_hora: dataHora ? new Date(dataHora).toISOString() : null,
-                    data_hora_fim: dataHoraFim ? new Date(dataHoraFim).toISOString() : null,
-                    tecnicos: tecnicos || null,
-                    descricao: descricao || null
-                };
-
-                let eventoId = editingEventoId;
-
-                if (editingEventoId) {
-                    // Atualizar evento base
-                    const { error } = await supabase.from('eventos').update(eventoData).eq('id', editingEventoId);
-                    if (error) throw error;
-
-                    // Atualizar equipas: apagar todas e inserir novas
-                    await supabase.from('evento_equipas').delete().eq('evento_id', editingEventoId);
-                } else {
-                    // Criar novo evento
-                    const { data, error } = await supabase.from('eventos').insert([eventoData]).select().single();
-                    if (error) throw error;
-                    eventoId = data.id;
-                }
-
-                // Inserir equipas na junction table (se privado e houver equipas)
-                if (!isPublico && equipaIds.length > 0) {
-                    const insertData = equipaIds.map(eid => ({ evento_id: eventoId, equipa_id: eid }));
-                    const { error: errJun } = await supabase.from('evento_equipas').insert(insertData);
-                    if (errJun) throw errJun;
-                }
-
-                if (editingEventoId) {
-                    alert('Evento atualizado com sucesso!');
-                } else {
-                    alert('Evento adicionado com sucesso!');
-                }
-
-                formEvento.reset();
-                document.getElementById('evento-data-fim').value = '';
-                toggleEquipaWrap();
-                editingEventoId = null;
-                const btn = formEvento.querySelector('button[type="submit"]');
-                if (btn) btn.textContent = 'Adicionar Evento';
-
-                // Limpar seleção do grid
-                const checkboxes = document.querySelectorAll('input[name="evento-equipas"]');
-                checkboxes.forEach(cb => cb.checked = false);
-
-                loadEventosAdmin();
-
-            } catch (err) {
-                console.error(err);
-                alert('Erro: ' + err.message);
-            }
-        });
-    }
-
-    // Mapa de ícones por tipo
-    const adminEventoIcons = {
-        1: '\uD83C\uDFC0', 2: '\uD83D\uDCF8', 3: '\uD83C\uDF7D\uFE0F', 4: '\uD83C\uDF7D\uFE0F', 5: '\uD83C\uDF7D\uFE0F',
-        6: '\uD83C\uDF88', 7: '\uD83C\uDFCA', 8: '\uD83E\uDDF1', 9: '\uD83C\uDFB6', 10: '\u26A1',
-        11: '\uD83C\uDFC1', 12: '\uD83C\uDF89', 13: '\uD83D\uDCCB'
-    };
-
-    let allTipoEventos = []; // Store types globally for names
-
-    async function loadTipoEventos() {
-        const select = document.getElementById('evento-tipo');
-        const filtroTipo = document.getElementById('filtro-evento-tipo');
-        if (!select) return;
-
-        const { data, error } = await supabase.from('tipo_eventos').select('id, nome').order('id');
-        if (error) {
-            console.error('Erro ao carregar tipos de evento:', error);
-            select.innerHTML = '<option value="" disabled>Erro ao carregar</option>';
-            return;
-        }
-
-        allTipoEventos = data;
-        select.innerHTML = '<option value="" disabled selected>Selecionar Tipo de Evento</option>';
-        if (filtroTipo) filtroTipo.innerHTML = '<option value="">Todos os Tipos</option>';
-
-        data.forEach(t => {
-            const opt = document.createElement('option');
-            opt.value = t.id;
-            opt.textContent = t.nome;
-            select.appendChild(opt);
-
-            if (filtroTipo) {
-                const optFiltro = document.createElement('option');
-                optFiltro.value = t.id;
-                optFiltro.textContent = t.nome;
-                filtroTipo.appendChild(optFiltro);
-            }
-        });
-    }
-
-    async function loadEventosAdmin() {
-        const listContainer = document.getElementById('admin-eventos-list');
-        if (!listContainer) return;
-        listContainer.innerHTML = 'Carregando...';
-
-        const { data, error } = await supabase
-            .from('eventos')
-            .select('*')
-            .order('data_hora', { ascending: true });
-
-        if (error) {
-            listContainer.innerHTML = 'Erro ao carregar eventos.';
-            console.error(error);
-            return;
-        }
-
-        window.allEventosAdmin = data || [];
-
-        // Ligar filtros apenas na primeira carga
-        if (!window._filtrosEventosAdmin) {
-            window._filtrosEventosAdmin = true;
-
-            ['filtro-evento-tipo', 'filtro-evento-data', 'filtro-evento-hora'].forEach(id => {
-                const el = document.getElementById(id);
-                if (el) el.addEventListener('change', filtrarERenderizarEventosAdmin);
-            });
-            document.getElementById('filtro-evento-hora')?.addEventListener('input', filtrarERenderizarEventosAdmin);
-
-            const btnLimpar = document.getElementById('btn-limpar-filtros-eventos');
-            if (btnLimpar) btnLimpar.addEventListener('click', () => {
-                document.getElementById('filtro-evento-tipo').value = '';
-                document.getElementById('filtro-evento-data').value = '';
-                document.getElementById('filtro-evento-hora').value = '';
-                filtrarERenderizarEventosAdmin();
-            });
-        }
-
-        filtrarERenderizarEventosAdmin();
-    }
-
-    function filtrarERenderizarEventosAdmin() {
-        const listContainer = document.getElementById('admin-eventos-list');
-        if (!listContainer) return;
-        const data = window.allEventosAdmin || [];
-
-        const filtroTipo = document.getElementById('filtro-evento-tipo')?.value || '';
-        const filtroData = document.getElementById('filtro-evento-data')?.value || '';
-        const filtroHora = document.getElementById('filtro-evento-hora')?.value || '';
-
-        const filtrados = data.filter(evento => {
-            const dt = evento.data_hora ? new Date(evento.data_hora) : null;
-
-            if (filtroTipo) {
-                if (String(evento.tipo_evento_id) !== filtroTipo) return false;
-            }
-            if (filtroData && dt) {
-                // Obter a data local de Portugal como string (YYYY-MM-DD)
-                const eventoData = dt.toLocaleDateString('en-CA', { timeZone: 'Europe/Lisbon' });
-                if (eventoData !== filtroData) return false;
-            }
-            if (filtroHora && dt) {
-                // Obter a hora local de Portugal como string (HH:MM)
-                const eventoHora = dt.toLocaleTimeString('pt-PT', { hour: '2-digit', minute: '2-digit', hour12: false, timeZone: 'Europe/Lisbon' });
-                if (eventoHora !== filtroHora) return false;
-            }
-            return true;
-        });
-
-        listContainer.innerHTML = '';
-        if (filtrados.length === 0) {
-            listContainer.innerHTML = '<p>Nenhum evento encontrado com estes filtros.</p>';
-            return;
-        }
-
-        filtrados.forEach(evento => {
-            const div = document.createElement('div');
-            div.className = 'admin-list-item';
-            div.style.borderBottom = '1px solid #ccc';
-            div.style.padding = '10px 0';
-            div.style.display = 'flex';
-            div.style.justifyContent = 'space-between';
-            div.style.alignItems = 'center';
-
-            const dataHora = evento.data_hora
-                ? new Date(evento.data_hora).toLocaleString('pt-PT', { day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit', timeZone: 'Europe/Lisbon' })
-                : 'Data a definir';
-            const icone = adminEventoIcons[evento.tipo_evento_id] || '\uD83D\uDCC5';
-            const tipoObj = allTipoEventos.find(t => t.id === evento.tipo_evento_id);
-            const tipo = tipoObj ? tipoObj.nome : 'Evento';
-            const visib = evento.is_publico ? '\uD83D\uDFE2 P\u00fablico' : '\uD83D\uDD34 Privado';
-
-            div.innerHTML = `
-                <div>
-                    <strong>${icone} ${tipo}</strong>
-                    <span style="margin-left:8px;font-size:0.8rem;color:#666">${visib}</span>
-                    <br>
-                    <small>\uD83D\uDCCD ${evento.local} &nbsp; \uD83D\uDDD3\uFE0F ${dataHora}${evento.data_hora_fim ? ` - ${new Date(evento.data_hora_fim).toLocaleTimeString('pt-PT', { hour: '2-digit', minute: '2-digit', timeZone: 'Europe/Lisbon' })}` : ''}</small>
-                    ${evento.tecnicos ? `<br><small>\uD83D\uDC64 ${evento.tecnicos}</small>` : ''}
-                </div>
-                <div style="display: flex; gap: 5px;">
-                    <button class="btn-success btn-sm" onclick="editEvento('${evento.id}')">Editar</button>
-                    <button class="btn-danger btn-sm" onclick="deleteEvento('${evento.id}')">Excluir</button>
-                </div>
-            `;
-            listContainer.appendChild(div);
-        });
-    }
-
-    window.editEvento = async (id) => {
-        const { data: evento, error } = await supabase.from('eventos').select('*').eq('id', id).single();
-        if (error) { alert('Erro ao buscar evento: ' + error.message); return; }
-
-        document.getElementById('evento-publico').value = String(evento.is_publico);
-        document.getElementById('evento-tipo').value = evento.tipo_evento_id || '';
-        document.getElementById('evento-local').value = evento.local || '';
-        document.getElementById('evento-tecnicos').value = evento.tecnicos || '';
-        document.getElementById('evento-descricao').value = evento.descricao || '';
-
-        // Preencher equipas (checkboxes)
-        const checkboxes = document.querySelectorAll('input[name="evento-equipas"]');
-        checkboxes.forEach(cb => cb.checked = false);
-
-        if (!evento.is_publico) {
-            // Buscar equipas associadas
-            const { data: relacoes } = await supabase.from('evento_equipas').select('equipa_id').eq('evento_id', id);
-            if (relacoes && relacoes.length > 0) {
-                const ids = relacoes.map(r => String(r.equipa_id));
-                checkboxes.forEach(cb => {
-                    if (ids.includes(String(cb.value))) cb.checked = true;
-                });
-            }
-        }
-
-        const selPub = document.getElementById('evento-publico');
-        const wrap = document.getElementById('evento-equipa-wrap');
-        if (wrap && selPub) wrap.style.display = selPub.value === 'false' ? 'block' : 'none';
-
-        if (evento.data_hora) {
-            const date = new Date(evento.data_hora);
-            const local = new Date(date.getTime() - date.getTimezoneOffset() * 60000).toISOString().slice(0, 16);
-            document.getElementById('evento-data').value = local;
-        }
-
-        if (evento.data_hora_fim) {
-            const date = new Date(evento.data_hora_fim);
-            const local = new Date(date.getTime() - date.getTimezoneOffset() * 60000).toISOString().slice(0, 16);
-            document.getElementById('evento-data-fim').value = local;
-        } else {
-            document.getElementById('evento-data-fim').value = '';
-        }
-
-        editingEventoId = id;
-        const btn = formEvento.querySelector('button[type="submit"]');
-        if (btn) btn.textContent = 'Atualizar Evento';
-        formEvento.scrollIntoView({ behavior: 'smooth' });
-    };
-
-    window.deleteEvento = async (id) => {
-        if (!confirm('Tem certeza que deseja apagar este evento?')) return;
-        const { error } = await supabase.from('eventos').delete().eq('id', id);
-        if (error) {
-            alert('Erro ao apagar: ' + error.message);
-        } else {
-            loadEventosAdmin();
-        }
-    };
-
-    // --- ABA GERAL E EXPORTAÇÃO PDF ---
-    async function loadGeralAdmin() {
-        const listContainer = document.getElementById('admin-geral-equipas-list');
-        if (!listContainer) return;
-
-        const { data: equipas, error } = await supabase
-            .from('equipas')
-            .select('id, nome, genero, escalao')
-            .order('nome');
-
-        if (error) {
-            console.error('Erro ao carregar equipas para info geral:', error);
-            return;
-        }
-
-        window.allEquipasGeral = equipas || [];
-        listContainer.innerHTML = '';
-
-        equipas.forEach(e => {
-            const tr = document.createElement('tr');
-            tr.innerHTML = `
-                <td>${e.id}</td>
-                <td>${e.nome}</td>
-                <td>${e.genero || '-'}</td>
-                <td>${e.escalao || '-'}</td>
-            `;
-            listContainer.appendChild(tr);
-        });
-    }
-
-    const btnExportPdf = document.getElementById('btn-export-pdf');
-    if (btnExportPdf) {
-        btnExportPdf.addEventListener('click', () => {
-            if (!window.allEquipasGeral || window.allEquipasGeral.length === 0) {
-                alert('Nenhuma equipa para exportar.');
+            usersTableBody.innerHTML = '<tr><td colspan="4" style="padding: 10px;">A carregar utilizadores...</td></tr>';
+            
+            const { data: users, error } = await supabase
+                .from('users')
+                .select('*')
+                .order('created_at', { ascending: false });
+
+            if (error) throw error;
+
+            if (users.length === 0) {
+                usersTableBody.innerHTML = '<tr><td colspan="4" style="padding: 10px;">Nenhum utilizador encontrado.</td></tr>';
                 return;
             }
 
-            const { jsPDF } = window.jspdf;
-            const doc = new jsPDF();
-
-            doc.setFontSize(18);
-            doc.text('Lista de Equipas - Torneio Eurocidade', 14, 20);
-            doc.setFontSize(11);
-            doc.setTextColor(100);
-
-            const tableData = window.allEquipasGeral.map(e => [
-                String(e.id),
-                e.nome,
-                e.genero || '-',
-                e.escalao || '-'
-            ]);
-
-            doc.autoTable({
-                startY: 30,
-                head: [['ID', 'Nome', 'Género', 'Escalão']],
-                body: tableData,
-                theme: 'striped',
-                headStyles: { fillColor: [74, 20, 140] } // #4a148c
+            usersTableBody.innerHTML = '';
+            users.forEach(user => {
+                const tr = document.createElement('tr');
+                const userJson = JSON.stringify(user).replace(/'/g, "&apos;").replace(/"/g, "&quot;");
+                
+                tr.innerHTML = `
+                    <td style="padding: 10px;">${user.nome || '-'}</td>
+                    <td style="padding: 10px;">${user.email || '-'}</td>
+                    <td style="padding: 10px; text-transform: capitalize;">${user.role || 'user'}</td>
+                    <td style="padding: 10px;">${user.telemovel || '-'}</td>
+                    <td style="padding: 10px; text-align: center;">
+                        <button class="btn-action" onclick="window.editUser('${userJson}')">✏️</button>
+                        <button class="btn-action delete" onclick="window.deleteUser('${user.id}')">🗑️</button>
+                    </td>
+                `;
+                usersTableBody.appendChild(tr);
             });
-
-            doc.save('equipas_torneio.pdf');
-        });
+        } catch (error) {
+            console.error("Erro ao carregar users:", error);
+            usersTableBody.innerHTML = '<tr><td colspan="5" style="color: red; padding: 10px;">Erro ao carregar utilizadores.</td></tr>';
+        }
     }
 
-    // --- CRUD PATROCINADORES ---
-    const formPatrocinador = document.getElementById('form-patrocinador');
-    let editingPatrocinadorId = null;
+    // Funções globais para botões inline da tabela
+    window.editUser = function(userStr) {
+        const user = JSON.parse(userStr);
+        
+        editUserIdInput.value = user.id;
+        document.getElementById('new-user-name').value = user.nome || '';
+        document.getElementById('new-user-email').value = user.email || '';
+        document.getElementById('new-user-email').disabled = true; // Não deixamos editar o email
+        document.getElementById('new-user-phone').value = user.telemovel || '';
+        document.getElementById('new-user-role').value = user.role || '';
+        
+        // Em modo edição, password não é obrigatória
+        passwordInput.required = false;
+        passwordInput.value = '';
+        passwordHint.style.display = 'block';
+        
+        formUserTitle.textContent = 'Editar Utilizador: ' + user.nome;
+        btnCreateUser.textContent = 'Guardar Alterações';
+        btnCancelEdit.classList.remove('hidden');
+        createUserMsg.classList.add('hidden');
+        
+        // Fazer scroll suave para o form
+        formUserTitle.scrollIntoView({ behavior: 'smooth' });
+    };
 
-    if (formPatrocinador) {
-        formPatrocinador.addEventListener('submit', async (e) => {
-            e.preventDefault();
+    window.deleteUser = async function(userId) {
+        if (!confirm('Tem a certeza absoluta que deseja eliminar este utilizador? Esta ação não pode ser desfeita.')) {
+            return;
+        }
 
-            const nome = document.getElementById('patrocinador-nome').value;
-            const tipo = document.getElementById('patrocinador-tipo').value;
-            const morada = document.getElementById('patrocinador-morada').value;
-            const cp = document.getElementById('patrocinador-cp').value;
-            const telefone = document.getElementById('patrocinador-telefone').value;
-            const facebook = document.getElementById('patrocinador-facebook').value;
-            const instagram = document.getElementById('patrocinador-instagram').value;
-            const maps = document.getElementById('patrocinador-maps').value;
-            const comer = document.getElementById('patrocinador-comer').checked;
-            const dormir = document.getElementById('patrocinador-dormir').checked;
-            const logoFile = document.getElementById('patrocinador-logo-file').files[0];
-
-            let logoUrl = null;
-
-            try {
-                // Upload Logo if exists
-                if (logoFile) {
-                    const fileName = `patrocinador_${Date.now()}_${logoFile.name.replace(/\s/g, '_')}`;
-                    const { data, error } = await supabase.storage.from('logos').upload(fileName, logoFile);
-                    if (error) throw error;
-                    const { data: publicData } = supabase.storage.from('logos').getPublicUrl(fileName);
-                    logoUrl = publicData.publicUrl;
-                }
-
-                const updates = {
-                    nome,
-                    tipo_servico: tipo,
-                    morada,
-                    codigo_postal: cp || null,
-                    telefone,
-                    facebook,
-                    instagram,
-                    google_maps_url: maps,
-                    comer,
-                    dormir
-                };
-
-                if (logoUrl) updates.logo_url = logoUrl;
-
-                if (editingPatrocinadorId) {
-                    const { error } = await supabase.from('patrocinadores').update(updates).eq('id', editingPatrocinadorId);
-                    if (error) throw error;
-                    alert('Patrocinador atualizado com sucesso!');
-                } else {
-                    const { error } = await supabase.from('patrocinadores').insert([updates]);
-                    if (error) throw error;
-                    alert('Patrocinador adicionado com sucesso!');
-                }
-
-                formPatrocinador.reset();
-                editingPatrocinadorId = null;
-                formPatrocinador.querySelector('button[type="submit"]').textContent = 'Adicionar Patrocinador';
-                loadPatrocinadoresAdmin();
-
-            } catch (err) {
-                console.error(err);
-                alert('Erro: ' + err.message);
+        try {
+            const { data, error } = await supabase.rpc('admin_delete_user', { p_user_id: userId });
+            if (error) throw error;
+            
+            alert('Utilizador eliminado com sucesso!');
+            loadUsers();
+            if (editUserIdInput.value === userId) {
+                resetUserForm();
             }
-        });
-    }
-
-    async function loadPatrocinadoresAdmin() {
-        const listContainer = document.getElementById('admin-patrocinadores-list');
-        if (!listContainer) return;
-
-        listContainer.innerHTML = 'Carregando...';
-
-        const { data, error } = await supabase
-            .from('patrocinadores')
-            .select('*')
-            .order('nome');
-
-        if (error) {
-            listContainer.innerHTML = 'Erro ao carregar patrocinadores.';
-            console.error(error);
-            return;
-        }
-
-        listContainer.innerHTML = '';
-        if (data.length === 0) {
-            listContainer.innerHTML = '<p>Nenhum patrocinador cadastrado.</p>';
-            return;
-        }
-
-        data.forEach(p => {
-            const div = document.createElement('div');
-            div.className = 'admin-list-item';
-            div.style.borderBottom = '1px solid #ccc';
-            div.style.padding = '10px 0';
-            div.style.display = 'flex';
-            div.style.justifyContent = 'space-between';
-            div.style.alignItems = 'center';
-
-            div.innerHTML = `
-                <div style="display: flex; align-items: center; gap: 10px;">
-                    ${p.logo_url 
-                        ? `<img src="${p.logo_url}" style="width: 40px; height: 40px; object-fit: contain;">` 
-                        : '<div style="width: 40px; height: 40px; background: #eee; border-radius: 4px;"></div>'}
-                    <div>
-                        <strong>${p.nome}</strong> (${p.tipo_servico || 'Sem tipo'})
-                        <br>
-                        <small>${p.morada || ''} | ${p.telefone || ''}</small>
-                        <br>
-                        <small>Comer: ${p.comer ? 'Sim' : 'Não'} | Dormir: ${p.dormir ? 'Sim' : 'Não'}</small>
-                    </div>
-                </div>
-                <div style="display: flex; gap: 5px;">
-                    <button class="btn-success btn-sm" onclick="editPatrocinador('${p.id}')">Editar</button>
-                    <button class="btn-danger btn-sm" onclick="deletePatrocinador('${p.id}')">Excluir</button>
-                </div>
-            `;
-            listContainer.appendChild(div);
-        });
-    }
-
-    window.editPatrocinador = async (id) => {
-        const { data: p, error } = await supabase.from('patrocinadores').select('*').eq('id', id).single();
-        if (error) {
-            alert('Erro ao buscar patrocinador: ' + error.message);
-            return;
-        }
-
-        document.getElementById('patrocinador-nome').value = p.nome;
-        document.getElementById('patrocinador-tipo').value = p.tipo_servico || '';
-        document.getElementById('patrocinador-morada').value = p.morada || '';
-        document.getElementById('patrocinador-cp').value = p.codigo_postal || '';
-        document.getElementById('patrocinador-telefone').value = p.telefone || '';
-        document.getElementById('patrocinador-facebook').value = p.facebook || '';
-        document.getElementById('patrocinador-instagram').value = p.instagram || '';
-        document.getElementById('patrocinador-maps').value = p.google_maps_url || '';
-        document.getElementById('patrocinador-comer').checked = p.comer;
-        document.getElementById('patrocinador-dormir').checked = p.dormir;
-
-        editingPatrocinadorId = id;
-        formPatrocinador.querySelector('button[type="submit"]').textContent = 'Atualizar Patrocinador';
-        formPatrocinador.scrollIntoView({ behavior: 'smooth' });
-    };
-
-    window.deletePatrocinador = async (id) => {
-        if (!confirm('Tem certeza que deseja apagar este patrocinador?')) return;
-        const { error } = await supabase.from('patrocinadores').delete().eq('id', id);
-        if (error) {
-            alert('Erro ao apagar: ' + error.message);
-        } else {
-            loadPatrocinadoresAdmin();
+        } catch (error) {
+            console.error("Erro ao eliminar:", error);
+            alert("Erro ao eliminar utilizador: " + error.message);
         }
     };
 
-    // --- CRUD GALERIA / ÁLBUNS ---
+    formCreateUser.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        
+        const userId = editUserIdInput.value;
+        const isEditMode = !!userId;
+        
+        btnCreateUser.textContent = isEditMode ? "A guardar..." : "A criar...";
+        btnCreateUser.disabled = true;
+        createUserMsg.classList.add('hidden');
+
+        const email = document.getElementById('new-user-email').value;
+        const password = document.getElementById('new-user-password').value;
+        const nome = document.getElementById('new-user-name').value;
+        const telemovel = document.getElementById('new-user-phone').value;
+        const role = document.getElementById('new-user-role').value;
+
+        try {
+            if (isEditMode) {
+                // Editar
+                const { error } = await supabase.rpc('admin_edit_user', {
+                    p_user_id: userId,
+                    p_nome: nome,
+                    p_telemovel: telemovel,
+                    p_role: role,
+                    p_password: password || null
+                });
+                if (error) throw error;
+                createUserMsg.textContent = "✅ Utilizador atualizado com sucesso!";
+            } else {
+                // Criar
+                const { error } = await supabase.rpc('admin_create_user', {
+                    p_email: email,
+                    p_password: password,
+                    p_nome: nome,
+                    p_telemovel: telemovel,
+                    p_role: role
+                });
+                if (error) throw error;
+                createUserMsg.textContent = "✅ Utilizador criado com sucesso!";
+            }
+
+            createUserMsg.style.color = "#4caf50";
+            createUserMsg.classList.remove('hidden');
+            
+            resetUserForm();
+            loadUsers(); // Recarregar a lista
+
+        } catch (error) {
+            console.error("Erro no formulário de utilizador:", error);
+            createUserMsg.textContent = "❌ Erro: " + error.message;
+            createUserMsg.style.color = "#ff5252";
+            createUserMsg.classList.remove('hidden');
+        } finally {
+            btnCreateUser.textContent = isEditMode ? "Guardar Alterações" : "Criar Utilizador";
+            btnCreateUser.disabled = false;
+        }
+    });
+
+    // ==========================================
+    // 9. Gestão de Galeria (Álbuns e Fotos)
+    // ==========================================
     const formAlbum = document.getElementById('form-album');
-    let editingAlbumId = null;
 
     if (formAlbum) {
         formAlbum.addEventListener('submit', async (e) => {
@@ -1409,16 +490,9 @@ document.addEventListener('DOMContentLoaded', async () => {
                 const updates = { titulo };
                 if (capaUrl) updates.capa_url = capaUrl;
 
-                if (editingAlbumId) {
-                    const { error } = await supabase.from('albuns').update(updates).eq('id', editingAlbumId);
-                    if (error) throw error;
-                    alert("Álbum atualizado!");
-                } else {
-                    const { error } = await supabase.from('albuns').insert([updates]);
-                    if (error) throw error;
-                    alert("Álbum criado!");
-                }
-
+                const { error } = await supabase.from('albuns').insert([updates]);
+                if (error) throw error;
+                
                 resetAlbumForm();
                 loadAlbunsAdmin();
             } catch (err) {
@@ -1426,90 +500,78 @@ document.addEventListener('DOMContentLoaded', async () => {
                 alert("Erro ao guardar álbum: " + err.message);
             } finally {
                 btn.disabled = false;
-                btn.textContent = editingAlbumId ? 'Atualizar Álbum' : 'Criar Álbum';
+                btn.textContent = 'Criar Álbum';
             }
         });
     }
 
-    document.getElementById('btn-cancel-album')?.addEventListener('click', resetAlbumForm);
-
     function resetAlbumForm() {
-        formAlbum?.reset();
-        editingAlbumId = null;
+        if (formAlbum) formAlbum.reset();
         document.getElementById('album-id').value = '';
-        document.getElementById('btn-save-album').textContent = 'Criar Álbum';
-        document.getElementById('btn-cancel-album').classList.add('hidden');
     }
 
-    async function loadAlbunsAdmin() {
+    window.loadAlbunsAdmin = async function() {
         const listContainer = document.getElementById('admin-albuns-list');
         if (!listContainer) return;
 
-        listContainer.innerHTML = 'Carregando...';
+        listContainer.innerHTML = '<tr><td colspan="4" style="padding: 10px;">Carregando...</td></tr>';
 
         const { data, error } = await supabase.from('albuns').select('*').order('created_at', { ascending: false });
 
         if (error) {
-            listContainer.innerHTML = 'Erro ao carregar álbuns.';
+            listContainer.innerHTML = '<tr><td colspan="4" style="padding: 10px; color: red;">Erro ao carregar álbuns.</td></tr>';
             return;
         }
 
         listContainer.innerHTML = '';
         if (data.length === 0) {
-            listContainer.innerHTML = '<p>Nenhum álbum criado.</p>';
+            listContainer.innerHTML = '<tr><td colspan="4" style="padding: 10px;">Nenhum álbum criado.</td></tr>';
             return;
         }
 
         data.forEach(album => {
-            const div = document.createElement('div');
-            div.className = 'admin-list-item';
-            div.style.borderBottom = '1px solid #ccc';
-            div.style.padding = '15px 0';
-            div.style.display = 'flex';
-            div.style.justifyContent = 'space-between';
-            div.style.alignItems = 'center';
-
-            div.innerHTML = `
-                <div style="display: flex; align-items: center; gap: 15px;">
+            const tr = document.createElement('tr');
+            tr.style.borderBottom = '1px solid rgba(255,255,255,0.05)';
+            tr.innerHTML = `
+                <td style="padding: 10px;">
                     ${album.capa_url 
                         ? `<img src="${album.capa_url}" style="width: 60px; height: 40px; object-fit: cover; border-radius: 4px;">` 
-                        : '<div style="width: 60px; height: 40px; background: #eee; border-radius: 4px; display:flex; align-items:center; justify-content:center;">📁</div>'}
-                    <div>
-                        <strong>${album.titulo}</strong>
-                        <br>
-                        <small>ID: ${album.id}</small>
-                    </div>
-                </div>
-                <div style="display: flex; gap: 8px;">
-                    <button class="btn-primary btn-sm" onclick="openPhotoManager(${album.id}, '${album.titulo.replace(/'/g, "\\'")}')">Gerir Fotos</button>
-                    <button class="btn-success btn-sm" onclick="editAlbum(${album.id}, '${album.titulo.replace(/'/g, "\\'")}')">Editar</button>
-                    <button class="btn-danger btn-sm" onclick="deleteAlbum(${album.id})">Apagar</button>
-                </div>
+                        : '<div style="width: 60px; height: 40px; background: rgba(255,255,255,0.1); border-radius: 4px; display:flex; align-items:center; justify-content:center;">📁</div>'}
+                </td>
+                <td style="padding: 10px;"><strong>${album.titulo}</strong></td>
+                <td style="padding: 10px; color: #a0a0ab;">${album.id}</td>
+                <td style="padding: 10px; text-align: center; white-space: nowrap;">
+                    <button class="btn-action" onclick="window.openPhotoManager(${album.id}, '${album.titulo.replace(/'/g, "\\'")}')" title="Gerir Fotos">🖼️ Fotos</button>
+                    <button class="btn-action" onclick="window.renameAlbum(${album.id}, '${album.titulo.replace(/'/g, "\\'")}')" title="Renomear Álbum">✏️ Renomear</button>
+                    <button class="btn-action delete" onclick="window.deleteAlbum(${album.id})" title="Apagar Álbum">🗑️ Apagar</button>
+                </td>
             `;
-            listContainer.appendChild(div);
+            listContainer.appendChild(tr);
         });
-    }
+    };
 
-    window.editAlbum = (id, titulo) => {
-        editingAlbumId = id;
-        document.getElementById('album-id').value = id;
-        document.getElementById('album-titulo').value = titulo;
-        document.getElementById('btn-save-album').textContent = 'Atualizar Álbum';
-        document.getElementById('btn-cancel-album').classList.remove('hidden');
-        formAlbum.scrollIntoView({ behavior: 'smooth' });
+    window.renameAlbum = async (id, tituloAtual) => {
+        const novoTitulo = window.prompt("Qual o novo nome do álbum?", tituloAtual);
+        if (novoTitulo && novoTitulo.trim() !== "" && novoTitulo !== tituloAtual) {
+            const { error } = await supabase.from('albuns').update({ titulo: novoTitulo.trim() }).eq('id', id);
+            if (error) {
+                alert("Erro ao renomear: " + error.message);
+            } else {
+                loadAlbunsAdmin();
+            }
+        }
     };
 
     window.deleteAlbum = async (id) => {
-        if (!confirm("Tem certeza? Isto apagará o álbum e TODAS as suas fotos.")) return;
+        if (!confirm("Tem certeza absoluta? Isto apagará o álbum e TODAS as suas fotos (a ação não pode ser desfeita).")) return;
         const { error } = await supabase.from('albuns').delete().eq('id', id);
         if (error) alert("Erro: " + error.message);
         else loadAlbunsAdmin();
     };
 
-    // --- GESTÃO DE FOTOS ---
     window.openPhotoManager = async (albumId, titulo) => {
         document.getElementById('album-form-container').classList.add('hidden');
-        document.getElementById('admin-albuns-list').classList.add('hidden');
+        document.getElementById('admin-albuns-table-container').classList.add('hidden');
         
         const manager = document.getElementById('album-photos-manager');
         manager.classList.remove('hidden');
@@ -1522,12 +584,15 @@ document.addEventListener('DOMContentLoaded', async () => {
     window.closePhotoManager = () => {
         document.getElementById('album-photos-manager').classList.add('hidden');
         document.getElementById('album-form-container').classList.remove('hidden');
-        document.getElementById('admin-albuns-list').classList.remove('hidden');
+        document.getElementById('admin-albuns-table-container').classList.remove('hidden');
     };
 
     async function loadAlbumPhotos(albumId) {
         const container = document.getElementById('album-photos-list');
         container.innerHTML = 'Carregando fotos...';
+
+        // Buscar outros álbuns para o dropdown de mover
+        const { data: albumsData } = await supabase.from('albuns').select('id, titulo').neq('id', albumId);
 
         const { data, error } = await supabase
             .from('fotos_galeria')
@@ -1548,13 +613,47 @@ document.addEventListener('DOMContentLoaded', async () => {
         data.forEach(foto => {
             const div = document.createElement('div');
             div.style.position = 'relative';
+            div.style.background = 'rgba(0,0,0,0.2)';
+            div.style.padding = '8px';
+            div.style.borderRadius = '8px';
+
+            let optionsHtml = '<option value="" disabled selected>Mover para...</option>';
+            if (albumsData) {
+                albumsData.forEach(a => {
+                    optionsHtml += `<option value="${a.id}">${a.titulo}</option>`;
+                });
+            }
+
             div.innerHTML = `
                 <img src="${foto.url}" style="width:100%; aspect-ratio:1; object-fit:cover; border-radius:5px;">
-                <button onclick="deleteFoto('${foto.id}', '${foto.url}')" style="position:absolute; top:5px; right:5px; background:rgba(255,0,0,0.8); color:white; border:none; border-radius:50%; width:24px; height:24px; cursor:pointer; display:flex; align-items:center; justify-content:center; font-size:12px;">&times;</button>
+                <button onclick="window.deleteFoto('${foto.id}', '${foto.url}')" style="position:absolute; top:12px; right:12px; background:rgba(255,0,0,0.9); color:white; border:none; border-radius:50%; width:24px; height:24px; cursor:pointer; display:flex; align-items:center; justify-content:center; font-size:14px; font-weight:bold;" title="Apagar Foto">&times;</button>
+                <div style="margin-top: 8px; display: flex; gap: 5px;">
+                    <select id="move-foto-${foto.id}" class="admin-input" style="padding: 5px; font-size: 0.8rem; width: 100%;">
+                        ${optionsHtml}
+                    </select>
+                    <button class="btn-primary" style="padding: 5px 10px; font-size: 0.8rem;" onclick="window.moveFoto('${foto.id}')">Ir</button>
+                </div>
             `;
             container.appendChild(div);
         });
     }
+
+    window.moveFoto = async (fotoId) => {
+        const selectEl = document.getElementById(`move-foto-${fotoId}`);
+        const novoAlbumId = selectEl.value;
+        if (!novoAlbumId) {
+            alert("Selecione um álbum de destino.");
+            return;
+        }
+
+        const { error } = await supabase.from('fotos_galeria').update({ album_id: novoAlbumId }).eq('id', fotoId);
+        if (error) {
+            alert("Erro ao mover a foto: " + error.message);
+        } else {
+            const albumAtualId = document.getElementById('manage-album-id').value;
+            loadAlbumPhotos(albumAtualId); // recarrega a lista, a foto vai desaparecer
+        }
+    };
 
     const formUploadFotos = document.getElementById('form-upload-fotos');
     if (formUploadFotos) {
@@ -1601,11 +700,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     }
 
     window.deleteFoto = async (id, url) => {
-        if (!confirm("Apagar esta foto?")) return;
-        
-        // Em teoria deveríamos apagar do Storage também, mas por segurança 
-        // ou simplicidade vamos apagar apenas da DB primeiro ou extrair o nome do ficheiro.
-        // Opcional: Apagar do Storage (precisa do path/nome relativo)
+        if (!confirm("Apagar esta foto permanentemente?")) return;
         
         const { error } = await supabase.from('fotos_galeria').delete().eq('id', id);
         if (error) alert("Erro: " + error.message);
@@ -1614,4 +709,337 @@ document.addEventListener('DOMContentLoaded', async () => {
             loadAlbumPhotos(albumId);
         }
     };
+
+    window.openStorageManager = () => {
+        document.getElementById('album-form-container').classList.add('hidden');
+        document.getElementById('admin-albuns-table-container').classList.add('hidden');
+        document.getElementById('album-photos-manager').classList.add('hidden');
+        document.getElementById('storage-manager').classList.remove('hidden');
+        loadStorageFiles();
+    };
+
+    window.closeStorageManager = () => {
+        document.getElementById('storage-manager').classList.add('hidden');
+        document.getElementById('album-form-container').classList.remove('hidden');
+        document.getElementById('admin-albuns-table-container').classList.remove('hidden');
+    };
+
+    async function loadStorageFiles() {
+        const tbody = document.getElementById('storage-files-list');
+        tbody.innerHTML = '<tr><td colspan="5" style="padding: 10px;">A carregar ficheiros do Supabase...</td></tr>';
+
+        const { data, error } = await supabase.storage.from('fotos').list('', {
+            limit: 500,
+            offset: 0,
+            sortBy: { column: 'created_at', order: 'desc' }
+        });
+
+        if (error) {
+            tbody.innerHTML = `<tr><td colspan="5" style="padding: 10px; color: red;">Erro ao aceder ao Storage: ${error.message}</td></tr>`;
+            return;
+        }
+
+        const files = data.filter(f => f.name !== '.emptyFolderPlaceholder');
+
+        if (files.length === 0) {
+            tbody.innerHTML = '<tr><td colspan="5" style="padding: 10px;">O bucket está vazio.</td></tr>';
+            return;
+        }
+
+        tbody.innerHTML = '';
+
+        files.forEach(file => {
+            const tr = document.createElement('tr');
+            tr.style.borderBottom = '1px solid rgba(255,255,255,0.05)';
+            
+            const { data: publicData } = supabase.storage.from('fotos').getPublicUrl(file.name);
+            const url = publicData.publicUrl;
+            
+            const sizeKB = file.metadata?.size ? (file.metadata.size / 1024).toFixed(1) : 0;
+            const date = new Date(file.created_at).toLocaleString('pt-PT');
+
+            tr.innerHTML = `
+                <td style="padding: 10px;">
+                    <a href="${url}" target="_blank">
+                        <img src="${url}" style="width: 50px; height: 50px; object-fit: cover; border-radius: 4px; border: 1px solid #444;">
+                    </a>
+                </td>
+                <td style="padding: 10px; word-break: break-all; font-size: 0.9rem;">${file.name}</td>
+                <td style="padding: 10px; font-size: 0.9rem; color: #a0a0ab;">${date}</td>
+                <td style="padding: 10px; font-size: 0.9rem;">${sizeKB} KB</td>
+                <td style="padding: 10px; text-align: center;">
+                    <button class="btn-action delete" onclick="window.deleteStorageFile('${file.name.replace(/'/g, "\\'")}')" title="Apagar Fisicamente">🗑️ Apagar</button>
+                </td>
+            `;
+            tbody.appendChild(tr);
+        });
+    }
+
+    window.deleteStorageFile = async (fileName) => {
+        if (!confirm(`Tem a certeza ABSOLUTA que deseja apagar o ficheiro "${fileName}" do servidor? Se ele estiver num álbum, a imagem ficará quebrada!`)) return;
+
+        const { error } = await supabase.storage.from('fotos').remove([fileName]);
+        if (error) {
+            alert("Erro ao apagar ficheiro: " + error.message);
+        } else {
+            loadStorageFiles();
+        }
+    };
+
+    // ==========================================
+    // 10. Gestão de Atletas
+    // ==========================================
+    const formAtleta = document.getElementById('form-atleta');
+    const btnSaveAtleta = document.getElementById('btn-save-atleta');
+    const btnCancelAtleta = document.getElementById('btn-cancel-atleta');
+    const atletaMsg = document.getElementById('atleta-msg');
+    const formAtletaTitle = document.getElementById('form-atleta-title');
+    const editAtletaIdInput = document.getElementById('edit-atleta-id');
+    const atletasTableBody = document.getElementById('atletas-table-body');
+
+    // Preview de Imagem Local e Remoção
+    const fotoFileInput = document.getElementById('atleta-foto-file');
+    const fotoPreviewDiv = document.getElementById('atleta-foto-preview');
+    const fotoImg = document.getElementById('atleta-foto-img');
+    const fotoUrlInput = document.getElementById('atleta-foto-url');
+    const btnRemoveFoto = document.getElementById('btn-remove-foto');
+
+    if (fotoFileInput) {
+        fotoFileInput.addEventListener('change', function(e) {
+            const file = e.target.files[0];
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    fotoImg.src = e.target.result;
+                    fotoPreviewDiv.style.display = 'block';
+                }
+                reader.readAsDataURL(file);
+            } else {
+                fotoPreviewDiv.style.display = 'none';
+            }
+        });
+    }
+
+    if (btnRemoveFoto) {
+        btnRemoveFoto.addEventListener('click', function() {
+            fotoFileInput.value = '';
+            fotoUrlInput.value = '';
+            fotoPreviewDiv.style.display = 'none';
+            fotoImg.src = '';
+        });
+    }
+
+    window.resetAtletaForm = function() {
+        if (formAtleta) formAtleta.reset();
+        editAtletaIdInput.value = '';
+        fotoUrlInput.value = '';
+        fotoPreviewDiv.style.display = 'none';
+        fotoImg.src = '';
+        formAtletaTitle.textContent = 'Adicionar Novo Atleta';
+        btnSaveAtleta.textContent = 'Adicionar Atleta';
+        if (btnCancelAtleta) btnCancelAtleta.classList.add('hidden');
+        if (atletaMsg) atletaMsg.classList.add('hidden');
+    }
+
+    if (btnCancelAtleta) {
+        btnCancelAtleta.addEventListener('click', resetAtletaForm);
+    }
+
+    let currentAtletas = [];
+
+    window.loadAtletas = async function() {
+        if (!atletasTableBody) return;
+        
+        try {
+            atletasTableBody.innerHTML = '<tr><td colspan="6" style="padding: 10px;">A carregar atletas...</td></tr>';
+            
+            const { data: atletas, error } = await supabase
+                .from('atletasbcv')
+                .select('*')
+                .order('nome', { ascending: true });
+
+            if (error) {
+                // If the table doesn't exist yet, show a friendly message instead of a harsh error
+                if (error.code === '42P01') {
+                    atletasTableBody.innerHTML = '<tr><td colspan="6" style="padding: 10px;">A tabela "atletasbcv" não existe na base de dados. Por favor, crie-a no Supabase.</td></tr>';
+                    return;
+                }
+                throw error;
+            }
+
+            currentAtletas = atletas || [];
+            renderAtletasTable(currentAtletas);
+            
+        } catch (error) {
+            console.error("Erro ao carregar atletas:", error);
+            atletasTableBody.innerHTML = `<tr><td colspan="6" style="color: red; padding: 10px;">Erro: ${error.message}</td></tr>`;
+        }
+    }
+
+    function renderAtletasTable(lista) {
+        atletasTableBody.innerHTML = '';
+        
+        if (!lista || lista.length === 0) {
+            atletasTableBody.innerHTML = '<tr><td colspan="6" style="padding: 10px;">Nenhum atleta encontrado.</td></tr>';
+            return;
+        }
+
+        lista.forEach(atleta => {
+            const tr = document.createElement('tr');
+            tr.style.borderBottom = '1px solid rgba(255,255,255,0.05)';
+            const atletaJson = JSON.stringify(atleta).replace(/'/g, "&apos;").replace(/"/g, "&quot;");
+            
+            const fotoHtml = atleta.foto 
+                ? `<img src="${atleta.foto}" style="width: 40px; height: 40px; object-fit: cover; border-radius: 50%;">` 
+                : '<div style="width: 40px; height: 40px; background: rgba(255,255,255,0.1); border-radius: 50%; display:flex; align-items:center; justify-content:center; font-size: 1.2rem;">👤</div>';
+
+            tr.innerHTML = `
+                <td style="padding: 10px;">${fotoHtml}</td>
+                <td style="padding: 10px;"><strong>${atleta.nome || '-'}</strong></td>
+                <td style="padding: 10px;">${atleta.equipa || '-'} <br><small style="color: #a0a0ab;">${atleta.escalao || '-'}</small></td>
+                <td style="padding: 10px;">${atleta.numero_camisola || '-'}</td>
+                <td style="padding: 10px;">${atleta.licenca || '-'}</td>
+                <td style="padding: 10px; text-align: center;">
+                    <button class="btn-action" onclick="window.editAtleta('${atletaJson}')" title="Editar">✏️</button>
+                    <button class="btn-action delete" onclick="window.deleteAtleta('${atleta.id}')" title="Apagar">🗑️</button>
+                </td>
+            `;
+            atletasTableBody.appendChild(tr);
+        });
+    }
+
+    const searchAtletaInput = document.getElementById('search-atleta');
+    if (searchAtletaInput) {
+        searchAtletaInput.addEventListener('input', (e) => {
+            const termo = e.target.value.toLowerCase();
+            const filtrados = currentAtletas.filter(a => {
+                const nome = (a.nome || '').toLowerCase();
+                const equipa = (a.equipa || '').toLowerCase();
+                const licenca = (a.licenca || '').toLowerCase();
+                
+                return nome.includes(termo) || equipa.includes(termo) || licenca.includes(termo);
+            });
+            renderAtletasTable(filtrados);
+        });
+    }
+
+    window.editAtleta = function(atletaStr) {
+        const atleta = JSON.parse(atletaStr);
+        
+        editAtletaIdInput.value = atleta.id;
+        document.getElementById('atleta-nome').value = atleta.nome || '';
+        document.getElementById('atleta-equipa').value = atleta.equipa || '';
+        document.getElementById('atleta-numero').value = atleta.numero_camisola || '';
+        document.getElementById('atleta-escalao').value = atleta.escalao || '';
+        document.getElementById('atleta-sexo').value = atleta.sexo || '';
+        document.getElementById('atleta-nascimento').value = atleta.data_nascimento || '';
+        document.getElementById('atleta-nacionalidade').value = atleta.nacionalidade || '';
+        document.getElementById('atleta-licenca').value = atleta.licenca || '';
+        
+        if (atleta.foto) {
+            fotoUrlInput.value = atleta.foto;
+            fotoImg.src = atleta.foto;
+            fotoPreviewDiv.style.display = 'block';
+        } else {
+            fotoUrlInput.value = '';
+            fotoPreviewDiv.style.display = 'none';
+        }
+        
+        formAtletaTitle.textContent = 'Editar Atleta: ' + atleta.nome;
+        btnSaveAtleta.textContent = 'Guardar Alterações';
+        if (btnCancelAtleta) btnCancelAtleta.classList.remove('hidden');
+        if (atletaMsg) atletaMsg.classList.add('hidden');
+        
+        formAtletaTitle.scrollIntoView({ behavior: 'smooth' });
+    };
+
+    window.deleteAtleta = async function(id) {
+        if (!confirm('Tem a certeza que deseja apagar este atleta?')) return;
+
+        try {
+            const { error } = await supabase.from('atletasbcv').delete().eq('id', id);
+            if (error) throw error;
+            
+            alert('Atleta apagado com sucesso!');
+            loadAtletas();
+            if (editAtletaIdInput.value === id) {
+                resetAtletaForm();
+            }
+        } catch (error) {
+            console.error("Erro ao eliminar atleta:", error);
+            alert("Erro ao eliminar atleta: " + error.message);
+        }
+    };
+
+    if (formAtleta) {
+        formAtleta.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            const atletaId = editAtletaIdInput.value;
+            const isEditMode = !!atletaId;
+            
+            btnSaveAtleta.textContent = isEditMode ? "A guardar..." : "A adicionar...";
+            btnSaveAtleta.disabled = true;
+            atletaMsg.classList.add('hidden');
+
+            const atletaData = {
+                nome: document.getElementById('atleta-nome').value,
+                equipa: document.getElementById('atleta-equipa').value,
+                numero_camisola: document.getElementById('atleta-numero').value ? parseInt(document.getElementById('atleta-numero').value) : null,
+                escalao: document.getElementById('atleta-escalao').value,
+                sexo: document.getElementById('atleta-sexo').value,
+                data_nascimento: document.getElementById('atleta-nascimento').value || null,
+                nacionalidade: document.getElementById('atleta-nacionalidade').value,
+                licenca: document.getElementById('atleta-licenca').value,
+                foto: fotoUrlInput.value // Default to existing or empty
+            };
+
+            try {
+                // Handle Foto Upload se houver ficheiro
+                const fotoFile = fotoFileInput.files[0];
+                if (fotoFile) {
+                    const fileName = `atleta_${Date.now()}_${fotoFile.name.replace(/\s/g, '_')}`;
+                    const { error: uploadError } = await supabase.storage.from('fotos').upload(fileName, fotoFile);
+                    
+                    if (uploadError) throw uploadError;
+                    
+                    const { data: publicData } = supabase.storage.from('fotos').getPublicUrl(fileName);
+                    atletaData.foto = publicData.publicUrl;
+                }
+
+                if (isEditMode) {
+                    const { error } = await supabase.from('atletasbcv').update(atletaData).eq('id', atletaId);
+                    if (error) throw error;
+                    atletaMsg.textContent = "✅ Atleta atualizado com sucesso!";
+                } else {
+                    const { error } = await supabase.from('atletasbcv').insert([atletaData]);
+                    if (error) throw error;
+                    atletaMsg.textContent = "✅ Atleta adicionado com sucesso!";
+                }
+
+                atletaMsg.style.color = "#4caf50";
+                atletaMsg.classList.remove('hidden');
+                
+                resetAtletaForm();
+                loadAtletas();
+
+            } catch (error) {
+                console.error("Erro ao guardar atleta:", error);
+                // Improve error message if table doesn't exist
+                if (error.code === '42P01') {
+                     atletaMsg.textContent = "❌ Erro: A tabela 'atletasbcv' não existe no Supabase.";
+                } else {
+                     atletaMsg.textContent = "❌ Erro: " + error.message;
+                }
+                atletaMsg.style.color = "#ff5252";
+                atletaMsg.classList.remove('hidden');
+            } finally {
+                btnSaveAtleta.textContent = isEditMode ? "Guardar Alterações" : "Adicionar Atleta";
+                btnSaveAtleta.disabled = false;
+            }
+        });
+    }
+
+    // Iniciar
+    checkSession();
 });

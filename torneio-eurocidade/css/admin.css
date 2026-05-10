@@ -1,0 +1,417 @@
+/* Reset e Variáveis */
+:root {
+    --primary-color: #6a1b9a;
+    --secondary-color: #4a148c;
+    --success-color: #388e3c;
+    --danger-color: #d32f2f;
+    --text-color: #333;
+    --bg-color: #f5f5f5;
+    --white: #ffffff;
+    --border-color: #ddd;
+    --shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+* {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+}
+
+body {
+    font-family: 'Roboto', sans-serif;
+    background-color: var(--bg-color);
+    color: var(--text-color);
+    line-height: 1.6;
+    padding: 0;
+    margin: 0;
+}
+
+.hidden {
+    display: none !important;
+}
+
+/* Login Container */
+#admin-login-container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 100vh;
+    padding: 20px;
+}
+
+.login-card {
+    background: var(--white);
+    padding: 40px;
+    border-radius: 8px;
+    box-shadow: var(--shadow);
+    width: 100%;
+    max-width: 400px;
+}
+
+.login-card h2 {
+    color: var(--primary-color);
+    margin-bottom: 20px;
+    text-align: center;
+}
+
+.login-card input {
+    width: 100%;
+    padding: 12px;
+    margin-bottom: 15px;
+    border: 1px solid var(--border-color);
+    border-radius: 4px;
+    font-size: 16px;
+}
+
+.error-msg {
+    color: var(--danger-color);
+    font-size: 14px;
+    text-align: center;
+    margin-top: 10px;
+}
+
+/* Admin Panel */
+#admin-panel {
+    width: 100%;
+    min-height: 100vh;
+    padding: 0;
+}
+
+/* Header */
+.admin-header {
+    background: var(--secondary-color);
+    color: var(--white);
+    padding: 20px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    box-shadow: var(--shadow);
+}
+
+.admin-header h1 {
+    font-size: 1.5rem;
+    font-weight: 700;
+}
+
+/* Tabs */
+.admin-tabs {
+    background: var(--white);
+    display: flex;
+    border-bottom: 2px solid var(--border-color);
+    padding: 0 20px;
+}
+
+.tab-btn {
+    background: none;
+    border: none;
+    padding: 15px 25px;
+    cursor: pointer;
+    font-size: 16px;
+    font-weight: 600;
+    color: #666;
+    border-bottom: 3px solid transparent;
+    transition: all 0.3s;
+}
+
+.tab-btn:hover {
+    color: var(--primary-color);
+}
+
+.tab-btn.active {
+    color: var(--primary-color);
+    border-bottom-color: var(--primary-color);
+}
+
+/* Tab Content */
+.tab-content {
+    padding: 20px;
+    width: 100%;
+}
+
+.tab-pane {
+    display: none;
+    width: 100%;
+}
+
+.tab-pane.active {
+    display: block;
+}
+
+.tab-pane h2 {
+    color: var(--primary-color);
+    margin-bottom: 20px;
+    font-size: 1.3rem;
+}
+
+/* Forms - ESTRUTURA SIMPLES E CONSISTENTE */
+.admin-form {
+    background: var(--white);
+    padding: 20px;
+    border-radius: 8px;
+    box-shadow: var(--shadow);
+    margin-bottom: 30px;
+    width: 100%;
+}
+
+.admin-form input,
+.admin-form select,
+.admin-form textarea {
+    width: 100%;
+    padding: 12px;
+    margin-bottom: 15px;
+    border: 1px solid var(--border-color);
+    border-radius: 4px;
+    font-size: 16px;
+    font-family: inherit;
+    display: block;
+}
+
+.admin-form textarea {
+    min-height: 80px;
+    resize: vertical;
+}
+
+.admin-form label {
+    display: block;
+    margin-bottom: 5px;
+    font-weight: 600;
+    color: var(--text-color);
+}
+
+.vs-separator {
+    text-align: center;
+    font-weight: bold;
+    color: var(--primary-color);
+    margin: 10px 0;
+    font-size: 18px;
+}
+
+/* Buttons */
+.btn-primary,
+.btn-submit,
+.btn-logout {
+    padding: 12px 24px;
+    border: none;
+    border-radius: 4px;
+    font-size: 16px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s;
+}
+
+.btn-primary {
+    background: var(--primary-color);
+    color: var(--white);
+    width: 100%;
+}
+
+.btn-primary:hover {
+    background: var(--secondary-color);
+}
+
+.btn-submit {
+    background: var(--success-color);
+    color: var(--white);
+    width: 100%;
+}
+
+.btn-submit:hover {
+    background: #2e7d32;
+}
+
+.btn-logout {
+    background: var(--danger-color);
+    color: var(--white);
+}
+
+.btn-logout:hover {
+    background: #c62828;
+}
+
+/* Admin List */
+.admin-list {
+    width: 100%;
+}
+
+.admin-list-item {
+    background: var(--white);
+    padding: 15px;
+    margin-bottom: 10px;
+    border-radius: 8px;
+    box-shadow: var(--shadow);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 10px;
+}
+
+.admin-list-item-content {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    flex: 1;
+}
+
+.admin-list-actions {
+    display: flex;
+    gap: 8px;
+}
+
+.btn-success,
+.btn-danger {
+    padding: 8px 16px;
+    border: none;
+    border-radius: 4px;
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s;
+}
+
+.btn-success {
+    background: var(--success-color);
+    color: var(--white);
+}
+
+.btn-success:hover {
+    background: #2e7d32;
+}
+
+.btn-danger {
+    background: var(--danger-color);
+    color: var(--white);
+}
+
+.btn-danger:hover {
+    background: #c62828;
+}
+
+.btn-sm {
+    padding: 6px 12px;
+    font-size: 13px;
+}
+
+hr {
+    border: none;
+    border-top: 1px solid var(--border-color);
+    margin: 20px 0;
+}
+
+/* Responsive - Tablet Vertical (Principal) */
+@media (max-width: 768px) {
+    .admin-header h1 {
+        font-size: 1.2rem;
+    }
+
+    .admin-tabs {
+        padding: 0 10px;
+    }
+
+    .tab-btn {
+        padding: 12px 15px;
+        font-size: 14px;
+    }
+
+    .tab-content {
+        padding: 15px;
+    }
+
+
+}
+
+/* Mobile */
+@media (max-width: 480px) {
+    .login-card {
+        padding: 30px 20px;
+    }
+
+    .admin-header {
+        padding: 15px;
+    }
+
+    .admin-form {
+        padding: 15px;
+    }
+}
+
+/* Checkbox Grid */
+.checkbox-grid {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 2px;
+    background: #f9f9f9;
+    padding: 10px;
+    border: 1px solid var(--border-color);
+    border-radius: 6px;
+    max-height: 400px;
+    overflow-y: auto;
+    margin-bottom: 15px;
+}
+
+.checkbox-item {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    background: var(--white);
+    padding: 2px 8px;
+    border-radius: 4px;
+    border: 1px solid #eee;
+    cursor: pointer;
+    font-size: 0.85rem;
+    transition: background 0.2s;
+}
+
+.checkbox-item:hover {
+    background: #f0f4ff;
+}
+
+.checkbox-item input[type="checkbox"] {
+    display: inline-block !important;
+    width: 18px !important;
+    height: 18px !important;
+    margin-bottom: 0 !important;
+    cursor: pointer;
+}
+
+.checkbox-item span {
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+/* Admin Table */
+.admin-table-container {
+    background: var(--white);
+    padding: 0;
+    border-radius: 8px;
+    box-shadow: var(--shadow);
+    overflow-x: auto;
+}
+
+.admin-table {
+    width: 100%;
+    border-collapse: collapse;
+    min-width: 600px;
+}
+
+.admin-table th,
+.admin-table td {
+    padding: 12px 15px;
+    text-align: left;
+    border-bottom: 1px solid var(--border-color);
+}
+
+.admin-table th {
+    background-color: var(--secondary-color);
+    color: var(--white);
+    font-weight: 700;
+}
+
+.admin-table tr:hover {
+    background-color: #f8f9fa;
+}
+
+.admin-table td {
+    font-size: 0.9rem;
+}

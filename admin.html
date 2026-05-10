@@ -4,365 +4,346 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link rel="icon" type="image/svg+xml" href="favicon.svg">
-    <title>Admin - Torneio Eurocidade</title>
+    <title>Administração | Basket Club de Valença</title>
+    
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;800&family=Outfit:wght@400;700;900&display=swap" rel="stylesheet">
+    
+    <!-- Stylesheets -->
+    <link rel="stylesheet" href="css/style.css">
     <link rel="stylesheet" href="css/admin.css">
-    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&display=swap" rel="stylesheet">
-    <link rel="manifest" href="manifest.json">
-    <meta name="theme-color" content="#4a148c">
-    <link rel="apple-touch-icon" href="Logo_bcv.jpg">
+    
+    <!-- Favicon -->
+    <link rel="icon" type="image/jpeg" href="assets/Logo_bcv.jpg">
+    
+    <!-- Supabase SDK -->
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.28/jspdf.plugin.autotable.min.js"></script>
 </head>
 
 <body>
     <!-- Login Container -->
     <div id="admin-login-container">
         <div class="login-card">
-            <h2>Área Administrativa</h2>
+            <img src="assets/Logo_bcv.jpg" alt="Logo BCV" style="width: 80px; border-radius: 50%; margin: 0 auto 20px; display: block;">
+            <h2>Portal do Clube</h2>
             <form id="login-form">
-                <input type="email" id="admin-email" placeholder="Email" required autocomplete="email">
-                <input type="password" id="admin-password" placeholder="Senha" required autocomplete="current-password">
-                <button type="submit" id="btn-login" class="btn-primary">Entrar</button>
+                <input type="email" id="admin-email" placeholder="Email de Administrador" required autocomplete="email">
+                <div style="position: relative; margin-bottom: 20px;">
+                    <input type="password" id="admin-password" placeholder="Palavra-passe" required autocomplete="current-password" style="margin-bottom: 0; padding-right: 40px;">
+                    <button type="button" class="toggle-password" data-target="admin-password" style="position: absolute; right: 10px; top: 50%; transform: translateY(-50%); background: none; border: none; color: #a0a0ab; cursor: pointer; font-size: 1.2rem; padding: 0;">👁️</button>
+                </div>
+                <button type="submit" id="btn-login" class="btn-primary">Aceder</button>
             </form>
             <p id="login-error" class="error-msg hidden"></p>
-            <p id="debug-info" style="font-size: 12px; color: #666; margin-top: 10px;"></p>
         </div>
     </div>
 
-    <!-- Admin Panel -->
-    <div id="admin-panel" class="hidden">
-        <!-- Header -->
-        <header class="admin-header">
-            <h1>Gestão do Torneio</h1>
-            <button id="btn-logout" class="btn-logout">Sair</button>
-        </header>
-
-        <!-- Tabs -->
-        <div class="admin-tabs">
-            <button class="tab-btn active" data-tab="tab-equipas">Equipas</button>
-            <button class="tab-btn" data-tab="tab-atletas">Atletas</button>
-            <button class="tab-btn" data-tab="tab-jogos">Jogos</button>
-            <button class="tab-btn" data-tab="tab-eventos">Eventos</button>
-            <button class="tab-btn" data-tab="tab-patrocinadores">Patrocinadores</button>
-            <button class="tab-btn" data-tab="tab-galeria">Galeria</button>
-            <button class="tab-btn" data-tab="tab-geral">Geral</button>
-        </div>
-
-        <!-- Tab Content -->
-        <div class="tab-content">
-            <!-- Equipas Tab -->
-            <div id="tab-equipas" class="tab-pane active">
-                <h2>Gerir Equipas</h2>
-                <form id="form-equipa" class="admin-form">
-                    <input type="text" id="equipa-nome" placeholder="Nome da Equipa" required>
-                    <select id="equipa-escalao" required>
-                        <option value="" disabled selected>Selecionar Escalão</option>
-                        <option value="Mini 8">Mini 8</option>
-                        <option value="Mini 10">Mini 10</option>
-                        <option value="Mini 12">Mini 12</option>
-                    </select>
-                    <select id="equipa-genero">
-                        <option value="">Selecionar Género (Opcional)</option>
-                        <option value="Masculino">Masculino</option>
-                        <option value="Feminino">Feminino</option>
-                    </select>
-                    <input type="text" id="equipa-local" placeholder="Localização (Ex: Porto)">
-                    <textarea id="equipa-desc" placeholder="Descrição breve"></textarea>
-                    <input type="text" id="equipa-tecnico" placeholder="Técnico da equipa">
-                    <input type="url" id="equipa-facebook" placeholder="Facebook URL (opcional)">
-                    <input type="url" id="equipa-instagram" placeholder="Instagram URL (opcional)">
-                    <input type="url" id="equipa-website" placeholder="Website URL (opcional)">
-                    <label>Cor Sombra do Card:</label>
-                    <input type="color" id="equipa-shadow-color" value="#3b82f6">
-
-                    <label>Logo da Equipa:</label>
-                    <input type="file" id="equipa-logo-file" accept="image/*">
-                    <label>Foto de Grupo:</label>
-                    <input type="file" id="equipa-foto-file" accept="image/*">
-                    <button type="submit" class="btn-submit">Adicionar Equipa</button>
-                </form>
-                <hr>
-                <!-- Filtros Equipas -->
-                <div id="admin-equipas-filtros"
-                    style="display:flex; flex-wrap:wrap; gap:8px; margin-bottom:12px; align-items:center;">
-                    <input type="text" id="filtro-equipa-nome" placeholder="Pesquisar por nome..." 
-                        style="padding:8px; border:1px solid #ddd; border-radius:6px; font-size:0.9rem; flex:2; min-width:200px;">
-                    <select id="filtro-equipa-escalao"
-                        style="padding:8px; border:1px solid #ddd; border-radius:6px; font-size:0.9rem; flex:1; min-width:150px;">
-                        <option value="">Todos os Escalões</option>
-                        <option value="Mini 8">Mini 8</option>
-                        <option value="Mini 10">Mini 10</option>
-                        <option value="Mini 12">Mini 12</option>
-                    </select>
-                    <button id="btn-limpar-filtros-equipas" type="button"
-                        style="padding:8px 14px; border-radius:6px; font-size:0.9rem; cursor:pointer; background:#eee; border:1px solid #ddd;">&#10005;
-                        Limpar</button>
-                </div>
-                <div id="admin-equipas-list" class="admin-list"></div>
+    <div id="admin-panel" class="hidden admin-layout">
+        <!-- Sidebar Menu -->
+        <aside class="admin-sidebar">
+            <div class="sidebar-header">
+                <img src="assets/Logo_bcv.jpg" alt="Logo BCV" class="sidebar-logo">
+                <h2>BCV Admin</h2>
             </div>
+            <nav class="sidebar-nav">
+                <ul>
+                    <li><a href="#" class="tab-btn active" data-tab="tab-dashboard"><span class="icon">📊</span> Dashboard</a></li>
+                    <li><a href="#" class="tab-btn" data-tab="tab-users"><span class="icon">🛡️</span> Gestão de Users</a></li>
+                    <li><a href="#" class="tab-btn" data-tab="tab-noticias"><span class="icon">📰</span> Notícias</a></li>
+                    <li><a href="#" class="tab-btn" data-tab="tab-agenda"><span class="icon">📅</span> Agenda</a></li>
+                    <li><a href="#" class="tab-btn" data-tab="tab-galeria"><span class="icon">📸</span> Galeria</a></li>
+                    <li><a href="#" class="tab-btn" data-tab="tab-equipas"><span class="icon">🏀</span> Equipas</a></li>
+                    <li><a href="#" class="tab-btn" data-tab="tab-atletas"><span class="icon">👥</span> Atletas</a></li>
+                    <li><a href="#" class="tab-btn" data-tab="tab-config"><span class="icon">⚙️</span> Configurações</a></li>
+                </ul>
+            </nav>
+        </aside>
 
-            <!-- Atletas Tab -->
-            <div id="tab-atletas" class="tab-pane hidden">
-                <h2>Gerir Atletas</h2>
-                <form id="form-atleta" class="admin-form">
-                    <select id="atleta-equipa-id" required>
-                        <option value="" disabled selected>Selecionar Equipa</option>
-                    </select>
-                    <input type="text" id="atleta-nome" placeholder="Nome do Atleta" required>
-                    <input type="number" id="atleta-numero" placeholder="Número da Camisola (opcional)" min="0">
-                    <label>Foto do Atleta:</label>
-                    <input type="file" id="atleta-foto-file" accept="image/*">
-                    <label>Função / Cargo:</label>
-                    <select id="atleta-funcao">
-                        <option value="Jogador">Jogador</option>
-                        <option value="Treinador">Treinador</option>
-                        <option value="Treinador Adjunto">Treinador Adjunto</option>
-                        <option value="Team Manager">Team Manager</option>
-                        <option value="Fisioterapeuta">Fisioterapeuta</option>
-                        <option value="Outro">Outro</option>
-                    </select>
-                    <div id="atleta-funcao-custom-wrap" class="hidden" style="margin-top: 10px;">
-                        <input type="text" id="atleta-funcao-custom" placeholder="Especificar Função">
-                    </div>
-                    <button type="submit" class="btn-submit">Adicionar Atleta</button>
-                </form>
-                <hr>
-                <!-- Filtros Atletas -->
-                <div id="admin-atletas-filtros"
-                    style="display:flex; flex-wrap:wrap; gap:8px; margin-bottom:12px; align-items:center;">
-                    <select id="filtro-atleta-equipa"
-                        style="padding:8px; border:1px solid #ddd; border-radius:6px; font-size:0.9rem; flex:1; min-width:200px;">
-                        <option value="">Filtrar por Equipa (Todas)</option>
-                    </select>
-                    <button id="btn-limpar-filtros-atletas" type="button"
-                        style="padding:8px 14px; border-radius:6px; font-size:0.9rem; cursor:pointer; background:#eee; border:1px solid #ddd;">&#10005;
-                        Limpar</button>
+        <!-- Main Content Area -->
+        <div class="admin-main">
+            <header class="admin-header">
+                <div class="header-title">
+                    <h1>Gestão Central do BCV</h1>
                 </div>
-                <div id="admin-atletas-list" class="admin-list"></div>
-            </div>
+                <button id="btn-logout" class="btn-logout">Terminar Sessão</button>
+            </header>
 
-            <!-- Jogos Tab -->
-            <div id="tab-jogos" class="tab-pane hidden">
-                <h2>Gerir Jogos</h2>
-                <form id="form-jogo" class="admin-form">
-                    <select id="jogo-equipa-casa" required>
-                        <option value="" disabled selected>Selecionar Equipa Casa</option>
-                    </select>
-                    <div class="vs-separator">VS</div>
-                    <select id="jogo-equipa-fora" required>
-                        <option value="" disabled selected>Selecionar Equipa Fora</option>
-                    </select>
-                    <input type="datetime-local" id="jogo-data">
-                    <select id="jogo-estado">
-                        <option value="Agendado">Agendado</option>
-                        <option value="Em Jogo">Em Jogo</option>
-                        <option value="Terminado">Terminado</option>
-                        <option value="Cancelado">Cancelado</option>
-                    </select>
-                    <div style="display:flex; gap:8px; align-items:center;">
-                        <input type="number" id="jogo-resultado-casa" placeholder="Resultado Casa" min="0"
-                            style="flex:1;">
-                        <span style="font-weight:bold;">–</span>
-                        <input type="number" id="jogo-resultado-fora" placeholder="Resultado Fora" min="0"
-                            style="flex:1;">
-                    </div>
-                    <input type="text" id="jogo-campo" placeholder="Campo (Ex: Campo 1)">
-                    <button type="submit" class="btn-submit">Agendar Jogo</button>
-                </form>
-                <hr>
-                <!-- Filtros -->
-                <div id="admin-jogos-filtros"
-                    style="display:flex; flex-wrap:wrap; gap:8px; margin-bottom:12px; align-items:center;">
-                    <select id="filtro-data"
-                        style="padding:8px; border:1px solid #ddd; border-radius:6px; font-size:0.9rem;">
-                        <option value="">Todas as Datas</option>
-                        <option value="2026-03-28">28/03/2026</option>
-                        <option value="2026-03-29">29/03/2026</option>
-                        <option value="2026-03-30">30/03/2026</option>
-                    </select>
-                    <input type="time" id="filtro-hora"
-                        style="padding:8px; border:1px solid #ddd; border-radius:6px; font-size:0.9rem;">
-                    <select id="filtro-clube"
-                        style="padding:8px; border:1px solid #ddd; border-radius:6px; font-size:0.9rem; flex:1; min-width:160px;">
-                        <option value="">Todos os Clubes</option>
-                    </select>
-                    <select id="filtro-estado"
-                        style="padding:8px; border:1px solid #ddd; border-radius:6px; font-size:0.9rem;">
-                        <option value="">Todos os Estados</option>
-                        <option value="Em Jogo">Em Jogo</option>
-                        <option value="Agendado">Agendado</option>
-                        <option value="Terminado">Terminado</option>
-                        <option value="Cancelado">Cancelado</option>
-                    </select>
-                    <button id="btn-limpar-filtros" type="button"
-                        style="padding:8px 14px; border-radius:6px; font-size:0.9rem; cursor:pointer; background:#eee; border:1px solid #ddd;">&#10005;
-                        Limpar</button>
-                </div>
-                <div id="admin-jogos-list" class="admin-list"></div>
-            </div>
-
-            <!-- Eventos Tab -->
-            <div id="tab-eventos" class="tab-pane hidden">
-                <h2>Gerir Eventos</h2>
-                <form id="form-evento" class="admin-form">
-                    <label>Visibilidade:</label>
-                    <select id="evento-publico" required>
-                        <option value="true">Público (visível a todos)</option>
-                        <option value="false">Privado (específico de uma equipa)</option>
-                    </select>
-                    <!-- Select de equipas: só visível em eventos privados -->
-                    <div id="evento-equipa-wrap" style="display:none;">
-                        <label>Equipa(s) — toque/clique em várias para selecionar múltiplas:</label>
-                        <div id="evento-equipa-id-grid" class="checkbox-grid">
-                            <!-- Populated via JS -->
+            <main class="admin-content">
+                <!-- Tab: Dashboard -->
+                <div id="tab-dashboard" class="tab-pane active">
+                    <div class="welcome-box" style="margin-top: 20px; background: linear-gradient(135deg, rgba(233, 30, 99, 0.1), rgba(156, 39, 176, 0.1)); border-color: rgba(233, 30, 99, 0.3);">
+                        <h3 style="margin-bottom: 15px; display: flex; align-items: center; gap: 10px;">🎂 Aniversariantes do Dia</h3>
+                        <div id="dashboard-aniversariantes" style="display: flex; flex-direction: column; gap: 10px;">
+                            <div style="color: #a0a0ab;">A verificar aniversários...</div>
                         </div>
                     </div>
-                    <select id="evento-tipo" required>
-                        <option value="" disabled selected>Carregando tipos...</option>
-                    </select>
-                    <input type="text" id="evento-local" placeholder="Local do Evento" required>
-                    <label>Data e Hora de Início:</label>
-                    <input type="datetime-local" id="evento-data" required>
-                    <label>Data e Hora de Fim (opcional):</label>
-                    <input type="datetime-local" id="evento-data-fim">
-                    <input type="text" id="evento-tecnicos" placeholder="Técnicos envolvidos (opcional)">
-                    <textarea id="evento-descricao" placeholder="Descrição (opcional)"></textarea>
-                    <button type="submit" class="btn-submit">Adicionar Evento</button>
-                </form>
-                <hr>
-                <!-- Filtros Eventos -->
-                <div id="admin-eventos-filtros"
-                    style="display:flex; flex-wrap:wrap; gap:8px; margin-bottom:12px; align-items:center;">
-                    <select id="filtro-evento-tipo"
-                        style="padding:8px; border:1px solid #ddd; border-radius:6px; font-size:0.9rem; flex:1; min-width:160px;">
-                        <option value="">Todos os Tipos</option>
-                    </select>
-                    <input type="date" id="filtro-evento-data"
-                        style="padding:8px; border:1px solid #ddd; border-radius:6px; font-size:0.9rem;">
-                    <input type="time" id="filtro-evento-hora"
-                        style="padding:8px; border:1px solid #ddd; border-radius:6px; font-size:0.9rem;">
-                    <button id="btn-limpar-filtros-eventos" type="button"
-                        style="padding:8px 14px; border-radius:6px; font-size:0.9rem; cursor:pointer; background:#eee; border:1px solid #ddd;">&#10005;
-                        Limpar</button>
                 </div>
-                <div id="admin-eventos-list" class="admin-list"></div>
-            </div>
 
-            <!-- Patrocinadores Tab -->
-            <div id="tab-patrocinadores" class="tab-pane hidden">
-                <h2>Gerir Patrocinadores</h2>
-                <form id="form-patrocinador" class="admin-form">
-                    <input type="text" id="patrocinador-nome" placeholder="Nome do Patrocinador" required>
-                    <input type="text" id="patrocinador-tipo" placeholder="Tipo de Serviço (Ex: Restaurante, Hotel)">
-                    <input type="text" id="patrocinador-morada" placeholder="Morada">
-                    <input type="text" id="patrocinador-cp" placeholder="Código Postal (Ex: 4930-123 Valença)">
-                    <input type="tel" id="patrocinador-telefone" placeholder="Telefone">
-                    <input type="url" id="patrocinador-facebook" placeholder="Facebook URL">
-                    <input type="url" id="patrocinador-instagram" placeholder="Instagram URL">
-                    <input type="url" id="patrocinador-maps" placeholder="Google Maps URL">
+                <!-- Tab: Gestão de Users -->
+                <div id="tab-users" class="tab-pane hidden">
+                    <h2 style="margin-bottom: 20px;">Gestão de Utilizadores</h2>
                     
-                    <div style="display: flex; gap: 20px; align-items: center; margin: 10px 0;">
-                        <label style="display: flex; align-items: center; gap: 5px;">
-                            <input type="checkbox" id="patrocinador-comer"> Comer (s/n)
-                        </label>
-                        <label style="display: flex; align-items: center; gap: 5px;">
-                            <input type="checkbox" id="patrocinador-dormir"> Dormir (s/n)
-                        </label>
+                    <!-- Formulário de Criação / Edição -->
+                    <div class="welcome-box" style="margin-bottom: 30px;">
+                        <h3 id="form-user-title">Criar Novo Utilizador</h3>
+                        <form id="form-create-user" style="display: grid; gap: 15px; margin-top: 15px; max-width: 500px;">
+                            <input type="hidden" id="edit-user-id">
+                            
+                            <input type="text" id="new-user-name" placeholder="Nome Completo" required class="admin-input">
+                            <input type="email" id="new-user-email" placeholder="Email" required class="admin-input">
+                            <div style="position: relative;">
+                                <input type="password" id="new-user-password" placeholder="Palavra-passe (mín. 6 chars)" minlength="6" class="admin-input" style="padding-right: 40px;">
+                                <button type="button" class="toggle-password" data-target="new-user-password" style="position: absolute; right: 10px; top: 50%; transform: translateY(-50%); background: none; border: none; color: #a0a0ab; cursor: pointer; font-size: 1.2rem; padding: 0;">👁️</button>
+                            </div>
+                            <small id="password-hint" style="color: #666; margin-top: -10px; font-size: 0.8rem; display: none;">(Deixe em branco para manter a palavra-passe atual)</small>
+                            
+                            <input type="text" id="new-user-phone" placeholder="Telemóvel" class="admin-input">
+                            <select id="new-user-role" required class="admin-input">
+                                <option value="" disabled selected>Selecionar Permissão (Role)</option>
+                                <option value="admin">Administrador (Total)</option>
+                                <option value="editor">Editor (Notícias/Agenda)</option>
+                                <option value="treinador">Treinador (Equipas/Atletas)</option>
+                            </select>
+                            
+                            <div style="display: flex; gap: 10px;">
+                                <button type="submit" id="btn-create-user" class="btn-primary" style="flex: 1;">Criar Utilizador</button>
+                                <button type="button" id="btn-cancel-edit" class="btn-secondary hidden" style="flex: 1;">Cancelar</button>
+                            </div>
+                            
+                            <p id="create-user-msg" class="hidden"></p>
+                        </form>
                     </div>
 
-                    <label>Logo do Patrocinador:</label>
-                    <input type="file" id="patrocinador-logo-file" accept="image/*">
-                    
-                    <button type="submit" class="btn-submit">Adicionar Patrocinador</button>
-                </form>
-                <hr>
-                <div id="admin-patrocinadores-list" class="admin-list"></div>
-            </div>
-
-            <!-- Galeria Tab -->
-            <div id="tab-galeria" class="tab-pane hidden">
-                <h2>Gerir Galeria de Fotos</h2>
-                <div id="album-form-container">
-                    <form id="form-album" class="admin-form">
-                        <input type="hidden" id="album-id">
-                        <input type="text" id="album-titulo" placeholder="Título do Álbum (Ex: Final Mini 12)" required>
-                        <label>Foto de Capa do Álbum (Opcional):</label>
-                        <input type="file" id="album-capa-file" accept="image/*">
-                        <button type="submit" id="btn-save-album" class="btn-submit">Criar Álbum</button>
-                        <button type="button" id="btn-cancel-album" class="hidden" style="margin-top:10px; background:#666;">Cancelar Edição</button>
-                    </form>
-                </div>
-
-                <!-- Gestão de Fotos dentro de um Álbum (Inicialmente escondido) -->
-                <div id="album-photos-manager" class="hidden" style="background:#f9f9f9; padding:20px; border-radius:10px; border:2px solid var(--primary-color); margin-bottom:30px;">
-                    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:15px;">
-                        <h3 id="current-album-name">Gerir Fotos</h3>
-                        <button onclick="closePhotoManager()" style="background:#666; padding:5px 12px; border-radius:5px; color:white; border:none; cursor:pointer;">Fechar</button>
-                    </div>
-                    
-                    <form id="form-upload-fotos" class="admin-form" style="background:white; border:1px dashed #ccc; padding:15px;">
-                        <input type="hidden" id="manage-album-id">
-                        <label>Adicionar Fotos (Pode selecionar várias):</label>
-                        <input type="file" id="galeria-fotos-files" accept="image/*" multiple required>
-                        <button type="submit" class="btn-submit" style="background-color: #2e7d32;">Fazer Upload das Fotos</button>
-                        <div id="upload-progress" class="hidden" style="margin-top:10px; font-weight:bold; color:var(--primary-color);">A carregar...</div>
-                    </form>
-
-                    <div id="album-photos-list" style="display:grid; grid-template-columns:repeat(auto-fill, minmax(120px, 1fr)); gap:10px; margin-top:20px;">
-                        <!-- Fotos do álbum aqui -->
+                    <!-- Tabela de Utilizadores -->
+                    <div class="admin-table-container">
+                        <h3>Utilizadores Ativos</h3>
+                        <table class="admin-table" style="width: 100%; text-align: left; margin-top: 15px; border-collapse: collapse;">
+                            <thead>
+                                <tr style="border-bottom: 1px solid rgba(255,255,255,0.1);">
+                                    <th style="padding: 10px;">Nome</th>
+                                    <th style="padding: 10px;">Email</th>
+                                    <th style="padding: 10px;">Role</th>
+                                    <th style="padding: 10px;">Telemóvel</th>
+                                    <th style="padding: 10px; text-align: center;">Ações</th>
+                                </tr>
+                            </thead>
+                            <tbody id="users-table-body">
+                                <tr><td colspan="4" style="padding: 10px;">A carregar...</td></tr>
+                            </tbody>
+                        </table>
                     </div>
                 </div>
+                
+                <!-- Outras Tabs (Em Desenvolvimento) -->
+                <div id="tab-noticias" class="tab-pane hidden"><h2>Notícias (Em Breve)</h2></div>
+                <div id="tab-agenda" class="tab-pane hidden"><h2>Agenda (Em Breve)</h2></div>
+                
+                <!-- Galeria Tab -->
+                <div id="tab-galeria" class="tab-pane hidden">
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+                        <h2>Gerir Galeria de Fotos</h2>
+                        <button onclick="window.openStorageManager()" class="btn-secondary" style="background: rgba(138,43,226,0.2); border-color: #8a2be2;">🗄️ Ver Biblioteca (Storage)</button>
+                    </div>
 
-                <hr>
-                <div id="admin-albuns-list" class="admin-list">
-                    <p class="loading">A carregar álbuns...</p>
-                </div>
-            </div>
+                    <!-- Formulário de Álbum (Mesmo estilo de Criar User) -->
+                    <div class="welcome-box" id="album-form-container" style="margin-bottom: 30px;">
+                        <h3 id="form-album-title" style="margin-top: 0;">Criar Novo Álbum</h3>
+                        <form id="form-album" style="display: grid; gap: 15px; margin-top: 15px; max-width: 500px;">
+                            <input type="hidden" id="album-id">
+                            
+                            <input type="text" id="album-titulo" placeholder="Título do Álbum (Ex: Final Mini 12)" required class="admin-input">
+                            
+                            <div>
+                                <label style="display:block; margin-bottom:5px; font-size:0.9rem; color:#a0a0ab;">Foto de Capa do Álbum (Opcional):</label>
+                                <input type="file" id="album-capa-file" accept="image/*" class="admin-input" style="padding: 10px;">
+                            </div>
+                            
+                            <div style="display: flex; gap: 10px;">
+                                <button type="submit" id="btn-save-album" class="btn-primary" style="flex: 1;">Criar Álbum</button>
+                            </div>
+                        </form>
+                    </div>
 
-            <!-- Geral Tab -->
-            <div id="tab-geral" class="tab-pane hidden">
-                <h2>Informação Geral</h2>
-                <div class="admin-actions-bar" style="margin-bottom: 20px;">
-                    <button id="btn-export-pdf" class="btn-primary" style="width: auto;">Descarregar Lista de Equipas
-                        (PDF)</button>
-                </div>
-                <div class="admin-table-container">
-                    <table class="admin-table" id="table-equipas-geral">
-                        <thead>
-                            <tr>
-                                <th>ID</th>
-                                <th>Nome</th>
-                                <th>Género</th>
-                                <th>Escalão</th>
-                            </tr>
-                        </thead>
-                        <tbody id="admin-geral-equipas-list">
-                            <!-- Populated via JS -->
-                        </tbody>
-                    </table>
-                </div>
-            </div>
+                    <!-- Gestão de Fotos dentro de um Álbum -->
+                    <div id="album-photos-manager" class="hidden" style="background:rgba(255,255,255,0.02); padding:20px; border-radius:10px; border:1px solid rgba(255,255,255,0.1); margin-bottom:30px; margin-top: 20px;">
+                        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:20px;">
+                            <h3 id="current-album-name" style="margin: 0; color: #fff;">Gerir Fotos</h3>
+                            <button onclick="window.closePhotoManager()" class="btn-secondary">Voltar aos Álbuns</button>
+                        </div>
+                        
+                        <form id="form-upload-fotos" style="display: grid; gap: 15px; max-width: 500px; background:rgba(0,0,0,0.2); padding:20px; border-radius:8px;">
+                            <input type="hidden" id="manage-album-id">
+                            
+                            <div>
+                                <label style="display:block; margin-bottom:5px; font-size:0.9rem; color:#a0a0ab;">Adicionar Fotos (Pode selecionar várias):</label>
+                                <input type="file" id="galeria-fotos-files" accept="image/*" multiple required class="admin-input" style="padding: 10px;">
+                            </div>
+                            
+                            <button type="submit" class="btn-primary" style="background: linear-gradient(135deg, #2e7d32, #1b5e20);">Fazer Upload das Fotos</button>
+                            <div id="upload-progress" class="hidden" style="text-align: center; font-weight:bold; color: #4caf50;">A carregar...</div>
+                        </form>
 
+                        <div id="album-photos-list" style="display:grid; grid-template-columns:repeat(auto-fill, minmax(180px, 1fr)); gap:15px; margin-top:30px;">
+                            <!-- Fotos do álbum aqui -->
+                        </div>
+                    </div>
+
+                    <!-- Tabela de Álbuns -->
+                    <div class="admin-table-container" id="admin-albuns-table-container">
+                        <h3>Álbuns da Galeria</h3>
+                        <table class="admin-table" style="width: 100%; text-align: left; margin-top: 15px; border-collapse: collapse;">
+                            <thead>
+                                <tr style="border-bottom: 1px solid rgba(255,255,255,0.1);">
+                                    <th style="padding: 10px; width: 80px;">Capa</th>
+                                    <th style="padding: 10px;">Título</th>
+                                    <th style="padding: 10px; width: 100px;">ID</th>
+                                    <th style="padding: 10px; text-align: center; width: 220px;">Ações</th>
+                                </tr>
+                            </thead>
+                            <tbody id="admin-albuns-list">
+                                <tr><td colspan="4" style="padding: 10px;">A carregar álbuns...</td></tr>
+                            </tbody>
+                        </table>
+                    </div>
+
+                    <!-- Biblioteca Storage Global -->
+                    <div id="storage-manager" class="hidden admin-table-container" style="margin-top: 0;">
+                        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:20px;">
+                            <h3 style="margin: 0; color: #fff;">Biblioteca Completa do Supabase (Pasta 'fotos')</h3>
+                            <button onclick="window.closeStorageManager()" class="btn-secondary">Voltar aos Álbuns</button>
+                        </div>
+                        <p style="color: #a0a0ab; font-size: 0.9rem; margin-bottom: 20px;">
+                            Abaixo estão todos os ficheiros armazenados fisicamente no servidor. Ficheiros não associados a nenhum álbum são considerados "órfãos" e podem ser apagados de forma segura.
+                        </p>
+                        
+                        <div style="background: rgba(0,0,0,0.2); border-radius: 8px; max-height: 600px; overflow-y: auto;">
+                            <table class="admin-table" style="width: 100%; text-align: left; border-collapse: collapse;">
+                                <thead>
+                                    <tr style="border-bottom: 1px solid rgba(255,255,255,0.1); position: sticky; top: 0; background: #1a1a24;">
+                                        <th style="padding: 10px; width: 80px;">Imagem</th>
+                                        <th style="padding: 10px;">Nome do Ficheiro</th>
+                                        <th style="padding: 10px; width: 120px;">Data</th>
+                                        <th style="padding: 10px; width: 100px;">Tamanho</th>
+                                        <th style="padding: 10px; text-align: center; width: 120px;">Ações</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="storage-files-list">
+                                    <tr><td colspan="5" style="padding: 10px;">A carregar ficheiros...</td></tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+
+                <div id="tab-equipas" class="tab-pane hidden"><h2>Equipas (Em Breve)</h2></div>
+                
+                <!-- Tab: Gestão de Atletas -->
+                <div id="tab-atletas" class="tab-pane hidden">
+                    <h2 style="margin-bottom: 20px;">Gestão de Atletas</h2>
+                    
+                    <!-- Barra de Pesquisa -->
+                    <div class="welcome-box" style="margin-bottom: 20px; padding: 15px; background: rgba(0,0,0,0.2);">
+                        <div style="position: relative;">
+                            <span style="position: absolute; left: 15px; top: 50%; transform: translateY(-50%); font-size: 1.2rem;">🔍</span>
+                            <input type="text" id="search-atleta" placeholder="Pesquisar atleta por nome, equipa ou nº de licença..." class="admin-input" style="margin-bottom: 0; padding-left: 45px; border-radius: 30px;">
+                        </div>
+                    </div>
+
+                    <!-- Formulário de Criação / Edição -->
+                    <div class="welcome-box" style="margin-bottom: 30px;">
+                        <h3 id="form-atleta-title">Adicionar Novo Atleta</h3>
+                        <form id="form-atleta" style="display: grid; gap: 15px; margin-top: 15px; max-width: 600px;">
+                            <input type="hidden" id="edit-atleta-id">
+                            
+                            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px;">
+                                <input type="text" id="atleta-nome" placeholder="Nome Completo do Atleta" required class="admin-input">
+                                <input type="text" id="atleta-equipa" placeholder="Equipa (Ex: Sub-14 Masculino)" required class="admin-input">
+                            </div>
+                            
+                            <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 15px;">
+                                <input type="number" id="atleta-numero" placeholder="Nº Camisola" class="admin-input">
+                                <select id="atleta-escalao" required class="admin-input">
+                                    <option value="" disabled selected>Escalão</option>
+                                    <option value="Mini 8">Mini 8</option>
+                                    <option value="Mini 10">Mini 10</option>
+                                    <option value="Mini 12">Mini 12</option>
+                                    <option value="Sub-14">Sub-14</option>
+                                    <option value="Sub-16">Sub-16</option>
+                                    <option value="Sub-18">Sub-18</option>
+                                    <option value="Seniores">Seniores</option>
+                                    <option value="Veteranos">Veteranos</option>
+                                </select>
+                                <select id="atleta-sexo" required class="admin-input">
+                                    <option value="" disabled selected>Sexo</option>
+                                    <option value="M">Masculino</option>
+                                    <option value="F">Feminino</option>
+                                </select>
+                            </div>
+                            
+                            <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 15px;">
+                                <div>
+                                    <label style="display:block; margin-bottom:5px; font-size:0.8rem; color:#a0a0ab;">Data Nascimento</label>
+                                    <input type="date" id="atleta-nascimento" class="admin-input">
+                                </div>
+                                <div>
+                                    <label style="display:block; margin-bottom:5px; font-size:0.8rem; color:#a0a0ab;">Nacionalidade</label>
+                                    <input type="text" id="atleta-nacionalidade" placeholder="Ex: Portuguesa" class="admin-input">
+                                </div>
+                                <div>
+                                    <label style="display:block; margin-bottom:5px; font-size:0.8rem; color:#a0a0ab;">Nº Licença FPB</label>
+                                    <input type="text" id="atleta-licenca" placeholder="Licença" class="admin-input">
+                                </div>
+                            </div>
+
+                            <div>
+                                <label style="display:block; margin-bottom:5px; font-size:0.9rem; color:#a0a0ab;">Foto do Atleta (Opcional):</label>
+                                <input type="file" id="atleta-foto-file" accept="image/*" class="admin-input" style="padding: 10px;">
+                                <div id="atleta-foto-preview" style="margin-top: 10px; max-width: 100px; display: none;">
+                                    <img src="" id="atleta-foto-img" style="width: 100px; height: 100px; object-fit: cover; border-radius: 8px; border: 1px solid rgba(255,255,255,0.2);">
+                                    <button type="button" id="btn-remove-foto" class="btn-secondary" style="padding: 5px; font-size: 0.8rem; width: 100px; margin-top: 5px;">Remover Foto</button>
+                                    <input type="hidden" id="atleta-foto-url">
+                                </div>
+                            </div>
+                            
+                            <div style="display: flex; gap: 10px;">
+                                <button type="submit" id="btn-save-atleta" class="btn-primary" style="flex: 1;">Adicionar Atleta</button>
+                                <button type="button" id="btn-cancel-atleta" class="btn-secondary hidden" style="flex: 1;">Cancelar Edição</button>
+                            </div>
+                            
+                            <p id="atleta-msg" class="hidden"></p>
+                        </form>
+                    </div>
+
+                    <!-- Tabela de Atletas -->
+                    <div class="admin-table-container">
+                        <h3>Lista de Atletas Registados</h3>
+                        <table class="admin-table" style="width: 100%; text-align: left; margin-top: 15px; border-collapse: collapse;">
+                            <thead>
+                                <tr style="border-bottom: 1px solid rgba(255,255,255,0.1);">
+                                    <th style="padding: 10px; width: 60px;">Foto</th>
+                                    <th style="padding: 10px;">Nome</th>
+                                    <th style="padding: 10px;">Equipa / Escalão</th>
+                                    <th style="padding: 10px; width: 60px;">Nº</th>
+                                    <th style="padding: 10px;">Licença</th>
+                                    <th style="padding: 10px; text-align: center; width: 120px;">Ações</th>
+                                </tr>
+                            </thead>
+                            <tbody id="atletas-table-body">
+                                <tr><td colspan="6" style="padding: 10px;">A carregar atletas...</td></tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <div id="tab-config" class="tab-pane hidden"><h2>Configurações (Em Breve)</h2></div>
+            </main>
         </div>
     </div>
 
-    <script src="js/config.js?v=mobile10"></script>
-    <script src="js/admin.js?v=mobile15"></script>
-    <script>
-        // Debug info para mobile
-        document.addEventListener('DOMContentLoaded', () => {
-            const debugInfo = document.getElementById('debug-info');
-            if (debugInfo) {
-                debugInfo.textContent = 'JS carregado. Aguardando login...';
-            }
-
-            // Log adicional para debug
-            console.log('Admin page loaded');
-            console.log('Login form exists:', !!document.getElementById('login-form'));
-        });
-    </script>
+    <!-- Scripts -->
+    <script src="js/config.js"></script>
+    <script src="js/admin.js"></script>
 </body>
-
 </html>
