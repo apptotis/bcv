@@ -97,7 +97,7 @@ async function loadPortalHighlights(supabase) {
                     item.style.background = 'rgba(255,255,255,0.05)';
                     item.style.borderRadius = '8px';
                     item.innerHTML = `
-                        <div style="display: flex; justify-content: space-between; margin-bottom: 5px;">
+                        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 5px; flex-wrap: wrap; gap: 5px;">
                             <span style="font-weight: bold; color: #fff; font-size: 0.95rem;">${jogo.equipa_casa} vs ${jogo.equipa_fora}</span>
                             <span style="color: #e91e63; font-weight: bold; font-size: 0.85rem;">${dataJogo} ${horaJogo}</span>
                         </div>
@@ -149,10 +149,10 @@ async function loadPortalHighlights(supabase) {
                     }
 
                     item.innerHTML = `
-                        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 5px;">
-                            <span style="color: #fff; font-size: 0.95rem; flex: 1;">${resultado.equipa_casa}</span>
-                            <span style="font-weight: bold; background: rgba(0,0,0,0.3); padding: 4px 8px; border-radius: 4px; letter-spacing: 2px;">${scoreCasa} - ${scoreFora}</span>
-                            <span style="color: #fff; font-size: 0.95rem; flex: 1; text-align: right;">${resultado.equipa_fora}</span>
+                        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 5px; flex-wrap: wrap; gap: 5px;">
+                            <span style="color: #fff; font-size: 0.95rem; flex: 1; min-width: 80px;">${resultado.equipa_casa}</span>
+                            <span style="font-weight: bold; background: rgba(0,0,0,0.3); padding: 4px 8px; border-radius: 4px; letter-spacing: 2px; white-space: nowrap;">${scoreCasa} - ${scoreFora}</span>
+                            <span style="color: #fff; font-size: 0.95rem; flex: 1; text-align: right; min-width: 80px;">${resultado.equipa_fora}</span>
                         </div>
                         <div style="color: #a0a0ab; font-size: 0.8rem; text-align: center;">📅 ${dataJogo} | 🏀 ${resultado.escalao || '-'}</div>
                     `;

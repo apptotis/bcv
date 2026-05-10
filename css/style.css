@@ -44,6 +44,11 @@
     box-sizing: border-box;
 }
 
+html, body {
+    max-width: 100vw;
+    overflow-x: hidden;
+}
+
 html {
     scroll-behavior: smooth;
     font-size: 16px;
@@ -54,8 +59,8 @@ body {
     background-color: var(--bg-primary);
     color: var(--text-primary);
     line-height: 1.6;
-    overflow-x: hidden;
     position: relative;
+    width: 100%;
 }
 
 h1, h2, h3, h4, h5, h6 {
@@ -779,6 +784,7 @@ img {
     box-shadow: 0 4px 15px rgba(0,0,0,0.3);
     animation: gradientMove 5s ease infinite;
     display: flex;
+    flex-wrap: wrap;
     justify-content: center;
     align-items: center;
     gap: 15px;
