@@ -832,6 +832,14 @@ img {
 }
 
 @media (max-width: 768px) {
+    .nav-container {
+        padding: 0 var(--spacing-md);
+    }
+
+    .brand-text {
+        font-size: 1.1rem;
+    }
+
     .mobile-toggle {
         display: block;
     }
@@ -902,3 +910,14 @@ img {
         padding: 2rem;
     }
 }
+
+ @ m e d i a   ( m a x - w i d t h :   4 8 0 p x )   { 
+         . b r a n d - t e x t   { 
+                 f o n t - s i z e :   0 . 9 5 r e m ; 
+         } 
+         
+         . n a v - c o n t a i n e r   { 
+                 p a d d i n g :   0   1 2 p x ; 
+         } 
+ }  
+ 
