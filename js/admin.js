@@ -184,8 +184,13 @@ document.addEventListener('DOMContentLoaded', async () => {
             const mesHoje = hoje.getMonth() + 1; // 0-11 -> 1-12
 
             const aniversariantesHoje = atletas.filter(atleta => {
-                const dataNasc = new Date(atleta.data_nascimento);
-                return dataNasc.getDate() === diaHoje && (dataNasc.getMonth() + 1) === mesHoje;
+                const partes = atleta.data_nascimento.split('-');
+                if (partes.length !== 3) return false;
+                
+                const diaNasc = parseInt(partes[2]);
+                const mesNasc = parseInt(partes[1]);
+                
+                return diaNasc === diaHoje && mesNasc === mesHoje;
             });
 
             container.innerHTML = '';
@@ -197,8 +202,9 @@ document.addEventListener('DOMContentLoaded', async () => {
 
             aniversariantesHoje.forEach(atleta => {
                 // Calcular idade
-                const dataNasc = new Date(atleta.data_nascimento);
-                let idade = hoje.getFullYear() - dataNasc.getFullYear();
+                const partes = atleta.data_nascimento.split('-');
+                const anoNasc = parseInt(partes[0]);
+                let idade = hoje.getFullYear() - anoNasc;
                 
                 const item = document.createElement('div');
                 item.style.display = 'flex';
