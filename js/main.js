@@ -246,12 +246,20 @@ async function loadPortalHighlights(supabase) {
                     });
                     
                     // Show Modal
+                    console.log("Tentando mostrar modal...", modal);
                     modal.style.display = 'flex';
-                    setTimeout(() => modal.classList.add('active'), 100);
+                    setTimeout(() => {
+                        modal.classList.add('active');
+                        console.log("Classe active adicionada ao modal");
+                    }, 100);
+                } else {
+                    console.log("Nenhum aniversariante filtrado para hoje.");
                 }
             }
         } catch (err) {
-            console.error("Erro ao verificar aniversariantes:", err);
+            console.error("Erro no bloco de aniversariantes:", err);
         }
+    } else {
+        console.warn("Elemento #birthday-modal não encontrado no DOM!");
     }
 }
