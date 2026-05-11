@@ -192,7 +192,13 @@ async function loadPortalHighlights(supabase) {
                 .select('nome, foto, equipa, data_nascimento')
                 .not('data_nascimento', 'is', null);
 
-            if (!error && atletas) {
+            if (error) {
+                console.error("Erro Supabase (Aniversariantes):", error);
+                return;
+            }
+
+            if (atletas) {
+                console.log("Atletas carregados:", atletas.length);
                 const hoje = new Date();
                 const diaHoje = hoje.getDate();
                 const mesHoje = hoje.getMonth() + 1;
@@ -206,6 +212,8 @@ async function loadPortalHighlights(supabase) {
                     
                     return diaNasc === diaHoje && mesNasc === mesHoje;
                 });
+
+                console.log("Aniversariantes hoje:", aniversariantesHoje.length);
 
                 if (aniversariantesHoje.length > 0) {
                     modalList.innerHTML = '';
