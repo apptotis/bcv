@@ -165,20 +165,34 @@ async function loadPortalHighlights(supabase) {
         }
     }
 
-    if (aniversariantesContainer) {
+    const modal = document.getElementById('birthday-modal');
+    const modalList = document.getElementById('birthday-modal-list');
+    const closeBtn = document.getElementById('close-birthday');
+    const closeBtn2 = document.getElementById('close-birthday-btn');
+
+    if (modal) {
+        const closeModal = () => {
+            modal.classList.remove('active');
+            setTimeout(() => {
+                modal.style.display = 'none';
+            }, 400);
+        };
+
+        if (closeBtn) closeBtn.addEventListener('click', closeModal);
+        if (closeBtn2) closeBtn2.addEventListener('click', closeModal);
+        
+        // Close on clicking outside
+        modal.addEventListener('click', (e) => {
+            if (e.target === modal) closeModal();
+        });
+
         try {
             const { data: atletas, error } = await supabase
                 .from('atletasbcv')
                 .select('nome, foto, equipa, data_nascimento')
                 .not('data_nascimento', 'is', null);
 
-            if (error) {
-                if (error.code === '42P01') {
-                    aniversariantesContainer.innerHTML = '<div style="color: #a0a0ab; font-size: 0.9rem;">(Tabela de atletas não existe)</div>';
-                } else {
-                    throw error;
-                }
-            } else {
+            if (!error && atletas) {
                 const hoje = new Date();
                 const diaHoje = hoje.getDate();
                 const mesHoje = hoje.getMonth() + 1;
@@ -188,10 +202,8 @@ async function loadPortalHighlights(supabase) {
                     return dataNasc.getDate() === diaHoje && (dataNasc.getMonth() + 1) === mesHoje;
                 });
 
-                if (aniversariantesHoje.length === 0) {
-                    aniversariantesContainer.innerHTML = '<div style="color: #a0a0ab; font-size: 0.9rem;">Nenhum atleta celebra o aniversário hoje.</div>';
-                } else {
-                    aniversariantesContainer.innerHTML = '';
+                if (aniversariantesHoje.length > 0) {
+                    modalList.innerHTML = '';
                     aniversariantesHoje.forEach(atleta => {
                         const dataNasc = new Date(atleta.data_nascimento);
                         let idade = hoje.getFullYear() - dataNasc.getFullYear();
@@ -199,29 +211,33 @@ async function loadPortalHighlights(supabase) {
                         const item = document.createElement('div');
                         item.style.display = 'flex';
                         item.style.alignItems = 'center';
-                        item.style.gap = '12px';
-                        item.style.padding = '10px';
+                        item.style.gap = '15px';
+                        item.style.padding = '12px';
                         item.style.background = 'rgba(255,255,255,0.05)';
-                        item.style.borderRadius = '8px';
+                        item.style.borderRadius = '12px';
+                        item.style.textAlign = 'left';
 
                         const fotoHtml = atleta.foto 
-                            ? `<img src="${atleta.foto}" style="width: 40px; height: 40px; object-fit: cover; border-radius: 50%;">` 
-                            : '<div style="width: 40px; height: 40px; background: rgba(255,255,255,0.1); border-radius: 50%; display:flex; align-items:center; justify-content:center; font-size: 1.2rem;">👤</div>';
+                            ? `<img src="${atleta.foto}" style="width: 50px; height: 50px; object-fit: cover; border-radius: 50%; border: 2px solid var(--accent-primary);">` 
+                            : '<div style="width: 50px; height: 50px; background: rgba(255,255,255,0.1); border-radius: 50%; display:flex; align-items:center; justify-content:center; font-size: 1.5rem; border: 2px solid var(--accent-primary);">👤</div>';
 
                         item.innerHTML = `
                             ${fotoHtml}
                             <div>
-                                <div style="font-weight: bold; font-size: 0.95rem; color: #fff;">${atleta.nome} 🎉</div>
-                                <div style="color: #a0a0ab; font-size: 0.8rem;">${atleta.equipa} • ${idade} anos</div>
+                                <div style="font-weight: bold; font-size: 1.1rem; color: #fff;">${atleta.nome} 🎉</div>
+                                <div style="color: #a0a0ab; font-size: 0.9rem;">${atleta.equipa} • ${idade} anos</div>
                             </div>
                         `;
-                        aniversariantesContainer.appendChild(item);
+                        modalList.appendChild(item);
                     });
+                    
+                    // Show Modal
+                    modal.style.display = 'flex';
+                    setTimeout(() => modal.classList.add('active'), 100);
                 }
             }
         } catch (err) {
             console.error("Erro ao verificar aniversariantes:", err);
-            aniversariantesContainer.innerHTML = '<div style="color: #ff5252; font-size: 0.9rem;">Erro ao verificar aniversários.</div>';
         }
     }
 }

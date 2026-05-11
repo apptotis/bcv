@@ -130,14 +130,6 @@
                 <!-- Sidebar Lateral (30%) -->
                 <aside class="portal-sidebar reveal">
                     
-                    <!-- Card Aniversariantes -->
-                    <div class="ad-widget" style="background: linear-gradient(135deg, rgba(233, 30, 99, 0.05), rgba(156, 39, 176, 0.05)); border-color: rgba(233, 30, 99, 0.2); text-align: left;">
-                        <h3 style="margin-bottom: 5px; display: flex; align-items: center; gap: 10px; font-size: 1.2rem;">🎂 Aniversariantes</h3>
-                        <p style="font-size: 0.85rem; color: var(--text-secondary); margin-bottom: 15px;">Do dia de hoje</p>
-                        <div id="aniversariantes-list" style="display: flex; flex-direction: column; gap: 10px;">
-                            <div style="color: var(--text-secondary); font-size: 0.9rem;">A verificar aniversários...</div>
-                        </div>
-                    </div>
                     
                     <!-- Espaço Publicitário 1 -->
                     <div class="ad-widget ad-square">
@@ -198,6 +190,22 @@
             </div>
         </div>
     </footer>
+
+    <!-- Birthday Modal -->
+    <div id="birthday-modal" class="birthday-modal">
+        <div class="birthday-modal-content">
+            <button class="birthday-close" id="close-birthday">&times;</button>
+            <div class="birthday-icon-large">🎂</div>
+            <h2 style="margin-bottom: 10px; font-size: 2rem;">Parabéns!</h2>
+            <p style="color: var(--text-secondary); margin-bottom: 25px;">Hoje celebramos o aniversário de membros especiais da nossa família BCV:</p>
+            <div id="birthday-modal-list" style="display: flex; flex-direction: column; gap: 15px;">
+                <!-- Preenchido via JS -->
+            </div>
+            <div style="margin-top: 30px;">
+                <button class="btn btn-primary" id="close-birthday-btn">Desejar Parabéns!</button>
+            </div>
+        </div>
+    </div>
 
     <!-- Scripts -->
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
