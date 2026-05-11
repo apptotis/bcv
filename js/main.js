@@ -168,8 +168,6 @@ async function loadPortalHighlights(supabase) {
     const modal = document.getElementById('birthday-modal');
     const modalList = document.getElementById('birthday-modal-list');
     const closeBtn = document.getElementById('close-birthday');
-    const closeBtn2 = document.getElementById('close-birthday-btn');
-
     if (modal) {
         const closeModal = () => {
             modal.classList.remove('active');
@@ -179,7 +177,6 @@ async function loadPortalHighlights(supabase) {
         };
 
         if (closeBtn) closeBtn.addEventListener('click', closeModal);
-        if (closeBtn2) closeBtn2.addEventListener('click', closeModal);
         
         // Close on clicking outside
         modal.addEventListener('click', (e) => {
