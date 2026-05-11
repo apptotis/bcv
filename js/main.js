@@ -192,13 +192,9 @@ async function loadPortalHighlights(supabase) {
                 .select('nome, foto, equipa, data_nascimento')
                 .not('data_nascimento', 'is', null);
 
-            if (error) {
-                console.error("Erro Supabase (Aniversariantes):", error);
-                return;
-            }
+            if (error) return;
 
             if (atletas) {
-                console.log("Atletas carregados:", atletas.length);
                 const hoje = new Date();
                 const diaHoje = hoje.getDate();
                 const mesHoje = hoje.getMonth() + 1;
@@ -213,8 +209,6 @@ async function loadPortalHighlights(supabase) {
                     return diaNasc === diaHoje && mesNasc === mesHoje;
                 });
 
-                console.log("Aniversariantes hoje:", aniversariantesHoje.length);
-
                 if (aniversariantesHoje.length > 0) {
                     modalList.innerHTML = '';
                     aniversariantesHoje.forEach(atleta => {
@@ -224,36 +218,35 @@ async function loadPortalHighlights(supabase) {
                         
                         const item = document.createElement('div');
                         item.style.display = 'flex';
+                        item.style.flexDirection = 'column';
                         item.style.alignItems = 'center';
-                        item.style.gap = '15px';
-                        item.style.padding = '12px';
-                        item.style.background = 'rgba(255,255,255,0.05)';
-                        item.style.borderRadius = '12px';
-                        item.style.textAlign = 'left';
+                        item.style.gap = '10px';
+                        item.style.padding = '20px';
+                        item.style.background = 'rgba(255,255,255,0.03)';
+                        item.style.borderRadius = '20px';
+                        item.style.border = '1px solid rgba(255,255,255,0.05)';
+                        item.style.textAlign = 'center';
 
                         const fotoHtml = atleta.foto 
-                            ? `<img src="${atleta.foto}" style="width: 50px; height: 50px; object-fit: cover; border-radius: 50%; border: 2px solid var(--accent-primary);">` 
-                            : '<div style="width: 50px; height: 50px; background: rgba(255,255,255,0.1); border-radius: 50%; display:flex; align-items:center; justify-content:center; font-size: 1.5rem; border: 2px solid var(--accent-primary);">👤</div>';
+                            ? `<img src="${atleta.foto}" style="width: 120px; height: 120px; object-fit: cover; border-radius: 50%; border: 4px solid var(--accent-primary); box-shadow: 0 0 20px rgba(138, 43, 226, 0.3);">` 
+                            : '<div style="width: 120px; height: 120px; background: rgba(255,255,255,0.1); border-radius: 50%; display:flex; align-items:center; justify-content:center; font-size: 3rem; border: 4px solid var(--accent-primary);">👤</div>';
 
                         item.innerHTML = `
                             ${fotoHtml}
-                            <div>
-                                <div style="font-weight: bold; font-size: 1.1rem; color: #fff;">${atleta.nome} 🎉</div>
-                                <div style="color: #a0a0ab; font-size: 0.9rem;">${atleta.equipa} • ${idade} anos</div>
+                            <div style="margin-top: 10px;">
+                                <div style="font-weight: 800; font-size: 1.5rem; color: #fff; font-family: var(--font-heading);">${atleta.nome} 🎉</div>
+                                <div style="color: var(--accent-secondary); font-weight: 600; font-size: 1.1rem; margin-top: 5px;">${atleta.equipa}</div>
+                                <div style="color: #a0a0ab; font-size: 1rem; margin-top: 2px;">${idade} anos</div>
                             </div>
                         `;
                         modalList.appendChild(item);
                     });
                     
                     // Show Modal
-                    console.log("Tentando mostrar modal...", modal);
                     modal.style.display = 'flex';
                     setTimeout(() => {
                         modal.classList.add('active');
-                        console.log("Classe active adicionada ao modal");
                     }, 100);
-                } else {
-                    console.log("Nenhum aniversariante filtrado para hoje.");
                 }
             }
         } catch (err) {
