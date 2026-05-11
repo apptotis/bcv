@@ -69,42 +69,39 @@
                     <section id="portal-highlights" style="padding-top: 0; padding-bottom: var(--spacing-md);">
                         <div class="reveal" style="display: flex; flex-direction: column; gap: 20px;">
                             
-                            <!-- Card Agenda Desportiva -->
-                            <div class="ad-widget" style="background: rgba(255,255,255,0.03); text-align: left;">
-                                <h3 style="margin-bottom: 5px; display: flex; align-items: center; gap: 10px; font-size: 1.2rem;">📅 Agenda Desportiva</h3>
-                                <p style="font-size: 0.85rem; color: var(--text-secondary); margin-bottom: 15px;">Próximos 7 dias</p>
-                                <div id="agenda-list" style="display: flex; flex-direction: column; gap: 10px;">
-                                    <div style="color: var(--text-secondary); font-size: 0.9rem;">A carregar agenda...</div>
+                            <!-- Primeira Linha: Agenda e Resultados -->
+                            <div class="grid-2" style="gap: 20px;">
+                                <!-- Card Agenda Desportiva -->
+                                <div class="ad-widget club-announcement" style="text-align: left;">
+                                    <h3 style="margin-bottom: 5px; display: flex; align-items: center; gap: 10px; font-size: 1.2rem;">📅 Agenda Desportiva</h3>
+                                    <p style="font-size: 0.85rem; color: var(--text-secondary); margin-bottom: 15px;">Próximos 7 dias</p>
+                                    <div id="agenda-list" style="display: flex; flex-direction: column; gap: 10px;">
+                                        <div style="color: var(--text-secondary); font-size: 0.9rem;">A carregar agenda...</div>
+                                    </div>
+                                </div>
+
+                                <!-- Card Resultados Desportivos -->
+                                <div class="ad-widget club-announcement" style="text-align: left;">
+                                    <h3 style="margin-bottom: 5px; display: flex; align-items: center; gap: 10px; font-size: 1.2rem;">🏆 Resultados Desportivos</h3>
+                                    <p style="font-size: 0.85rem; color: var(--text-secondary); margin-bottom: 15px;">Últimos Resultados</p>
+                                    <div id="resultados-list" style="display: flex; flex-direction: column; gap: 10px;">
+                                        <div style="color: var(--text-secondary); font-size: 0.9rem;">A carregar resultados...</div>
+                                    </div>
                                 </div>
                             </div>
 
-                            <!-- Card Resultados Desportivos -->
-                            <div class="ad-widget" style="background: rgba(255,255,255,0.03); text-align: left;">
-                                <h3 style="margin-bottom: 5px; display: flex; align-items: center; gap: 10px; font-size: 1.2rem;">🏆 Resultados Desportivos</h3>
-                                <p style="font-size: 0.85rem; color: var(--text-secondary); margin-bottom: 15px;">Últimos Resultados</p>
-                                <div id="resultados-list" style="display: flex; flex-direction: column; gap: 10px;">
-                                    <div style="color: var(--text-secondary); font-size: 0.9rem;">A carregar resultados...</div>
-                                </div>
-                            </div>
-
-                            <!-- Quadro de Notícias -->
-                            <div class="ad-widget club-announcement" style="text-align: left;">
-                                <h3 style="color: #fff; margin-bottom: 10px; font-size: 1.2rem; display: flex; align-items: center; gap: 10px;">📢 Notícias do Clube</h3>
-                                <p style="font-size: 0.95rem; color: var(--text-secondary);">As inscrições para a nova época já se encontram abertas para todos os escalões de formação!</p>
-                                <a href="clube.html" class="btn btn-primary" style="font-size: 0.85rem; padding: 10px 20px; margin-top: 15px;">Ler a notícia completa</a>
-                            </div>
                             
                         </div>
                     </section>
 
-                    <!-- Torneio Highlight Section -->
-                    <section id="destaque-torneio" style="padding-top: var(--spacing-md); padding-bottom: var(--spacing-xl); border-top: 1px solid var(--border-color);">
+                    <!-- Notícias do Clube Highlight Section -->
+                    <section id="noticias" style="padding-top: var(--spacing-md); padding-bottom: var(--spacing-xl); border-top: 1px solid var(--border-color);">
                         <div class="reveal">
                             <div class="card-featured">
                                 <div class="card-content">
-                                    <h2>XXII Torneio Eurocidade</h2>
-                                    <p>O maior evento desportivo de basquetebol da região está a chegar! Descobre todas as equipas participantes, calendários, resultados em direto e as melhores fotos do evento.</p>
-                                    <a href="torneio-eurocidade/index.html" class="btn btn-primary mt-4">Aceder ao Portal do Torneio →</a>
+                                    <h2 style="display: flex; align-items: center; gap: 15px;">📢 Notícias do Clube</h2>
+                                    <p>As inscrições para a nova época já se encontram abertas para todos os escalões de formação! Junta-te à família BCV e vem aprender basquetebol com os melhores treinadores.</p>
+                                    <a href="clube.html" class="btn btn-primary mt-4">Saber mais sobre o Clube →</a>
                                 </div>
                                 <div class="card-visual">
                                     <div class="basketball-icon">🏀</div>

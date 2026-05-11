@@ -24,3 +24,5 @@
 - [2026-05-10] Gemini: Adição de uma barra de pesquisa na tab de Gestão de Atletas para filtrar a tabela em tempo real (por nome, equipa ou licença).
 - [2026-05-10] Gemini: Atualização do `index.html` (Portal). Remoção do Hero Banner e adição de dois cards principais (Agenda Desportiva na coluna principal e Aniversariantes do Dia no topo da barra lateral) com respetiva lógica de consulta ao Supabase no `main.js`.
 - [2026-05-11] Gemini: Movimentação do bloco de "Notícias do Clube" para a coluna principal. Criação do card "Resultados Desportivos" (ligado à tabela `resultados`) entre a Agenda Desportiva e as Notícias do Clube na página inicial.
+- [2026-05-11] Gemini: Reestruturação da página inicial (Portal). Os cartões "Agenda Desportiva" e "Resultados Desportivos" agora estão lado a lado e partilham o mesmo layout visual premium (classe `club-announcement`) que as Notícias do Clube.
+- [2026-05-11] Gemini: O antigo card de notícias foi removido e substituído pelo layout de destaque (`card-featured`) que era utilizado pelo Torneio, transformando as notícias no elemento visual central da página.
