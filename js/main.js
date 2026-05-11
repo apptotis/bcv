@@ -217,19 +217,11 @@ async function loadPortalHighlights(supabase) {
                         let idade = hoje.getFullYear() - anoNasc;
                         
                         const item = document.createElement('div');
-                        item.style.display = 'flex';
-                        item.style.flexDirection = 'column';
-                        item.style.alignItems = 'center';
-                        item.style.gap = '10px';
-                        item.style.padding = '20px';
-                        item.style.background = 'rgba(255,255,255,0.03)';
-                        item.style.borderRadius = '20px';
-                        item.style.border = '1px solid rgba(255,255,255,0.05)';
-                        item.style.textAlign = 'center';
+                        item.className = 'birthday-item';
 
                         const fotoHtml = atleta.foto 
-                            ? `<img src="${atleta.foto}" style="width: 120px; height: 120px; object-fit: cover; border-radius: 50%; border: 4px solid var(--accent-primary); box-shadow: 0 0 20px rgba(138, 43, 226, 0.3);">` 
-                            : '<div style="width: 120px; height: 120px; background: rgba(255,255,255,0.1); border-radius: 50%; display:flex; align-items:center; justify-content:center; font-size: 3rem; border: 4px solid var(--accent-primary);">👤</div>';
+                            ? `<img src="${atleta.foto}" alt="${atleta.nome}">` 
+                            : '<div class="birthday-photo-placeholder" style="display:flex; align-items:center; justify-content:center; font-size: 3rem;">👤</div>';
 
                         item.innerHTML = `
                             ${fotoHtml}

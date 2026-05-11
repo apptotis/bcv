@@ -170,6 +170,23 @@ img {
     transition: transform 0.5s cubic-bezier(0.34, 1.56, 0.64, 1);
 }
 
+@media (max-width: 480px) {
+    .birthday-modal-content {
+        padding: 2rem 1.5rem;
+        width: 90%;
+        max-height: 85vh;
+        overflow-y: auto;
+    }
+    
+    .birthday-icon-large {
+        font-size: 3rem;
+    }
+
+    .birthday-modal-content h2 {
+        font-size: 1.5rem !important;
+    }
+}
+
 .birthday-modal.active .birthday-modal-content {
     transform: scale(1);
 }
@@ -195,6 +212,38 @@ img {
 .birthday-close:hover {
     background: rgba(233, 30, 99, 0.2);
     transform: rotate(90deg);
+}
+
+.birthday-item {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 10px;
+    padding: 20px;
+    background: rgba(255,255,255,0.03);
+    border-radius: 24px;
+    border: 1px solid rgba(255,255,255,0.05);
+    text-align: center;
+}
+
+.birthday-item img, .birthday-photo-placeholder {
+    width: 120px;
+    height: 120px;
+    object-fit: cover;
+    border-radius: 50%;
+    border: 4px solid var(--accent-primary);
+    box-shadow: 0 0 20px rgba(138, 43, 226, 0.3);
+}
+
+@media (max-width: 480px) {
+    .birthday-item img, .birthday-photo-placeholder {
+        width: 90px;
+        height: 90px;
+    }
+    
+    .birthday-item {
+        padding: 15px;
+    }
 }
 
 .birthday-icon-large {
