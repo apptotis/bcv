@@ -27,3 +27,4 @@
 - [2026-05-11] Gemini: Reestruturação da página inicial (Portal). Os cartões "Agenda Desportiva" e "Resultados Desportivos" agora estão lado a lado e partilham o mesmo layout visual premium (classe `club-announcement`) que as Notícias do Clube.
 - [2026-05-11] Gemini: O antigo card de notícias foi removido e substituído pelo layout de destaque (`card-featured`) que era utilizado pelo Torneio, transformando as notícias no elemento visual central da página.
 - [2026-05-11] Gemini: Ajuste do alinhamento da navbar em mobile (redução de padding e ajuste de fonte) para garantir que o logo e nome do clube estejam alinhados à esquerda e legíveis em ecrãs pequenos.
+- [2026-05-11] Gemini: Remoção do ícone 🎉 do banner de 30 anos em todas as páginas para um design mais limpo.
