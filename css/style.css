@@ -965,6 +965,15 @@ img {
         margin-top: 10px !important;
     }
 
+    .footer .brand-text {
+        display: none;
+    }
+
+    .footer-content {
+        justify-content: center !important;
+        gap: 30px !important;
+    }
+
     .footer-grid {
         grid-template-columns: 1fr;
         gap: 2rem;
