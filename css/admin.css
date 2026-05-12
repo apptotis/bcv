@@ -17,28 +17,25 @@ body {
     align-items: center;
     min-height: 100vh;
     padding: 20px;
-    background: radial-gradient(circle at center, #1a1a24 0%, #0a0a0e 100%);
+    background: var(--bg-secondary);
 }
 
 .login-card {
-    background: rgba(255, 255, 255, 0.05);
-    backdrop-filter: blur(20px);
-    border: 1px solid rgba(255, 255, 255, 0.1);
+    background: #ffffff;
+    border: 1px solid var(--border-color);
     padding: 40px;
     border-radius: 16px;
     width: 100%;
     max-width: 400px;
     text-align: center;
-    box-shadow: 0 15px 35px rgba(0,0,0,0.5);
+    box-shadow: var(--shadow-lg);
 }
 
 .login-card h2 {
     font-family: 'Outfit', sans-serif;
     margin-bottom: 30px;
     font-size: 2rem;
-    background: linear-gradient(135deg, #8a2be2, #ff7b00);
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
+    color: var(--accent-primary);
 }
 
 .login-card input {
@@ -46,9 +43,9 @@ body {
     padding: 15px;
     margin-bottom: 20px;
     border-radius: 8px;
-    border: 1px solid rgba(255, 255, 255, 0.2);
-    background: rgba(0, 0, 0, 0.3);
-    color: #fff;
+    border: 1px solid var(--border-color);
+    background: #f8f9fa;
+    color: var(--text-primary);
     font-size: 1rem;
     box-sizing: border-box;
     transition: all 0.3s ease;
@@ -56,21 +53,21 @@ body {
 
 .login-card input:focus {
     outline: none;
-    border-color: #8a2be2;
-    box-shadow: 0 0 10px rgba(138, 43, 226, 0.3);
+    border-color: var(--accent-primary);
+    box-shadow: 0 0 10px rgba(92, 45, 145, 0.1);
 }
 
 .btn-primary {
     width: 100%;
     padding: 15px;
-    background: linear-gradient(135deg, #8a2be2, #ff7b00);
+    background: var(--accent-primary);
     color: #fff;
     border: none;
     border-radius: 8px;
     font-size: 1.1rem;
     font-weight: bold;
     cursor: pointer;
-    transition: transform 0.2s ease, box-shadow 0.2s ease;
+    transition: transform 0.2s ease, background 0.2s ease;
 }
 
 .btn-primary:hover {
@@ -99,11 +96,12 @@ body {
 /* Sidebar */
 .admin-sidebar {
     width: 260px;
-    background: rgba(20, 20, 28, 0.95);
-    border-right: 1px solid rgba(255, 255, 255, 0.1);
+    background: #ffffff;
+    border-right: 1px solid var(--border-color);
     display: flex;
     flex-direction: column;
     flex-shrink: 0;
+    box-shadow: var(--shadow-sm);
 }
 
 .sidebar-header {
@@ -111,7 +109,7 @@ body {
     display: flex;
     align-items: center;
     gap: 15px;
-    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    border-bottom: 1px solid var(--border-color);
 }
 
 .sidebar-logo {
@@ -125,7 +123,7 @@ body {
     font-family: 'Outfit', sans-serif;
     font-size: 1.2rem;
     margin: 0;
-    color: #fff;
+    color: var(--text-primary);
 }
 
 .sidebar-nav {
@@ -156,9 +154,9 @@ body {
 }
 
 .sidebar-nav a:hover, .sidebar-nav a.active {
-    background: rgba(138, 43, 226, 0.1);
-    color: #fff;
-    border-left-color: #8a2be2;
+    background: rgba(92, 45, 145, 0.05);
+    color: var(--accent-primary);
+    border-left-color: var(--accent-primary);
 }
 
 .sidebar-nav .icon {
@@ -178,8 +176,8 @@ body {
     justify-content: space-between;
     align-items: center;
     padding: 20px 40px;
-    background: rgba(255,255,255,0.03);
-    border-bottom: 1px solid rgba(255,255,255,0.1);
+    background: #ffffff;
+    border-bottom: 1px solid var(--border-color);
 }
 
 .header-title h1 {
@@ -210,8 +208,8 @@ body {
 }
 
 .welcome-box {
-    background: rgba(138, 43, 226, 0.1);
-    border: 1px solid rgba(138, 43, 226, 0.3);
+    background: rgba(92, 45, 145, 0.05);
+    border: 1px solid rgba(92, 45, 145, 0.1);
     padding: 30px;
     border-radius: 12px;
     text-align: left;
@@ -234,31 +232,32 @@ body {
     width: 100%;
     padding: 12px 15px;
     border-radius: 6px;
-    border: 1px solid rgba(255, 255, 255, 0.2);
-    background: rgba(0, 0, 0, 0.4);
-    color: #fff;
+    border: 1px solid var(--border-color);
+    background: #ffffff;
+    color: var(--text-primary);
     font-size: 1rem;
     box-sizing: border-box;
 }
 
 .admin-input:focus {
     outline: none;
-    border-color: #8a2be2;
+    border-color: var(--accent-primary);
+    box-shadow: 0 0 10px rgba(92, 45, 145, 0.1);
 }
 
 .admin-table th, .admin-table td {
     padding: 12px;
-    border-bottom: 1px solid rgba(255,255,255,0.05);
+    border-bottom: 1px solid var(--border-color);
 }
 
 .admin-table tbody tr:hover {
-    background: rgba(255,255,255,0.02);
+    background: var(--bg-secondary);
 }
 
 .btn-secondary {
-    background: rgba(255, 255, 255, 0.1);
-    color: #fff;
-    border: 1px solid rgba(255, 255, 255, 0.2);
+    background: #ffffff;
+    color: var(--text-primary);
+    border: 1px solid var(--border-color);
     padding: 15px;
     border-radius: 8px;
     font-size: 1.1rem;
@@ -272,9 +271,9 @@ body {
 }
 
 .btn-action {
-    background: rgba(255,255,255,0.05);
-    border: 1px solid rgba(255,255,255,0.1);
-    color: #fff;
+    background: #f8f9fa;
+    border: 1px solid var(--border-color);
+    color: var(--text-primary);
     padding: 5px 10px;
     border-radius: 4px;
     cursor: pointer;
@@ -284,8 +283,9 @@ body {
 }
 
 .btn-action:hover {
-    background: rgba(138, 43, 226, 0.3);
-    border-color: #8a2be2;
+    background: rgba(92, 45, 145, 0.1);
+    border-color: var(--accent-primary);
+    color: var(--accent-primary);
 }
 
 .btn-action.delete:hover {

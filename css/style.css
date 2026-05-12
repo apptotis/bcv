@@ -2,17 +2,17 @@
    CSS Variables & Tokens
    ========================================================================== */
 :root {
-    /* Colors - Dark Premium Theme */
-    --bg-primary: #0a0a0e;
-    --bg-secondary: #13131a;
-    --bg-card: rgba(255, 255, 255, 0.03);
+    /* Colors - Institutional Light Theme */
+    --bg-primary: #ffffff;
+    --bg-secondary: #f8f9fa;
+    --bg-card: #ffffff;
     
-    --text-primary: #ffffff;
-    --text-secondary: #a0a0ab;
+    --text-primary: #1a1a1a;
+    --text-secondary: #6c757d;
     
-    --accent-primary: #8a2be2; /* Purple */
-    --accent-secondary: #ff7b00; /* Orange */
-    --accent-gradient: linear-gradient(135deg, var(--accent-primary), var(--accent-secondary));
+    --accent-primary: #5c2d91; /* Institutional Purple */
+    --accent-secondary: #ff7b00; /* Orange Accent */
+    --accent-solid: #5c2d91;
     
     /* Typography */
     --font-heading: 'Outfit', sans-serif;
@@ -28,7 +28,12 @@
     --border-radius-sm: 8px;
     --border-radius-md: 16px;
     --border-radius-lg: 24px;
-    --border-color: rgba(255, 255, 255, 0.08);
+    --border-color: #e9ecef;
+    
+    /* Shadows */
+    --shadow-sm: 0 2px 4px rgba(0,0,0,0.05);
+    --shadow-md: 0 4px 12px rgba(0,0,0,0.08);
+    --shadow-lg: 0 10px 30px rgba(0,0,0,0.12);
     
     /* Transitions */
     --transition-fast: 0.2s ease;
@@ -104,14 +109,14 @@ img {
     border-radius: 50%;
     filter: blur(120px);
     z-index: -1;
-    opacity: 0.5;
+    opacity: 0.3; /* Subtle opacity for light theme */
     animation: float 20s infinite alternate ease-in-out;
 }
 
 .shape-1 {
     width: 40vw;
     height: 40vw;
-    background-color: rgba(138, 43, 226, 0.15);
+    background-color: rgba(92, 45, 145, 0.1);
     top: -10vw;
     left: -10vw;
 }
@@ -119,7 +124,7 @@ img {
 .shape-2 {
     width: 30vw;
     height: 30vw;
-    background-color: rgba(255, 123, 0, 0.1);
+    background-color: rgba(255, 123, 0, 0.05);
     top: 40%;
     right: -5vw;
     animation-delay: -5s;
@@ -157,15 +162,15 @@ img {
 }
 
 .birthday-modal-content {
-    background: linear-gradient(135deg, #13131a, #1a1a24);
-    border: 1px solid rgba(233, 30, 99, 0.3);
+    background: #ffffff;
+    border: 1px solid var(--border-color);
     border-radius: 32px;
     padding: 3rem 2rem;
     max-width: 600px;
     width: 95%;
     text-align: center;
     position: relative;
-    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5), 0 0 30px rgba(233, 30, 99, 0.15);
+    box-shadow: var(--shadow-lg);
     transform: scale(0.9);
     transition: transform 0.5s cubic-bezier(0.34, 1.56, 0.64, 1);
 }
@@ -195,9 +200,9 @@ img {
     position: absolute;
     top: 20px;
     right: 20px;
-    background: rgba(255,255,255,0.05);
-    border: none;
-    color: #fff;
+    background: #f8f9fa;
+    border: 1px solid var(--border-color);
+    color: var(--text-primary);
     width: 40px;
     height: 40px;
     border-radius: 50%;
@@ -220,9 +225,9 @@ img {
     align-items: center;
     gap: 10px;
     padding: 20px;
-    background: rgba(255,255,255,0.03);
+    background: #f8f9fa;
     border-radius: 24px;
-    border: 1px solid rgba(255,255,255,0.05);
+    border: 1px solid var(--border-color);
     text-align: center;
 }
 
@@ -279,11 +284,12 @@ img {
 }
 
 .navbar.scrolled {
-    background: rgba(10, 10, 14, 0.85);
+    background: rgba(255, 255, 255, 0.95);
     backdrop-filter: blur(16px);
     -webkit-backdrop-filter: blur(16px);
     border-bottom: 1px solid var(--border-color);
     padding: 10px 0;
+    box-shadow: var(--shadow-sm);
 }
 
 .nav-container {
@@ -310,9 +316,11 @@ img {
 
 .brand-text {
     font-family: var(--font-heading);
-    font-weight: 800;
-    font-size: 1.2rem;
-    letter-spacing: -0.5px;
+    font-weight: 700;
+    font-size: 0.9rem;
+    letter-spacing: 0.5px;
+    text-transform: uppercase;
+    color: var(--accent-primary);
 }
 
 .nav-menu ul {
@@ -324,14 +332,15 @@ img {
 
 .nav-link {
     font-size: 0.95rem;
-    font-weight: 500;
-    color: var(--text-secondary);
+    font-weight: 600;
+    color: var(--text-primary);
     position: relative;
     padding: 8px 0;
+    transition: var(--transition-fast);
 }
 
 .nav-link:hover, .nav-link.active {
-    color: var(--text-primary);
+    color: var(--accent-primary);
 }
 
 .nav-link::after {
@@ -341,7 +350,7 @@ img {
     left: 0;
     width: 0;
     height: 2px;
-    background: var(--accent-gradient);
+    background: var(--accent-primary);
     transition: var(--transition-normal);
 }
 
@@ -360,10 +369,87 @@ img {
 .nav-link.highlight::after {
     display: none;
 }
-
 .nav-link.highlight:hover {
     background: rgba(255, 123, 0, 0.2);
-    color: #fff;
+    color: var(--accent-secondary);
+}
+
+/* Dropdown Menu Styles */
+.nav-menu ul li {
+    position: relative;
+}
+
+.dropdown {
+    position: absolute;
+    top: 100%;
+    left: 0;
+    background: #ffffff;
+    min-width: 200px;
+    box-shadow: var(--shadow-md);
+    border: 1px solid var(--border-color);
+    border-radius: var(--border-radius-sm);
+    padding: 10px 0;
+    opacity: 0;
+    visibility: hidden;
+    transform: translateY(10px);
+    transition: all 0.3s ease;
+    z-index: 100;
+    list-style: none !important;
+    display: flex;
+    flex-direction: column;
+    gap: 0 !important;
+    margin: 0 !important;
+}
+
+.nav-menu ul li:hover .dropdown {
+    opacity: 1;
+    visibility: visible;
+    transform: translateY(0);
+}
+
+.dropdown li {
+    width: 100%;
+    margin: 0 !important;
+}
+
+.dropdown a {
+    display: block;
+    padding: 10px 20px;
+    font-size: 0.9rem;
+    font-weight: 500;
+    color: var(--text-primary) !important;
+    transition: var(--transition-fast);
+    text-align: left;
+    width: 100%;
+}
+
+.dropdown a:hover {
+    background: var(--bg-secondary);
+    color: var(--accent-primary) !important;
+    padding-left: 25px;
+}
+
+/* Mobile Dropdown */
+@media (max-width: 768px) {
+    .dropdown {
+        position: static;
+        opacity: 1;
+        visibility: visible;
+        transform: none;
+        box-shadow: none;
+        border: none;
+        padding: 0 0 0 20px;
+        background: transparent;
+        max-height: 0;
+        overflow: hidden;
+        transition: max-height 0.3s ease;
+        min-width: unset;
+    }
+
+    .nav-menu ul li:hover .dropdown {
+        max-height: 250px;
+        margin-top: 10px !important;
+    }
 }
 
 .mobile-toggle {
@@ -424,10 +510,7 @@ img {
 }
 
 .text-gradient {
-    background: var(--accent-gradient);
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
-    background-clip: text;
+    color: var(--accent-primary);
 }
 
 .hero-subtitle {
@@ -464,21 +547,22 @@ img {
 }
 
 .btn-primary {
-    background: var(--text-primary);
-    color: var(--bg-primary);
-    box-shadow: 0 4px 15px rgba(255, 255, 255, 0.1);
+    background: var(--accent-primary);
+    color: #ffffff;
+    box-shadow: var(--shadow-sm);
 }
 
 .btn-primary:hover {
     transform: translateY(-2px);
-    box-shadow: 0 8px 25px rgba(255, 255, 255, 0.2);
+    background: #4a2475; /* Slightly darker purple */
+    box-shadow: var(--shadow-md);
 }
 
 .btn-secondary {
-    background: rgba(255, 255, 255, 0.05);
+    background: #ffffff;
     color: var(--text-primary);
     border: 1px solid var(--border-color);
-    backdrop-filter: blur(10px);
+    box-shadow: var(--shadow-sm);
 }
 
 .btn-secondary:hover {
@@ -521,21 +605,21 @@ img {
    Featured Card (Torneio)
    ========================================================================== */
 .card-featured {
-    background: linear-gradient(145deg, rgba(20, 20, 28, 0.8), rgba(10, 10, 14, 0.9));
+    background: #ffffff;
     border: 1px solid var(--border-color);
     border-radius: var(--border-radius-lg);
     overflow: hidden;
     display: flex;
     align-items: stretch;
-    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.4);
+    box-shadow: var(--shadow-md);
     position: relative;
 }
 
 .card-featured::before {
     content: '';
     position: absolute;
-    top: 0; left: 0; width: 100%; height: 2px;
-    background: var(--accent-gradient);
+    top: 0; left: 0; width: 100%; height: 4px;
+    background: var(--accent-primary);
 }
 
 .card-content {
@@ -547,9 +631,7 @@ img {
 .card-content h2 {
     font-size: 2rem;
     margin-bottom: 1rem;
-    background: linear-gradient(to right, #fff, #a0a0ab);
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
+    color: var(--text-primary);
 }
 
 .card-content p {
@@ -560,7 +642,7 @@ img {
 
 .card-visual {
     flex: 0.8;
-    background: rgba(255, 123, 0, 0.05);
+    background: var(--bg-secondary);
     display: flex;
     align-items: center;
     justify-content: center;
@@ -595,18 +677,20 @@ img {
 }
 
 .feature-box {
-    background: var(--bg-card);
+    background: #ffffff;
     border: 1px solid var(--border-color);
     padding: 2.5rem;
     border-radius: var(--border-radius-md);
     transition: var(--transition-normal);
     text-align: left;
+    box-shadow: var(--shadow-sm);
 }
 
 .feature-box:hover {
     transform: translateY(-5px);
-    background: rgba(255, 255, 255, 0.05);
-    border-color: rgba(138, 43, 226, 0.3);
+    background: #ffffff;
+    border-color: var(--accent-primary);
+    box-shadow: var(--shadow-md);
 }
 
 .feature-icon {
@@ -632,9 +716,10 @@ img {
    Footer
    ========================================================================== */
 .footer {
-    background: #050508;
+    background: #1a1a1a;
     padding: 4rem 0 2rem;
     border-top: 1px solid var(--border-color);
+    color: #ffffff;
 }
 
 .footer-grid {
@@ -647,7 +732,7 @@ img {
 .footer-col h3 {
     font-size: 1.2rem;
     margin-bottom: 1.5rem;
-    color: #fff;
+    color: #ffffff;
 }
 
 .footer-col p {
@@ -680,7 +765,7 @@ img {
 }
 
 .footer-bottom a {
-    color: #fff;
+    color: #ffffff;
     font-weight: 600;
 }
 
@@ -708,18 +793,19 @@ img {
 }
 
 .album-card {
-    background: rgba(255,255,255,0.03);
+    background: #ffffff;
     border: 1px solid var(--border-color);
     border-radius: 12px;
     overflow: hidden;
     cursor: pointer;
     transition: var(--transition-normal);
+    box-shadow: var(--shadow-sm);
 }
 
 .album-card:hover {
     transform: translateY(-5px);
-    border-color: var(--text-primary);
-    box-shadow: 0 10px 30px rgba(138, 43, 226, 0.2);
+    border-color: var(--accent-primary);
+    box-shadow: var(--shadow-md);
 }
 
 .album-cover-wrapper {
@@ -746,7 +832,7 @@ img {
 .album-title {
     margin: 0;
     font-size: 1.1rem;
-    color: #fff;
+    color: var(--text-primary);
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
@@ -841,7 +927,7 @@ img {
 }
 
 .ad-widget {
-    background: var(--bg-card);
+    background: #ffffff;
     border: 1px solid var(--border-color);
     border-radius: var(--border-radius-md);
     padding: 1.5rem;
@@ -849,11 +935,12 @@ img {
     position: relative;
     overflow: hidden;
     transition: var(--transition-normal);
+    box-shadow: var(--shadow-sm);
 }
 
 .ad-widget:hover {
-    border-color: rgba(138, 43, 226, 0.3);
-    box-shadow: 0 10px 20px rgba(0,0,0,0.2);
+    border-color: var(--accent-primary);
+    box-shadow: var(--shadow-md);
 }
 
 .ad-label {
@@ -872,7 +959,7 @@ img {
     flex-direction: column;
     align-items: center;
     justify-content: center;
-    background: linear-gradient(145deg, rgba(20,20,25,0.6), rgba(10,10,15,0.8));
+    background: var(--bg-secondary);
 }
 
 .ad-square .placeholder-icon {
@@ -886,16 +973,18 @@ img {
     display: flex;
     align-items: center;
     justify-content: center;
-    background: linear-gradient(145deg, rgba(255,123,0,0.05), rgba(138,43,226,0.05));
+    background: var(--bg-secondary);
+    border: 1px dashed var(--border-color);
 }
 
 .club-announcement {
-    background: linear-gradient(135deg, rgba(138,43,226,0.15), rgba(255,123,0,0.15));
+    background: #ffffff;
     border-left: 4px solid var(--accent-primary);
+    box-shadow: var(--shadow-sm);
 }
 
 .club-announcement h4 {
-    color: #fff;
+    color: var(--text-primary);
     margin-bottom: 10px;
     font-size: 1.2rem;
 }
@@ -910,20 +999,18 @@ img {
    ========================================================================== */
 .anniversary-banner {
     width: 100%;
-    background: linear-gradient(90deg, #4a148c, #ff7b00, #4a148c);
-    background-size: 200% auto;
+    background: var(--accent-primary);
     color: white;
     text-align: center;
-    padding: 10px 20px;
+    padding: 12px 20px;
     font-family: var(--font-heading);
     font-weight: 700;
-    font-size: 1.1rem;
+    font-size: 1rem;
     letter-spacing: 1px;
     text-transform: uppercase;
     position: relative;
     z-index: 999;
-    box-shadow: 0 4px 15px rgba(0,0,0,0.3);
-    animation: gradientMove 5s ease infinite;
+    box-shadow: var(--shadow-md);
     display: flex;
     flex-wrap: wrap;
     justify-content: center;
@@ -986,12 +1073,12 @@ img {
         width: 80%;
         max-width: 400px;
         height: 100vh;
-        background: rgba(10, 10, 14, 0.98);
-        backdrop-filter: blur(20px);
+        background: #ffffff;
         border-left: 1px solid var(--border-color);
         padding: 100px 40px;
         transition: 0.4s cubic-bezier(0.4, 0, 0.2, 1);
         z-index: 1000;
+        box-shadow: var(--shadow-lg);
     }
 
     .nav-menu.active {

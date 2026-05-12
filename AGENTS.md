@@ -1,4 +1,4 @@
-# Projeto: Basket Club de Valença (BCV)
+# Projeto: Basket Clube de Valença (BCV)
 
 ## Stack Técnica
 - Frontend: HTML5, CSS3 (Vanilla), JavaScript (Vanilla)
@@ -23,3 +23,6 @@
 - [2026-05-11] Gemini: Transformação das Notícias no elemento central (`card-featured`).
 - [2026-05-11] Gemini: Otimização da Navbar mobile e remoção de ícones excessivos no banner.
 - [2026-05-11] Gemini: Implementação do Popup Automático de Aniversariantes (Modal) e remoção do card fixo.
+- [2026-05-12] Gemini: Reformulação Radical para Tema Claro Institucional (Roxo Sólido, Base Branca).
+- [2026-05-12] Gemini: Implementação de Sub-menu (Dropdown) para a secção Clube.
+- [2026-05-12] Gemini: Simplificação do Hero da página Clube (apenas emblema).
