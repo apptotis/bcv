@@ -941,6 +941,26 @@ img {
         transform: translateY(-7px) rotate(-45deg);
     }
 
+    .dropdown {
+        position: static;
+        opacity: 1;
+        visibility: visible;
+        transform: none;
+        box-shadow: none;
+        border: none;
+        padding: 0 0 0 20px;
+        background: transparent;
+        max-height: 0;
+        overflow: hidden;
+        transition: max-height 0.3s ease;
+        min-width: unset;
+    }
+
+    .nav-menu ul li:hover .dropdown {
+        max-height: 250px;
+        margin-top: 10px !important;
+    }
+
     .footer-grid {
         grid-template-columns: 1fr;
         gap: 2rem;
