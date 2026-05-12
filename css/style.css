@@ -887,8 +887,12 @@ img {
 }
 
 @media (max-width: 768px) {
+    .container {
+        padding: 0 20px;
+    }
+
     .nav-container {
-        padding: 0 var(--spacing-md);
+        padding: 0 20px;
     }
 
     .brand-text {
@@ -988,6 +992,10 @@ img {
     
     .grid-2, .grid-3, .grid-4 {
         grid-template-columns: 1fr;
+    }
+
+    .container, .nav-container {
+        padding: 0 15px;
     }
 }
 
