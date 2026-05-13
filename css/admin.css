@@ -1,8 +1,20 @@
 /* css/admin.css - Estilos Específicos para a Área de Administração do BCV */
 
+/* Revertendo para Tema Escuro apenas na Admin */
+:root {
+    --bg-primary: #0a0a0e;
+    --bg-secondary: #13131a;
+    --bg-card: #1a1a24;
+    --text-primary: #ffffff;
+    --text-secondary: #a0a0ab;
+    --border-color: rgba(255, 255, 255, 0.1);
+    --accent-primary: #8a2be2;
+    --shadow-lg: 0 10px 30px rgba(0, 0, 0, 0.5);
+}
+
 body {
-    background-color: var(--bg-primary, #0a0a0e);
-    color: var(--text-primary, #ffffff);
+    background-color: var(--bg-primary);
+    color: var(--text-primary);
     font-family: 'Inter', sans-serif;
     margin: 0;
     padding: 0;
@@ -21,7 +33,7 @@ body {
 }
 
 .login-card {
-    background: #ffffff;
+    background: var(--bg-card);
     border: 1px solid var(--border-color);
     padding: 40px;
     border-radius: 16px;
@@ -44,7 +56,7 @@ body {
     margin-bottom: 20px;
     border-radius: 8px;
     border: 1px solid var(--border-color);
-    background: #f8f9fa;
+    background: var(--bg-secondary);
     color: var(--text-primary);
     font-size: 1rem;
     box-sizing: border-box;
@@ -96,7 +108,7 @@ body {
 /* Sidebar */
 .admin-sidebar {
     width: 260px;
-    background: #ffffff;
+    background: var(--bg-secondary);
     border-right: 1px solid var(--border-color);
     display: flex;
     flex-direction: column;
@@ -176,7 +188,7 @@ body {
     justify-content: space-between;
     align-items: center;
     padding: 20px 40px;
-    background: #ffffff;
+    background: var(--bg-secondary);
     border-bottom: 1px solid var(--border-color);
 }
 
@@ -233,7 +245,7 @@ body {
     padding: 12px 15px;
     border-radius: 6px;
     border: 1px solid var(--border-color);
-    background: #ffffff;
+    background: var(--bg-secondary);
     color: var(--text-primary);
     font-size: 1rem;
     box-sizing: border-box;
@@ -255,9 +267,9 @@ body {
 }
 
 .btn-secondary {
-    background: #ffffff;
-    color: var(--text-primary);
-    border: 1px solid var(--border-color);
+    background: rgba(255, 255, 255, 0.1);
+    color: #fff;
+    border: 1px solid rgba(255, 255, 255, 0.2);
     padding: 15px;
     border-radius: 8px;
     font-size: 1.1rem;
@@ -271,9 +283,9 @@ body {
 }
 
 .btn-action {
-    background: #f8f9fa;
-    border: 1px solid var(--border-color);
-    color: var(--text-primary);
+    background: rgba(255,255,255,0.05);
+    border: 1px solid rgba(255,255,255,0.1);
+    color: #fff;
     padding: 5px 10px;
     border-radius: 4px;
     cursor: pointer;
