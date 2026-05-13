@@ -26,3 +26,4 @@
 - [2026-05-12] Gemini: Reformulação Radical para Tema Claro Institucional (Roxo Sólido, Base Branca).
 - [2026-05-12] Gemini: Implementação de Sub-menu (Dropdown) para a secção Clube.
 - [2026-05-12] Gemini: Simplificação do Hero da página Clube (apenas emblema).
+- [2026-05-13] Gemini: Substituição global do logo (Logo_bcv.jpg -> emblema_png.png).
