@@ -172,13 +172,11 @@ document.addEventListener('DOMContentLoaded', () => {
             card.onclick = () => openPublicAlbum(album.id, album.titulo);
 
             const capaHtml = album.capa_url 
-                ? `<img src="${album.capa_url}" class="album-cover" alt="${album.titulo}">` 
+                ? `<div class="album-cover"><img src="${album.capa_url}" alt="${album.titulo}"></div>` 
                 : `<div class="album-cover" style="background: rgba(138,43,226,0.1); display:flex; align-items:center; justify-content:center; font-size:3rem; color:rgba(138,43,226,0.5);">📸</div>`;
 
             card.innerHTML = `
-                <div class="album-cover-wrapper">
-                    ${capaHtml}
-                </div>
+                ${capaHtml}
                 <div class="album-info">
                     <h3 class="album-title" title="${album.titulo}">${album.titulo}</h3>
                 </div>
