@@ -1,0 +1,29 @@
+{
+  "meta": {
+    "url": "https://scbraga.pt/",
+    "timestamp": "2026-05-14T10:15:00Z",
+    "extraction_method": "Visual/DOM Analysis via DesignTokenizer-Local"
+  },
+  "colors": {
+    "primary": "#5c2d91",
+    "secondary": "#000000",
+    "background": "#FFFFFF",
+    "surface": "#F8F9FA",
+    "text": "#1A1A1A",
+    "palette": ["#5c2d91", "#000000", "#FFFFFF", "#F8F9FA", "#E9ECEF", "#DEE2E6"]
+  },
+  "typography": {
+    "fontFamily": ["Industry", "Inter", "sans-serif"],
+    "scales": {
+      "h1": { "size": "2.5rem", "lineHeight": "1.1" },
+      "h2": { "size": "2rem", "lineHeight": "1.2" },
+      "h3": { "size": "1.75rem", "lineHeight": "1.2" },
+      "body": { "size": "1rem", "lineHeight": "1.5" }
+    },
+    "weights": ["400", "700", "900"]
+  },
+  "effects": {
+    "borderRadius": ["0px", "2px"],
+    "boxShadow": ["0 4px 12px rgba(0, 0, 0, 0.08)", "none"]
+  }
+}

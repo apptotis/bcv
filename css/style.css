@@ -24,10 +24,10 @@
     --spacing-lg: 2rem;
     --spacing-xl: 4rem;
     
-    /* UI Elements */
-    --border-radius-sm: 8px;
-    --border-radius-md: 16px;
-    --border-radius-lg: 24px;
+    /* UI Elements - Sharp Style (SC Braga Inspired) */
+    --border-radius-sm: 0px;
+    --border-radius-md: 0px;
+    --border-radius-lg: 0px;
     --border-color: #e9ecef;
     
     /* Shadows */
@@ -77,8 +77,9 @@ body.with-bg-image {
 
 h1, h2, h3, h4, h5, h6 {
     font-family: var(--font-heading);
-    font-weight: 700;
-    line-height: 1.2;
+    font-weight: 900; /* Max weight for aggressive look */
+    line-height: 1.1;
+    text-transform: uppercase; /* Match SC Braga headers */
 }
 
 a {
@@ -369,7 +370,7 @@ img {
     justify-content: center;
     gap: 8px;
     padding: 14px 28px;
-    border-radius: 30px;
+    border-radius: 0px; /* Sharp Style */
     font-weight: 600;
     font-size: 1rem;
     cursor: pointer;
@@ -628,7 +629,7 @@ img {
 .album-card {
     background: #ffffff;
     border: 1px solid var(--border-color);
-    border-radius: 12px;
+    border-radius: 0px;
     overflow: hidden;
     cursor: pointer;
     transition: var(--transition-normal);
@@ -687,7 +688,7 @@ img {
 
 .photo-item {
     aspect-ratio: 1;
-    border-radius: 12px;
+    border-radius: 0px;
     overflow: hidden;
     cursor: pointer;
     transition: transform 0.3s ease, box-shadow 0.3s ease;
