@@ -1158,6 +1158,7 @@ document.addEventListener('DOMContentLoaded', async () => {
                     // Converter data para formato ISO YYYY-MM-DD
                     let isoDate = parsePortugueseDate(jogo.date);
 
+                    if (hasResult) {
                         // Tratar como Resultado
                         const scores = jogo.score.split('-').map(s => parseInt(s.trim()));
                         await supabase.from('resultados_bcv').insert([{
