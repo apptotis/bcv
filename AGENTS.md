@@ -27,4 +27,4 @@
 - [2026-05-12] Gemini: Implementação de Sub-menu (Dropdown) para a secção Clube.
 - [2026-05-12] Gemini: Simplificação do Hero da página Clube (apenas emblema).
 - [2026-05-13] Gemini: Substituição global do logo (Logo_bcv.jpg -> emblema_png.png).
-- [2026-05-14] Gemini: Padronização das barras de destaque (accent bar) no topo de todos os cards.
+- [2026-05-14] Gemini: Remoção de ícones decorativos (Agenda, Taça, Megafone) nos títulos dos cards.
