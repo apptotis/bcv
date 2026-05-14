@@ -1154,14 +1154,14 @@ document.addEventListener('DOMContentLoaded', async () => {
             for (const jogo of fpbExtractedData) {
                 try {
                     const hasResult = jogo.score && jogo.score.includes('-');
-                    
-                    // Converter data para formato ISO YYYY-MM-DD
                     let isoDate = parsePortugueseDate(jogo.date);
 
+                    console.log("A tentar gravar jogo:", { ...jogo, isoDate });
+
+                    let result;
                     if (hasResult) {
-                        // Tratar como Resultado
                         const scores = jogo.score.split('-').map(s => parseInt(s.trim()));
-                        await supabase.from('resultados_bcv').insert([{
+                        result = await supabase.from('resultados_bcv').insert([{
                             equipa_casa: jogo.home,
                             equipa_fora: jogo.away,
                             pontos_casa: scores[0],
@@ -1170,8 +1170,7 @@ document.addEventListener('DOMContentLoaded', async () => {
                             escalao: jogo.competition
                         }]);
                     } else {
-                        // Tratar como Agenda
-                        await supabase.from('agenda_bcv').insert([{
+                        result = await supabase.from('agenda_bcv').insert([{
                             equipa_casa: jogo.home,
                             equipa_fora: jogo.away,
                             data_jogo: isoDate,
@@ -1180,10 +1179,20 @@ document.addEventListener('DOMContentLoaded', async () => {
                             escalao: jogo.competition
                         }]);
                     }
+
+                    if (result.error) {
+                        console.error("Erro Supabase:", result.error);
+                        throw new Error(result.error.message);
+                    }
+                    
                     savedCount++;
                 } catch (err) {
-                    console.error("Erro ao guardar jogo:", err, jogo);
+                    console.error("Erro ao guardar jogo:", err);
                     errorCount++;
+                    // Mostrar apenas o primeiro erro para não inundar o utilizador
+                    if (errorCount === 1) {
+                        alert("Erro na gravação: " + err.message + "\nConsulte o Console (F12) para detalhes.");
+                    }
                 }
             }
 
