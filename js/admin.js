@@ -1326,10 +1326,23 @@ document.addEventListener('DOMContentLoaded', async () => {
     };
 
     // Iniciar carregamento das tabs quando ativadas
-    const originalTabSwitch = document.querySelectorAll('.sidebar-menu li');
-    originalTabSwitch.forEach(btn => {
+    const tabButtons = document.querySelectorAll('.tab-btn');
+    tabButtons.forEach(btn => {
         btn.addEventListener('click', () => {
             const target = btn.getAttribute('data-tab');
+            
+            // Esconder todas as panes
+            document.querySelectorAll('.tab-pane').forEach(p => p.classList.add('hidden'));
+            // Remover active de todos os botões
+            tabButtons.forEach(b => b.classList.remove('active'));
+            
+            // Mostrar a pane destino
+            const targetPane = document.getElementById(target);
+            if (targetPane) {
+                targetPane.classList.remove('hidden');
+                btn.classList.add('active');
+            }
+
             if (target === 'tab-agenda') loadAgenda();
             if (target === 'tab-resultados') loadResultados();
         });
