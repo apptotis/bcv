@@ -304,3 +304,10 @@ body {
     background: rgba(255, 82, 82, 0.3);
     border-color: #ff5252;
 }
+
+/* Estilo para a tab de sincronização */
+[data-tab="tab-sincronizar"].active {
+    background: rgba(233, 30, 99, 0.2) !important;
+    border-left-color: #e91e63 !important;
+    color: #e91e63 !important;
+}

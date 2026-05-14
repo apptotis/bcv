@@ -70,9 +70,9 @@ async function loadPortalHighlights(supabase) {
             const todayStr = hoje.toISOString().split('T')[0];
             const nextWeekStr = daquiA7Dias.toISOString().split('T')[0];
 
-            // Tentar obter jogos da tabela agenda
+            // Tentar obter jogos da tabela agenda_bcv
             const { data: agenda, error } = await supabase
-                .from('agenda')
+                .from('agenda_bcv')
                 .select('*')
                 .gte('data_jogo', todayStr)
                 .lte('data_jogo', nextWeekStr)
@@ -116,7 +116,7 @@ async function loadPortalHighlights(supabase) {
     if (resultadosContainer) {
         try {
             const { data: resultados, error } = await supabase
-                .from('resultados')
+                .from('resultados_bcv')
                 .select('*')
                 .order('data_jogo', { ascending: false })
                 .limit(5);

@@ -53,9 +53,11 @@
                     <li><a href="#" class="tab-btn" data-tab="tab-users"><span class="icon">🛡️</span> Gestão de Users</a></li>
                     <li><a href="#" class="tab-btn" data-tab="tab-noticias"><span class="icon">📰</span> Notícias</a></li>
                     <li><a href="#" class="tab-btn" data-tab="tab-agenda"><span class="icon">📅</span> Agenda</a></li>
+                    <li><a href="#" class="tab-btn" data-tab="tab-resultados"><span class="icon">🏆</span> Resultados</a></li>
                     <li><a href="#" class="tab-btn" data-tab="tab-galeria"><span class="icon">📸</span> Galeria</a></li>
                     <li><a href="#" class="tab-btn" data-tab="tab-equipas"><span class="icon">🏀</span> Equipas</a></li>
                     <li><a href="#" class="tab-btn" data-tab="tab-atletas"><span class="icon">👥</span> Atletas</a></li>
+                    <li><a href="#" class="tab-btn" data-tab="tab-sincronizar" style="background: rgba(233,30,99,0.1); color: #e91e63;"><span class="icon">🔄</span> Sincronizar FPB</a></li>
                     <li><a href="#" class="tab-btn" data-tab="tab-config"><span class="icon">⚙️</span> Configurações</a></li>
                 </ul>
             </nav>
@@ -138,7 +140,70 @@
                 
                 <!-- Outras Tabs (Em Desenvolvimento) -->
                 <div id="tab-noticias" class="tab-pane hidden"><h2>Notícias (Em Breve)</h2></div>
-                <div id="tab-agenda" class="tab-pane hidden"><h2>Agenda (Em Breve)</h2></div>
+                <div id="tab-agenda" class="tab-pane hidden">
+                    <h2 style="margin-bottom: 20px;">Agenda de Jogos</h2>
+                    <div class="welcome-box">
+                        <p>Gerir os próximos jogos do clube.</p>
+                        <!-- Adicionar tabela de agenda aqui se necessário -->
+                    </div>
+                </div>
+
+                <!-- Tab: Resultados -->
+                <div id="tab-resultados" class="tab-pane hidden">
+                    <h2 style="margin-bottom: 20px;">Resultados de Jogos</h2>
+                    <div class="welcome-box">
+                        <p>Gerir os resultados dos jogos terminados.</p>
+                        <!-- Adicionar tabela de resultados aqui se necessário -->
+                    </div>
+                </div>
+                
+                <!-- Tab: Sincronizar FPB -->
+                <div id="tab-sincronizar" class="tab-pane hidden">
+                    <h2 style="margin-bottom: 20px;">Sincronizador de Época (FPB)</h2>
+                    
+                    <div class="welcome-box" style="margin-bottom: 30px; border-left: 5px solid #e91e63;">
+                        <h3>Como Sincronizar:</h3>
+                        <ol style="margin-top: 15px; padding-left: 20px; line-height: 1.6;">
+                            <li>Abra a página do calendário da FPB: <a href="https://www.fpb.pt/calendario/clube_656/?clube=656&epoca=2025/2026&" target="_blank" style="color: #e91e63;">Link do Calendário BCV</a></li>
+                            <li><strong>Arraste este botão</strong> para a sua barra de favoritos: 
+                                <a href="javascript:(function(){const games=[];let currentDate='';document.querySelectorAll('h4, a.game-wrapper-a, div.game-wrapper-a').forEach(el=>{if(el.tagName==='H4'){currentDate=el.innerText.trim();}else{const home=el.querySelector('div:first-child > div:nth-child(1) span')?.innerText.trim();const away=el.querySelector('div:first-child > div:nth-child(3) span')?.innerText.trim();const centerContent=el.querySelector('div:first-child > div:nth-child(2)');let time='';let score='';if(centerContent){const h3s=centerContent.querySelectorAll('h3');if(h3s.length>=3){score=h3s[0].innerText.trim()+' - '+h3s[2].innerText.trim();}else{time=centerContent.innerText.trim();}}const local=el.querySelector('div:nth-child(2) span b')?.innerText.trim();const comp=el.querySelector('div:nth-child(2) div span')?.innerText.trim();if(home && away){games.push({date:currentDate,time:time,home:home,away:away,score:score,local:local || '',competition:comp || ''});}}});const json=JSON.stringify(games);const textarea=document.createElement('textarea');textarea.value=json;document.body.appendChild(textarea);textarea.select();document.execCommand('copy');document.body.removeChild(textarea);alert('✅ Sucesso! Dados de '+games.length+' jogos copiados.\\n\\nVolte ao Admin e cole na caixa.');})();" 
+                                class="btn-primary" style="display: inline-block; width: auto; padding: 5px 15px; margin-left: 10px; font-size: 0.9rem; background: #e91e63;">⭐ Extrair da FPB</a>
+                            </li>
+                            <li>No site da FPB, clique no favorito "Extrair da FPB".</li>
+                            <li>Volte aqui e cole o conteúdo no campo abaixo.</li>
+                        </ol>
+                    </div>
+
+                    <div class="welcome-box">
+                        <h3>Importar Dados Extraídos</h3>
+                        <div style="margin-top: 15px;">
+                            <textarea id="fpb-import-json" placeholder="Cole aqui o conteúdo copiado do site da FPB..." class="admin-input" style="height: 150px; font-family: monospace; font-size: 0.8rem; margin-bottom: 15px;"></textarea>
+                            <button id="btn-process-fpb" class="btn-primary">Processar Dados</button>
+                        </div>
+                    </div>
+
+                    <div id="fpb-preview-container" class="hidden" style="margin-top: 30px;">
+                        <h3>Pré-visualização da Importação</h3>
+                        <p id="fpb-stats" style="margin-bottom: 15px; color: #a0a0ab;"></p>
+                        <div class="admin-table-container">
+                            <table class="admin-table" style="width: 100%;">
+                                <thead>
+                                    <tr>
+                                        <th>Data/Hora</th>
+                                        <th>Jogo</th>
+                                        <th>Resultado / Local</th>
+                                        <th>Escalão</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="fpb-preview-body"></tbody>
+                            </table>
+                        </div>
+                        <div style="margin-top: 20px; display: flex; gap: 10px;">
+                            <button id="btn-save-fpb" class="btn-primary" style="background: #4caf50;">Confirmar e Guardar no Site</button>
+                            <button id="btn-clear-fpb" class="btn-secondary">Limpar</button>
+                        </div>
+                    </div>
+                </div>
                 
                 <!-- Galeria Tab -->
                 <div id="tab-galeria" class="tab-pane hidden">

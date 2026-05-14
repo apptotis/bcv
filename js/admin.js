@@ -1046,6 +1046,157 @@ document.addEventListener('DOMContentLoaded', async () => {
         });
     }
 
+    // Utilitário para converter "10 de maio de 2026" ou "10-05-2026" para "2026-05-10"
+    function parsePortugueseDate(dateStr) {
+        if (!dateStr) return null;
+        const months = {
+            'janeiro': '01', 'fevereiro': '02', 'março': '03', 'abril': '04',
+            'maio': '05', 'junho': '06', 'julho': '07', 'agosto': '08',
+            'setembro': '09', 'outubro': '10', 'novembro': '11', 'dezembro': '12'
+        };
+        
+        let d = dateStr.toLowerCase().trim();
+        
+        // Formato: "10 de maio de 2026"
+        if (d.includes(' de ')) {
+            const parts = d.split(' de ');
+            if (parts.length === 3) {
+                const day = parts[0].padStart(2, '0');
+                const month = months[parts[1]] || '01';
+                const year = parts[2];
+                return `${year}-${month}-${day}`;
+            }
+        }
+        
+        // Formato: "10-05-2026"
+        const partsDash = d.split('-');
+        if (partsDash.length === 3) {
+            return `${partsDash[2]}-${partsDash[1]}-${partsDash[0]}`;
+        }
+
+        return dateStr;
+    }
+
+    // ==========================================
+    // 11. Sincronizador FPB (Calendário e Resultados)
+    // ==========================================
+    const btnProcessFpb = document.getElementById('btn-process-fpb');
+    const fpbInput = document.getElementById('fpb-import-json');
+    const fpbPreviewContainer = document.getElementById('fpb-preview-container');
+    const fpbPreviewBody = document.getElementById('fpb-preview-body');
+    const fpbStats = document.getElementById('fpb-stats');
+    const btnSaveFpb = document.getElementById('btn-save-fpb');
+    const btnClearFpb = document.getElementById('btn-clear-fpb');
+
+    let fpbExtractedData = [];
+
+    if (btnProcessFpb) {
+        btnProcessFpb.addEventListener('click', () => {
+            const rawData = fpbInput.value.trim();
+            if (!rawData) {
+                alert("Por favor, cole os dados JSON extraídos do site da FPB.");
+                return;
+            }
+
+            try {
+                fpbExtractedData = JSON.parse(rawData);
+                renderFpbPreview(fpbExtractedData);
+            } catch (err) {
+                console.error(err);
+                alert("Erro ao ler os dados. Certifique-se de que copiou o conteúdo corretamente.");
+            }
+        });
+    }
+
+    function renderFpbPreview(data) {
+        fpbPreviewBody.innerHTML = '';
+        fpbPreviewContainer.classList.remove('hidden');
+        
+        let agendaCount = 0;
+        let resultadosCount = 0;
+
+        data.forEach((jogo, index) => {
+            const hasResult = jogo.score && jogo.score.includes('-');
+            if (hasResult) resultadosCount++;
+            else agendaCount++;
+
+            const tr = document.createElement('tr');
+            tr.innerHTML = `
+                <td style="padding: 10px;">${jogo.date}<br><small>${jogo.time}</small></td>
+                <td style="padding: 10px;"><strong>${jogo.home}</strong> vs <strong>${jogo.away}</strong></td>
+                <td style="padding: 10px;">${hasResult ? `<span style="background:#e91e63; padding:2px 6px; border-radius:4px;">${jogo.score}</span>` : `📍 ${jogo.local}`}</td>
+                <td style="padding: 10px; font-size: 0.8rem; color: #a0a0ab;">${jogo.competition}</td>
+            `;
+            fpbPreviewBody.appendChild(tr);
+        });
+
+        fpbStats.innerHTML = `Identificados <strong>${agendaCount}</strong> jogos para a Agenda e <strong>${resultadosCount}</strong> resultados terminados.`;
+    }
+
+    if (btnClearFpb) {
+        btnClearFpb.addEventListener('click', () => {
+            fpbInput.value = '';
+            fpbPreviewContainer.classList.add('hidden');
+            fpbExtractedData = [];
+        });
+    }
+
+    if (btnSaveFpb) {
+        btnSaveFpb.addEventListener('click', async () => {
+            if (fpbExtractedData.length === 0) return;
+            
+            btnSaveFpb.disabled = true;
+            btnSaveFpb.textContent = "A Guardar na Base de Dados...";
+
+            let savedCount = 0;
+            let errorCount = 0;
+
+            for (const jogo of fpbExtractedData) {
+                try {
+                    const hasResult = jogo.score && jogo.score.includes('-');
+                    
+                    // Converter data para formato ISO YYYY-MM-DD
+                    let isoDate = parsePortugueseDate(jogo.date);
+
+                        // Tratar como Resultado
+                        const scores = jogo.score.split('-').map(s => parseInt(s.trim()));
+                        await supabase.from('resultados_bcv').insert([{
+                            equipa_casa: jogo.home,
+                            equipa_fora: jogo.away,
+                            pontos_casa: scores[0],
+                            pontos_fora: scores[1],
+                            data_jogo: isoDate,
+                            escalao: jogo.competition
+                        }]);
+                    } else {
+                        // Tratar como Agenda
+                        await supabase.from('agenda_bcv').insert([{
+                            equipa_casa: jogo.home,
+                            equipa_fora: jogo.away,
+                            data_jogo: isoDate,
+                            hora_jogo: jogo.time,
+                            local: jogo.local,
+                            escalao: jogo.competition
+                        }]);
+                    }
+                    savedCount++;
+                } catch (err) {
+                    console.error("Erro ao guardar jogo:", err, jogo);
+                    errorCount++;
+                }
+            }
+
+            alert(`Sincronização concluída!\nSucesso: ${savedCount}\nErros: ${errorCount}`);
+            btnSaveFpb.disabled = false;
+            btnSaveFpb.textContent = "Confirmar e Guardar no Site";
+            
+            if (errorCount === 0) {
+                fpbInput.value = '';
+                fpbPreviewContainer.classList.add('hidden');
+            }
+        });
+    }
+
     // Iniciar
     checkSession();
 });
