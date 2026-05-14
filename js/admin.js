@@ -1135,6 +1135,209 @@ document.addEventListener('DOMContentLoaded', async () => {
         });
     }
 
+    // ==========================================
+    // 12. Gestão Manual de Agenda (CRUD)
+    // ==========================================
+    const formAgenda = document.getElementById('form-agenda');
+    const agendaTableBody = document.getElementById('agenda-table-body');
+    const agendaMsg = document.getElementById('agenda-form-msg');
+    const btnSaveAgenda = document.getElementById('btn-save-agenda');
+    const btnCancelAgenda = document.getElementById('btn-cancel-agenda');
+    const btnRefreshAgenda = document.getElementById('btn-refresh-agenda');
+
+    async function loadAgenda() {
+        if (!agendaTableBody) return;
+        agendaTableBody.innerHTML = '<tr><td colspan="5" style="padding: 20px; text-align: center;">A carregar jogos...</td></tr>';
+
+        try {
+            const { data, error } = await supabase
+                .from('agenda_bcv')
+                .select('*')
+                .order('data_jogo', { ascending: true });
+
+            if (error) throw error;
+
+            agendaTableBody.innerHTML = '';
+            if (data.length === 0) {
+                agendaTableBody.innerHTML = '<tr><td colspan="5" style="padding: 20px; text-align: center;">Nenhum jogo agendado.</td></tr>';
+                return;
+            }
+
+            data.forEach(jogo => {
+                const tr = document.createElement('tr');
+                tr.style.borderBottom = "1px solid rgba(255,255,255,0.05)";
+                tr.innerHTML = `
+                    <td style="padding: 12px;">${formatDate(jogo.data_jogo)}<br><small>${jogo.hora_jogo || '--:--'}</small></td>
+                    <td style="padding: 12px;"><strong>${jogo.equipa_casa}</strong> vs <strong>${jogo.equipa_fora}</strong></td>
+                    <td style="padding: 12px;">${jogo.local || '--'}</td>
+                    <td style="padding: 12px;"><span style="font-size:0.8rem; background:rgba(255,255,255,0.1); padding:2px 6px; border-radius:4px;">${jogo.escalao}</span></td>
+                    <td style="padding: 12px; text-align: center;">
+                        <button class="btn-action edit" onclick="editGame('${jogo.id}')">✏️</button>
+                        <button class="btn-action delete" onclick="deleteGame('${jogo.id}')">🗑️</button>
+                    </td>
+                `;
+                agendaTableBody.appendChild(tr);
+            });
+        } catch (err) {
+            console.error("Erro ao carregar agenda:", err);
+            agendaTableBody.innerHTML = '<tr><td colspan="5" style="padding: 20px; text-align: center; color: #ff5252;">Erro ao carregar dados.</td></tr>';
+        }
+    }
+
+    if (formAgenda) {
+        formAgenda.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const id = document.getElementById('agenda-id').value;
+            const gameData = {
+                equipa_casa: document.getElementById('agenda-casa').value,
+                equipa_fora: document.getElementById('agenda-fora').value,
+                data_jogo: document.getElementById('agenda-data').value,
+                hora_jogo: document.getElementById('agenda-hora').value,
+                local: document.getElementById('agenda-local').value,
+                escalao: document.getElementById('agenda-escalao').value
+            };
+
+            btnSaveAgenda.disabled = true;
+            btnSaveAgenda.textContent = "A guardar...";
+
+            try {
+                let error;
+                if (id) {
+                    const { error: err } = await supabase.from('agenda_bcv').update(gameData).eq('id', id);
+                    error = err;
+                } else {
+                    const { error: err } = await supabase.from('agenda_bcv').insert([gameData]);
+                    error = err;
+                }
+
+                if (error) throw error;
+
+                agendaMsg.textContent = "✅ Jogo guardado com sucesso!";
+                agendaMsg.style.color = "#4caf50";
+                agendaMsg.classList.remove('hidden');
+                
+                resetAgendaForm();
+                loadAgenda();
+                setTimeout(() => agendaMsg.classList.add('hidden'), 3000);
+
+            } catch (err) {
+                console.error("Erro ao guardar jogo:", err);
+                agendaMsg.textContent = "❌ Erro: " + err.message;
+                agendaMsg.style.color = "#ff5252";
+                agendaMsg.classList.remove('hidden');
+            } finally {
+                btnSaveAgenda.disabled = false;
+                btnSaveAgenda.textContent = id ? "Guardar Alterações" : "Guardar Jogo";
+            }
+        });
+    }
+
+    function resetAgendaForm() {
+        formAgenda.reset();
+        document.getElementById('agenda-id').value = '';
+        document.getElementById('form-agenda-title').textContent = "Adicionar Novo Jogo";
+        btnSaveAgenda.textContent = "Guardar Jogo";
+        btnCancelAgenda.classList.add('hidden');
+    }
+
+    if (btnCancelAgenda) btnCancelAgenda.addEventListener('click', resetAgendaForm);
+    if (btnRefreshAgenda) btnRefreshAgenda.addEventListener('click', loadAgenda);
+
+    // Expor funções globais para botões na tabela
+    window.editGame = async (id) => {
+        const { data, error } = await supabase.from('agenda_bcv').select('*').eq('id', id).single();
+        if (data) {
+            document.getElementById('agenda-id').value = data.id;
+            document.getElementById('agenda-casa').value = data.equipa_casa;
+            document.getElementById('agenda-fora').value = data.equipa_fora;
+            document.getElementById('agenda-data').value = data.data_jogo;
+            document.getElementById('agenda-hora').value = data.hora_jogo;
+            document.getElementById('agenda-local').value = data.local;
+            document.getElementById('agenda-escalao').value = data.escalao;
+
+            document.getElementById('form-agenda-title').textContent = "Editar Jogo";
+            btnSaveAgenda.textContent = "Guardar Alterações";
+            btnCancelAgenda.classList.remove('hidden');
+            formAgenda.scrollIntoView({ behavior: 'smooth' });
+        }
+    };
+
+    window.deleteGame = async (id) => {
+        if (!confirm("Tem a certeza que deseja eliminar este jogo?")) return;
+        const { error } = await supabase.from('agenda_bcv').delete().eq('id', id);
+        if (error) alert("Erro ao eliminar: " + error.message);
+        else loadAgenda();
+    };
+
+    // Auxiliar: Formatar data DD-MM-YYYY
+    function formatDate(dateStr) {
+        if (!dateStr) return '--/--/----';
+        const [year, month, day] = dateStr.split('-');
+        return `${day}/${month}/${year}`;
+    }
+
+    // ==========================================
+    // 13. Gestão Manual de Resultados (CRUD)
+    // ==========================================
+    const resultadosTableBody = document.getElementById('resultados-table-body');
+
+    async function loadResultados() {
+        if (!resultadosTableBody) return;
+        resultadosTableBody.innerHTML = '<tr><td colspan="5" style="padding: 20px; text-align: center;">A carregar resultados...</td></tr>';
+
+        try {
+            const { data, error } = await supabase
+                .from('resultados_bcv')
+                .select('*')
+                .order('data_jogo', { ascending: false });
+
+            if (error) throw error;
+
+            resultadosTableBody.innerHTML = '';
+            if (data.length === 0) {
+                resultadosTableBody.innerHTML = '<tr><td colspan="5" style="padding: 20px; text-align: center;">Nenhum resultado registado.</td></tr>';
+                return;
+            }
+
+            data.forEach(jogo => {
+                const tr = document.createElement('tr');
+                tr.style.borderBottom = "1px solid rgba(255,255,255,0.05)";
+                tr.innerHTML = `
+                    <td style="padding: 12px;">${formatDate(jogo.data_jogo)}</td>
+                    <td style="padding: 12px;"><strong>${jogo.equipa_casa}</strong> vs <strong>${jogo.equipa_fora}</strong></td>
+                    <td style="padding: 12px;"><span style="background:#e91e63; padding:2px 8px; border-radius:4px; font-weight:bold;">${jogo.pontos_casa} - ${jogo.pontos_fora}</span></td>
+                    <td style="padding: 12px;">${jogo.escalao}</td>
+                    <td style="padding: 12px; text-align: center;">
+                        <button class="btn-action delete" onclick="deleteResultado('${jogo.id}')">🗑️</button>
+                    </td>
+                `;
+                resultadosTableBody.appendChild(tr);
+            });
+        } catch (err) {
+            console.error("Erro ao carregar resultados:", err);
+        }
+    }
+
+    window.deleteResultado = async (id) => {
+        if (!confirm("Tem a certeza que deseja eliminar este resultado?")) return;
+        const { error } = await supabase.from('resultados_bcv').delete().eq('id', id);
+        if (error) alert("Erro ao eliminar: " + error.message);
+        else loadResultados();
+    };
+
+    // Iniciar carregamento das tabs quando ativadas
+    const originalTabSwitch = document.querySelectorAll('.sidebar-menu li');
+    originalTabSwitch.forEach(btn => {
+        btn.addEventListener('click', () => {
+            const target = btn.getAttribute('data-tab');
+            if (target === 'tab-agenda') loadAgenda();
+            if (target === 'tab-resultados') loadResultados();
+        });
+    });
+
+    // ==========================================
+    // 11. Sincronizador FPB (Lógica de Gravação)
+    // ==========================================
     if (btnSaveFpb) {
         btnSaveFpb.addEventListener('click', async () => {
             if (fpbExtractedData.length === 0) return;
@@ -1150,12 +1353,9 @@ document.addEventListener('DOMContentLoaded', async () => {
                     const hasResult = jogo.score && jogo.score.includes('-');
                     let isoDate = parsePortugueseDate(jogo.date);
 
-                    console.log("A tentar gravar jogo:", { ...jogo, isoDate });
-
-                    let result;
                     if (hasResult) {
                         const scores = jogo.score.split('-').map(s => parseInt(s.trim()));
-                        result = await supabase.from('resultados_bcv').insert([{
+                        await supabase.from('resultados_bcv').insert([{
                             equipa_casa: jogo.home,
                             equipa_fora: jogo.away,
                             pontos_casa: scores[0],
@@ -1164,7 +1364,7 @@ document.addEventListener('DOMContentLoaded', async () => {
                             escalao: jogo.competition
                         }]);
                     } else {
-                        result = await supabase.from('agenda_bcv').insert([{
+                        await supabase.from('agenda_bcv').insert([{
                             equipa_casa: jogo.home,
                             equipa_fora: jogo.away,
                             data_jogo: isoDate,
@@ -1173,20 +1373,9 @@ document.addEventListener('DOMContentLoaded', async () => {
                             escalao: jogo.competition
                         }]);
                     }
-
-                    if (result.error) {
-                        console.error("Erro Supabase:", result.error);
-                        throw new Error(result.error.message);
-                    }
-                    
                     savedCount++;
                 } catch (err) {
-                    console.error("Erro ao guardar jogo:", err);
                     errorCount++;
-                    // Mostrar apenas o primeiro erro para não inundar o utilizador
-                    if (errorCount === 1) {
-                        alert("Erro na gravação: " + err.message + "\nConsulte o Console (F12) para detalhes.");
-                    }
                 }
             }
 
@@ -1200,7 +1389,7 @@ document.addEventListener('DOMContentLoaded', async () => {
             }
         });
     }
-
+    
     // Iniciar
     checkSession();
 });

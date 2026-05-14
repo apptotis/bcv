@@ -140,20 +140,92 @@
                 
                 <!-- Outras Tabs (Em Desenvolvimento) -->
                 <div id="tab-noticias" class="tab-pane hidden"><h2>Notícias (Em Breve)</h2></div>
+                <!-- Tab: Agenda -->
                 <div id="tab-agenda" class="tab-pane hidden">
-                    <h2 style="margin-bottom: 20px;">Agenda de Jogos</h2>
-                    <div class="welcome-box">
-                        <p>Gerir os próximos jogos do clube.</p>
-                        <!-- Adicionar tabela de agenda aqui se necessário -->
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+                        <h2>Gestão de Agenda (Próximos Jogos)</h2>
+                        <button id="btn-refresh-agenda" class="btn-secondary" style="width: auto; padding: 5px 15px;">🔄 Atualizar</button>
+                    </div>
+
+                    <!-- Formulário de Jogo -->
+                    <div class="welcome-box" style="margin-bottom: 30px;">
+                        <h3 id="form-agenda-title" style="margin-top: 0;">Adicionar Novo Jogo</h3>
+                        <form id="form-agenda" style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-top: 15px;">
+                            <input type="hidden" id="agenda-id">
+                            
+                            <input type="text" id="agenda-casa" placeholder="Equipa Casa (Ex: BC Valença)" required class="admin-input">
+                            <input type="text" id="agenda-fora" placeholder="Equipa Fora (Ex: BC Limiense)" required class="admin-input">
+                            
+                            <div style="display: flex; gap: 10px;">
+                                <div style="flex: 1;">
+                                    <label style="font-size: 0.8rem; color: #a0a0ab;">Data do Jogo</label>
+                                    <input type="date" id="agenda-data" required class="admin-input">
+                                </div>
+                                <div style="flex: 1;">
+                                    <label style="font-size: 0.8rem; color: #a0a0ab;">Hora</label>
+                                    <input type="time" id="agenda-hora" required class="admin-input">
+                                </div>
+                            </div>
+
+                            <input type="text" id="agenda-local" placeholder="Local/Pavilhão" class="admin-input">
+                            
+                            <select id="agenda-escalao" required class="admin-input">
+                                <option value="" disabled selected>Selecionar Escalão</option>
+                                <option value="Seniores">Seniores</option>
+                                <option value="Sub-18">Sub-18</option>
+                                <option value="Sub-16">Sub-16</option>
+                                <option value="Sub-14">Sub-14</option>
+                                <option value="Minibasquete">Minibasquete</option>
+                            </select>
+
+                            <div style="grid-column: span 2; display: flex; gap: 10px;">
+                                <button type="submit" id="btn-save-agenda" class="btn-primary" style="flex: 2;">Guardar Jogo</button>
+                                <button type="button" id="btn-cancel-agenda" class="btn-secondary hidden" style="flex: 1;">Cancelar</button>
+                            </div>
+                            <p id="agenda-form-msg" class="hidden"></p>
+                        </form>
+                    </div>
+
+                    <!-- Tabela de Agenda -->
+                    <div class="admin-table-container">
+                        <h3>Jogos Agendados</h3>
+                        <table class="admin-table" style="width: 100%;">
+                            <thead>
+                                <tr>
+                                    <th>Data / Hora</th>
+                                    <th>Jogo (Casa vs Fora)</th>
+                                    <th>Local</th>
+                                    <th>Escalão</th>
+                                    <th style="text-align: center;">Ações</th>
+                                </tr>
+                            </thead>
+                            <tbody id="agenda-table-body">
+                                <tr><td colspan="5" style="padding: 20px; text-align: center;">A carregar jogos...</td></tr>
+                            </tbody>
+                        </table>
                     </div>
                 </div>
 
                 <!-- Tab: Resultados -->
                 <div id="tab-resultados" class="tab-pane hidden">
-                    <h2 style="margin-bottom: 20px;">Resultados de Jogos</h2>
-                    <div class="welcome-box">
-                        <p>Gerir os resultados dos jogos terminados.</p>
-                        <!-- Adicionar tabela de resultados aqui se necessário -->
+                    <h2 style="margin-bottom: 20px;">Gestão de Resultados</h2>
+                    
+                    <!-- Tabela de Resultados -->
+                    <div class="admin-table-container">
+                        <table class="admin-table" style="width: 100%;">
+                            <thead>
+                                <tr>
+                                    <th>Data</th>
+                                    <th>Jogo</th>
+                                    <th>Resultado</th>
+                                    <th>Escalão</th>
+                                    <th style="text-align: center;">Ações</th>
+                                </tr>
+                            </thead>
+                            <tbody id="resultados-table-body">
+                                <tr><td colspan="5" style="padding: 20px; text-align: center;">A carregar resultados...</td></tr>
+                            </tbody>
+                        </table>
                     </div>
                 </div>
                 
