@@ -1050,28 +1050,22 @@ document.addEventListener('DOMContentLoaded', async () => {
     function parsePortugueseDate(dateStr) {
         if (!dateStr) return null;
         const months = {
-            'janeiro': '01', 'fevereiro': '02', 'março': '03', 'abril': '04',
-            'maio': '05', 'junho': '06', 'julho': '07', 'agosto': '08',
-            'setembro': '09', 'outubro': '10', 'novembro': '11', 'dezembro': '12'
+            'janeiro': '01', 'fevereiro': '02', 'março': '03', 'abril': '04', 'maio': '05', 'junho': '06',
+            'julho': '07', 'agosto': '08', 'setembro': '09', 'outubro': '10', 'novembro': '11', 'dezembro': '12',
+            'jan': '01', 'fev': '02', 'mar': '03', 'abr': '04', 'mai': '05', 'jun': '06',
+            'jul': '07', 'ago': '08', 'set': '09', 'out': '10', 'nov': '11', 'dez': '12'
         };
         
-        let d = dateStr.toLowerCase().trim();
-        
-        // Formato: "10 de maio de 2026"
-        if (d.includes(' de ')) {
-            const parts = d.split(' de ');
-            if (parts.length === 3) {
-                const day = parts[0].padStart(2, '0');
-                const month = months[parts[1]] || '01';
-                const year = parts[2];
-                return `${year}-${month}-${day}`;
-            }
-        }
-        
-        // Formato: "10-05-2026"
-        const partsDash = d.split('-');
-        if (partsDash.length === 3) {
-            return `${partsDash[2]}-${partsDash[1]}-${partsDash[0]}`;
+        // Formato FPB: "16 MAI 2026" ou "16 maio 2026"
+        const partsSpace = d.split(' ');
+        if (partsSpace.length === 3) {
+            const day = partsSpace[0].padStart(2, '0');
+            const monthName = partsSpace[1].toLowerCase();
+            const year = partsSpace[2];
+            
+            // Tentar nome completo ou abreviado (primeiras 3 letras)
+            const month = months[monthName] || months[monthName.substring(0, 3)] || '01';
+            return `${year}-${month}-${day}`;
         }
 
         return dateStr;
