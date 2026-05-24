@@ -252,11 +252,7 @@ img {
     color: var(--accent-secondary);
 }
 
-@media (max-width: 576px) {
-    .nav-social-btn {
-        display: none; /* Hide socials on very small screens */
-    }
-}
+
 
 /* ==========================================================================
    Hamburger Button
