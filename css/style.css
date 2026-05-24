@@ -325,7 +325,7 @@ img {
     box-shadow: var(--shadow-lg);
     display: flex;
     flex-direction: column;
-    padding: 120px 40px 40px 40px;
+    padding: 30px 40px 40px 40px;
     overflow-y: auto;
 }
 
@@ -355,16 +355,13 @@ img {
 
 /* Drawer Close Button (Mobile and Desktop friendly) */
 .drawer-close-btn {
-    position: absolute;
-    top: 25px;
-    right: 25px;
     background: none;
     border: none;
     color: rgba(255, 255, 255, 0.7);
     font-size: 1.5rem;
     cursor: pointer;
     transition: var(--transition-fast);
-    padding: 10px;
+    padding: 5px;
     display: flex;
     align-items: center;
     justify-content: center;
@@ -377,6 +374,13 @@ img {
 }
 
 /* Drawer Header info */
+.drawer-header-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    width: 100%;
+}
+
 .drawer-header {
     margin-bottom: 40px;
     border-bottom: 1px solid rgba(255, 255, 255, 0.1);

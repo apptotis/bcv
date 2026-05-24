@@ -32,3 +32,4 @@
 - [2026-05-24] Gemini: Ajuste do tamanho da fonte do menu, texto do cabeçalho do drawer para 'BCV', correção do emblema e adição do botão fechar no drawer.
 - [2026-05-24] Gemini: Migração completa do cabeçalho clássico do index.html para o modelo centrado com drawer lateral interativo de teste-design.
 - [2026-05-24] Gemini: Remoção do display:none nas redes sociais no mobile da navbar para manter visibilidade em todos os ecrãs.
+- [2026-05-24] Gemini: Alinhamento do cabeçalho do drawer menu em linha única (emblema + BCV + botão fechar) e redução do padding superior para economizar espaço.
