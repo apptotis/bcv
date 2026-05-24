@@ -4,29 +4,73 @@ document.addEventListener('DOMContentLoaded', () => {
     const navbar = document.getElementById('navbar');
     
     window.addEventListener('scroll', () => {
-        if (window.scrollY > 50) {
+        if (window.scrollY > 20) {
             navbar.classList.add('scrolled');
         } else {
             navbar.classList.remove('scrolled');
         }
     });
 
-    // 2. Mobile Menu Toggle
-    const mobileToggle = document.querySelector('.mobile-toggle');
-    const navMenu = document.querySelector('.nav-menu');
-    const navLinks = document.querySelectorAll('.nav-link');
+    // 2. Menu Drawer Toggle & Dropdown Interaction
+    const hamburgerTrigger = document.getElementById('hamburger-trigger');
+    const drawerMenu = document.getElementById('drawer-menu');
+    const drawerOverlay = document.getElementById('drawer-overlay');
+    const dropdownToggle = document.getElementById('dropdown-toggle');
+    const dropdownMenu = document.getElementById('dropdown-menu');
+    const drawerCloseBtn = document.getElementById('drawer-close-btn');
 
-    mobileToggle.addEventListener('click', () => {
-        mobileToggle.classList.toggle('active');
-        navMenu.classList.toggle('active');
+    function toggleMenu() {
+        if (!drawerMenu || !hamburgerTrigger || !drawerOverlay) return;
+        const isOpen = drawerMenu.classList.toggle('is-open');
+        hamburgerTrigger.classList.toggle('is-active');
+        drawerOverlay.classList.toggle('is-open');
+        
+        // Accessibility updates
+        hamburgerTrigger.setAttribute('aria-expanded', isOpen);
+        
+        if (isOpen) {
+            document.body.style.overflow = 'hidden'; // Prevent background scrolling
+        } else {
+            document.body.style.overflow = ''; // Restore scrolling
+        }
+    }
+
+    if (hamburgerTrigger) hamburgerTrigger.addEventListener('click', toggleMenu);
+    if (drawerOverlay) drawerOverlay.addEventListener('click', toggleMenu);
+    if (drawerCloseBtn) drawerCloseBtn.addEventListener('click', toggleMenu);
+
+    // Dropdown toggle inside the drawer
+    if (dropdownToggle && dropdownMenu) {
+        dropdownToggle.addEventListener('click', (e) => {
+            e.preventDefault();
+            dropdownToggle.classList.toggle('is-active');
+            dropdownMenu.classList.toggle('is-open');
+        });
+    }
+
+    // Close drawer when clicking links (excluding expander targets)
+    const menuLinks = document.querySelectorAll('.drawer-link, .drawer-dropdown-link');
+    menuLinks.forEach(link => {
+        const href = link.getAttribute('href');
+        if (href === 'clube.html' || href === '#clube') {
+            link.addEventListener('click', (e) => {
+                e.preventDefault();
+                if (dropdownToggle) dropdownToggle.click();
+            });
+        } else {
+            link.addEventListener('click', () => {
+                if (drawerMenu && drawerMenu.classList.contains('is-open')) {
+                    toggleMenu();
+                }
+            });
+        }
     });
 
-    // Close menu when clicking a link
-    navLinks.forEach(link => {
-        link.addEventListener('click', () => {
-            mobileToggle.classList.remove('active');
-            navMenu.classList.remove('active');
-        });
+    // Close on Escape key press
+    document.addEventListener('keydown', (e) => {
+        if (e.key === 'Escape' && drawerMenu && drawerMenu.classList.contains('is-open')) {
+            toggleMenu();
+        }
     });
 
     // 3. Scroll Reveal Animations

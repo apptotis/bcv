@@ -25,45 +25,98 @@
     <div class="bg-shape shape-1"></div>
     <div class="bg-shape shape-2"></div>
 
-    <!-- Header / Navbar -->
+    <!-- Header / Navbar (Logo Centered, Hamburger Left) -->
     <header class="navbar" id="navbar">
-        <div class="nav-container">
-            <a href="/" class="brand">
-                <img src="assets/emblema_png.png" alt="BCV Logo" class="logo">
-                <span class="brand-text">Basket Clube de Valença</span>
-            </a>
+        <div class="navbar-grid">
+            <!-- Left Side: Hamburger Trigger -->
+            <div class="nav-left">
+                <button class="hamburger-btn" id="hamburger-trigger" aria-label="Abrir Menu" aria-expanded="false" aria-controls="drawer-menu">
+                    <span class="hamburger-line"></span>
+                    <span class="hamburger-line"></span>
+                    <span class="hamburger-line"></span>
+                </button>
+            </div>
             
-            <button class="mobile-toggle" aria-label="Abrir Menu">
-                <span class="bar"></span>
-                <span class="bar"></span>
-                <span class="bar"></span>
-            </button>
-
-            <nav class="nav-menu">
-                <ul>
-                    <li><a href="#inicio" class="nav-link active">Início</a></li>
-                    <li>
-                        <a href="clube.html" class="nav-link">Clube</a>
-                        <ul class="dropdown">
-                            <li><a href="clube.html#historia">História</a></li>
-                            <li><a href="clube.html#orgaos-sociais">Órgãos Sociais</a></li>
-                            <li><a href="clube.html#contactos">Contactos</a></li>
-                        </ul>
-                    </li>
-                    <li><a href="#equipas" class="nav-link">Equipas</a></li>
-                    <li><a href="#competicoes" class="nav-link">Competições</a></li>
-                    <li><a href="#noticias" class="nav-link">Notícias</a></li>
-                    <li><a href="#agenda" class="nav-link">Agenda</a></li>
-                    <li><a href="#galeria" class="nav-link">Galeria</a></li>
-
-                </ul>
-            </nav>
+            <!-- Center: Club Logo and Name -->
+            <div class="nav-center">
+                <a href="#" class="brand-logo-container">
+                    <img src="assets/emblema_png.png" alt="BCV Logo" class="brand-logo">
+                    <span class="brand-title-nav">Basket Clube de Valença</span>
+                </a>
+            </div>
+            
+            <!-- Right Side: Social Media Icons -->
+            <div class="nav-right">
+                <div class="nav-social-btn">
+                    <a href="https://www.facebook.com/profile.php?id=100039859278453" target="_blank" aria-label="Facebook"><i class="fab fa-facebook"></i></a>
+                    <a href="https://www.instagram.com/bcvalenca" target="_blank" aria-label="Instagram"><i class="fab fa-instagram"></i></a>
+                    <a href="https://www.youtube.com/@BCValenca" target="_blank" aria-label="YouTube"><i class="fab fa-youtube"></i></a>
+                </div>
+            </div>
         </div>
     </header>
 
+    <!-- Overlay Background (visible when menu is open) -->
+    <div class="drawer-overlay" id="drawer-overlay"></div>
+
+    <!-- Slide-in Drawer Navigation Menu -->
+    <nav class="drawer-menu" id="drawer-menu" aria-label="Menu Principal">
+        <!-- Botão de Fechar Explicito para Mobile -->
+        <button class="drawer-close-btn" id="drawer-close-btn" aria-label="Fechar Menu">
+            <i class="fas fa-times"></i>
+        </button>
+        <div class="drawer-header">
+            <div class="drawer-club-info">
+                <img src="assets/emblema_png.png" alt="BCV Emblema" class="drawer-club-logo">
+                <span class="drawer-club-name">BCV</span>
+            </div>
+        </div>
+
+        <ul class="drawer-links-list">
+            <li>
+                <a href="#inicio" class="drawer-link">Início</a>
+            </li>
+            <li class="drawer-item">
+                <div style="display: flex; justify-content: space-between; align-items: center;">
+                    <a href="clube.html" class="drawer-link" style="flex: 1;">O Clube</a>
+                    <button class="drawer-dropdown-btn" id="dropdown-toggle" aria-label="Expandir submenu O Clube">
+                        <i class="fas fa-chevron-down"></i>
+                    </button>
+                </div>
+                <ul class="drawer-dropdown-content" id="dropdown-menu">
+                    <li><a href="clube.html#historia" class="drawer-dropdown-link">História</a></li>
+                    <li><a href="clube.html#orgaos-sociais" class="drawer-dropdown-link">Órgãos Sociais</a></li>
+                    <li><a href="clube.html#contactos" class="drawer-dropdown-link">Contactos</a></li>
+                </ul>
+            </li>
+            <li>
+                <a href="#equipas" class="drawer-link">Equipas</a>
+            </li>
+            <li>
+                <a href="#competicoes" class="drawer-link">Competições</a>
+            </li>
+            <li>
+                <a href="#noticias" class="drawer-link">Notícias</a>
+            </li>
+            <li>
+                <a href="#agenda" class="drawer-link">Agenda</a>
+            </li>
+            <li>
+                <a href="#galeria" class="drawer-link">Galeria</a>
+            </li>
+        </ul>
+
+        <div class="drawer-footer">
+            <p class="drawer-footer-text">
+                &copy; 2026 Basket Clube de Valença.<br>
+                Todos os direitos reservados.
+            </p>
+        </div>
+    </nav>
+
     <main>
         <!-- Anniversary Banner -->
-        <div class="anniversary-banner" style="position: relative; margin-top: 80px; width: 100%;">
+        <div class="anniversary-banner" style="position: relative; margin-top: 95px; width: 100%;">
             <span>1996 - 2026</span> Celebramos 30 Anos de História e Paixão pelo Basquetebol! 🏀
         </div>
 

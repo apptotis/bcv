@@ -28,3 +28,6 @@
 - [2026-05-12] Gemini: Simplificação do Hero da página Clube (apenas emblema).
 - [2026-05-13] Gemini: Substituição global do logo (Logo_bcv.jpg -> emblema_png.png).
 - [2026-05-14] Gemini: Remoção de ícones decorativos (Agenda, Taça, Megafone) nos títulos dos cards.
+- [2026-05-24] Gemini: Criação de protótipo de design (teste-design.html/css) com logo centrado e menu drawer lateral.
+- [2026-05-24] Gemini: Ajuste do tamanho da fonte do menu, texto do cabeçalho do drawer para 'BCV', correção do emblema e adição do botão fechar no drawer.
+- [2026-05-24] Gemini: Migração completa do cabeçalho clássico do index.html para o modelo centrado com drawer lateral interativo de teste-design.
