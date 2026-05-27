@@ -267,8 +267,7 @@ async function loadPortalHighlights(supabase) {
                         item.innerHTML = `
                             ${fotoHtml}
                             <div style="margin-top: 10px;">
-                                <div style="font-weight: 800; font-size: 1.5rem; color: #fff; font-family: var(--font-heading);">${atleta.nome} 🎉</div>
-                                <div style="color: var(--accent-secondary); font-weight: 600; font-size: 1.1rem; margin-top: 5px;">${atleta.equipa}</div>
+                                <div style="font-weight: 800; font-size: 1.5rem; color: #fff; font-family: var(--font-heading);">${atleta.nome}</div>
                                 <div style="color: #a0a0ab; font-size: 1rem; margin-top: 2px;">${idade} anos</div>
                             </div>
                         `;
