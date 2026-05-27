@@ -211,18 +211,19 @@ document.addEventListener('DOMContentLoaded', async () => {
                 item.style.alignItems = 'center';
                 item.style.gap = '15px';
                 item.style.padding = '10px';
-                item.style.background = 'rgba(255,255,255,0.05)';
+                item.style.background = '#ffffff';
+                item.style.border = '1px solid var(--border-color)';
                 item.style.borderRadius = '8px';
 
                 const fotoHtml = atleta.foto 
                     ? `<img src="${atleta.foto}" style="width: 50px; height: 50px; object-fit: cover; border-radius: 50%;">` 
-                    : '<div style="width: 50px; height: 50px; background: rgba(255,255,255,0.1); border-radius: 50%; display:flex; align-items:center; justify-content:center; font-size: 1.5rem;">👤</div>';
+                    : '<div style="width: 50px; height: 50px; background: rgba(0,0,0,0.05); border-radius: 50%; display:flex; align-items:center; justify-content:center; font-size: 1.5rem;">👤</div>';
 
                 item.innerHTML = `
                     ${fotoHtml}
                     <div>
-                        <div style="font-weight: bold; font-size: 1.1rem; color: #fff;">${atleta.nome} 🎉</div>
-                        <div style="color: #a0a0ab; font-size: 0.9rem;">${atleta.equipa} • ${idade} anos</div>
+                        <div style="font-weight: bold; font-size: 1.1rem; color: var(--text-primary);">${atleta.nome} 🎉</div>
+                        <div style="color: var(--text-secondary); font-size: 0.9rem;">${atleta.equipa} • ${idade} anos</div>
                     </div>
                 `;
                 container.appendChild(item);
