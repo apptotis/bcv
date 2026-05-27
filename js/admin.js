@@ -381,7 +381,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         passwordInput.value = '';
         passwordHint.style.display = 'block';
         
-        formUserTitle.textContent = 'Editar Utilizador: ' + user.nome;
+        formUserTitle.textContent = 'Editar Utilizador: ' + (user.nome || user.email || 'Utilizador');
         btnCreateUser.textContent = 'Guardar Alterações';
         btnCancelEdit.classList.remove('hidden');
         createUserMsg.classList.add('hidden');
