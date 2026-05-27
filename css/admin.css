@@ -2,14 +2,14 @@
 
 /* Revertendo para Tema Escuro apenas na Admin */
 :root {
-    --bg-primary: #0a0a0e;
-    --bg-secondary: #13131a;
-    --bg-card: #1a1a24;
-    --text-primary: #ffffff;
-    --text-secondary: #a0a0ab;
-    --border-color: rgba(255, 255, 255, 0.1);
-    --accent-primary: #8a2be2;
-    --shadow-lg: 0 10px 30px rgba(0, 0, 0, 0.5);
+    --bg-primary: #ffffff;
+    --bg-secondary: #f8f9fa;
+    --bg-card: #ffffff;
+    --text-primary: #1a1a1a;
+    --text-secondary: #6c757d;
+    --border-color: #e9ecef;
+    --accent-primary: #5c2d91; /* Roxo Institucional BCV */
+    --shadow-lg: 0 10px 30px rgba(0, 0, 0, 0.08);
 }
 
 body {
@@ -84,7 +84,8 @@ body {
 
 .btn-primary:hover {
     transform: translateY(-2px);
-    box-shadow: 0 5px 15px rgba(255, 123, 0, 0.4);
+    background: #4a2475;
+    box-shadow: var(--shadow-md);
 }
 
 .error-msg {
@@ -232,7 +233,7 @@ body {
 }
 
 .welcome-box p {
-    color: #a0a0ab;
+    color: var(--text-secondary);
     margin-top: 10px;
 }
 
@@ -267,9 +268,9 @@ body {
 }
 
 .btn-secondary {
-    background: rgba(255, 255, 255, 0.1);
-    color: #fff;
-    border: 1px solid rgba(255, 255, 255, 0.2);
+    background: #e9ecef;
+    color: var(--text-primary);
+    border: 1px solid var(--border-color);
     padding: 15px;
     border-radius: 8px;
     font-size: 1.1rem;
@@ -279,13 +280,13 @@ body {
 }
 
 .btn-secondary:hover {
-    background: rgba(255, 255, 255, 0.2);
+    background: #dee2e6;
 }
 
 .btn-action {
-    background: rgba(255,255,255,0.05);
-    border: 1px solid rgba(255,255,255,0.1);
-    color: #fff;
+    background: rgba(0,0,0,0.03);
+    border: 1px solid rgba(0,0,0,0.08);
+    color: var(--text-primary);
     padding: 5px 10px;
     border-radius: 4px;
     cursor: pointer;
@@ -295,14 +296,19 @@ body {
 }
 
 .btn-action:hover {
-    background: rgba(92, 45, 145, 0.1);
+    background: rgba(92, 45, 145, 0.08);
     border-color: var(--accent-primary);
     color: var(--accent-primary);
 }
 
 .btn-action.delete:hover {
-    background: rgba(255, 82, 82, 0.3);
+    background: #ffebee;
     border-color: #ff5252;
+    color: #d32f2f;
+}
+
+.sidebar-logout-btn:hover {
+    color: #ff5252 !important;
 }
 
 /* Estilo para a tab de sincronização */
