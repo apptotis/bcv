@@ -58,6 +58,7 @@ html, body {
 html {
     scroll-behavior: smooth;
     font-size: 16px;
+    scroll-padding-top: 95px; /* Evita que o topo das secções fique oculto sob a navbar fixa */
 }
 
 body {
