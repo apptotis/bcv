@@ -33,5 +33,6 @@
 - [2026-05-24] Gemini: Migração completa do cabeçalho clássico do index.html para o modelo centrado com drawer lateral interativo de teste-design.
 - [2026-05-24] Gemini: Remoção do display:none nas redes sociais no mobile da navbar para manter visibilidade em todos os ecrãs.
 - [2026-05-24] Gemini: Alinhamento do cabeçalho do drawer menu em linha única (emblema + BCV + botão fechar) e redução do padding superior para economizar espaço.
-- [2026-05-27] Gemini: Simplificação do modal de aniversários (index.html), removendo a informação do escalão (equipa) e o emoji festivo do nome dos atletas.
+- [2026-05-27] Gemini: Simplificação do modal de aniversários (index.html), remoção da idade, exibição de "Parabéns, [Nickname/Nome]" no topo da imagem, e integração do campo Nickname no Admin e DB.
+
 

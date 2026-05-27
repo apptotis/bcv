@@ -230,7 +230,7 @@ async function loadPortalHighlights(supabase) {
         try {
             const { data: atletas, error } = await supabase
                 .from('atletasbcv')
-                .select('nome, foto, equipa, data_nascimento')
+                .select('nome, nickname, foto, equipa, data_nascimento')
                 .not('data_nascimento', 'is', null);
 
             if (error) return;
@@ -253,10 +253,6 @@ async function loadPortalHighlights(supabase) {
                 if (aniversariantesHoje.length > 0) {
                     modalList.innerHTML = '';
                     aniversariantesHoje.forEach(atleta => {
-                        const partes = atleta.data_nascimento.split('-');
-                        const anoNasc = parseInt(partes[0]);
-                        let idade = hoje.getFullYear() - anoNasc;
-                        
                         const item = document.createElement('div');
                         item.className = 'birthday-item';
 
@@ -264,12 +260,13 @@ async function loadPortalHighlights(supabase) {
                             ? `<img src="${atleta.foto}" alt="${atleta.nome}">` 
                             : '<div class="birthday-photo-placeholder" style="display:flex; align-items:center; justify-content:center; font-size: 3rem;">👤</div>';
 
+                        const nomeParaMostrar = atleta.nickname ? atleta.nickname : atleta.nome;
+
                         item.innerHTML = `
-                            ${fotoHtml}
-                            <div style="margin-top: 10px;">
-                                <div style="font-weight: 800; font-size: 1.5rem; color: #fff; font-family: var(--font-heading);">${atleta.nome}</div>
-                                <div style="color: #a0a0ab; font-size: 1rem; margin-top: 2px;">${idade} anos</div>
+                            <div style="font-size: 1.6rem; font-weight: 800; color: var(--accent-primary); margin-bottom: 15px; font-family: var(--font-heading);">
+                                Parabéns, ${nomeParaMostrar}!
                             </div>
+                            ${fotoHtml}
                         `;
                         modalList.appendChild(item);
                     });

@@ -901,7 +901,7 @@ document.addEventListener('DOMContentLoaded', async () => {
 
             tr.innerHTML = `
                 <td style="padding: 10px;">${fotoHtml}</td>
-                <td style="padding: 10px;"><strong>${atleta.nome || '-'}</strong></td>
+                <td style="padding: 10px;"><strong>${atleta.nome || '-'}</strong>${atleta.nickname ? `<br><span style="font-size: 0.85rem; color: var(--accent-primary); font-weight: 600;">"${atleta.nickname}"</span>` : ''}</td>
                 <td style="padding: 10px;">${atleta.equipa || '-'} <br><small style="color: #a0a0ab;">${atleta.escalao || '-'}</small></td>
                 <td style="padding: 10px;">${atleta.numero_camisola || '-'}</td>
                 <td style="padding: 10px;">${atleta.licenca || '-'}</td>
@@ -934,6 +934,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         
         editAtletaIdInput.value = atleta.id;
         document.getElementById('atleta-nome').value = atleta.nome || '';
+        document.getElementById('atleta-nickname').value = atleta.nickname || '';
         document.getElementById('atleta-equipa').value = atleta.equipa || '';
         document.getElementById('atleta-numero').value = atleta.numero_camisola || '';
         document.getElementById('atleta-escalao').value = atleta.escalao || '';
@@ -990,6 +991,7 @@ document.addEventListener('DOMContentLoaded', async () => {
 
             const atletaData = {
                 nome: document.getElementById('atleta-nome').value,
+                nickname: document.getElementById('atleta-nickname').value || null,
                 equipa: document.getElementById('atleta-equipa').value,
                 numero_camisola: document.getElementById('atleta-numero').value ? parseInt(document.getElementById('atleta-numero').value) : null,
                 escalao: document.getElementById('atleta-escalao').value,
