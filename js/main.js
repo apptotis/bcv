@@ -264,7 +264,7 @@ async function loadPortalHighlights(supabase) {
 
                         item.innerHTML = `
                             <div style="font-size: 1.6rem; font-weight: 800; color: var(--accent-primary); margin-bottom: 15px; font-family: var(--font-heading);">
-                                Parabéns, ${nomeParaMostrar}!
+                                PARABÉNS, ${nomeParaMostrar}!
                             </div>
                             ${fotoHtml}
                         `;
