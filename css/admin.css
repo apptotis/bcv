@@ -33,7 +33,7 @@ body {
 }
 
 .login-card {
-    background: var(--bg-card);
+    background: #f8f9fa; /* Ligeiramente mais escuro */
     border: 1px solid var(--border-color);
     padding: 40px;
     border-radius: 16px;
@@ -56,7 +56,7 @@ body {
     margin-bottom: 20px;
     border-radius: 8px;
     border: 1px solid var(--border-color);
-    background: var(--bg-secondary);
+    background: #ffffff; /* Fundo branco para input sob fundo cinza */
     color: var(--text-primary);
     font-size: 1rem;
     box-sizing: border-box;
@@ -109,8 +109,8 @@ body {
 /* Sidebar */
 .admin-sidebar {
     width: 260px;
-    background: var(--bg-secondary);
-    border-right: 1px solid var(--border-color);
+    background: #3c195a; /* Roxo Escuro BCV */
+    border-right: 1px solid rgba(255, 255, 255, 0.1);
     display: flex;
     flex-direction: column;
     flex-shrink: 0;
@@ -122,7 +122,7 @@ body {
     display: flex;
     align-items: center;
     gap: 15px;
-    border-bottom: 1px solid var(--border-color);
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
 }
 
 .sidebar-logo {
@@ -136,7 +136,7 @@ body {
     font-family: 'Outfit', sans-serif;
     font-size: 1.2rem;
     margin: 0;
-    color: var(--text-primary);
+    color: #ffffff; /* Texto branco */
 }
 
 .sidebar-nav {
@@ -159,7 +159,7 @@ body {
     align-items: center;
     gap: 12px;
     padding: 12px 20px;
-    color: var(--text-secondary, #a0a0ab);
+    color: rgba(255, 255, 255, 0.7); /* Texto branco suave */
     text-decoration: none;
     font-weight: 500;
     transition: all 0.2s ease;
@@ -167,9 +167,9 @@ body {
 }
 
 .sidebar-nav a:hover, .sidebar-nav a.active {
-    background: rgba(92, 45, 145, 0.05);
-    color: var(--accent-primary);
-    border-left-color: var(--accent-primary);
+    background: rgba(255, 255, 255, 0.08);
+    color: #ffffff;
+    border-left-color: var(--accent-secondary, #ff7b00); /* Laranja */
 }
 
 .sidebar-nav .icon {
@@ -221,8 +221,8 @@ body {
 }
 
 .welcome-box {
-    background: rgba(92, 45, 145, 0.05);
-    border: 1px solid rgba(92, 45, 145, 0.1);
+    background: #f1f3f5; /* Mais escuro para contraste */
+    border: 1px solid #dee2e6;
     padding: 30px;
     border-radius: 12px;
     text-align: left;
@@ -258,13 +258,35 @@ body {
     box-shadow: 0 0 10px rgba(92, 45, 145, 0.1);
 }
 
-.admin-table th, .admin-table td {
+.admin-table-container {
+    background: #f8f9fa; /* Cartão mais escuro */
+    border: 1px solid #e9ecef;
+    border-radius: 12px;
+    padding: 25px;
+    margin-top: 25px;
+    box-shadow: var(--shadow-sm);
+}
+
+.admin-table {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+.admin-table th {
+    background: #e9ecef; /* Cabeçalho mais escuro */
+    color: var(--text-primary);
+    font-weight: 600;
+    text-align: left;
     padding: 12px;
-    border-bottom: 1px solid var(--border-color);
+}
+
+.admin-table td {
+    padding: 12px;
+    border-bottom: 1px solid #dee2e6;
 }
 
 .admin-table tbody tr:hover {
-    background: var(--bg-secondary);
+    background: #e9ecef;
 }
 
 .btn-secondary {
@@ -305,6 +327,10 @@ body {
     background: #ffebee;
     border-color: #ff5252;
     color: #d32f2f;
+}
+
+.sidebar-logout-btn {
+    color: rgba(255, 255, 255, 0.7) !important;
 }
 
 .sidebar-logout-btn:hover {
