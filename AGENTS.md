@@ -34,6 +34,8 @@
 - [2026-05-24] Gemini: Remoção do display:none nas redes sociais no mobile da navbar para manter visibilidade em todos os ecrãs.
 - [2026-05-24] Gemini: Alinhamento do cabeçalho do drawer menu em linha única (emblema + BCV + botão fechar) e redução do padding superior para economizar espaço.
 - [2026-05-27] Gemini: Simplificação do modal de aniversários (index.html) com fotos quadradas sem recorte, remoção da idade e dos textos fixos repetidos, exibição de "PARABÉNS, [Nickname/Nome]" no topo, e integração do campo Nickname no Admin e DB.
+- [2026-05-27] Gemini: Alinhamento horizontal (display: flex) do logo e nome no rodapé em desktop para index.html e clube.html.
+
 
 
 
