@@ -859,10 +859,9 @@ document.addEventListener('DOMContentLoaded', async () => {
         try {
             equipasTableBody.innerHTML = '<tr><td colspan="6" style="padding: 10px;">A carregar equipas...</td></tr>';
             
-            const { data: equipas, error } = await supabase
+            let { data: equipas, error } = await supabase
                 .from('equipasbcv')
-                .select('*')
-                .order('nome', { ascending: true });
+                .select('*');
 
             if (error) {
                 if (error.code === '42P01') {
@@ -870,6 +869,28 @@ document.addEventListener('DOMContentLoaded', async () => {
                     return;
                 }
                 throw error;
+            }
+
+            const ordemEscalao = [
+                "Mini 8", 
+                "Mini 10", 
+                "Mini 12", 
+                "Sub-14", 
+                "Sub-16", 
+                "Sub-18", 
+                "Seniores", 
+                "Veteranos"
+            ];
+
+            if (equipas) {
+                equipas.sort((a, b) => {
+                    let indexA = ordemEscalao.indexOf(a.escalao);
+                    let indexB = ordemEscalao.indexOf(b.escalao);
+                    if (indexA === -1) indexA = 999;
+                    if (indexB === -1) indexB = 999;
+                    if (indexA === indexB) return (a.nome || '').localeCompare(b.nome || '');
+                    return indexA - indexB;
+                });
             }
 
             currentEquipas = equipas || [];

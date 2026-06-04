@@ -6,14 +6,42 @@ document.addEventListener('DOMContentLoaded', async () => {
     if (!grid) return;
 
     try {
-        // Buscar Equipas
-        const { data: equipas, error: errEquipas } = await supabaseClient
+        let { data: equipas, error: errEquipas } = await supabaseClient
             .from('equipasbcv')
             .select('*')
-            .eq('epoca', '2025-2026')
-            .order('escalao', { ascending: true });
+            .eq('epoca', '2025-2026');
 
         if (errEquipas) throw errEquipas;
+
+        // Ordenação customizada por Escalão
+        const ordemEscalao = [
+            "Mini 8", 
+            "Mini 10", 
+            "Mini 12", 
+            "Sub-14", 
+            "Sub-16", 
+            "Sub-18", 
+            "Seniores", 
+            "Veteranos"
+        ];
+
+        if (equipas) {
+            equipas.sort((a, b) => {
+                let indexA = ordemEscalao.indexOf(a.escalao);
+                let indexB = ordemEscalao.indexOf(b.escalao);
+                
+                // Se o escalão não estiver na lista, vai para o fim
+                if (indexA === -1) indexA = 999;
+                if (indexB === -1) indexB = 999;
+                
+                // Se o escalão for igual, desempata pelo sexo ou nome
+                if (indexA === indexB) {
+                    return a.nome.localeCompare(b.nome);
+                }
+                
+                return indexA - indexB;
+            });
+        }
 
         // Buscar Atletas da mesma época
         const { data: atletas, error: errAtletas } = await supabaseClient
