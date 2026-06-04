@@ -772,9 +772,9 @@ img {
    Footer
    ========================================================================== */
 .footer {
-    background: #1a1a1a;
+    background: var(--accent-primary);
     padding: 4rem 0 2rem;
-    border-top: 1px solid var(--border-color);
+    border-top: none;
     color: #ffffff;
 }
 
