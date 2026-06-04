@@ -977,7 +977,7 @@ document.addEventListener('DOMContentLoaded', async () => {
             try {
                 const fotoFile = equipaFotoFileInput.files[0];
                 if (fotoFile) {
-                    const fileName = \`equipa_${Date.now()}_${fotoFile.name.replace(/\\s/g, '_')}\`;
+                    const fileName = `equipa_${Date.now()}_${fotoFile.name.replace(/\\s/g, '_')}`;
                     const { error: uploadError } = await supabase.storage.from('fotos').upload(fileName, fotoFile);
                     
                     if (uploadError) throw uploadError;
