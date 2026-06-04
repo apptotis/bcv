@@ -347,37 +347,67 @@
                             <input type="hidden" id="edit-atleta-id">
                             
                             <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px;">
-                                <input type="text" id="atleta-nome" placeholder="Nome Completo do Atleta" required class="admin-input">
-                                <input type="text" id="atleta-nickname" placeholder="Alcunha / Nickname (Opcional)" class="admin-input">
+                                <div>
+                                    <label style="display:block; margin-bottom:5px; font-size:0.8rem; color:#a0a0ab;">Nome Completo</label>
+                                    <input type="text" id="atleta-nome" placeholder="Nome Completo do Atleta" required class="admin-input">
+                                </div>
+                                <div>
+                                    <label style="display:block; margin-bottom:5px; font-size:0.8rem; color:#a0a0ab;">Alcunha / Nickname</label>
+                                    <input type="text" id="atleta-nickname" placeholder="Alcunha (Opcional)" class="admin-input">
+                                </div>
                             </div>
                             <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px;">
-                                <input type="text" id="atleta-epoca" placeholder="Época (Ex: 2025/2026)" required class="admin-input">
-                                <input type="text" id="atleta-funcao" placeholder="Função (Ex: Jogador, Treinador)" required class="admin-input">
+                                <div>
+                                    <label style="display:block; margin-bottom:5px; font-size:0.8rem; color:#a0a0ab;">Época</label>
+                                    <input type="text" id="atleta-epoca" placeholder="Ex: 2025/2026" required class="admin-input">
+                                </div>
+                                <div>
+                                    <label style="display:block; margin-bottom:5px; font-size:0.8rem; color:#a0a0ab;">Função</label>
+                                    <input type="text" id="atleta-funcao" placeholder="Ex: Jogador, Treinador" required class="admin-input">
+                                </div>
                             </div>
                             <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 15px;">
-                                <input type="text" id="atleta-equipafpb" placeholder="Equipa FPB" class="admin-input">
-                                <input type="text" id="atleta-equipabcv1" placeholder="Equipa BCV 1" class="admin-input">
-                                <input type="text" id="atleta-equipabcv2" placeholder="Equipa BCV 2" class="admin-input">
+                                <div>
+                                    <label style="display:block; margin-bottom:5px; font-size:0.8rem; color:#a0a0ab;">Equipa FPB</label>
+                                    <input type="text" id="atleta-equipafpb" placeholder="Equipa FPB" class="admin-input">
+                                </div>
+                                <div>
+                                    <label style="display:block; margin-bottom:5px; font-size:0.8rem; color:#a0a0ab;">Equipa BCV 1</label>
+                                    <input type="text" id="atleta-equipabcv1" placeholder="Equipa BCV 1" class="admin-input">
+                                </div>
+                                <div>
+                                    <label style="display:block; margin-bottom:5px; font-size:0.8rem; color:#a0a0ab;">Equipa BCV 2</label>
+                                    <input type="text" id="atleta-equipabcv2" placeholder="Equipa BCV 2" class="admin-input">
+                                </div>
                             </div>
                             
                             <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 15px;">
-                                <input type="number" id="atleta-numero" placeholder="Nº Camisola" class="admin-input">
-                                <select id="atleta-escalao" required class="admin-input">
-                                    <option value="" disabled selected>Escalão</option>
-                                    <option value="Mini 8">Mini 8</option>
-                                    <option value="Mini 10">Mini 10</option>
-                                    <option value="Mini 12">Mini 12</option>
-                                    <option value="Sub-14">Sub-14</option>
-                                    <option value="Sub-16">Sub-16</option>
-                                    <option value="Sub-18">Sub-18</option>
-                                    <option value="Seniores">Seniores</option>
-                                    <option value="Veteranos">Veteranos</option>
-                                </select>
-                                <select id="atleta-sexo" required class="admin-input">
-                                    <option value="" disabled selected>Sexo</option>
-                                    <option value="M">Masculino</option>
-                                    <option value="F">Feminino</option>
-                                </select>
+                                <div>
+                                    <label style="display:block; margin-bottom:5px; font-size:0.8rem; color:#a0a0ab;">Nº Camisola</label>
+                                    <input type="number" id="atleta-numero" placeholder="Nº" class="admin-input">
+                                </div>
+                                <div>
+                                    <label style="display:block; margin-bottom:5px; font-size:0.8rem; color:#a0a0ab;">Escalão</label>
+                                    <select id="atleta-escalao" required class="admin-input">
+                                        <option value="" disabled selected>Selecionar</option>
+                                        <option value="Mini 8">Mini 8</option>
+                                        <option value="Mini 10">Mini 10</option>
+                                        <option value="Mini 12">Mini 12</option>
+                                        <option value="Sub-14">Sub-14</option>
+                                        <option value="Sub-16">Sub-16</option>
+                                        <option value="Sub-18">Sub-18</option>
+                                        <option value="Seniores">Seniores</option>
+                                        <option value="Veteranos">Veteranos</option>
+                                    </select>
+                                </div>
+                                <div>
+                                    <label style="display:block; margin-bottom:5px; font-size:0.8rem; color:#a0a0ab;">Sexo</label>
+                                    <select id="atleta-sexo" required class="admin-input">
+                                        <option value="" disabled selected>Selecionar</option>
+                                        <option value="M">Masculino</option>
+                                        <option value="F">Feminino</option>
+                                    </select>
+                                </div>
                             </div>
                             
                             <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 15px;">
