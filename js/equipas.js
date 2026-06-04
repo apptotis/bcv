@@ -1,4 +1,5 @@
 document.addEventListener('DOMContentLoaded', async () => {
+    const supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
     const grid = document.getElementById('equipas-grid');
     const loading = document.getElementById('equipas-loading');
 
@@ -6,7 +7,7 @@ document.addEventListener('DOMContentLoaded', async () => {
 
     try {
         // Buscar Equipas
-        const { data: equipas, error: errEquipas } = await supabase
+        const { data: equipas, error: errEquipas } = await supabaseClient
             .from('equipasbcv')
             .select('*')
             .eq('epoca', '2025-2026')
@@ -15,7 +16,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         if (errEquipas) throw errEquipas;
 
         // Buscar Atletas da mesma época
-        const { data: atletas, error: errAtletas } = await supabase
+        const { data: atletas, error: errAtletas } = await supabaseClient
             .from('atletasbcv')
             .select('*')
             .eq('epoca', '2025-2026');
