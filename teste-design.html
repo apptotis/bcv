@@ -1,0 +1,208 @@
+<!DOCTYPE html>
+<html lang="pt-PT">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Teste de Design | Basket Clube de Valença</title>
+    
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Outfit:wght@400;700;900&display=swap" rel="stylesheet">
+    
+    <!-- Font Awesome for Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    
+    <!-- Custom Test Stylesheet -->
+    <link rel="stylesheet" href="css/teste-design.css">
+    
+    <!-- Favicon -->
+    <link rel="icon" type="image/png" href="assets/emblema_png.png">
+</head>
+<body class="with-bg-image">
+
+    <!-- Header / Navbar (Logo Centered, Hamburger Left) -->
+    <header class="navbar-test" id="navbar">
+        <div class="navbar-grid">
+            <!-- Left Side: Hamburger Trigger -->
+            <div class="nav-left">
+                <button class="hamburger-btn" id="hamburger-trigger" aria-label="Abrir Menu" aria-expanded="false" aria-controls="drawer-menu">
+                    <span class="hamburger-line"></span>
+                    <span class="hamburger-line"></span>
+                    <span class="hamburger-line"></span>
+                </button>
+            </div>
+            
+            <!-- Center: Club Logo and Name -->
+            <div class="nav-center">
+                <a href="#" class="brand-logo-container">
+                    <img src="assets/emblema_png.png" alt="BCV Logo" class="brand-logo">
+                    <span class="brand-title-nav">Basket Clube de Valença</span>
+                </a>
+            </div>
+            
+            <!-- Right Side: Social Media Icons (for balance and utility) -->
+            <div class="nav-right">
+                <div class="nav-social-btn">
+                    <a href="https://www.facebook.com/profile.php?id=100039859278453" target="_blank" aria-label="Facebook"><i class="fab fa-facebook"></i></a>
+                    <a href="https://www.instagram.com/bcvalenca" target="_blank" aria-label="Instagram"><i class="fab fa-instagram"></i></a>
+                    <a href="https://www.youtube.com/@BCValenca" target="_blank" aria-label="YouTube"><i class="fab fa-youtube"></i></a>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- Overlay Background (visible when menu is open) -->
+    <div class="drawer-overlay" id="drawer-overlay"></div>
+
+    <!-- Slide-in Drawer Navigation Menu -->
+    <nav class="drawer-menu" id="drawer-menu" aria-label="Menu Principal">
+        <!-- Botão de Fechar Explicito para Mobile -->
+        <button class="drawer-close-btn" id="drawer-close-btn" aria-label="Fechar Menu">
+            <i class="fas fa-times"></i>
+        </button>
+        <div class="drawer-header">
+            <div class="drawer-club-info">
+                <img src="assets/emblema_png.png" alt="BCV Emblema" class="drawer-club-logo">
+                <span class="drawer-club-name">BCV</span>
+            </div>
+        </div>
+
+        <ul class="drawer-links-list">
+            <li>
+                <a href="#inicio" class="drawer-link">Início</a>
+            </li>
+            <li class="drawer-item">
+                <div style="display: flex; justify-content: space-between; align-items: center;">
+                    <a href="#clube" class="drawer-link" style="flex: 1;">O Clube</a>
+                    <button class="drawer-dropdown-btn" id="dropdown-toggle" aria-label="Expandir submenu O Clube">
+                        <i class="fas fa-chevron-down"></i>
+                    </button>
+                </div>
+                <ul class="drawer-dropdown-content" id="dropdown-menu">
+                    <li><a href="#historia" class="drawer-dropdown-link">História</a></li>
+                    <li><a href="#orgaos-sociais" class="drawer-dropdown-link">Órgãos Sociais</a></li>
+                    <li><a href="#contactos" class="drawer-dropdown-link">Contactos</a></li>
+                </ul>
+            </li>
+            <li>
+                <a href="#equipas" class="drawer-link">Equipas</a>
+            </li>
+            <li>
+                <a href="#competicoes" class="drawer-link">Competições</a>
+            </li>
+            <li>
+                <a href="#noticias" class="drawer-link">Notícias</a>
+            </li>
+            <li>
+                <a href="#agenda" class="drawer-link">Agenda</a>
+            </li>
+            <li>
+                <a href="#galeria" class="drawer-link">Galeria</a>
+            </li>
+        </ul>
+
+        <div class="drawer-footer">
+            <p class="drawer-footer-text">
+                &copy; 2026 Basket Clube de Valença.<br>
+                Todos os direitos reservados.
+            </p>
+        </div>
+    </nav>
+
+    <!-- Main Content (Hero Container for Demonstration) -->
+    <main>
+        <div class="demo-hero">
+            <span class="demo-badge">Design Concept</span>
+            <h1 class="demo-title">Nova Navegação <span>BCV</span></h1>
+            <p class="demo-description">
+                Este é um protótipo para testar o novo layout com logo centrado no cabeçalho e menu lateral interativo (drawer) acessível via hambúrguer em todos os dispositivos.
+            </p>
+            <button class="demo-btn" id="explore-btn">
+                Simular Ação <i class="fas fa-arrow-right"></i>
+            </button>
+        </div>
+    </main>
+
+    <!-- Vanilla Javascript Logic -->
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const navbar = document.getElementById('navbar');
+            const hamburgerTrigger = document.getElementById('hamburger-trigger');
+            const drawerMenu = document.getElementById('drawer-menu');
+            const drawerOverlay = document.getElementById('drawer-overlay');
+            const dropdownToggle = document.getElementById('dropdown-toggle');
+            const dropdownMenu = document.getElementById('dropdown-menu');
+
+            // 1. Scroll effect on Navbar
+            window.addEventListener('scroll', () => {
+                if (window.scrollY > 20) {
+                    navbar.classList.add('scrolled');
+                } else {
+                    navbar.classList.remove('scrolled');
+                }
+            });
+
+            // 2. Toggle Menu Drawer Function
+            function toggleMenu() {
+                const isOpen = drawerMenu.classList.toggle('is-open');
+                hamburgerTrigger.classList.toggle('is-active');
+                drawerOverlay.classList.toggle('is-open');
+                
+                // Accessibility updates
+                hamburgerTrigger.setAttribute('aria-expanded', isOpen);
+                
+                if (isOpen) {
+                    document.body.style.overflow = 'hidden'; // Prevent background scrolling
+                } else {
+                    document.body.style.overflow = ''; // Restore scrolling
+                }
+            }
+
+            // Bind triggers
+            const drawerCloseBtn = document.getElementById('drawer-close-btn');
+            hamburgerTrigger.addEventListener('click', toggleMenu);
+            drawerOverlay.addEventListener('click', toggleMenu);
+            drawerCloseBtn.addEventListener('click', toggleMenu);
+
+            // 3. Dropdown Menu inside Drawer
+            dropdownToggle.addEventListener('click', (e) => {
+                e.preventDefault();
+                dropdownToggle.classList.toggle('is-active');
+                dropdownMenu.classList.toggle('is-open');
+            });
+
+            // 4. Close menu when a link inside it is clicked (except dropdown toggles)
+            const menuLinks = document.querySelectorAll('.drawer-link, .drawer-dropdown-link');
+            menuLinks.forEach(link => {
+                // If it's the Clube link itself, we want to expand/collapse as well
+                if (link.getAttribute('href') === '#clube') {
+                    link.addEventListener('click', (e) => {
+                        e.preventDefault();
+                        dropdownToggle.click(); // Trigger the chevron toggle
+                    });
+                } else {
+                    link.addEventListener('click', () => {
+                        if (drawerMenu.classList.contains('is-open')) {
+                            toggleMenu();
+                        }
+                    });
+                }
+            });
+
+            // 5. Close on Escape key press
+            document.addEventListener('keydown', (e) => {
+                if (e.key === 'Escape' && drawerMenu.classList.contains('is-open')) {
+                    toggleMenu();
+                }
+            });
+
+            // 6. Action button simulation
+            const exploreBtn = document.getElementById('explore-btn');
+            exploreBtn.addEventListener('click', () => {
+                toggleMenu(); // Open menu to show navigation design
+            });
+        });
+    </script>
+</body>
+</html>

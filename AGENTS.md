@@ -38,3 +38,4 @@
 - [2026-05-27] Gemini: Reformulação visual do Admin (admin.html, admin.css) para tema claro (ambiente de trabalho branco, sidebar roxa escura, e cards/tabelas em cinza contrastante), remoção da barra superior, integração do botão de logout na sidebar, correção de contraste no dashboard de aniversariantes, e correção do bug "null" no título de edição do utilizador.
 - [2026-05-27] Gemini: Correção da cor do ícone de dropdown (abertura do sub-menu O Clube) no menu lateral de preto para branco em style.css e teste-design.css.
 - [2026-05-27] Gemini: Adicionado scroll-padding-top para evitar que o topo das secções seja ocultado sob a navbar fixa ao navegar pelos links do menu no mobile, e ajustado o margin-top do banner de aniversários em clube.html para evitar sobreposição inicial.
+- [2026-06-04] Gemini: Remoção completa da aba, menu e lógica JavaScript relacionados ao "Sincronizar FPB" da página admin.

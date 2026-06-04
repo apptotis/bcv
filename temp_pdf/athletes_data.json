@@ -1,0 +1,1002 @@
+[
+  {
+    "nome": "Aaron Gonzalez Moreira",
+    "licenca": "257862",
+    "equipa": "Sub-16 Masculino",
+    "escalao": "Sub-16",
+    "sexo": "M",
+    "data_nascimento": "2010-08-20",
+    "nacionalidade": "Espanha",
+    "numero_camisola": null
+  },
+  {
+    "nome": "Andre Freitas Carvalho",
+    "licenca": "154145",
+    "equipa": "Seniores Masculino",
+    "escalao": "Seniores",
+    "sexo": "M",
+    "data_nascimento": "1991-06-28",
+    "nacionalidade": "Portugal",
+    "numero_camisola": null
+  },
+  {
+    "nome": "Anita de Melo Domingues Oliveira",
+    "licenca": "314897",
+    "equipa": "Mini 8 Feminino",
+    "escalao": "Mini 8",
+    "sexo": "F",
+    "data_nascimento": "2021-07-09",
+    "nacionalidade": "Portugal",
+    "numero_camisola": null
+  },
+  {
+    "nome": "Ariel Meireles Drumond",
+    "licenca": "258188",
+    "equipa": "Seniores Masculino",
+    "escalao": "Seniores",
+    "sexo": "M",
+    "data_nascimento": "1998-10-12",
+    "nacionalidade": "Brasil",
+    "numero_camisola": null
+  },
+  {
+    "nome": "Arthur Henrick Silva Félix",
+    "licenca": "306985",
+    "equipa": "Sub-16 Masculino",
+    "escalao": "Sub-16",
+    "sexo": "M",
+    "data_nascimento": "2011-12-09",
+    "nacionalidade": "Brasil",
+    "numero_camisola": null
+  },
+  {
+    "nome": "Arthur Vinicius de Oliveira Teixeira",
+    "licenca": "296270",
+    "equipa": "Sub-16 Masculino",
+    "escalao": "Sub-16",
+    "sexo": "M",
+    "data_nascimento": "2010-05-05",
+    "nacionalidade": "Portugal",
+    "numero_camisola": null
+  },
+  {
+    "nome": "Brian Quintião Xavier",
+    "licenca": "309963",
+    "equipa": "Mini 12 Masculino",
+    "escalao": "Mini 12",
+    "sexo": "M",
+    "data_nascimento": "2015-12-05",
+    "nacionalidade": "Portugal",
+    "numero_camisola": null
+  },
+  {
+    "nome": "Caetana Preto Lopez",
+    "licenca": "286305",
+    "equipa": "Mini 12 Feminino",
+    "escalao": "Mini 12",
+    "sexo": "F",
+    "data_nascimento": "2014-09-25",
+    "nacionalidade": "Portugal",
+    "numero_camisola": null
+  },
+  {
+    "nome": "Camila Alvez Rei",
+    "licenca": "316274",
+    "equipa": "Mini 10 Feminino",
+    "escalao": "Mini 10",
+    "sexo": "F",
+    "data_nascimento": "2016-04-04",
+    "nacionalidade": "Portugal",
+    "numero_camisola": null
+  },
+  {
+    "nome": "Camila Pereira Duro",
+    "licenca": "281029",
+    "equipa": "Sub-14 Feminino",
+    "escalao": "Sub-14",
+    "sexo": "F",
+    "data_nascimento": "2012-04-30",
+    "nacionalidade": "Portugal",
+    "numero_camisola": null
+  },
+  {
+    "nome": "Carl Michael Araújo da Costa",
+    "licenca": "290412",
+    "equipa": "Mini 8 Masculino",
+    "escalao": "Mini 8",
+    "sexo": "M",
+    "data_nascimento": "2018-03-11",
+    "nacionalidade": "Portugal",
+    "numero_camisola": null
+  },
+  {
+    "nome": "Carolina Magalhães Alves da Silva",
+    "licenca": "305332",
+    "equipa": "Mini 12 Feminino",
+    "escalao": "Mini 12",
+    "sexo": "F",
+    "data_nascimento": "2014-05-30",
+    "nacionalidade": "Portugal",
+    "numero_camisola": null
+  },
+  {
+    "nome": "Catarina Calheiros Ferreira do Carmo",
+    "licenca": "311419",
+    "equipa": "Mini 8 Feminino",
+    "escalao": "Mini 8",
+    "sexo": "F",
+    "data_nascimento": "2018-07-18",
+    "nacionalidade": "Portugal",
+    "numero_camisola": null
+  },
+  {
+    "nome": "Conrado Basso Prochmann",
+    "licenca": "289877",
+    "equipa": "Seniores Masculino",
+    "escalao": "Seniores",
+    "sexo": "M",
+    "data_nascimento": "2006-02-14",
+    "nacionalidade": "Brasil",
+    "numero_camisola": null
+  },
+  {
+    "nome": "D├ícil T├íboas Rodrigues",
+    "licenca": "275037",
+    "equipa": "Sub-14 Feminino",
+    "escalao": "Sub-14",
+    "sexo": "F",
+    "data_nascimento": "2012-02-24",
+    "nacionalidade": "Portugal",
+    "numero_camisola": null
+  },
+  {
+    "nome": "David Lobão Moreno Marques Severino",
+    "licenca": "281207",
+    "equipa": "Sub-14 Masculino",
+    "escalao": "Sub-14",
+    "sexo": "M",
+    "data_nascimento": "2013-05-05",
+    "nacionalidade": "Portugal",
+    "numero_camisola": null
+  },
+  {
+    "nome": "Dinis Miguel Pereira",
+    "licenca": "309964",
+    "equipa": "Mini 8 Masculino",
+    "escalao": "Mini 8",
+    "sexo": "M",
+    "data_nascimento": "2020-12-21",
+    "nacionalidade": "Valença",
+    "numero_camisola": null
+  },
+  {
+    "nome": "Diogo Afonso Gomes Reis Mota",
+    "licenca": "314903",
+    "equipa": "Mini 8 Masculino",
+    "escalao": "Mini 8",
+    "sexo": "M",
+    "data_nascimento": "2018-12-01",
+    "nacionalidade": "Portugal",
+    "numero_camisola": null
+  },
+  {
+    "nome": "Diogo Freitas Goncalves",
+    "licenca": "262656",
+    "equipa": "Sub-16 Masculino",
+    "escalao": "Sub-16",
+    "sexo": "M",
+    "data_nascimento": "2010-03-15",
+    "nacionalidade": "Portugal",
+    "numero_camisola": null
+  },
+  {
+    "nome": "Diogo Magalhães Alves da Silva",
+    "licenca": "305333",
+    "equipa": "Mini 10 Masculino",
+    "escalao": "Mini 10",
+    "sexo": "M",
+    "data_nascimento": "2017-02-09",
+    "nacionalidade": "Portugal",
+    "numero_camisola": null
+  },
+  {
+    "nome": "Diogo Miguel Mota Moreira",
+    "licenca": "294282",
+    "equipa": "Mini 10 Masculino",
+    "escalao": "Mini 10",
+    "sexo": "M",
+    "data_nascimento": "2017-04-19",
+    "nacionalidade": "Portugal",
+    "numero_camisola": null
+  },
+  {
+    "nome": "Duarte Lourenço Gomes",
+    "licenca": "295310",
+    "equipa": "Mini 12 Masculino",
+    "escalao": "Mini 12",
+    "sexo": "M",
+    "data_nascimento": "2015-12-16",
+    "nacionalidade": "Portugal",
+    "numero_camisola": null
+  },
+  {
+    "nome": "Edgar Amorim Ribeiro",
+    "licenca": "118558",
+    "equipa": "Seniores Masculino",
+    "escalao": "Seniores",
+    "sexo": "M",
+    "data_nascimento": "1991-02-16",
+    "nacionalidade": "Portugal",
+    "numero_camisola": null
+  },
+  {
+    "nome": "Edgar Roda Ferreira",
+    "licenca": "300436",
+    "equipa": "Sub-16 Masculino",
+    "escalao": "Sub-16",
+    "sexo": "M",
+    "data_nascimento": "2010-12-13",
+    "nacionalidade": "Portugal",
+    "numero_camisola": null
+  },
+  {
+    "nome": "Esperança Silva Moreira",
+    "licenca": "309004",
+    "equipa": "Mini 12 Feminino",
+    "escalao": "Mini 12",
+    "sexo": "F",
+    "data_nascimento": "2015-03-03",
+    "nacionalidade": "Portugal",
+    "numero_camisola": null
+  },
+  {
+    "nome": "Eva Geraldes Meixeiro",
+    "licenca": "310912",
+    "equipa": "Sub-14 Feminino",
+    "escalao": "Sub-14",
+    "sexo": "F",
+    "data_nascimento": "2012-12-09",
+    "nacionalidade": "Portugal",
+    "numero_camisola": null
+  },
+  {
+    "nome": "Felipe Nejar Pfeiffer",
+    "licenca": "317277",
+    "equipa": "Sub-16 Masculino",
+    "escalao": "Sub-16",
+    "sexo": "M",
+    "data_nascimento": "2010-07-04",
+    "nacionalidade": "Brasil",
+    "numero_camisola": null
+  },
+  {
+    "nome": "Filipe Carlos Teixeira da Silva",
+    "licenca": "311418",
+    "equipa": "Mini 12 Masculino",
+    "escalao": "Mini 12",
+    "sexo": "M",
+    "data_nascimento": "2014-04-17",
+    "nacionalidade": "Portugal",
+    "numero_camisola": null
+  },
+  {
+    "nome": "Filipe Gomes Teixeira",
+    "licenca": "197556",
+    "equipa": "Seniores Masculino",
+    "escalao": "Seniores",
+    "sexo": "M",
+    "data_nascimento": "1993-08-05",
+    "nacionalidade": "Portugal",
+    "numero_camisola": null
+  },
+  {
+    "nome": "Francisca Freitas Conceiçao Aguiar",
+    "licenca": "277113",
+    "equipa": "Sub-14 Feminino",
+    "escalao": "Sub-14",
+    "sexo": "F",
+    "data_nascimento": "2012-03-30",
+    "nacionalidade": "Portugal",
+    "numero_camisola": null
+  },
+  {
+    "nome": "Francisco Ferreira de S├í Fernandes",
+    "licenca": "285288",
+    "equipa": "Sub-14 Masculino",
+    "escalao": "Sub-14",
+    "sexo": "M",
+    "data_nascimento": "2013-09-27",
+    "nacionalidade": "Portugal",
+    "numero_camisola": null
+  },
+  {
+    "nome": "Francisco Maria Soares da Costa Lobão Moreno",
+    "licenca": "312493",
+    "equipa": "Mini 8 Masculino",
+    "escalao": "Mini 8",
+    "sexo": "M",
+    "data_nascimento": "2021-03-23",
+    "nacionalidade": "Portugal",
+    "numero_camisola": null
+  },
+  {
+    "nome": "Gonçalo Domingues Sousa",
+    "licenca": "309786",
+    "equipa": "Mini 8 Masculino",
+    "escalao": "Mini 8",
+    "sexo": "M",
+    "data_nascimento": "2018-08-10",
+    "nacionalidade": "Portugal",
+    "numero_camisola": null
+  },
+  {
+    "nome": "Gonçalo Gonçalves Oliveira",
+    "licenca": "145515",
+    "equipa": "Seniores Masculino",
+    "escalao": "Seniores",
+    "sexo": "M",
+    "data_nascimento": "1989-04-24",
+    "nacionalidade": "Valença",
+    "numero_camisola": null
+  },
+  {
+    "nome": "Guilherme Veloso Peixoto",
+    "licenca": "307437",
+    "equipa": "Mini 8 Masculino",
+    "escalao": "Mini 8",
+    "sexo": "M",
+    "data_nascimento": "2018-01-05",
+    "nacionalidade": "Portugal",
+    "numero_camisola": null
+  },
+  {
+    "nome": "Gustavo Pereira Cruz Esteves",
+    "licenca": "275181",
+    "equipa": "Mini 12 Masculino",
+    "escalao": "Mini 12",
+    "sexo": "M",
+    "data_nascimento": "2014-08-15",
+    "nacionalidade": "Portugal",
+    "numero_camisola": null
+  },
+  {
+    "nome": "Henrique Gonçalves Castelão Moreira",
+    "licenca": "287038",
+    "equipa": "Mini 10 Masculino",
+    "escalao": "Mini 10",
+    "sexo": "M",
+    "data_nascimento": "2017-09-27",
+    "nacionalidade": "Portugal",
+    "numero_camisola": null
+  },
+  {
+    "nome": "Higor Rui Coutinho",
+    "licenca": "262822",
+    "equipa": "Seniores Masculino",
+    "escalao": "Seniores",
+    "sexo": "M",
+    "data_nascimento": "1996-01-27",
+    "nacionalidade": "Brasil",
+    "numero_camisola": null
+  },
+  {
+    "nome": "Hugo Miguel Araújo Ferreira",
+    "licenca": "194330",
+    "equipa": "Seniores Masculino",
+    "escalao": "Seniores",
+    "sexo": "M",
+    "data_nascimento": "2000-07-19",
+    "nacionalidade": "Portugal",
+    "numero_camisola": null
+  },
+  {
+    "nome": "Iris Lima Baptista",
+    "licenca": "286422",
+    "equipa": "Sub-14 Feminino",
+    "escalao": "Sub-14",
+    "sexo": "F",
+    "data_nascimento": "2012-05-16",
+    "nacionalidade": "Portugal",
+    "numero_camisola": null
+  },
+  {
+    "nome": "Ivan Parciu AB Viana do Castelo Basket Clube de Valença Mini 10 Masculino 2025/2026 FBP 2016-01-30 Mold├ívia",
+    "licenca": "305337",
+    "equipa": "Mini 10 Masculino",
+    "escalao": "Mini 10",
+    "sexo": "M",
+    "data_nascimento": "2016-01-30",
+    "nacionalidade": "Mold├ívia",
+    "numero_camisola": null
+  },
+  {
+    "nome": "João Carlos Reis Costa",
+    "licenca": "197392",
+    "equipa": "Seniores Masculino",
+    "escalao": "Seniores",
+    "sexo": "M",
+    "data_nascimento": "1999-06-26",
+    "nacionalidade": "Portugal",
+    "numero_camisola": null
+  },
+  {
+    "nome": "José Lopez de Lima",
+    "licenca": "307731",
+    "equipa": "Mini 8 Masculino",
+    "escalao": "Mini 8",
+    "sexo": "M",
+    "data_nascimento": "2018-11-05",
+    "nacionalidade": "Portugal",
+    "numero_camisola": null
+  },
+  {
+    "nome": "Julia de Oliveira Dionizio",
+    "licenca": "316344",
+    "equipa": "Mini 12 Feminino",
+    "escalao": "Mini 12",
+    "sexo": "F",
+    "data_nascimento": "2015-03-11",
+    "nacionalidade": "Portugal",
+    "numero_camisola": null
+  },
+  {
+    "nome": "Lara da Cunha Gomes",
+    "licenca": "275771",
+    "equipa": "Sub-14 Feminino",
+    "escalao": "Sub-14",
+    "sexo": "F",
+    "data_nascimento": "2012-02-08",
+    "nacionalidade": "Portugal",
+    "numero_camisola": null
+  },
+  {
+    "nome": "Leonor Baranda Soutelo",
+    "licenca": "275772",
+    "equipa": "Sub-14 Feminino",
+    "escalao": "Sub-14",
+    "sexo": "F",
+    "data_nascimento": "2012-09-11",
+    "nacionalidade": "Portugal",
+    "numero_camisola": null
+  },
+  {
+    "nome": "Leonor Gonçalves Castelão Moreira",
+    "licenca": "286304",
+    "equipa": "Mini 12 Feminino",
+    "escalao": "Mini 12",
+    "sexo": "F",
+    "data_nascimento": "2014-03-13",
+    "nacionalidade": "Portugal",
+    "numero_camisola": null
+  },
+  {
+    "nome": "Lourenzo Murce Cosvosli",
+    "licenca": "314905",
+    "equipa": "Mini 8 Masculino",
+    "escalao": "Mini 8",
+    "sexo": "M",
+    "data_nascimento": "2019-02-16",
+    "nacionalidade": "Brasil",
+    "numero_camisola": null
+  },
+  {
+    "nome": "Luz Campos Ribeiro",
+    "licenca": "318653",
+    "equipa": "Mini 8 Feminino",
+    "escalao": "Mini 8",
+    "sexo": "F",
+    "data_nascimento": "2018-04-21",
+    "nacionalidade": "Portugal",
+    "numero_camisola": null
+  },
+  {
+    "nome": "Marco André Barros Caçador Alves",
+    "licenca": "177263",
+    "equipa": "Seniores Masculino",
+    "escalao": "Seniores",
+    "sexo": "M",
+    "data_nascimento": "1995-11-27",
+    "nacionalidade": "Portugal",
+    "numero_camisola": null
+  },
+  {
+    "nome": "Marco Conde",
+    "licenca": "277137",
+    "equipa": "Sub-16 Masculino",
+    "escalao": "Sub-16",
+    "sexo": "M",
+    "data_nascimento": "2010-04-20",
+    "nacionalidade": "Nacionalid",
+    "numero_camisola": null
+  },
+  {
+    "nome": "Maria Inês Mendes Barreiro",
+    "licenca": "293586",
+    "equipa": "Mini 10 Feminino",
+    "escalao": "Mini 10",
+    "sexo": "F",
+    "data_nascimento": "2017-02-25",
+    "nacionalidade": "Portugal",
+    "numero_camisola": null
+  },
+  {
+    "nome": "Mariema Filipa Cardoso Santos",
+    "licenca": "318639",
+    "equipa": "Mini 8 Feminino",
+    "escalao": "Mini 8",
+    "sexo": "F",
+    "data_nascimento": "2018-03-24",
+    "nacionalidade": "Portugal",
+    "numero_camisola": null
+  },
+  {
+    "nome": "Martim Marques Soutelo",
+    "licenca": "316341",
+    "equipa": "Mini 12 Masculino",
+    "escalao": "Mini 12",
+    "sexo": "M",
+    "data_nascimento": "2015-02-22",
+    "nacionalidade": "Portugal",
+    "numero_camisola": null
+  },
+  {
+    "nome": "Mateus Cruz Lemos",
+    "licenca": "280817",
+    "equipa": "Seniores Masculino",
+    "escalao": "Seniores",
+    "sexo": "M",
+    "data_nascimento": "2007-11-28",
+    "nacionalidade": "Portugal",
+    "numero_camisola": null
+  },
+  {
+    "nome": "Matilde Alves Rei",
+    "licenca": "316271",
+    "equipa": "Mini 8 Feminino",
+    "escalao": "Mini 8",
+    "sexo": "F",
+    "data_nascimento": "2018-10-08",
+    "nacionalidade": "Portugal",
+    "numero_camisola": null
+  },
+  {
+    "nome": "Matilde Mejias Rodrigues Correia",
+    "licenca": "310913",
+    "equipa": "Mini 8 Feminino",
+    "escalao": "Mini 8",
+    "sexo": "F",
+    "data_nascimento": "2018-05-03",
+    "nacionalidade": "Portugal",
+    "numero_camisola": null
+  },
+  {
+    "nome": "Matilde Rodrigues de Sousa",
+    "licenca": "314412",
+    "equipa": "Mini 12 Feminino",
+    "escalao": "Mini 12",
+    "sexo": "F",
+    "data_nascimento": "2015-07-30",
+    "nacionalidade": "Portugal",
+    "numero_camisola": null
+  },
+  {
+    "nome": "Mauro Cunha Alves",
+    "licenca": "317044",
+    "equipa": "Sub-14 Masculino",
+    "escalao": "Sub-14",
+    "sexo": "M",
+    "data_nascimento": "2012-02-12",
+    "nacionalidade": "Portugal",
+    "numero_camisola": null
+  },
+  {
+    "nome": "Miguel Carvalho Morais",
+    "licenca": "285289",
+    "equipa": "Mini 8 Masculino",
+    "escalao": "Mini 8",
+    "sexo": "M",
+    "data_nascimento": "2018-01-15",
+    "nacionalidade": "Portugal",
+    "numero_camisola": null
+  },
+  {
+    "nome": "Miguel da Cruz Fernandes",
+    "licenca": "301189",
+    "equipa": "Mini 8 Masculino",
+    "escalao": "Mini 8",
+    "sexo": "M",
+    "data_nascimento": "2019-04-09",
+    "nacionalidade": "Portugal",
+    "numero_camisola": null
+  },
+  {
+    "nome": "Miguel Lourenço Gomes",
+    "licenca": "290418",
+    "equipa": "Sub-14 Masculino",
+    "escalao": "Sub-14",
+    "sexo": "M",
+    "data_nascimento": "2012-11-27",
+    "nacionalidade": "Portugal",
+    "numero_camisola": null
+  },
+  {
+    "nome": "Miguel Viana da Costa Nascimento",
+    "licenca": "285577",
+    "equipa": "Mini 10 Masculino",
+    "escalao": "Mini 10",
+    "sexo": "M",
+    "data_nascimento": "2017-11-07",
+    "nacionalidade": "Portugal",
+    "numero_camisola": null
+  },
+  {
+    "nome": "Nerea Gonzalez Moreira",
+    "licenca": "281222",
+    "equipa": "Mini 12 Feminino",
+    "escalao": "Mini 12",
+    "sexo": "F",
+    "data_nascimento": "2014-05-10",
+    "nacionalidade": "Espanha",
+    "numero_camisola": null
+  },
+  {
+    "nome": "NFamara Conde",
+    "licenca": "279418",
+    "equipa": "Seniores Masculino",
+    "escalao": "Seniores",
+    "sexo": "M",
+    "data_nascimento": "1995-10-29",
+    "nacionalidade": "Guiné",
+    "numero_camisola": null
+  },
+  {
+    "nome": "Nicholas Saboleski Lima",
+    "licenca": "317162",
+    "equipa": "Mini 10 Masculino",
+    "escalao": "Mini 10",
+    "sexo": "M",
+    "data_nascimento": "2017-09-30",
+    "nacionalidade": "Canada",
+    "numero_camisola": null
+  },
+  {
+    "nome": "Nicolas Lorenzo Montes",
+    "licenca": "262995",
+    "equipa": "Seniores Masculino",
+    "escalao": "Seniores",
+    "sexo": "M",
+    "data_nascimento": "1975-05-11",
+    "nacionalidade": "Espanha",
+    "numero_camisola": null
+  },
+  {
+    "nome": "Nicole Kyara Rodriguez Gomes",
+    "licenca": "280909",
+    "equipa": "Mini 12 Feminino",
+    "escalao": "Mini 12",
+    "sexo": "F",
+    "data_nascimento": "2014-08-09",
+    "nacionalidade": "Portugal",
+    "numero_camisola": null
+  },
+  {
+    "nome": "Oleksander Melnyk",
+    "licenca": "297892",
+    "equipa": "Mini 10 Masculino",
+    "escalao": "Mini 10",
+    "sexo": "M",
+    "data_nascimento": "2016-10-14",
+    "nacionalidade": "Valença",
+    "numero_camisola": null
+  },
+  {
+    "nome": "Olivia Gonzales Cunha",
+    "licenca": "313964",
+    "equipa": "Mini 8 Feminino",
+    "escalao": "Mini 8",
+    "sexo": "F",
+    "data_nascimento": "2020-04-25",
+    "nacionalidade": "Portugal",
+    "numero_camisola": null
+  },
+  {
+    "nome": "Olivia Hand Azevedo",
+    "licenca": "305582",
+    "equipa": "Mini 10 Feminino",
+    "escalao": "Mini 10",
+    "sexo": "F",
+    "data_nascimento": "2017-03-01",
+    "nacionalidade": "Portugal",
+    "numero_camisola": null
+  },
+  {
+    "nome": "Pedro Miguel Pereira Fernandes",
+    "licenca": "293910",
+    "equipa": "Mini 10 Masculino",
+    "escalao": "Mini 10",
+    "sexo": "M",
+    "data_nascimento": "2017-02-01",
+    "nacionalidade": "Portugal",
+    "numero_camisola": null
+  },
+  {
+    "nome": "Reazen Thakur",
+    "licenca": "315091",
+    "equipa": "Mini 12 Masculino",
+    "escalao": "Mini 12",
+    "sexo": "M",
+    "data_nascimento": "2014-04-16",
+    "nacionalidade": "Nepal",
+    "numero_camisola": null
+  },
+  {
+    "nome": "Ricardo Alves Gonzalez",
+    "licenca": "296492",
+    "equipa": "Mini 8 Masculino",
+    "escalao": "Mini 8",
+    "sexo": "M",
+    "data_nascimento": "2019-01-24",
+    "nacionalidade": "Portugal",
+    "numero_camisola": null
+  },
+  {
+    "nome": "Ricardo Seixas Cacho",
+    "licenca": "314043",
+    "equipa": "Mini 8 Masculino",
+    "escalao": "Mini 8",
+    "sexo": "M",
+    "data_nascimento": "2021-08-22",
+    "nacionalidade": "Portugal",
+    "numero_camisola": null
+  },
+  {
+    "nome": "Rodrigo Magalhães Alves da Silva",
+    "licenca": "305334",
+    "equipa": "Mini 8 Masculino",
+    "escalao": "Mini 8",
+    "sexo": "M",
+    "data_nascimento": "2020-04-06",
+    "nacionalidade": "Portugal",
+    "numero_camisola": null
+  },
+  {
+    "nome": "Rodrigo Martins Viana",
+    "licenca": "314917",
+    "equipa": "Mini 8 Masculino",
+    "escalao": "Mini 8",
+    "sexo": "M",
+    "data_nascimento": "2021-09-30",
+    "nacionalidade": "Portugal",
+    "numero_camisola": null
+  },
+  {
+    "nome": "Rodrigo Pires Domingues",
+    "licenca": "291276",
+    "equipa": "Sub-14 Masculino",
+    "escalao": "Sub-14",
+    "sexo": "M",
+    "data_nascimento": "2013-12-12",
+    "nacionalidade": "Portugal",
+    "numero_camisola": null
+  },
+  {
+    "nome": "Rosangelo Carvalho Barros",
+    "licenca": "176075",
+    "equipa": "Seniores Masculino",
+    "escalao": "Seniores",
+    "sexo": "M",
+    "data_nascimento": "1989-05-14",
+    "nacionalidade": "Cabo Verde",
+    "numero_camisola": null
+  },
+  {
+    "nome": "Rui Pedro Fernandes Dantas",
+    "licenca": "161876",
+    "equipa": "Seniores Masculino",
+    "escalao": "Seniores",
+    "sexo": "M",
+    "data_nascimento": "1993-02-24",
+    "nacionalidade": "Portugal",
+    "numero_camisola": null
+  },
+  {
+    "nome": "Salvador Moreira Triquete Silva",
+    "licenca": "285299",
+    "equipa": "Sub-14 Masculino",
+    "escalao": "Sub-14",
+    "sexo": "M",
+    "data_nascimento": "2012-05-24",
+    "nacionalidade": "Portugal",
+    "numero_camisola": null
+  },
+  {
+    "nome": "Samuel Gomes de Lima Pimenta Bueno",
+    "licenca": "312200",
+    "equipa": "Sub-14 Masculino",
+    "escalao": "Sub-14",
+    "sexo": "M",
+    "data_nascimento": "2012-01-24",
+    "nacionalidade": "Brasil",
+    "numero_camisola": null
+  },
+  {
+    "nome": "Santiago Gonzalez Cunha",
+    "licenca": "297251",
+    "equipa": "Mini 10 Masculino",
+    "escalao": "Mini 10",
+    "sexo": "M",
+    "data_nascimento": "2017-03-21",
+    "nacionalidade": "Portugal",
+    "numero_camisola": null
+  },
+  {
+    "nome": "Santiago Miguel Guterres dos Santos",
+    "licenca": "314422",
+    "equipa": "Mini 10 Masculino",
+    "escalao": "Mini 10",
+    "sexo": "M",
+    "data_nascimento": "2017-07-30",
+    "nacionalidade": "Portugal",
+    "numero_camisola": null
+  },
+  {
+    "nome": "Santiago Seixas Cacho",
+    "licenca": "290417",
+    "equipa": "Mini 8 Masculino",
+    "escalao": "Mini 8",
+    "sexo": "M",
+    "data_nascimento": "2018-10-31",
+    "nacionalidade": "Portugal",
+    "numero_camisola": null
+  },
+  {
+    "nome": "Santiago Sousa Carvalho",
+    "licenca": "285291",
+    "equipa": "Mini 10 Masculino",
+    "escalao": "Mini 10",
+    "sexo": "M",
+    "data_nascimento": "2016-02-15",
+    "nacionalidade": "Valença",
+    "numero_camisola": null
+  },
+  {
+    "nome": "Sofia Pinto Rodrigues",
+    "licenca": "280907",
+    "equipa": "Mini 12 Feminino",
+    "escalao": "Mini 12",
+    "sexo": "F",
+    "data_nascimento": "2014-05-12",
+    "nacionalidade": "Portugal",
+    "numero_camisola": null
+  },
+  {
+    "nome": "Sofia Vilar da Costa",
+    "licenca": "314911",
+    "equipa": "Mini 8 Feminino",
+    "escalao": "Mini 8",
+    "sexo": "F",
+    "data_nascimento": "2018-07-06",
+    "nacionalidade": "Portugal",
+    "numero_camisola": null
+  },
+  {
+    "nome": "Sónia Yevsyeyeva",
+    "licenca": "305620",
+    "equipa": "Sub-14 Feminino",
+    "escalao": "Sub-14",
+    "sexo": "F",
+    "data_nascimento": "2012-01-26",
+    "nacionalidade": "Portugal",
+    "numero_camisola": null
+  },
+  {
+    "nome": "Tiago Martins Viana",
+    "licenca": "284452",
+    "equipa": "Mini 10 Masculino",
+    "escalao": "Mini 10",
+    "sexo": "M",
+    "data_nascimento": "2016-07-04",
+    "nacionalidade": "Portugal",
+    "numero_camisola": null
+  },
+  {
+    "nome": "Tom Carlo Hand Azevedo",
+    "licenca": "305576",
+    "equipa": "Mini 8 Masculino",
+    "escalao": "Mini 8",
+    "sexo": "M",
+    "data_nascimento": "2019-10-25",
+    "nacionalidade": "Portugal",
+    "numero_camisola": null
+  },
+  {
+    "nome": "Tom├ís Domingues Sousa",
+    "licenca": "309787",
+    "equipa": "Mini 8 Masculino",
+    "escalao": "Mini 8",
+    "sexo": "M",
+    "data_nascimento": "2018-08-10",
+    "nacionalidade": "Portugal",
+    "numero_camisola": null
+  },
+  {
+    "nome": "Tom├ís Ferreira Temporão",
+    "licenca": "314682",
+    "equipa": "Sub-14 Masculino",
+    "escalao": "Sub-14",
+    "sexo": "M",
+    "data_nascimento": "2013-09-21",
+    "nacionalidade": "Portugal",
+    "numero_camisola": null
+  },
+  {
+    "nome": "Valentina Mesquita Viães Cunha",
+    "licenca": "280894",
+    "equipa": "Sub-14 Feminino",
+    "escalao": "Sub-14",
+    "sexo": "F",
+    "data_nascimento": "2013-05-27",
+    "nacionalidade": "Portugal",
+    "numero_camisola": null
+  },
+  {
+    "nome": "Valentina Moreira Triquete da Silva",
+    "licenca": "305338",
+    "equipa": "Sub-14 Feminino",
+    "escalao": "Sub-14",
+    "sexo": "F",
+    "data_nascimento": "2012-05-24",
+    "nacionalidade": "Portugal",
+    "numero_camisola": null
+  },
+  {
+    "nome": "Vasco Lobão Moreno Marques Severino",
+    "licenca": "282951",
+    "equipa": "Sub-16 Masculino",
+    "escalao": "Sub-16",
+    "sexo": "M",
+    "data_nascimento": "2010-09-10",
+    "nacionalidade": "Portugal",
+    "numero_camisola": null
+  },
+  {
+    "nome": "Vicente Henrique Marta Rodrigues",
+    "licenca": "288605",
+    "equipa": "Sub-14 Masculino",
+    "escalao": "Sub-14",
+    "sexo": "M",
+    "data_nascimento": "2013-06-24",
+    "nacionalidade": "Portugal",
+    "numero_camisola": null
+  },
+  {
+    "nome": "Vitória Pereira da Cruz Vaz",
+    "licenca": "314899",
+    "equipa": "Mini 8 Feminino",
+    "escalao": "Mini 8",
+    "sexo": "F",
+    "data_nascimento": "2021-02-04",
+    "nacionalidade": "Portugal",
+    "numero_camisola": null
+  },
+  {
+    "nome": "Yair Garat AB Viana do Castelo Basket Clube de Valença Mini 12 Masculino 2025/2026 FBP 2015-10-20 Argentina",
+    "licenca": "314417",
+    "equipa": "Mini 12 Masculino",
+    "escalao": "Mini 12",
+    "sexo": "M",
+    "data_nascimento": "2015-10-20",
+    "nacionalidade": "Argentina",
+    "numero_camisola": null
+  },
+  {
+    "nome": "Yara Gomes da Costa",
+    "licenca": "287284",
+    "equipa": "Mini 12 Feminino",
+    "escalao": "Mini 12",
+    "sexo": "F",
+    "data_nascimento": "2014-01-04",
+    "nacionalidade": "--",
+    "numero_camisola": null
+  }
+]

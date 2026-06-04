@@ -1,0 +1,1106 @@
+﻿Listagem Jogadores
+N┬║
+Licen├ºa
+Nome Associa├º├úo Clube Escal├úo Sexo ├ëpoca Estatuto Data
+Nascimento
+Nacionalid
+257862 Aaron
+Gonzalez
+Moreira
+AB Viana do
+Castelo
+Basket
+Clube
+de
+Valen├ºa
+Sub 16 Masculino 2025/2026 FBP 2010-08-20 Espanha
+154145 Andre
+Freitas
+Carvalho
+AB Viana do
+Castelo
+Basket
+Clube
+de
+Valen├ºa
+S├®nior Masculino 2025/2026 FBP 1991-06-28 Portugal
+314897 Anita de
+Melo
+Domingues
+Oliveira
+AB Viana do
+Castelo
+Basket
+Clube
+de
+Valen├ºa
+Baby-
+Basket
+Feminino 2025/2026 FBP 2021-07-09 Portugal
+258188 Ariel
+Meireles
+Drumond
+AB Viana do
+Castelo
+Basket
+Clube
+de
+Valen├ºa
+S├®nior Masculino 2025/2026 Sem FBP
+Comunit├írio
+1998-10-12 Brasil
+306985 Arthur
+Henrick
+Silva F├®lix
+AB Viana do
+Castelo
+Basket
+Clube
+de
+Valen├ºa
+Sub 16 Masculino 2025/2026 Sem FBP
+Comunit├írio
+2011-12-09 Brasil
+296270 Arthur
+Vinicius de
+Oliveira
+Teixeira
+AB Viana do
+Castelo
+Basket
+Clube
+de
+Valen├ºa
+Sub 16 Masculino 2025/2026 Sem FBP
+Comunit├írio
+2010-05-05 Portugal
+309963 Brian
+Quinti├úo
+Xavier
+AB Viana do
+Castelo
+Basket
+Clube
+de
+Valen├ºa
+Mini 12 Masculino 2025/2026 FBP 2015-12-05 Portugal
+286305 Caetana
+Preto Lopez
+AB Viana do
+Castelo
+Basket
+Clube
+de
+Valen├ºa
+Mini 12 Feminino 2025/2026 FBP 2014-09-25 Portugal
+316274 Camila
+Alvez Rei
+AB Viana do
+Castelo
+Basket
+Clube
+de
+Valen├ºa
+Mini 10 Feminino 2025/2026 FBP 2016-04-04 Portugal
+281029 Camila
+Pereira
+Duro
+AB Viana do
+Castelo
+Basket
+Clube
+de
+Valen├ºa
+Sub 14 Feminino 2025/2026 FBP 2012-04-30 Portugal
+290412 Carl
+Michael
+Ara├║jo da
+Costa
+AB Viana do
+Castelo
+Basket
+Clube
+de
+Valen├ºa
+Mini 8 Masculino 2025/2026 FBP 2018-03-11 Portugal
+305332 Carolina
+Magalh├úes
+Alves da
+Silva
+AB Viana do
+Castelo
+Basket
+Clube
+de
+Valen├ºa
+Mini 12 Feminino 2025/2026 FBP 2014-05-30 Portugal
+311419 Catarina
+Calheiros
+Ferreira do
+Carmo
+AB Viana do
+Castelo
+Basket
+Clube
+de
+Valen├ºa
+Mini 8 Feminino 2025/2026 FBP 2018-07-18 Portugal
+289877 Conrado
+Basso
+Prochmann
+AB Viana do
+Castelo
+Basket
+Clube
+de
+Valen├ºa
+S├®nior Masculino 2025/2026 FBP 2006-02-14 Brasil
+275037 D├ícil
+T├íboas
+Rodrigues
+AB Viana do
+Castelo
+Basket
+Clube
+de
+Valen├ºa
+Sub 14 Feminino 2025/2026 FBP 2012-02-24 Portugal
+281207 David
+Lob├úo
+Moreno
+Marques
+Severino
+AB Viana do
+Castelo
+Basket
+Clube
+de
+Valen├ºa
+Sub 14 Masculino 2025/2026 FBP 2013-05-05 Portugal
+309964 Dinis
+Miguel
+Pereira
+AB Viana do
+Castelo
+Basket
+Clube
+de
+Baby-
+Basket
+Masculino 2025/2026 FBP 2020-12-21 Portugal
+
+-- 1 of 6 --
+
+N┬║
+Licen├ºa
+Nome Associa├º├úo Clube Escal├úo Sexo ├ëpoca Estatuto Data
+Nascimento
+Nacionalid
+Fernandes Valen├ºa
+314903 Diogo
+Afonso
+Gomes Reis
+Mota
+AB Viana do
+Castelo
+Basket
+Clube
+de
+Valen├ºa
+Mini 8 Masculino 2025/2026 FBP 2018-12-01 Portugal
+262656 Diogo
+Freitas
+Goncalves
+AB Viana do
+Castelo
+Basket
+Clube
+de
+Valen├ºa
+Sub 16 Masculino 2025/2026 FBP 2010-03-15 Portugal
+305333 Diogo
+Magalh├úes
+Alves da
+Silva
+AB Viana do
+Castelo
+Basket
+Clube
+de
+Valen├ºa
+Mini 10 Masculino 2025/2026 FBP 2017-02-09 Portugal
+294282 Diogo
+Miguel
+Mota
+Moreira
+AB Viana do
+Castelo
+Basket
+Clube
+de
+Valen├ºa
+Mini 10 Masculino 2025/2026 FBP 2017-04-19 Portugal
+295310 Duarte
+Louren├ºo
+Gomes
+AB Viana do
+Castelo
+Basket
+Clube
+de
+Valen├ºa
+Mini 12 Masculino 2025/2026 FBP 2015-12-16 Portugal
+118558 Edgar
+Amorim
+Ribeiro
+AB Viana do
+Castelo
+Basket
+Clube
+de
+Valen├ºa
+S├®nior Masculino 2025/2026 FBP 1991-02-16 Portugal
+300436 Edgar Roda
+Ferreira
+AB Viana do
+Castelo
+Basket
+Clube
+de
+Valen├ºa
+Sub 16 Masculino 2025/2026 Sem FBP
+Comunit├írio
+2010-12-13 Portugal
+309004 Esperan├ºa
+Silva
+Moreira
+AB Viana do
+Castelo
+Basket
+Clube
+de
+Valen├ºa
+Mini 12 Feminino 2025/2026 FBP 2015-03-03 Portugal
+310912 Eva
+Geraldes
+Meixeiro
+AB Viana do
+Castelo
+Basket
+Clube
+de
+Valen├ºa
+Sub 14 Feminino 2025/2026 Sem FBP
+Comunit├írio
+2012-12-09 Portugal
+317277 Felipe Nejar
+Pfeiffer
+AB Viana do
+Castelo
+Basket
+Clube
+de
+Valen├ºa
+Sub 16 Masculino 2025/2026 Sem FBP
+Comunit├írio
+2010-07-04 Brasil
+311418 Filipe
+Carlos
+Teixeira da
+Silva
+AB Viana do
+Castelo
+Basket
+Clube
+de
+Valen├ºa
+Mini 12 Masculino 2025/2026 FBP 2014-04-17 Portugal
+197556 Filipe
+Gomes
+Teixeira
+AB Viana do
+Castelo
+Basket
+Clube
+de
+Valen├ºa
+S├®nior Masculino 2025/2026 FBP 1993-08-05 Portugal
+277113 Francisca
+Freitas
+Concei├ºao
+Aguiar
+AB Viana do
+Castelo
+Basket
+Clube
+de
+Valen├ºa
+Sub 14 Feminino 2025/2026 FBP 2012-03-30 Portugal
+285288 Francisco
+Ferreira de
+S├í
+Fernandes
+AB Viana do
+Castelo
+Basket
+Clube
+de
+Valen├ºa
+Sub 14 Masculino 2025/2026 FBP 2013-09-27 Portugal
+312493 Francisco
+Maria
+Soares da
+Costa
+Lob├úo
+Moreno
+AB Viana do
+Castelo
+Basket
+Clube
+de
+Valen├ºa
+Baby-
+Basket
+Masculino 2025/2026 FBP 2021-03-23 Portugal
+309786 Gon├ºalo
+Domingues
+Sousa
+AB Viana do
+Castelo
+Basket
+Clube
+de
+Valen├ºa
+Mini 8 Masculino 2025/2026 FBP 2018-08-10 Portugal
+145515 Gon├ºalo
+Gon├ºalves
+Oliveira
+AB Viana do
+Castelo
+Basket
+Clube
+de
+S├®nior Masculino 2025/2026 FBP 1989-04-24 Portugal
+
+-- 2 of 6 --
+
+N┬║
+Licen├ºa
+Nome Associa├º├úo Clube Escal├úo Sexo ├ëpoca Estatuto Data
+Nascimento
+Nacionalid
+Valen├ºa
+307437 Guilherme
+Veloso
+Peixoto
+AB Viana do
+Castelo
+Basket
+Clube
+de
+Valen├ºa
+Mini 8 Masculino 2025/2026 FBP 2018-01-05 Portugal
+275181 Gustavo
+Pereira
+Cruz
+Esteves
+AB Viana do
+Castelo
+Basket
+Clube
+de
+Valen├ºa
+Mini 12 Masculino 2025/2026 FBP 2014-08-15 Portugal
+287038 Henrique
+Gon├ºalves
+Castel├úo
+Moreira
+AB Viana do
+Castelo
+Basket
+Clube
+de
+Valen├ºa
+Mini 10 Masculino 2025/2026 FBP 2017-09-27 Portugal
+262822 Higor Rui
+Coutinho
+AB Viana do
+Castelo
+Basket
+Clube
+de
+Valen├ºa
+S├®nior Masculino 2025/2026 Sem FBP
+Comunit├írio
+1996-01-27 Brasil
+194330 Hugo
+Miguel
+Ara├║jo
+Ferreira
+AB Viana do
+Castelo
+Basket
+Clube
+de
+Valen├ºa
+S├®nior Masculino 2025/2026 FBP 2000-07-19 Portugal
+286422 Iris Lima
+Baptista
+AB Viana do
+Castelo
+Basket
+Clube
+de
+Valen├ºa
+Sub 14 Feminino 2025/2026 FBP 2012-05-16 Portugal
+305337 Ivan Parciu AB Viana do
+Castelo
+Basket
+Clube
+de
+Valen├ºa
+Mini 10 Masculino 2025/2026 FBP 2016-01-30 Mold├ívia
+197392 Jo├úo Carlos
+Reis Costa
+AB Viana do
+Castelo
+Basket
+Clube
+de
+Valen├ºa
+S├®nior Masculino 2025/2026 FBP 1999-06-26 Portugal
+307731 Jos├® Lopez
+de Lima
+AB Viana do
+Castelo
+Basket
+Clube
+de
+Valen├ºa
+Mini 8 Masculino 2025/2026 FBP 2018-11-05 Portugal
+316344 Julia de
+Oliveira
+Dionizio
+AB Viana do
+Castelo
+Basket
+Clube
+de
+Valen├ºa
+Mini 12 Feminino 2025/2026 FBP 2015-03-11 Portugal
+275771 Lara da
+Cunha
+Gomes
+AB Viana do
+Castelo
+Basket
+Clube
+de
+Valen├ºa
+Sub 14 Feminino 2025/2026 FBP 2012-02-08 Portugal
+275772 Leonor
+Baranda
+Soutelo
+AB Viana do
+Castelo
+Basket
+Clube
+de
+Valen├ºa
+Sub 14 Feminino 2025/2026 FBP 2012-09-11 Portugal
+286304 Leonor
+Gon├ºalves
+Castel├úo
+Moreira
+AB Viana do
+Castelo
+Basket
+Clube
+de
+Valen├ºa
+Mini 12 Feminino 2025/2026 FBP 2014-03-13 Portugal
+314905 Lourenzo
+Murce
+Cosvosli
+AB Viana do
+Castelo
+Basket
+Clube
+de
+Valen├ºa
+Mini 8 Masculino 2025/2026 FBP 2019-02-16 Brasil
+318653 Luz
+Campos
+Ribeiro
+AB Viana do
+Castelo
+Basket
+Clube
+de
+Valen├ºa
+Mini 8 Feminino 2025/2026 FBP 2018-04-21 Portugal
+177263 Marco
+Andr├®
+Barros
+Ca├ºador
+Alves
+AB Viana do
+Castelo
+Basket
+Clube
+de
+Valen├ºa
+S├®nior Masculino 2025/2026 FBP 1995-11-27 Portugal
+277137 Marco
+Conde
+AB Viana do
+Castelo
+Basket
+Clube
+de
+Valen├ºa
+Sub 16 Masculino 2025/2026 FBP 2010-04-20 Portugal
+
+-- 3 of 6 --
+
+N┬║
+Licen├ºa
+Nome Associa├º├úo Clube Escal├úo Sexo ├ëpoca Estatuto Data
+Nascimento
+Nacionalid
+293586 Maria In├¬s
+Mendes
+Barreiro
+AB Viana do
+Castelo
+Basket
+Clube
+de
+Valen├ºa
+Mini 10 Feminino 2025/2026 FBP 2017-02-25 Portugal
+318639 Mariema
+Filipa
+Cardoso
+Santos
+AB Viana do
+Castelo
+Basket
+Clube
+de
+Valen├ºa
+Mini 8 Feminino 2025/2026 FBP 2018-03-24 Portugal
+316341 Martim
+Marques
+Soutelo
+AB Viana do
+Castelo
+Basket
+Clube
+de
+Valen├ºa
+Mini 12 Masculino 2025/2026 FBP 2015-02-22 Portugal
+280817 Mateus
+Cruz Lemos
+AB Viana do
+Castelo
+Basket
+Clube
+de
+Valen├ºa
+S├®nior Masculino 2025/2026 FBP 2007-11-28 Portugal
+316271 Matilde
+Alves Rei
+AB Viana do
+Castelo
+Basket
+Clube
+de
+Valen├ºa
+Mini 8 Feminino 2025/2026 FBP 2018-10-08 Portugal
+310913 Matilde
+Mejias
+Rodrigues
+Correia
+AB Viana do
+Castelo
+Basket
+Clube
+de
+Valen├ºa
+Mini 8 Feminino 2025/2026 FBP 2018-05-03 Portugal
+314412 Matilde
+Rodrigues
+de Sousa
+AB Viana do
+Castelo
+Basket
+Clube
+de
+Valen├ºa
+Mini 12 Feminino 2025/2026 FBP 2015-07-30 Portugal
+317044 Mauro
+Cunha
+Alves
+AB Viana do
+Castelo
+Basket
+Clube
+de
+Valen├ºa
+Sub 14 Masculino 2025/2026 Sem FBP
+Comunit├írio
+2012-02-12 Portugal
+285289 Miguel
+Carvalho
+Morais
+AB Viana do
+Castelo
+Basket
+Clube
+de
+Valen├ºa
+Mini 8 Masculino 2025/2026 FBP 2018-01-15 Portugal
+301189 Miguel da
+Cruz
+Fernandes
+AB Viana do
+Castelo
+Basket
+Clube
+de
+Valen├ºa
+Mini 8 Masculino 2025/2026 FBP 2019-04-09 Portugal
+290418 Miguel
+Louren├ºo
+Gomes
+AB Viana do
+Castelo
+Basket
+Clube
+de
+Valen├ºa
+Sub 14 Masculino 2025/2026 FBP 2012-11-27 Portugal
+285577 Miguel
+Viana da
+Costa
+Nascimento
+AB Viana do
+Castelo
+Basket
+Clube
+de
+Valen├ºa
+Mini 10 Masculino 2025/2026 FBP 2017-11-07 Portugal
+281222 Nerea
+Gonzalez
+Moreira
+AB Viana do
+Castelo
+Basket
+Clube
+de
+Valen├ºa
+Mini 12 Feminino 2025/2026 FBP 2014-05-10 Espanha
+279418 NFamara
+Conde
+AB Viana do
+Castelo
+Basket
+Clube
+de
+Valen├ºa
+S├®nior Masculino 2025/2026 Sem FBP
+Comunit├írio
+1995-10-29 Guin├®
+317162 Nicholas
+Saboleski
+Lima
+AB Viana do
+Castelo
+Basket
+Clube
+de
+Valen├ºa
+Mini 10 Masculino 2025/2026 FBP 2017-09-30 Canada
+262995 Nicolas
+Lorenzo
+Montes
+AB Viana do
+Castelo
+Basket
+Clube
+de
+Valen├ºa
+S├®nior Masculino 2025/2026 Sem FBP
+Comunit├írio
+1975-05-11 Espanha
+280909 Nicole
+Kyara
+Rodriguez
+Gomes
+AB Viana do
+Castelo
+Basket
+Clube
+de
+Valen├ºa
+Mini 12 Feminino 2025/2026 FBP 2014-08-09 Portugal
+297892 Oleksander
+Melnyk
+AB Viana do
+Castelo
+Basket
+Clube
+Mini 10 Masculino 2025/2026 FBP 2016-10-14 Portugal
+
+-- 4 of 6 --
+
+N┬║
+Licen├ºa
+Nome Associa├º├úo Clube Escal├úo Sexo ├ëpoca Estatuto Data
+Nascimento
+Nacionalid
+de
+Valen├ºa
+313964 Olivia
+Gonzales
+Cunha
+AB Viana do
+Castelo
+Basket
+Clube
+de
+Valen├ºa
+Baby-
+Basket
+Feminino 2025/2026 FBP 2020-04-25 Portugal
+305582 Olivia Hand
+Azevedo
+AB Viana do
+Castelo
+Basket
+Clube
+de
+Valen├ºa
+Mini 10 Feminino 2025/2026 FBP 2017-03-01 Portugal
+293910 Pedro
+Miguel
+Pereira
+Fernandes
+AB Viana do
+Castelo
+Basket
+Clube
+de
+Valen├ºa
+Mini 10 Masculino 2025/2026 FBP 2017-02-01 Portugal
+315091 Reazen
+Thakur
+AB Viana do
+Castelo
+Basket
+Clube
+de
+Valen├ºa
+Mini 12 Masculino 2025/2026 FBP 2014-04-16 Nepal
+296492 Ricardo
+Alves
+Gonzalez
+AB Viana do
+Castelo
+Basket
+Clube
+de
+Valen├ºa
+Mini 8 Masculino 2025/2026 FBP 2019-01-24 Portugal
+314043 Ricardo
+Seixas
+Cacho
+AB Viana do
+Castelo
+Basket
+Clube
+de
+Valen├ºa
+Baby-
+Basket
+Masculino 2025/2026 FBP 2021-08-22 Portugal
+305334 Rodrigo
+Magalh├úes
+Alves da
+Silva
+AB Viana do
+Castelo
+Basket
+Clube
+de
+Valen├ºa
+Baby-
+Basket
+Masculino 2025/2026 FBP 2020-04-06 Portugal
+314917 Rodrigo
+Martins
+Viana
+AB Viana do
+Castelo
+Basket
+Clube
+de
+Valen├ºa
+Baby-
+Basket
+Masculino 2025/2026 FBP 2021-09-30 Portugal
+291276 Rodrigo
+Pires
+Domingues
+AB Viana do
+Castelo
+Basket
+Clube
+de
+Valen├ºa
+Sub 14 Masculino 2025/2026 FBP 2013-12-12 Portugal
+176075 Rosangelo
+Carvalho
+Barros
+AB Viana do
+Castelo
+Basket
+Clube
+de
+Valen├ºa
+S├®nior Masculino 2025/2026 FBP 1989-05-14 Cabo Verde
+161876 Rui Pedro
+Fernandes
+Dantas
+AB Viana do
+Castelo
+Basket
+Clube
+de
+Valen├ºa
+S├®nior Masculino 2025/2026 FBP 1993-02-24 Portugal
+285299 Salvador
+Moreira
+Triquete
+Silva
+AB Viana do
+Castelo
+Basket
+Clube
+de
+Valen├ºa
+Sub 14 Masculino 2025/2026 FBP 2012-05-24 Portugal
+312200 Samuel
+Gomes de
+Lima
+Pimenta
+Bueno
+AB Viana do
+Castelo
+Basket
+Clube
+de
+Valen├ºa
+Sub 14 Masculino 2025/2026 Sem FBP
+Comunit├írio
+2012-01-24 Brasil
+297251 Santiago
+Gonzalez
+Cunha
+AB Viana do
+Castelo
+Basket
+Clube
+de
+Valen├ºa
+Mini 10 Masculino 2025/2026 FBP 2017-03-21 Portugal
+314422 Santiago
+Miguel
+Guterres
+dos Santos
+AB Viana do
+Castelo
+Basket
+Clube
+de
+Valen├ºa
+Mini 10 Masculino 2025/2026 FBP 2017-07-30 Portugal
+290417 Santiago
+Seixas
+Cacho
+AB Viana do
+Castelo
+Basket
+Clube
+de
+Valen├ºa
+Mini 8 Masculino 2025/2026 FBP 2018-10-31 Portugal
+285291 Santiago
+Sousa
+Carvalho
+AB Viana do
+Castelo
+Basket
+Clube
+de
+Mini 10 Masculino 2025/2026 FBP 2016-02-15 Portugal
+
+-- 5 of 6 --
+
+N┬║
+Licen├ºa
+Nome Associa├º├úo Clube Escal├úo Sexo ├ëpoca Estatuto Data
+Nascimento
+Nacionalid
+Valen├ºa
+280907 Sofia Pinto
+Rodrigues
+AB Viana do
+Castelo
+Basket
+Clube
+de
+Valen├ºa
+Mini 12 Feminino 2025/2026 FBP 2014-05-12 Portugal
+314911 Sofia Vilar
+da Costa
+AB Viana do
+Castelo
+Basket
+Clube
+de
+Valen├ºa
+Mini 8 Feminino 2025/2026 FBP 2018-07-06 Portugal
+305620 S├│nia
+Yevsyeyeva
+AB Viana do
+Castelo
+Basket
+Clube
+de
+Valen├ºa
+Sub 14 Feminino 2025/2026 Sem FBP
+Comunit├írio
+2012-01-26 Portugal
+284452 Tiago
+Martins
+Viana
+AB Viana do
+Castelo
+Basket
+Clube
+de
+Valen├ºa
+Mini 10 Masculino 2025/2026 FBP 2016-07-04 Portugal
+305576 Tom Carlo
+Hand
+Azevedo
+AB Viana do
+Castelo
+Basket
+Clube
+de
+Valen├ºa
+Mini 8 Masculino 2025/2026 FBP 2019-10-25 Portugal
+309787 Tom├ís
+Domingues
+Sousa
+AB Viana do
+Castelo
+Basket
+Clube
+de
+Valen├ºa
+Mini 8 Masculino 2025/2026 FBP 2018-08-10 Portugal
+314682 Tom├ís
+Ferreira
+Tempor├úo
+AB Viana do
+Castelo
+Basket
+Clube
+de
+Valen├ºa
+Sub 14 Masculino 2025/2026 Sem FBP
+Comunit├írio
+2013-09-21 Portugal
+280894 Valentina
+Mesquita
+Vi├úes
+Cunha
+AB Viana do
+Castelo
+Basket
+Clube
+de
+Valen├ºa
+Sub 14 Feminino 2025/2026 FBP 2013-05-27 Portugal
+305338 Valentina
+Moreira
+Triquete da
+Silva
+AB Viana do
+Castelo
+Basket
+Clube
+de
+Valen├ºa
+Sub 14 Feminino 2025/2026 Sem FBP
+Comunit├írio
+2012-05-24 Portugal
+282951 Vasco
+Lob├úo
+Moreno
+Marques
+Severino
+AB Viana do
+Castelo
+Basket
+Clube
+de
+Valen├ºa
+Sub 16 Masculino 2025/2026 FBP 2010-09-10 Portugal
+288605 Vicente
+Henrique
+Marta
+Rodrigues
+AB Viana do
+Castelo
+Basket
+Clube
+de
+Valen├ºa
+Sub 14 Masculino 2025/2026 FBP 2013-06-24 Portugal
+314899 Vit├│ria
+Pereira da
+Cruz Vaz
+AB Viana do
+Castelo
+Basket
+Clube
+de
+Valen├ºa
+Baby-
+Basket
+Feminino 2025/2026 FBP 2021-02-04 Portugal
+314417 Yair Garat AB Viana do
+Castelo
+Basket
+Clube
+de
+Valen├ºa
+Mini 12 Masculino 2025/2026 FBP 2015-10-20 Argentina
+287284 Yara
+Gomes da
+Costa
+AB Viana do
+Castelo
+Basket
+Clube
+de
+Valen├ºa
+Mini 12 Feminino 2025/2026 FBP 2014-01-04 Portugal
+
+-- 6 of 6 --
+
