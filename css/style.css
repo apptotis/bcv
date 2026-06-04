@@ -224,7 +224,10 @@ img {
 
 @media (max-width: 768px) {
     .brand-title-nav {
-        display: none; /* Show only logo on mobile to prevent overlap */
+        display: inline-block;
+        font-size: 0.85rem;
+        line-height: 1.2;
+        white-space: nowrap;
     }
 }
 
@@ -1513,7 +1516,38 @@ img {
 }
 @media (max-width: 480px) {
     .grid-4 {
-        grid-template-columns: 1fr;
+        grid-template-columns: repeat(2, 1fr);
+        gap: 15px;
+    }
+}
+
+/* Ajustes Mobile Adicionais para Plantel e Botões */
+@media (max-width: 768px) {
+    #btn-back-teams {
+        margin-bottom: 1rem !important;
+        padding: 8px 12px;
+        font-size: 0.85rem;
+    }
+    
+    .team-roster-section {
+        margin-top: 2rem !important;
+    }
+    
+    .roster-section-title {
+        font-size: 1.5rem;
+        margin-bottom: 1.5rem;
+    }
+    
+    .player-name {
+        font-size: 1rem;
+    }
+    
+    .player-role {
+        font-size: 0.75rem;
+    }
+    
+    .player-info {
+        padding: 1rem 0.5rem;
     }
 }
 
