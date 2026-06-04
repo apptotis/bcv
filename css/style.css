@@ -816,7 +816,7 @@ img {
     text-align: center;
     padding-top: 2rem;
     border-top: 1px solid rgba(255, 255, 255, 0.05);
-    color: var(--text-secondary);
+    color: #ffffff;
     font-size: 0.85rem;
 }
 
