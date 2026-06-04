@@ -1357,4 +1357,158 @@ img {
     color: var(--text-secondary);
 }
 
+}
+
+/* ==========================================================================
+   Team Detail View & Player Cards
+   ========================================================================== */
+.team-detail-header {
+    text-align: center;
+    margin-bottom: var(--spacing-xl);
+}
+
+.team-hero-title {
+    font-size: clamp(2rem, 5vw, 3.5rem);
+    color: var(--accent-primary);
+    margin-bottom: 0.5rem;
+    font-family: var(--font-heading);
+    font-weight: 900;
+    text-transform: uppercase;
+}
+
+.team-hero-subtitle {
+    font-size: 1.2rem;
+    color: var(--text-secondary);
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 2px;
+    margin-bottom: 2rem;
+}
+
+.team-hero-photo-container img {
+    width: 100%;
+    max-height: 500px;
+    object-fit: cover;
+    border-radius: var(--border-radius-md);
+    box-shadow: var(--shadow-md);
+    border: 2px solid var(--border-color);
+}
+
+.roster-section-title {
+    font-size: 2rem;
+    color: var(--text-primary);
+    border-bottom: 4px solid var(--accent-primary);
+    display: inline-block;
+    padding-bottom: 0.5rem;
+    margin-bottom: 2rem;
+}
+
+.player-grid {
+    gap: 30px;
+}
+
+.player-card {
+    background: #ffffff;
+    border: 1px solid var(--border-color);
+    border-radius: var(--border-radius-md);
+    overflow: hidden;
+    transition: var(--transition-normal);
+    box-shadow: var(--shadow-sm);
+    position: relative;
+    text-align: center;
+    display: flex;
+    flex-direction: column;
+}
+
+.player-card:hover {
+    transform: translateY(-5px);
+    box-shadow: var(--shadow-md);
+    border-color: var(--accent-primary);
+}
+
+.player-photo-container {
+    width: 100%;
+    aspect-ratio: 3/4;
+    background: var(--bg-secondary);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    overflow: hidden;
+    position: relative;
+}
+
+.player-photo {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    transition: transform var(--transition-normal);
+}
+
+.player-card:hover .player-photo {
+    transform: scale(1.05);
+}
+
+.player-photo-placeholder {
+    font-size: 4rem;
+    color: rgba(92, 45, 145, 0.2);
+}
+
+.player-number {
+    position: absolute;
+    top: 10px;
+    left: 10px;
+    background: var(--accent-primary);
+    color: #ffffff;
+    font-family: var(--font-heading);
+    font-size: 1.2rem;
+    font-weight: 900;
+    padding: 5px 10px;
+    border-radius: var(--border-radius-sm);
+    box-shadow: var(--shadow-sm);
+    z-index: 2;
+}
+
+.player-info {
+    padding: 1.5rem 1rem;
+    background: #ffffff;
+    border-top: 1px solid var(--border-color);
+    flex-grow: 1;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+}
+
+.player-name {
+    font-family: var(--font-heading);
+    font-size: 1.2rem;
+    font-weight: 700;
+    color: var(--text-primary);
+    text-transform: uppercase;
+    margin-bottom: 0.25rem;
+}
+
+.player-role {
+    font-size: 0.9rem;
+    color: var(--text-secondary);
+    text-transform: uppercase;
+    letter-spacing: 1px;
+}
+
+/* Responsividade adicional para Player Grid */
+@media (max-width: 1024px) {
+    .grid-4 {
+        grid-template-columns: repeat(3, 1fr);
+    }
+}
+@media (max-width: 768px) {
+    .grid-4 {
+        grid-template-columns: repeat(2, 1fr);
+    }
+}
+@media (max-width: 480px) {
+    .grid-4 {
+        grid-template-columns: 1fr;
+    }
+}
+
 /* End of Stylesheet */

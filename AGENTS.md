@@ -41,4 +41,6 @@
 - [2026-06-04] Gemini: Remoção completa da aba, menu e lógica JavaScript relacionados ao "Sincronizar FPB" da página admin.
 - [2026-06-04] Gemini: Atualização do formulário e tabela de Atletas no Admin para incluir os novos campos (epoca, funcao, equipafpb, equipabcv1, equipabcv2).
 - [2026-06-04] Gemini: Criação completa do módulo Gestão de Equipas BCV no Admin, incluindo CRUD na tabela equipasbcv com upload de foto.
-- [2026-06-04] Gemini: Criação da página pública Equipas (equipas.html) com listagem das equipas da época atual e funcionalidade "Plantel" (atletas agrupados por funções).
+- [2026-06-04] Gemini: Criação da página pública Equipas (equipas.html) com listagem das equipas da época atual.
+- [2026-06-04] Gemini: Correção de bug no menu lateral que limitava a exibição da lista de equipas e remoção do link genérico 'Todas as Equipas'.
+- [2026-06-04] Gemini: Reformulação da visualização de Plantel na página Equipas (equipas.html) para exibir um detalhe focado na equipa selecionada, com cartões individuais de jogador (foto, número, alcunha).

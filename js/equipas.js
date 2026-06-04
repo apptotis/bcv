@@ -2,8 +2,18 @@ document.addEventListener('DOMContentLoaded', async () => {
     const supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
     const grid = document.getElementById('equipas-grid');
     const loading = document.getElementById('equipas-loading');
+    const allTeamsView = document.getElementById('all-teams-view');
+    const teamDetailView = document.getElementById('team-detail-view');
 
     if (!grid) return;
+
+    // Voltar para a lista de equipas
+    const btnBack = document.getElementById('btn-back-teams');
+    if (btnBack) {
+        btnBack.addEventListener('click', () => {
+            window.location.href = 'equipas.html';
+        });
+    }
 
     try {
         let { data: equipas, error: errEquipas } = await supabaseClient
@@ -13,148 +23,161 @@ document.addEventListener('DOMContentLoaded', async () => {
 
         if (errEquipas) throw errEquipas;
 
-        // Ordenação customizada por Escalão
         const ordemEscalao = [
-            "Mini 8", 
-            "Mini 10", 
-            "Mini 12", 
-            "Sub-14", 
-            "Sub-16", 
-            "Sub-18", 
-            "Seniores", 
-            "Veteranos"
+            "Mini 8", "Mini 10", "Mini 12", "Sub-14", "Sub-16", "Sub-18", "Seniores", "Veteranos"
         ];
 
         if (equipas) {
             equipas.sort((a, b) => {
                 let indexA = ordemEscalao.indexOf(a.escalao);
                 let indexB = ordemEscalao.indexOf(b.escalao);
-                
-                // Se o escalão não estiver na lista, vai para o fim
                 if (indexA === -1) indexA = 999;
                 if (indexB === -1) indexB = 999;
-                
-                // Se o escalão for igual, desempata pelo sexo ou nome
-                if (indexA === indexB) {
-                    return a.nome.localeCompare(b.nome);
-                }
-                
+                if (indexA === indexB) return a.nome.localeCompare(b.nome);
                 return indexA - indexB;
             });
         }
 
-        // Filtro por ID da equipa caso venha no URL
         const urlParams = new URLSearchParams(window.location.search);
         const equipaIdFiltro = urlParams.get('equipaId');
-        if (equipaIdFiltro && equipas) {
-            equipas = equipas.filter(e => e.id === equipaIdFiltro);
-        }
 
-        // Buscar Atletas da mesma época
-        const { data: atletas, error: errAtletas } = await supabaseClient
-            .from('atletasbcv')
-            .select('*')
-            .eq('epoca', '2025-2026');
-
-        if (errAtletas) throw errAtletas;
-
-        loading.style.display = 'none';
-
-        if (!equipas || equipas.length === 0) {
-            grid.innerHTML = '<p style="grid-column: 1/-1; text-align: center; color: var(--text-secondary);">Ainda não existem equipas registadas para a época 2025-2026.</p>';
-            return;
-        }
-
-        equipas.forEach(equipa => {
-            const card = document.createElement('div');
-            card.className = 'equipa-card';
-
-            const fotoUrl = equipa.foto || 'https://via.placeholder.com/600x400?text=Sem+Foto';
-            const nomeStr = `${equipa.nome} (${equipa.escalao})`;
-
-            // Filtrar plantel da equipa
-            // O atleta pertence a esta equipa se equipabcv1 ou equipabcv2 for igual a "Nome (Escalão)"
-            const plantel = atletas.filter(a => a.equipabcv1 === nomeStr || a.equipabcv2 === nomeStr);
+        if (equipaIdFiltro) {
+            // ==========================================
+            // MODO: DETALHE DE EQUIPA
+            // ==========================================
+            if (allTeamsView) allTeamsView.style.display = 'none';
+            if (teamDetailView) teamDetailView.style.display = 'block';
             
-            // Separar Jogadores vs Resto (Treinador, Seccionista)
-            const jogadores = plantel.filter(a => a.funcao === 'Jogador' || a.funcao === 'Jogadora');
-            const equipaTecnica = plantel.filter(a => a.funcao !== 'Jogador' && a.funcao !== 'Jogadora');
+            const equipaSelecionada = equipas.find(e => e.id === equipaIdFiltro);
+            
+            if (!equipaSelecionada) {
+                teamDetailView.innerHTML = '<p>Equipa não encontrada.</p>';
+                return;
+            }
 
-            // Gerar HTML dos Jogadores
-            let htmlJogadores = '';
+            let escalaoDisplay = equipaSelecionada.escalao;
+            if (equipaSelecionada.sexo && equipaSelecionada.sexo !== 'Todos') {
+                escalaoDisplay += ` ${equipaSelecionada.sexo}`;
+            }
+
+            // Atualizar cabeçalho da equipa
+            document.getElementById('team-detail-title').innerText = equipaSelecionada.nome;
+            document.getElementById('team-detail-subtitle').innerText = `${escalaoDisplay} | Época 2025-2026`;
+            
+            const fotoUrl = equipaSelecionada.foto || 'https://via.placeholder.com/1200x500?text=Sem+Foto';
+            document.getElementById('team-detail-photo').innerHTML = `<img src="${fotoUrl}" alt="${equipaSelecionada.nome}">`;
+
+            // Buscar plantel
+            const nomeStr = `${equipaSelecionada.nome} (${equipaSelecionada.escalao})`;
+            const { data: atletas, error: errAtletas } = await supabaseClient
+                .from('atletasbcv')
+                .select('*')
+                .eq('epoca', '2025-2026')
+                .or(`equipabcv1.eq."${nomeStr}",equipabcv2.eq."${nomeStr}"`);
+
+            if (errAtletas) throw errAtletas;
+
+            const jogadores = atletas.filter(a => a.funcao === 'Jogador' || a.funcao === 'Jogadora');
+            const equipaTecnica = atletas.filter(a => a.funcao !== 'Jogador' && a.funcao !== 'Jogadora');
+
+            const playersGrid = document.getElementById('roster-players-grid');
+            const staffGrid = document.getElementById('roster-staff-grid');
+
             if (jogadores.length > 0) {
-                htmlJogadores += `<div class="plantel-group-title">Jogadores</div>`;
                 jogadores.forEach(j => {
-                    const fotoJ = j.foto ? `<img src="${j.foto}" class="plantel-foto">` : `<div class="plantel-foto">👤</div>`;
-                    const numJ = j.numero_camisola ? `<strong>#${j.numero_camisola}</strong> ` : '';
-                    htmlJogadores += `
-                        <div class="plantel-item">
-                            ${fotoJ}
-                            <div>${numJ}${j.nome} ${j.nickname ? `<small style="color:var(--accent-primary);">"${j.nickname}"</small>` : ''}</div>
+                    const card = document.createElement('div');
+                    card.className = 'player-card reveal active';
+                    
+                    const numBadge = j.numero_camisola ? `<div class="player-number">#${j.numero_camisola}</div>` : '';
+                    const photoHtml = j.foto 
+                        ? `<img src="${j.foto}" alt="${j.nome}" class="player-photo">` 
+                        : `<div class="player-photo-placeholder">👤</div>`;
+                    
+                    const nomeExibicao = j.nickname ? j.nickname : j.nome.split(' ')[0]; // Alcunha ou primeiro nome
+                    
+                    card.innerHTML = `
+                        <div class="player-photo-container">
+                            ${numBadge}
+                            ${photoHtml}
+                        </div>
+                        <div class="player-info">
+                            <h4 class="player-name">${nomeExibicao}</h4>
+                            <div class="player-role">${j.nome}</div>
                         </div>
                     `;
+                    playersGrid.appendChild(card);
                 });
+            } else {
+                document.getElementById('roster-players-section').style.display = 'none';
             }
 
-            // Gerar HTML da Equipa Técnica
-            let htmlStaff = '';
             if (equipaTecnica.length > 0) {
-                htmlStaff += `<div class="plantel-group-title">Equipa Técnica / Staff</div>`;
                 equipaTecnica.forEach(t => {
-                    const fotoT = t.foto ? `<img src="${t.foto}" class="plantel-foto">` : `<div class="plantel-foto">👤</div>`;
-                    htmlStaff += `
-                        <div class="plantel-item">
-                            ${fotoT}
-                            <div>
-                                ${t.nome} <br>
-                                <small style="color:var(--text-secondary);">${t.funcao}</small>
-                            </div>
+                    const card = document.createElement('div');
+                    card.className = 'player-card reveal active';
+                    
+                    const photoHtml = t.foto 
+                        ? `<img src="${t.foto}" alt="${t.nome}" class="player-photo">` 
+                        : `<div class="player-photo-placeholder">👤</div>`;
+                    
+                    card.innerHTML = `
+                        <div class="player-photo-container">
+                            ${photoHtml}
+                        </div>
+                        <div class="player-info">
+                            <h4 class="player-name">${t.nickname ? t.nickname : t.nome}</h4>
+                            <div class="player-role">${t.funcao}</div>
                         </div>
                     `;
+                    staffGrid.appendChild(card);
                 });
+            } else {
+                document.getElementById('roster-staff-section').style.display = 'none';
             }
 
-            const htmlPlantelVazio = (jogadores.length === 0 && equipaTecnica.length === 0) 
-                ? '<p style="color:var(--text-secondary); font-size:0.85rem; margin-top:10px;">Ainda não existem atletas registados nesta equipa.</p>' 
-                : '';
+        } else {
+            // ==========================================
+            // MODO: TODAS AS EQUIPAS
+            // ==========================================
+            // Reset no flex do allTeamsView que é flex-row em desktop devido a portal-container
+            if (allTeamsView) {
+                allTeamsView.style.display = window.innerWidth >= 992 ? 'flex' : 'flex'; 
+                // A classe .portal-container no media-query faz flex-direction: row
+            }
+            if (teamDetailView) teamDetailView.style.display = 'none';
+            loading.style.display = 'none';
 
-            let escalaoDisplay = equipa.escalao;
-            if (equipa.sexo && equipa.sexo !== 'Todos') {
-                escalaoDisplay += ` ${equipa.sexo}`;
+            if (!equipas || equipas.length === 0) {
+                grid.innerHTML = '<p style="grid-column: 1/-1; text-align: center; color: var(--text-secondary);">Ainda não existem equipas registadas para a época 2025-2026.</p>';
+                return;
             }
 
-            card.innerHTML = `
-                <img src="${fotoUrl}" alt="${equipa.nome}" class="equipa-foto">
-                <div class="equipa-info">
-                    <h3 style="color: var(--accent-primary); margin-bottom: 5px;">${equipa.nome}</h3>
-                    <p style="color: var(--text-secondary); font-weight: 600; margin-bottom: 10px;">${escalaoDisplay}</p>
-                    
-                    <button class="plantel-btn" onclick="togglePlantel('${equipa.id}')">Ver Plantel (${plantel.length})</button>
-                    
-                    <div id="plantel-${equipa.id}" class="plantel-container">
-                        ${htmlJogadores}
-                        ${htmlStaff}
-                        ${htmlPlantelVazio}
+            equipas.forEach(equipa => {
+                const card = document.createElement('div');
+                card.className = 'equipa-card';
+
+                const fotoUrl = equipa.foto || 'https://via.placeholder.com/600x400?text=Sem+Foto';
+                
+                let escalaoDisplay = equipa.escalao;
+                if (equipa.sexo && equipa.sexo !== 'Todos') {
+                    escalaoDisplay += ` ${equipa.sexo}`;
+                }
+
+                card.innerHTML = `
+                    <img src="${fotoUrl}" alt="${equipa.nome}" class="equipa-foto">
+                    <div class="equipa-info">
+                        <h3 style="color: var(--accent-primary); margin-bottom: 5px;">${equipa.nome}</h3>
+                        <p style="color: var(--text-secondary); font-weight: 600; margin-bottom: 15px;">${escalaoDisplay}</p>
+                        <button onclick="window.location.href='equipas.html?equipaId=${equipa.id}'" class="btn btn-primary" style="width: 100%;">Ver Plantel</button>
                     </div>
-                </div>
-            `;
+                `;
 
-            grid.appendChild(card);
-        });
+                grid.appendChild(card);
+            });
+        }
 
     } catch (error) {
         console.error('Erro ao carregar equipas:', error);
         loading.innerHTML = `<span style="color: red;">Erro ao carregar equipas: ${error.message}</span>`;
     }
 });
-
-function togglePlantel(id) {
-    const el = document.getElementById(`plantel-${id}`);
-    if (el) {
-        if (el.style.display === 'block') {
-            el.style.display = 'none';
-        } else {
-            el.style.display = 'block';
-        }
-    }
-}

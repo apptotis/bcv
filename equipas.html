@@ -194,7 +194,8 @@
         </div>
 
         <div class="container section" style="padding-top: var(--spacing-xl);">
-            <div class="portal-container">
+            <!-- Vista de Todas as Equipas -->
+            <div id="all-teams-view" class="portal-container">
                 
                 <!-- Coluna Principal (70%) -->
                 <div class="portal-main">
@@ -239,6 +240,34 @@
                 </aside>
 
             </div>
+            
+            <!-- Vista de Detalhe de Equipa (Oculta por omissão) -->
+            <div id="team-detail-view" style="display: none;">
+                <button id="btn-back-teams" class="btn btn-secondary" style="margin-bottom: 2rem;">&larr; Voltar às Equipas</button>
+                
+                <div class="team-detail-header reveal">
+                    <h2 id="team-detail-title" class="team-hero-title">Nome da Equipa</h2>
+                    <p id="team-detail-subtitle" class="team-hero-subtitle">Escalão | Época 2025-2026</p>
+                    <div id="team-detail-photo" class="team-hero-photo-container">
+                        <!-- Foto preenchida via JS -->
+                    </div>
+                </div>
+
+                <div id="roster-players-section" class="team-roster-section reveal" style="margin-top: 4rem;">
+                    <h3 class="roster-section-title">Plantel</h3>
+                    <div id="roster-players-grid" class="grid-4 player-grid">
+                        <!-- Jogadores preenchidos via JS -->
+                    </div>
+                </div>
+
+                <div id="roster-staff-section" class="team-roster-section reveal" style="margin-top: 4rem;">
+                    <h3 class="roster-section-title">Equipa Técnica</h3>
+                    <div id="roster-staff-grid" class="grid-4 player-grid">
+                        <!-- Staff preenchido via JS -->
+                    </div>
+                </div>
+            </div>
+
         </div>
     </main>
 
