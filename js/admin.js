@@ -857,7 +857,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         if (!equipasTableBody) return;
         
         try {
-            equipasTableBody.innerHTML = '<tr><td colspan="5" style="padding: 10px;">A carregar equipas...</td></tr>';
+            equipasTableBody.innerHTML = '<tr><td colspan="6" style="padding: 10px;">A carregar equipas...</td></tr>';
             
             const { data: equipas, error } = await supabase
                 .from('equipasbcv')
@@ -866,7 +866,7 @@ document.addEventListener('DOMContentLoaded', async () => {
 
             if (error) {
                 if (error.code === '42P01') {
-                    equipasTableBody.innerHTML = '<tr><td colspan="5" style="padding: 10px;">A tabela "equipasbcv" não existe na base de dados. Por favor, crie-a no Supabase.</td></tr>';
+                    equipasTableBody.innerHTML = '<tr><td colspan="6" style="padding: 10px;">A tabela "equipasbcv" não existe na base de dados. Por favor, crie-a no Supabase.</td></tr>';
                     return;
                 }
                 throw error;
@@ -877,7 +877,7 @@ document.addEventListener('DOMContentLoaded', async () => {
             
         } catch (error) {
             console.error("Erro ao carregar equipas:", error);
-            equipasTableBody.innerHTML = `<tr><td colspan="5" style="color: red; padding: 10px;">Erro: ${error.message}</td></tr>`;
+            equipasTableBody.innerHTML = `<tr><td colspan="6" style="color: red; padding: 10px;">Erro: ${error.message}</td></tr>`;
         }
     }
 
@@ -886,7 +886,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         equipasTableBody.innerHTML = '';
         
         if (!lista || lista.length === 0) {
-            equipasTableBody.innerHTML = '<tr><td colspan="5" style="padding: 10px;">Nenhuma equipa encontrada.</td></tr>';
+            equipasTableBody.innerHTML = '<tr><td colspan="6" style="padding: 10px;">Nenhuma equipa encontrada.</td></tr>';
             return;
         }
 
@@ -904,6 +904,7 @@ document.addEventListener('DOMContentLoaded', async () => {
                 <td style="padding: 10px;"><strong>${equipa.nome || '-'}</strong></td>
                 <td style="padding: 10px;">${equipa.epoca || '-'}</td>
                 <td style="padding: 10px;">${equipa.escalao || '-'}</td>
+                <td style="padding: 10px;">${equipa.sexo || '-'}</td>
                 <td style="padding: 10px; text-align: center;">
                     <button class="btn-action" onclick="window.editEquipa('${equipaJson}')" title="Editar">✏️</button>
                     <button class="btn-action delete" onclick="window.deleteEquipa('${equipa.id}')" title="Apagar">🗑️</button>
@@ -920,6 +921,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         document.getElementById('equipa-nome').value = equipa.nome || '';
         document.getElementById('equipa-epoca').value = equipa.epoca || '';
         document.getElementById('equipa-escalao').value = equipa.escalao || '';
+        document.getElementById('equipa-sexo').value = equipa.sexo || '';
         
         if (equipa.foto) {
             equipaFotoUrlInput.value = equipa.foto;
@@ -971,6 +973,7 @@ document.addEventListener('DOMContentLoaded', async () => {
                 nome: document.getElementById('equipa-nome').value,
                 epoca: document.getElementById('equipa-epoca').value,
                 escalao: document.getElementById('equipa-escalao').value,
+                sexo: document.getElementById('equipa-sexo').value,
                 foto: equipaFotoUrlInput.value
             };
 

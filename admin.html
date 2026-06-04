@@ -343,7 +343,7 @@
                                 </div>
                             </div>
                             
-                            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px;">
+                            <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 15px;">
                                 <div>
                                     <label style="display:block; margin-bottom:5px; font-size:0.8rem; color:#a0a0ab;">Época</label>
                                     <select id="equipa-epoca" required class="admin-input">
@@ -364,6 +364,15 @@
                                         <option value="Sub-18">Sub-18</option>
                                         <option value="Seniores">Seniores</option>
                                         <option value="Veteranos">Veteranos</option>
+                                    </select>
+                                </div>
+                                <div>
+                                    <label style="display:block; margin-bottom:5px; font-size:0.8rem; color:#a0a0ab;">Sexo</label>
+                                    <select id="equipa-sexo" required class="admin-input">
+                                        <option value="" disabled selected>Selecionar</option>
+                                        <option value="Masculino">Masculino</option>
+                                        <option value="Feminino">Feminino</option>
+                                        <option value="Todos">Todos</option>
                                     </select>
                                 </div>
                             </div>
@@ -397,6 +406,7 @@
                                     <th style="padding: 10px;">Nome da Equipa</th>
                                     <th style="padding: 10px;">Época</th>
                                     <th style="padding: 10px;">Escalão</th>
+                                    <th style="padding: 10px;">Sexo</th>
                                     <th style="padding: 10px; text-align: center; width: 120px;">Ações</th>
                                 </tr>
                             </thead>
