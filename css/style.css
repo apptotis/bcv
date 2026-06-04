@@ -995,6 +995,12 @@ img {
     }
 }
 
+@media (max-width: 991px) {
+    .portal-sidebar {
+        display: none;
+    }
+}
+
 .ad-widget {
     background: #ffffff;
     border: 1px solid var(--border-color);
