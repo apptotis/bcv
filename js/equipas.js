@@ -111,11 +111,16 @@ document.addEventListener('DOMContentLoaded', async () => {
                 ? '<p style="color:var(--text-secondary); font-size:0.85rem; margin-top:10px;">Ainda não existem atletas registados nesta equipa.</p>' 
                 : '';
 
+            let escalaoDisplay = equipa.escalao;
+            if (equipa.sexo && equipa.sexo !== 'Todos') {
+                escalaoDisplay += ` ${equipa.sexo}`;
+            }
+
             card.innerHTML = `
                 <img src="${fotoUrl}" alt="${equipa.nome}" class="equipa-foto">
                 <div class="equipa-info">
                     <h3 style="color: var(--accent-primary); margin-bottom: 5px;">${equipa.nome}</h3>
-                    <p style="color: var(--text-secondary); font-weight: 600; margin-bottom: 10px;">${equipa.escalao}</p>
+                    <p style="color: var(--text-secondary); font-weight: 600; margin-bottom: 10px;">${escalaoDisplay}</p>
                     
                     <button class="plantel-btn" onclick="togglePlantel('${equipa.id}')">Ver Plantel (${plantel.length})</button>
                     
