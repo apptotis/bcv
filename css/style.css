@@ -1374,7 +1374,7 @@ img {
 }
 
 .team-hero-title {
-    font-size: clamp(2rem, 5vw, 3.5rem);
+    font-size: 1.5rem; /* Igual ao tamanho do h3 Plantel */
     color: var(--accent-primary);
     margin-bottom: 0.5rem;
     font-family: var(--font-heading);
@@ -1525,9 +1525,7 @@ img {
 
 /* Ajustes Mobile Adicionais para Plantel e Botões */
 @media (max-width: 768px) {
-    .team-hero-title {
-        font-size: 1.6rem !important;
-    }
+    /* Removido o override do team-hero-title pois agora tem tamanho único (1.5rem) */
 
     #btn-back-teams {
         margin-bottom: 1rem !important;
