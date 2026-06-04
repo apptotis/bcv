@@ -359,11 +359,21 @@
                             <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px;">
                                 <div>
                                     <label style="display:block; margin-bottom:5px; font-size:0.8rem; color:#a0a0ab;">Época</label>
-                                    <input type="text" id="atleta-epoca" placeholder="Ex: 2025/2026" required class="admin-input">
+                                    <select id="atleta-epoca" required class="admin-input">
+                                        <option value="" disabled selected>Selecionar</option>
+                                        <option value="2025-2026">2025-2026</option>
+                                        <option value="2026-2027">2026-2027</option>
+                                    </select>
                                 </div>
                                 <div>
                                     <label style="display:block; margin-bottom:5px; font-size:0.8rem; color:#a0a0ab;">Função</label>
-                                    <input type="text" id="atleta-funcao" placeholder="Ex: Jogador, Treinador" required class="admin-input">
+                                    <select id="atleta-funcao" required class="admin-input">
+                                        <option value="" disabled selected>Selecionar</option>
+                                        <option value="Jogador">Jogador</option>
+                                        <option value="Treinador">Treinador</option>
+                                        <option value="Treinadora">Treinadora</option>
+                                        <option value="Seccionista">Seccionista</option>
+                                    </select>
                                 </div>
                             </div>
                             <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 15px;">
