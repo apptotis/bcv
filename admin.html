@@ -530,11 +530,47 @@
                         </form>
                     </div>
 
-                    <!-- Barra de Pesquisa -->
+                    <!-- Barra de Filtros -->
                     <div class="welcome-box" style="margin-bottom: 20px; padding: 15px; background: rgba(0,0,0,0.2);">
-                        <div style="position: relative;">
-                            <span style="position: absolute; left: 15px; top: 50%; transform: translateY(-50%); font-size: 1.2rem;">🔍</span>
-                            <input type="text" id="search-atleta" placeholder="Pesquisar atleta por nome, equipa ou nº de licença..." class="admin-input" style="margin-bottom: 0; padding-left: 45px; border-radius: 30px;">
+                        <h4 style="margin-bottom: 10px; color: #a0a0ab; font-size: 0.9rem;">Filtrar Atletas</h4>
+                        <div style="display: grid; grid-template-columns: 1fr 1fr 1fr 1fr auto; gap: 10px; align-items: end;">
+                            <div>
+                                <label style="display:block; margin-bottom:5px; font-size:0.8rem;">Escalão</label>
+                                <select id="filter-escalao" class="admin-input" style="margin-bottom: 0;">
+                                    <option value="">Todos</option>
+                                    <option value="Mini 8">Mini 8</option>
+                                    <option value="Mini 10">Mini 10</option>
+                                    <option value="Mini 12">Mini 12</option>
+                                    <option value="Sub-14">Sub-14</option>
+                                    <option value="Sub-16">Sub-16</option>
+                                    <option value="Sub-18">Sub-18</option>
+                                    <option value="Seniores">Seniores</option>
+                                    <option value="Veteranos">Veteranos</option>
+                                </select>
+                            </div>
+                            <div>
+                                <label style="display:block; margin-bottom:5px; font-size:0.8rem;">Equipa BCV 1</label>
+                                <select id="filter-equipabcv1" class="admin-input" style="margin-bottom: 0;">
+                                    <option value="">Todas</option>
+                                </select>
+                            </div>
+                            <div>
+                                <label style="display:block; margin-bottom:5px; font-size:0.8rem;">Equipa BCV 2</label>
+                                <select id="filter-equipabcv2" class="admin-input" style="margin-bottom: 0;">
+                                    <option value="">Todas</option>
+                                </select>
+                            </div>
+                            <div>
+                                <label style="display:block; margin-bottom:5px; font-size:0.8rem;">Sexo</label>
+                                <select id="filter-sexo" class="admin-input" style="margin-bottom: 0;">
+                                    <option value="">Ambos</option>
+                                    <option value="M">Masculino</option>
+                                    <option value="F">Feminino</option>
+                                </select>
+                            </div>
+                            <div>
+                                <button type="button" id="btn-clear-filters" class="btn-secondary" style="padding: 12px 15px; margin-bottom: 0;">Limpar</button>
+                            </div>
                         </div>
                     </div>
 

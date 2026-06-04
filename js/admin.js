@@ -1086,23 +1086,34 @@ document.addEventListener('DOMContentLoaded', async () => {
         if (!error && equipas) {
             const select1 = document.getElementById('atleta-equipabcv1');
             const select2 = document.getElementById('atleta-equipabcv2');
+            const filter1 = document.getElementById('filter-equipabcv1');
+            const filter2 = document.getElementById('filter-equipabcv2');
+            
+            let optionsHtml = '<option value="">Nenhuma / Sem Equipa</option>';
+            let filterOptionsHtml = '<option value="">Todas</option>';
+            
+            equipas.forEach(eq => {
+                const label = `${eq.nome} (${eq.escalao})`;
+                optionsHtml += `<option value="${label}">${label}</option>`;
+                filterOptionsHtml += `<option value="${label}">${label}</option>`;
+            });
             
             if (select1 && select2) {
-                let optionsHtml = '<option value="">Nenhuma / Sem Equipa</option>';
-                equipas.forEach(eq => {
-                    const label = `${eq.nome} (${eq.escalao})`;
-                    optionsHtml += `<option value="${label}">${label}</option>`;
-                });
-                
-                // Manter o valor selecionado se já estiver definido
                 const val1 = select1.value;
                 const val2 = select2.value;
-                
                 select1.innerHTML = optionsHtml;
                 select2.innerHTML = optionsHtml;
-                
                 if (val1) select1.value = val1;
                 if (val2) select2.value = val2;
+            }
+            
+            if (filter1 && filter2) {
+                const fval1 = filter1.value;
+                const fval2 = filter2.value;
+                filter1.innerHTML = filterOptionsHtml;
+                filter2.innerHTML = filterOptionsHtml;
+                if (fval1) filter1.value = fval1;
+                if (fval2) filter2.value = fval2;
             }
         }
     }
@@ -1173,18 +1184,44 @@ document.addEventListener('DOMContentLoaded', async () => {
         });
     }
 
-    const searchAtletaInput = document.getElementById('search-atleta');
-    if (searchAtletaInput) {
-        searchAtletaInput.addEventListener('input', (e) => {
-            const termo = e.target.value.toLowerCase();
-            const filtrados = currentAtletas.filter(a => {
-                const nome = (a.nome || '').toLowerCase();
-                const equipa = ((a.equipafpb || '') + ' ' + (a.equipabcv1 || '') + ' ' + (a.equipabcv2 || '')).toLowerCase();
-                const licenca = (a.licenca || '').toLowerCase();
-                
-                return nome.includes(termo) || equipa.includes(termo) || licenca.includes(termo);
-            });
-            renderAtletasTable(filtrados);
+    const filterEscalao = document.getElementById('filter-escalao');
+    const filterEquipabcv1 = document.getElementById('filter-equipabcv1');
+    const filterEquipabcv2 = document.getElementById('filter-equipabcv2');
+    const filterSexo = document.getElementById('filter-sexo');
+    const btnClearFilters = document.getElementById('btn-clear-filters');
+
+    function applyAtletasFilters() {
+        if (!currentAtletas) return;
+        
+        const fEscalao = filterEscalao ? filterEscalao.value : '';
+        const fEq1 = filterEquipabcv1 ? filterEquipabcv1.value : '';
+        const fEq2 = filterEquipabcv2 ? filterEquipabcv2.value : '';
+        const fSexo = filterSexo ? filterSexo.value : '';
+
+        const filtrados = currentAtletas.filter(a => {
+            let pass = true;
+            if (fEscalao && a.escalao !== fEscalao) pass = false;
+            if (fEq1 && a.equipabcv1 !== fEq1) pass = false;
+            if (fEq2 && a.equipabcv2 !== fEq2) pass = false;
+            if (fSexo && a.sexo !== fSexo) pass = false;
+            return pass;
+        });
+
+        renderAtletasTable(filtrados);
+    }
+
+    if (filterEscalao) filterEscalao.addEventListener('change', applyAtletasFilters);
+    if (filterEquipabcv1) filterEquipabcv1.addEventListener('change', applyAtletasFilters);
+    if (filterEquipabcv2) filterEquipabcv2.addEventListener('change', applyAtletasFilters);
+    if (filterSexo) filterSexo.addEventListener('change', applyAtletasFilters);
+
+    if (btnClearFilters) {
+        btnClearFilters.addEventListener('click', () => {
+            if (filterEscalao) filterEscalao.value = '';
+            if (filterEquipabcv1) filterEquipabcv1.value = '';
+            if (filterEquipabcv2) filterEquipabcv2.value = '';
+            if (filterSexo) filterSexo.value = '';
+            applyAtletasFilters();
         });
     }
 
