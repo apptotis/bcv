@@ -296,3 +296,55 @@ async function loadPortalHighlights(supabase) {
         console.warn("Elemento #birthday-modal não encontrado no DOM!");
     }
 }
+
+async function loadEquipasMenu(supabase) {
+    const dropdownEquipasMenu = document.getElementById('dropdown-equipas-menu');
+    if (!dropdownEquipasMenu) return;
+
+    try {
+        const { data: equipas, error } = await supabase
+            .from('equipasbcv')
+            .select('id, nome, escalao, sexo')
+            .eq('epoca', '2025-2026');
+            
+        if (!error && equipas && equipas.length > 0) {
+            const ordemEscalao = ["Mini 8", "Mini 10", "Mini 12", "Sub-14", "Sub-16", "Sub-18", "Seniores", "Veteranos"];
+            equipas.sort((a, b) => {
+                let indexA = ordemEscalao.indexOf(a.escalao);
+                let indexB = ordemEscalao.indexOf(b.escalao);
+                if (indexA === -1) indexA = 999;
+                if (indexB === -1) indexB = 999;
+                if (indexA === indexB) return (a.nome || '').localeCompare(b.nome || '');
+                return indexA - indexB;
+            });
+            
+            equipas.forEach(equipa => {
+                const li = document.createElement('li');
+                let escalaoDisplay = equipa.escalao;
+                if (equipa.sexo && equipa.sexo !== 'Todos') {
+                    escalaoDisplay += ` ${equipa.sexo}`;
+                }
+                li.innerHTML = `<a href="equipas.html?equipaId=${equipa.id}" class="drawer-dropdown-link">${escalaoDisplay}</a>`;
+                dropdownEquipasMenu.appendChild(li);
+            });
+
+            // Adicionar evento para fechar menu ao clicar nas novas opções
+            const drawerMenu = document.getElementById('drawer-menu');
+            const hamburgerTrigger = document.getElementById('hamburger-trigger');
+            const drawerOverlay = document.getElementById('drawer-overlay');
+            const newLinks = dropdownEquipasMenu.querySelectorAll('a');
+            newLinks.forEach(link => {
+                link.addEventListener('click', () => {
+                    if (drawerMenu && drawerMenu.classList.contains('is-open')) {
+                        drawerMenu.classList.remove('is-open');
+                        if (hamburgerTrigger) hamburgerTrigger.classList.remove('is-active');
+                        if (drawerOverlay) drawerOverlay.classList.remove('is-open');
+                        document.body.style.overflow = '';
+                    }
+                });
+            });
+        }
+    } catch (error) {
+        console.error("Erro ao carregar menu de equipas:", error);
+    }
+}
