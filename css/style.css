@@ -469,7 +469,7 @@ img {
 }
 
 .drawer-dropdown-content.is-open {
-    max-height: 200px; /* Adjust based on children */
+    max-height: 500px; /* Aumentado para caber todas as equipas */
 }
 
 .drawer-dropdown-link {
