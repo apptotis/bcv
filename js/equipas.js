@@ -139,10 +139,8 @@ document.addEventListener('DOMContentLoaded', async () => {
             // ==========================================
             // MODO: TODAS AS EQUIPAS
             // ==========================================
-            // Reset no flex do allTeamsView que é flex-row em desktop devido a portal-container
             if (allTeamsView) {
-                allTeamsView.style.display = window.innerWidth >= 992 ? 'flex' : 'flex'; 
-                // A classe .portal-container no media-query faz flex-direction: row
+                allTeamsView.style.display = 'block'; 
             }
             if (teamDetailView) teamDetailView.style.display = 'none';
             loading.style.display = 'none';
