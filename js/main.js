@@ -48,6 +48,16 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
+    const dropdownEquipasToggle = document.getElementById('dropdown-equipas-toggle');
+    const dropdownEquipasMenu = document.getElementById('dropdown-equipas-menu');
+    if (dropdownEquipasToggle && dropdownEquipasMenu) {
+        dropdownEquipasToggle.addEventListener('click', (e) => {
+            e.preventDefault();
+            dropdownEquipasToggle.classList.toggle('is-active');
+            dropdownEquipasMenu.classList.toggle('is-open');
+        });
+    }
+
     // Close drawer when clicking links (excluding expander targets)
     const menuLinks = document.querySelectorAll('.drawer-link, .drawer-dropdown-link');
     menuLinks.forEach(link => {
@@ -94,10 +104,11 @@ document.addEventListener('DOMContentLoaded', () => {
     // Run on scroll
     window.addEventListener('scroll', revealFunction);
     
-    // 4. Carregar Destaques do Portal (Agenda e Aniversariantes)
+    // 4. Carregar Destaques do Portal (Agenda e Aniversariantes) e Menu Equipas
     if (typeof window.supabase !== 'undefined' && typeof SUPABASE_URL !== 'undefined') {
         const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
         loadPortalHighlights(supabase);
+        loadEquipasMenu(supabase);
     }
 });
 

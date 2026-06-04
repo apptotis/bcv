@@ -90,8 +90,17 @@
                     <li><a href="clube.html#contactos" class="drawer-dropdown-link">Contactos</a></li>
                 </ul>
             </li>
-            <li>
-                <a href="equipas.html" class="drawer-link">Equipas</a>
+            <li class="drawer-item">
+                <div style="display: flex; justify-content: space-between; align-items: center;">
+                    <a href="equipas.html" class="drawer-link" style="flex: 1;">Equipas</a>
+                    <button class="drawer-dropdown-btn" id="dropdown-equipas-toggle" aria-label="Expandir submenu Equipas">
+                        <i class="fas fa-chevron-down"></i>
+                    </button>
+                </div>
+                <ul class="drawer-dropdown-content" id="dropdown-equipas-menu">
+                    <li><a href="equipas.html" class="drawer-dropdown-link">Todas as Equipas</a></li>
+                    <!-- Preenchido via JS -->
+                </ul>
             </li>
             <li>
                 <a href="index.html#competicoes" class="drawer-link">Competições</a>

@@ -43,6 +43,13 @@ document.addEventListener('DOMContentLoaded', async () => {
             });
         }
 
+        // Filtro por ID da equipa caso venha no URL
+        const urlParams = new URLSearchParams(window.location.search);
+        const equipaIdFiltro = urlParams.get('equipaId');
+        if (equipaIdFiltro && equipas) {
+            equipas = equipas.filter(e => e.id === equipaIdFiltro);
+        }
+
         // Buscar Atletas da mesma época
         const { data: atletas, error: errAtletas } = await supabaseClient
             .from('atletasbcv')
