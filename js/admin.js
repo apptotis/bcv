@@ -1077,10 +1077,42 @@ document.addEventListener('DOMContentLoaded', async () => {
         btnCancelAtleta.addEventListener('click', resetAtletaForm);
     }
 
+    async function populateEquipasDropdowns() {
+        const { data: equipas, error } = await supabase
+            .from('equipasbcv')
+            .select('nome, escalao')
+            .order('nome', { ascending: true });
+            
+        if (!error && equipas) {
+            const select1 = document.getElementById('atleta-equipabcv1');
+            const select2 = document.getElementById('atleta-equipabcv2');
+            
+            if (select1 && select2) {
+                let optionsHtml = '<option value="">Nenhuma / Sem Equipa</option>';
+                equipas.forEach(eq => {
+                    const label = `${eq.nome} (${eq.escalao})`;
+                    optionsHtml += `<option value="${label}">${label}</option>`;
+                });
+                
+                // Manter o valor selecionado se já estiver definido
+                const val1 = select1.value;
+                const val2 = select2.value;
+                
+                select1.innerHTML = optionsHtml;
+                select2.innerHTML = optionsHtml;
+                
+                if (val1) select1.value = val1;
+                if (val2) select2.value = val2;
+            }
+        }
+    }
+
     let currentAtletas = [];
 
     window.loadAtletas = async function() {
         if (!atletasTableBody) return;
+        
+        populateEquipasDropdowns();
         
         try {
             atletasTableBody.innerHTML = '<tr><td colspan="6" style="padding: 10px;">A carregar atletas...</td></tr>';
