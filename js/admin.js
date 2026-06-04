@@ -794,6 +794,231 @@ document.addEventListener('DOMContentLoaded', async () => {
     };
 
     // ==========================================
+    // 9.5. Gestão de Equipas BCV
+    // ==========================================
+    const formEquipa = document.getElementById('form-equipa');
+    const btnSaveEquipa = document.getElementById('btn-save-equipa');
+    const btnCancelEquipa = document.getElementById('btn-cancel-equipa');
+    const equipaMsg = document.getElementById('equipa-msg');
+    const formEquipaTitle = document.getElementById('form-equipa-title');
+    const editEquipaIdInput = document.getElementById('edit-equipa-id');
+    const equipasTableBody = document.getElementById('equipas-table-body');
+
+    const equipaFotoFileInput = document.getElementById('equipa-foto-file');
+    const equipaFotoPreviewDiv = document.getElementById('equipa-foto-preview');
+    const equipaFotoImg = document.getElementById('equipa-foto-img');
+    const equipaFotoUrlInput = document.getElementById('equipa-foto-url');
+    const btnRemoveEquipaFoto = document.getElementById('btn-remove-equipa-foto');
+
+    if (equipaFotoFileInput) {
+        equipaFotoFileInput.addEventListener('change', function(e) {
+            const file = e.target.files[0];
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    equipaFotoImg.src = e.target.result;
+                    equipaFotoPreviewDiv.style.display = 'block';
+                }
+                reader.readAsDataURL(file);
+            } else {
+                equipaFotoPreviewDiv.style.display = 'none';
+            }
+        });
+    }
+
+    if (btnRemoveEquipaFoto) {
+        btnRemoveEquipaFoto.addEventListener('click', function() {
+            equipaFotoFileInput.value = '';
+            equipaFotoUrlInput.value = '';
+            equipaFotoPreviewDiv.style.display = 'none';
+            equipaFotoImg.src = '';
+        });
+    }
+
+    window.resetEquipaForm = function() {
+        if (formEquipa) formEquipa.reset();
+        editEquipaIdInput.value = '';
+        equipaFotoUrlInput.value = '';
+        equipaFotoPreviewDiv.style.display = 'none';
+        equipaFotoImg.src = '';
+        formEquipaTitle.textContent = 'Adicionar Nova Equipa';
+        btnSaveEquipa.textContent = 'Adicionar Equipa';
+        if (btnCancelEquipa) btnCancelEquipa.classList.add('hidden');
+        if (equipaMsg) equipaMsg.classList.add('hidden');
+    }
+
+    if (btnCancelEquipa) {
+        btnCancelEquipa.addEventListener('click', resetEquipaForm);
+    }
+
+    let currentEquipas = [];
+
+    window.loadEquipas = async function() {
+        if (!equipasTableBody) return;
+        
+        try {
+            equipasTableBody.innerHTML = '<tr><td colspan="5" style="padding: 10px;">A carregar equipas...</td></tr>';
+            
+            const { data: equipas, error } = await supabase
+                .from('equipasbcv')
+                .select('*')
+                .order('nome', { ascending: true });
+
+            if (error) {
+                if (error.code === '42P01') {
+                    equipasTableBody.innerHTML = '<tr><td colspan="5" style="padding: 10px;">A tabela "equipasbcv" não existe na base de dados. Por favor, crie-a no Supabase.</td></tr>';
+                    return;
+                }
+                throw error;
+            }
+
+            currentEquipas = equipas || [];
+            renderEquipasTable(currentEquipas);
+            
+        } catch (error) {
+            console.error("Erro ao carregar equipas:", error);
+            equipasTableBody.innerHTML = `<tr><td colspan="5" style="color: red; padding: 10px;">Erro: ${error.message}</td></tr>`;
+        }
+    }
+
+    function renderEquipasTable(lista) {
+        if (!equipasTableBody) return;
+        equipasTableBody.innerHTML = '';
+        
+        if (!lista || lista.length === 0) {
+            equipasTableBody.innerHTML = '<tr><td colspan="5" style="padding: 10px;">Nenhuma equipa encontrada.</td></tr>';
+            return;
+        }
+
+        lista.forEach(equipa => {
+            const tr = document.createElement('tr');
+            tr.style.borderBottom = '1px solid rgba(255,255,255,0.05)';
+            const equipaJson = JSON.stringify(equipa).replace(/'/g, "&apos;").replace(/"/g, "&quot;");
+            
+            const fotoHtml = equipa.foto 
+                ? `<img src="${equipa.foto}" style="width: 60px; height: 40px; object-fit: cover; border-radius: 4px;">` 
+                : '<div style="width: 60px; height: 40px; background: rgba(255,255,255,0.1); border-radius: 4px; display:flex; align-items:center; justify-content:center; font-size: 1rem;">🏀</div>';
+
+            tr.innerHTML = `
+                <td style="padding: 10px;">${fotoHtml}</td>
+                <td style="padding: 10px;"><strong>${equipa.nome || '-'}</strong></td>
+                <td style="padding: 10px;">${equipa.epoca || '-'}</td>
+                <td style="padding: 10px;">${equipa.escalao || '-'}</td>
+                <td style="padding: 10px; text-align: center;">
+                    <button class="btn-action" onclick="window.editEquipa('${equipaJson}')" title="Editar">✏️</button>
+                    <button class="btn-action delete" onclick="window.deleteEquipa('${equipa.id}')" title="Apagar">🗑️</button>
+                </td>
+            `;
+            equipasTableBody.appendChild(tr);
+        });
+    }
+
+    window.editEquipa = function(equipaStr) {
+        const equipa = JSON.parse(equipaStr);
+        
+        editEquipaIdInput.value = equipa.id;
+        document.getElementById('equipa-nome').value = equipa.nome || '';
+        document.getElementById('equipa-epoca').value = equipa.epoca || '';
+        document.getElementById('equipa-escalao').value = equipa.escalao || '';
+        
+        if (equipa.foto) {
+            equipaFotoUrlInput.value = equipa.foto;
+            equipaFotoImg.src = equipa.foto;
+            equipaFotoPreviewDiv.style.display = 'block';
+        } else {
+            equipaFotoUrlInput.value = '';
+            equipaFotoPreviewDiv.style.display = 'none';
+        }
+        
+        formEquipaTitle.textContent = 'Editar Equipa: ' + equipa.nome;
+        btnSaveEquipa.textContent = 'Guardar Alterações';
+        if (btnCancelEquipa) btnCancelEquipa.classList.remove('hidden');
+        if (equipaMsg) equipaMsg.classList.add('hidden');
+        
+        formEquipaTitle.scrollIntoView({ behavior: 'smooth' });
+    };
+
+    window.deleteEquipa = async function(id) {
+        if (!confirm('Tem a certeza que deseja apagar esta equipa?')) return;
+
+        try {
+            const { error } = await supabase.from('equipasbcv').delete().eq('id', id);
+            if (error) throw error;
+            
+            alert('Equipa apagada com sucesso!');
+            loadEquipas();
+            if (editEquipaIdInput.value === id) {
+                resetEquipaForm();
+            }
+        } catch (error) {
+            console.error("Erro ao eliminar equipa:", error);
+            alert("Erro ao eliminar equipa: " + error.message);
+        }
+    };
+
+    if (formEquipa) {
+        formEquipa.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            const equipaId = editEquipaIdInput.value;
+            const isEditMode = !!equipaId;
+            
+            btnSaveEquipa.textContent = isEditMode ? "A guardar..." : "A adicionar...";
+            btnSaveEquipa.disabled = true;
+            equipaMsg.classList.add('hidden');
+
+            const equipaData = {
+                nome: document.getElementById('equipa-nome').value,
+                epoca: document.getElementById('equipa-epoca').value,
+                escalao: document.getElementById('equipa-escalao').value,
+                foto: equipaFotoUrlInput.value
+            };
+
+            try {
+                const fotoFile = equipaFotoFileInput.files[0];
+                if (fotoFile) {
+                    const fileName = \`equipa_${Date.now()}_${fotoFile.name.replace(/\\s/g, '_')}\`;
+                    const { error: uploadError } = await supabase.storage.from('fotos').upload(fileName, fotoFile);
+                    
+                    if (uploadError) throw uploadError;
+                    
+                    const { data: publicData } = supabase.storage.from('fotos').getPublicUrl(fileName);
+                    equipaData.foto = publicData.publicUrl;
+                }
+
+                if (isEditMode) {
+                    const { error } = await supabase.from('equipasbcv').update(equipaData).eq('id', equipaId);
+                    if (error) throw error;
+                    equipaMsg.textContent = "✅ Equipa atualizada com sucesso!";
+                } else {
+                    const { error } = await supabase.from('equipasbcv').insert([equipaData]);
+                    if (error) throw error;
+                    equipaMsg.textContent = "✅ Equipa adicionada com sucesso!";
+                }
+
+                equipaMsg.style.color = "#4caf50";
+                equipaMsg.classList.remove('hidden');
+                
+                resetEquipaForm();
+                loadEquipas();
+
+            } catch (error) {
+                console.error("Erro ao guardar equipa:", error);
+                if (error.code === '42P01') {
+                     equipaMsg.textContent = "❌ Erro: A tabela 'equipasbcv' não existe no Supabase.";
+                } else {
+                     equipaMsg.textContent = "❌ Erro: " + error.message;
+                }
+                equipaMsg.style.color = "#ff5252";
+                equipaMsg.classList.remove('hidden');
+            } finally {
+                btnSaveEquipa.textContent = isEditMode ? "Guardar Alterações" : "Adicionar Equipa";
+                btnSaveEquipa.disabled = false;
+            }
+        });
+    }
+
+    // ==========================================
     // 10. Gestão de Atletas
     // ==========================================
     const formAtleta = document.getElementById('form-atleta');
@@ -1269,6 +1494,7 @@ document.addEventListener('DOMContentLoaded', async () => {
 
             if (target === 'tab-agenda') loadAgenda();
             if (target === 'tab-resultados') loadResultados();
+            if (target === 'tab-equipas') loadEquipas();
         });
     });
 

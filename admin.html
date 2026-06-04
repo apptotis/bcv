@@ -326,7 +326,86 @@
                     </div>
                 </div>
 
-                <div id="tab-equipas" class="tab-pane hidden"><h2>Equipas (Em Breve)</h2></div>
+                <!-- Tab: Gestão de Equipas -->
+                <div id="tab-equipas" class="tab-pane hidden">
+                    <h2 style="margin-bottom: 20px;">Gestão de Equipas BCV</h2>
+                    
+                    <!-- Formulário de Criação / Edição -->
+                    <div class="welcome-box" style="margin-bottom: 30px;">
+                        <h3 id="form-equipa-title">Adicionar Nova Equipa</h3>
+                        <form id="form-equipa" style="display: grid; gap: 15px; margin-top: 15px; max-width: 600px;">
+                            <input type="hidden" id="edit-equipa-id">
+                            
+                            <div style="display: grid; grid-template-columns: 1fr; gap: 15px;">
+                                <div>
+                                    <label style="display:block; margin-bottom:5px; font-size:0.8rem; color:#a0a0ab;">Nome da Equipa</label>
+                                    <input type="text" id="equipa-nome" placeholder="Ex: Sub-14 Masculino A" required class="admin-input">
+                                </div>
+                            </div>
+                            
+                            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px;">
+                                <div>
+                                    <label style="display:block; margin-bottom:5px; font-size:0.8rem; color:#a0a0ab;">Época</label>
+                                    <select id="equipa-epoca" required class="admin-input">
+                                        <option value="" disabled selected>Selecionar</option>
+                                        <option value="2025-2026">2025-2026</option>
+                                        <option value="2026-2027">2026-2027</option>
+                                    </select>
+                                </div>
+                                <div>
+                                    <label style="display:block; margin-bottom:5px; font-size:0.8rem; color:#a0a0ab;">Escalão</label>
+                                    <select id="equipa-escalao" required class="admin-input">
+                                        <option value="" disabled selected>Selecionar</option>
+                                        <option value="Mini 8">Mini 8</option>
+                                        <option value="Mini 10">Mini 10</option>
+                                        <option value="Mini 12">Mini 12</option>
+                                        <option value="Sub-14">Sub-14</option>
+                                        <option value="Sub-16">Sub-16</option>
+                                        <option value="Sub-18">Sub-18</option>
+                                        <option value="Seniores">Seniores</option>
+                                        <option value="Veteranos">Veteranos</option>
+                                    </select>
+                                </div>
+                            </div>
+
+                            <div>
+                                <label style="display:block; margin-bottom:5px; font-size:0.9rem; color:#a0a0ab;">Foto da Equipa (Opcional):</label>
+                                <input type="file" id="equipa-foto-file" accept="image/*" class="admin-input" style="padding: 10px;">
+                                <div id="equipa-foto-preview" style="margin-top: 10px; max-width: 150px; display: none;">
+                                    <img src="" id="equipa-foto-img" style="width: 150px; height: 100px; object-fit: cover; border-radius: 8px; border: 1px solid rgba(255,255,255,0.2);">
+                                    <button type="button" id="btn-remove-equipa-foto" class="btn-secondary" style="padding: 5px; font-size: 0.8rem; width: 150px; margin-top: 5px;">Remover Foto</button>
+                                    <input type="hidden" id="equipa-foto-url">
+                                </div>
+                            </div>
+                            
+                            <div style="display: flex; gap: 10px;">
+                                <button type="submit" id="btn-save-equipa" class="btn-primary" style="flex: 1;">Adicionar Equipa</button>
+                                <button type="button" id="btn-cancel-equipa" class="btn-secondary hidden" style="flex: 1;">Cancelar Edição</button>
+                            </div>
+                            
+                            <p id="equipa-msg" class="hidden"></p>
+                        </form>
+                    </div>
+
+                    <!-- Tabela de Equipas -->
+                    <div class="admin-table-container">
+                        <h3>Lista de Equipas Registadas</h3>
+                        <table class="admin-table" style="width: 100%; text-align: left; margin-top: 15px; border-collapse: collapse;">
+                            <thead>
+                                <tr style="border-bottom: 1px solid rgba(255,255,255,0.1);">
+                                    <th style="padding: 10px; width: 80px;">Foto</th>
+                                    <th style="padding: 10px;">Nome da Equipa</th>
+                                    <th style="padding: 10px;">Época</th>
+                                    <th style="padding: 10px;">Escalão</th>
+                                    <th style="padding: 10px; text-align: center; width: 120px;">Ações</th>
+                                </tr>
+                            </thead>
+                            <tbody id="equipas-table-body">
+                                <tr><td colspan="5" style="padding: 10px;">A carregar equipas...</td></tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
                 
                 <!-- Tab: Gestão de Atletas -->
                 <div id="tab-atletas" class="tab-pane hidden">
