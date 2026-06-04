@@ -39,3 +39,4 @@
 - [2026-05-27] Gemini: Correção da cor do ícone de dropdown (abertura do sub-menu O Clube) no menu lateral de preto para branco em style.css e teste-design.css.
 - [2026-05-27] Gemini: Adicionado scroll-padding-top para evitar que o topo das secções seja ocultado sob a navbar fixa ao navegar pelos links do menu no mobile, e ajustado o margin-top do banner de aniversários em clube.html para evitar sobreposição inicial.
 - [2026-06-04] Gemini: Remoção completa da aba, menu e lógica JavaScript relacionados ao "Sincronizar FPB" da página admin.
+- [2026-06-04] Gemini: Atualização do formulário e tabela de Atletas no Admin para incluir os novos campos (epoca, funcao, equipafpb, equipabcv1, equipabcv2).

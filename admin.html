@@ -350,8 +350,14 @@
                                 <input type="text" id="atleta-nome" placeholder="Nome Completo do Atleta" required class="admin-input">
                                 <input type="text" id="atleta-nickname" placeholder="Alcunha / Nickname (Opcional)" class="admin-input">
                             </div>
-                            <div style="display: grid; grid-template-columns: 1fr; gap: 15px;">
-                                <input type="text" id="atleta-equipa" placeholder="Equipa (Ex: Sub-14 Masculino)" required class="admin-input">
+                            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px;">
+                                <input type="text" id="atleta-epoca" placeholder="Época (Ex: 2025/2026)" required class="admin-input">
+                                <input type="text" id="atleta-funcao" placeholder="Função (Ex: Jogador, Treinador)" required class="admin-input">
+                            </div>
+                            <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 15px;">
+                                <input type="text" id="atleta-equipafpb" placeholder="Equipa FPB" class="admin-input">
+                                <input type="text" id="atleta-equipabcv1" placeholder="Equipa BCV 1" class="admin-input">
+                                <input type="text" id="atleta-equipabcv2" placeholder="Equipa BCV 2" class="admin-input">
                             </div>
                             
                             <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 15px;">
@@ -416,14 +422,15 @@
                                 <tr style="border-bottom: 1px solid rgba(255,255,255,0.1);">
                                     <th style="padding: 10px; width: 60px;">Foto</th>
                                     <th style="padding: 10px;">Nome</th>
-                                    <th style="padding: 10px;">Equipa / Escalão</th>
+                                    <th style="padding: 10px;">Época/Função</th>
+                                    <th style="padding: 10px;">Equipas (FPB / BCV)</th>
                                     <th style="padding: 10px; width: 60px;">Nº</th>
                                     <th style="padding: 10px;">Licença</th>
                                     <th style="padding: 10px; text-align: center; width: 120px;">Ações</th>
                                 </tr>
                             </thead>
                             <tbody id="atletas-table-body">
-                                <tr><td colspan="6" style="padding: 10px;">A carregar atletas...</td></tr>
+                                <tr><td colspan="7" style="padding: 10px;">A carregar atletas...</td></tr>
                             </tbody>
                         </table>
                     </div>
