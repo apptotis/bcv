@@ -77,8 +77,10 @@ document.addEventListener('DOMContentLoaded', async () => {
 
             if (errAtletas) throw errAtletas;
 
-            const jogadores = atletas.filter(a => a.funcao === 'Jogador' || a.funcao === 'Jogadora');
-            const equipaTecnica = atletas.filter(a => a.funcao !== 'Jogador' && a.funcao !== 'Jogadora');
+            const jogadores = atletas.filter(a => a.funcao === 'Jogador' || a.funcao === 'Jogadora')
+                                     .sort((a, b) => (a.nickname || a.nome).localeCompare(b.nickname || b.nome));
+            const equipaTecnica = atletas.filter(a => a.funcao !== 'Jogador' && a.funcao !== 'Jogadora')
+                                         .sort((a, b) => (a.nickname || a.nome).localeCompare(b.nickname || b.nome));
 
             const playersGrid = document.getElementById('roster-players-grid');
             const staffGrid = document.getElementById('roster-staff-grid');
@@ -97,13 +99,16 @@ document.addEventListener('DOMContentLoaded', async () => {
                     
                     card.innerHTML = `
                         <div class="player-photo-container">
-                            ${numBadge}
                             ${photoHtml}
                         </div>
                         <div class="player-info">
-                            <h4 class="player-name">${nomeExibicao}</h4>
-                            <div class="player-role">${j.nome}</div>
+                            <div class="player-mobile-number">${j.numero_camisola ? '#' + j.numero_camisola : ''}</div>
+                            <div class="player-text-wrap">
+                                <h4 class="player-name">${nomeExibicao}</h4>
+                                <div class="player-role">${j.nome}</div>
+                            </div>
                         </div>
+                        ${numBadge}
                     `;
                     playersGrid.appendChild(card);
                 });
@@ -125,8 +130,11 @@ document.addEventListener('DOMContentLoaded', async () => {
                             ${photoHtml}
                         </div>
                         <div class="player-info">
-                            <h4 class="player-name">${t.nickname ? t.nickname : t.nome}</h4>
-                            <div class="player-role">${t.funcao}</div>
+                            <div class="player-mobile-number"></div>
+                            <div class="player-text-wrap">
+                                <h4 class="player-name">${t.nickname ? t.nickname : t.nome}</h4>
+                                <div class="player-role">${t.funcao}</div>
+                            </div>
                         </div>
                     `;
                     staffGrid.appendChild(card);
