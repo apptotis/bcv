@@ -319,6 +319,8 @@ async function loadEquipasMenu(supabase) {
                 return indexA - indexB;
             });
             
+            dropdownEquipasMenu.innerHTML = ''; // Limpar o texto de carregamento
+
             equipas.forEach(equipa => {
                 const li = document.createElement('li');
                 let escalaoDisplay = equipa.escalao;
@@ -347,5 +349,8 @@ async function loadEquipasMenu(supabase) {
         }
     } catch (error) {
         console.error("Erro ao carregar menu de equipas:", error);
+        if (dropdownEquipasMenu) {
+            dropdownEquipasMenu.innerHTML = `<li style="padding: 10px; color: rgba(255,255,255,0.5); font-size: 0.9rem;">Falha ao carregar. Tente novamente.</li>`;
+        }
     }
 }
