@@ -1544,3 +1544,5 @@ img {
 }
 
 /* End of Stylesheet */
+.team-hero-title-container { display: flex; flex-direction: row; align-items: center; justify-content: flex-start; margin-bottom: 1.5rem; }
+@media (max-width: 768px) { .team-hero-title-container { flex-direction: column; align-items: flex-start; margin-bottom: 1.5rem; } .team-hero-separator { display: none; } .team-hero-subtitle { margin-top: 5px !important; } }
