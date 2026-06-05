@@ -62,7 +62,7 @@ document.addEventListener('DOMContentLoaded', async () => {
 
             // Atualizar cabeçalho da equipa
             document.getElementById('team-detail-title').innerText = equipaSelecionada.nome;
-            document.getElementById('team-detail-subtitle').innerText = `${escalaoDisplay} | Época 2025-2026`;
+            document.getElementById('team-detail-subtitle').innerText = `${escalaoDisplay} - 2025-2026`;
             
             const fotoUrl = equipaSelecionada.foto || 'https://via.placeholder.com/1200x500?text=Sem+Foto';
             document.getElementById('team-detail-photo').innerHTML = `<img src="${fotoUrl}" alt="${equipaSelecionada.nome}">`;
