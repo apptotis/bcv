@@ -53,6 +53,7 @@ document.addEventListener('DOMContentLoaded', () => {
     if (dropdownEquipasToggle && dropdownEquipasMenu) {
         dropdownEquipasToggle.addEventListener('click', (e) => {
             e.preventDefault();
+            e.stopPropagation();
             dropdownEquipasToggle.classList.toggle('is-active');
             dropdownEquipasMenu.classList.toggle('is-open');
         });
