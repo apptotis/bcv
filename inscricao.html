@@ -1,0 +1,879 @@
+<!DOCTYPE html>
+<html lang="pt">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Inscrição de Atletas 2026/2027 - Basket Clube de Valença</title>
+    <link rel="icon" type="image/png" href="assets/emblema_png.png">
+    
+    <!-- Fontes Google -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700;800&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+    
+    <!-- CSS Principal -->
+    <link rel="stylesheet" href="css/style.css">
+    
+    <!-- CSS Específico da Inscrição Mobile -->
+    <style>
+        .inscricao-body {
+            background-color: #f4f6f9;
+            min-height: 100vh;
+            padding-bottom: 40px;
+        }
+
+        .inscricao-header {
+            background: linear-gradient(135deg, var(--bcv-purple-dark, #2b1055) 0%, var(--bcv-purple, #4c1d95) 100%);
+            color: #ffffff;
+            padding: 24px 20px 32px 20px;
+            text-align: center;
+            border-bottom-left-radius: 24px;
+            border-bottom-right-radius: 24px;
+            box-shadow: 0 4px 20px rgba(76, 29, 149, 0.15);
+            position: relative;
+        }
+
+        .inscricao-brand {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 12px;
+            margin-bottom: 16px;
+            text-decoration: none;
+            color: #ffffff;
+        }
+
+        .inscricao-brand img {
+            width: 44px;
+            height: 44px;
+            object-fit: contain;
+        }
+
+        .inscricao-brand span {
+            font-family: 'Outfit', sans-serif;
+            font-size: 1.25rem;
+            font-weight: 800;
+            letter-spacing: 0.5px;
+        }
+
+        .inscricao-title {
+            font-size: 1.4rem;
+            font-weight: 700;
+            margin-bottom: 6px;
+        }
+
+        .inscricao-subtitle {
+            font-size: 0.88rem;
+            opacity: 0.85;
+        }
+
+        /* Container do Formulário */
+        .inscricao-container {
+            max-width: 600px;
+            margin: -20px auto 0 auto;
+            padding: 0 16px;
+        }
+
+        /* Progresso por Passos */
+        .wizard-progress {
+            background: #ffffff;
+            border-radius: 16px;
+            padding: 16px 20px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
+            margin-bottom: 20px;
+        }
+
+        .progress-bar-bg {
+            background: #e2e8f0;
+            height: 8px;
+            border-radius: 4px;
+            overflow: hidden;
+            margin-bottom: 12px;
+        }
+
+        .progress-bar-fill {
+            background: linear-gradient(90deg, #4c1d95, #6d28d9);
+            height: 100%;
+            width: 20%;
+            transition: width 0.3s ease;
+        }
+
+        .progress-steps-text {
+            display: flex;
+            justify-content: space-between;
+            font-size: 0.8rem;
+            font-weight: 600;
+            color: #64748b;
+        }
+
+        .progress-steps-text .active {
+            color: #4c1d95;
+        }
+
+        /* Card do Passo */
+        .step-card {
+            background: #ffffff;
+            border-radius: 20px;
+            padding: 24px 20px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.06);
+            display: none;
+        }
+
+        .step-card.active {
+            display: block;
+            animation: fadeIn 0.3s ease-in-out;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(100px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .step-title {
+            font-size: 1.15rem;
+            font-weight: 700;
+            color: #1e293b;
+            margin-bottom: 18px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding-bottom: 12px;
+            border-bottom: 2px solid #f1f5f9;
+        }
+
+        .step-title-icon {
+            background: #f3e8ff;
+            color: #7e22ce;
+            width: 32px;
+            height: 32px;
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.95rem;
+            font-weight: 800;
+        }
+
+        /* Grupos de Formulário */
+        .form-group {
+            margin-bottom: 16px;
+        }
+
+        .form-group label {
+            display: block;
+            font-size: 0.85rem;
+            font-weight: 600;
+            color: #334155;
+            margin-bottom: 6px;
+        }
+
+        .form-group label span.req {
+            color: #ef4444;
+        }
+
+        .form-control {
+            width: 100%;
+            padding: 12px 14px;
+            border: 1.5px solid #cbd5e1;
+            border-radius: 12px;
+            font-size: 0.95rem;
+            color: #0f172a;
+            background-color: #fff;
+            transition: all 0.2s ease;
+            box-sizing: border-box;
+        }
+
+        .form-control:focus {
+            outline: none;
+            border-color: #7e22ce;
+            box-shadow: 0 0 0 3px rgba(126, 34, 206, 0.12);
+        }
+
+        .form-row {
+            display: flex;
+            gap: 12px;
+        }
+
+        .form-row .form-group {
+            flex: 1;
+        }
+
+        /* Radio & Checkbox Customizados */
+        .radio-group, .checkbox-group {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .radio-card {
+            border: 1.5px solid #cbd5e1;
+            border-radius: 12px;
+            padding: 12px 16px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .radio-card.selected {
+            border-color: #7e22ce;
+            background-color: #faf5ff;
+        }
+
+        .radio-card input[type="radio"], .checkbox-card input[type="checkbox"] {
+            accent-color: #7e22ce;
+            width: 18px;
+            height: 18px;
+        }
+
+        .radio-card-title {
+            font-size: 0.9rem;
+            font-weight: 600;
+            color: #1e293b;
+        }
+
+        .radio-card-desc {
+            font-size: 0.78rem;
+            color: #64748b;
+        }
+
+        /* Pesquisa Atleta Existente */
+        .search-box {
+            background-color: #f8fafc;
+            border: 1.5px dashed #cbd5e1;
+            border-radius: 14px;
+            padding: 16px;
+            margin-bottom: 20px;
+        }
+
+        /* Botões de Ação do Wizard */
+        .wizard-buttons {
+            display: flex;
+            gap: 12px;
+            margin-top: 24px;
+        }
+
+        .btn-wizard {
+            flex: 1;
+            padding: 14px;
+            border-radius: 12px;
+            font-size: 0.95rem;
+            font-weight: 700;
+            border: none;
+            cursor: pointer;
+            text-align: center;
+            transition: all 0.2s ease;
+        }
+
+        .btn-prev {
+            background-color: #f1f5f9;
+            color: #475569;
+        }
+
+        .btn-prev:hover {
+            background-color: #e2e8f0;
+        }
+
+        .btn-next {
+            background: linear-gradient(135deg, #6d28d9, #4c1d95);
+            color: #ffffff;
+            box-shadow: 0 4px 12px rgba(109, 40, 217, 0.25);
+        }
+
+        .btn-next:hover {
+            opacity: 0.95;
+            transform: translateY(-1px);
+        }
+
+        .btn-submit {
+            background: linear-gradient(135deg, #16a34a, #15803d);
+            color: #ffffff;
+            box-shadow: 0 4px 12px rgba(22, 163, 74, 0.25);
+        }
+
+        /* Modal Mensagem Sucesso */
+        .alert-box {
+            padding: 12px 16px;
+            border-radius: 10px;
+            font-size: 0.85rem;
+            margin-bottom: 16px;
+            display: none;
+        }
+
+        .alert-info {
+            background-color: #eff6ff;
+            color: #1e40af;
+            border: 1px solid #bfdbfe;
+        }
+
+        .alert-success {
+            background-color: #f0fdf4;
+            color: #166534;
+            border: 1px solid #bbf7d0;
+        }
+    </style>
+</head>
+<body class="inscricao-body">
+
+    <!-- Cabeçalho Institucional BCV -->
+    <header class="inscricao-header">
+        <a href="index.html" class="inscricao-brand">
+            <img src="assets/emblema_png.png" alt="Basket Clube de Valença">
+            <span>BASKET CLUBE DE VALENÇA</span>
+        </a>
+        <h1 class="inscricao-title">Ficha de Inscrição Oficial</h1>
+        <p class="inscricao-subtitle">Época Desportiva 2026 / 2027 • Modelo FPB</p>
+    </header>
+
+    <!-- Contentor Principal -->
+    <main class="inscricao-container">
+
+        <!-- Barra de Progresso -->
+        <div class="wizard-progress">
+            <div class="progress-bar-bg">
+                <div class="progress-bar-fill" id="progress-fill"></div>
+            </div>
+            <div class="progress-steps-text">
+                <span id="step-label">Passo 1 de 5</span>
+                <span id="step-name" class="active">Tipo de Inscrição</span>
+            </div>
+        </div>
+
+        <form id="form-inscricao" autocomplete="on">
+
+            <!-- PASSO 1: TIPO DE INSCRIÇÃO -->
+            <div class="step-card active" id="step-1">
+                <div class="step-title">
+                    <span class="step-title-icon">1</span>
+                    Tipo de Inscrição na Época 2026/2027
+                </div>
+
+                <div class="form-group">
+                    <label>Selecione a Modalidade de Inscrição <span class="req">*</span></label>
+                    <div class="radio-group">
+                        <label class="radio-card selected" id="card-revalidacao">
+                            <input type="radio" name="tipo_inscricao" value="Revalidação" checked>
+                            <div>
+                                <div class="radio-card-title">Renovação / Revalidação</div>
+                                <div class="radio-card-desc">Já fui atleta do BCV na época 2025/2026</div>
+                            </div>
+                        </label>
+                        <label class="radio-card" id="card-primeira">
+                            <input type="radio" name="tipo_inscricao" value="Primeira Inscrição">
+                            <div>
+                                <div class="radio-card-title">Primeira Inscrição</div>
+                                <div class="radio-card-desc">É a minha primeira vez a inscrever-me no BCV</div>
+                            </div>
+                        </label>
+                    </div>
+                </div>
+
+                <!-- Box de Pesquisa para Revalidação -->
+                <div class="search-box" id="box-pesquisa-atleta">
+                    <label class="form-group">
+                        <span style="font-weight: 700; color: #4c1d95;">Pesquisar Atleta Existente (2025/2026)</span>
+                        <p style="font-size: 0.78rem; color: #64748b; margin-top: 2px;">Digite o seu Nome ou Nº Licença para pré-preencher os seus dados automaticamente.</p>
+                        <div style="display: flex; gap: 8px; margin-top: 10px;">
+                            <input type="text" id="input-pesquisa-atleta" class="form-control" placeholder="Ex: Nome ou Nº Licença...">
+                            <button type="button" id="btn-pesquisar-atleta" class="btn-wizard btn-next" style="width: auto; padding: 0 16px;">Pesquisar</button>
+                        </div>
+                    </label>
+                    <div class="alert-box alert-info" id="msg-pesquisa"></div>
+                </div>
+
+                <div class="form-group">
+                    <label>Estatuto FPB <span class="req">*</span></label>
+                    <select name="estatuto_fpb" class="form-control" required>
+                        <option value="FBP">FBP (Nacionalidade Portuguesa)</option>
+                        <option value="Sem FBP Comunitário">Sem FBP Comunitário (União Europeia)</option>
+                        <option value="Sem FBP Não Comunitário">Sem FBP Não Comunitário (Extracomunitário)</option>
+                    </select>
+                </div>
+
+                <div class="wizard-buttons">
+                    <div></div> <!-- Spacer -->
+                    <button type="button" class="btn-wizard btn-next" onclick="nextStep(1)">Seguinte &rarr;</button>
+                </div>
+            </div>
+
+            <!-- PASSO 2: DADOS PESSOAIS DO ATLETA -->
+            <div class="step-card" id="step-2">
+                <div class="step-title">
+                    <span class="step-title-icon">2</span>
+                    Identificação do(a) Atleta
+                </div>
+
+                <div class="form-group">
+                    <label>Nome Completo (conforme documento) <span class="req">*</span></label>
+                    <input type="text" name="nome" class="form-control" placeholder="Nome Completo" required>
+                </div>
+
+                <div class="form-group">
+                    <label>Alcunha / Nome de Camisola (Nickname)</label>
+                    <input type="text" name="nickname" class="form-control" placeholder="Ex: Carlitos">
+                </div>
+
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>Data Nascimento <span class="req">*</span></label>
+                        <input type="date" name="data_nascimento" id="data_nascimento" class="form-control" required>
+                    </div>
+                    <div class="form-group">
+                        <label>Sexo <span class="req">*</span></label>
+                        <select name="sexo" class="form-control" required>
+                            <option value="M">Masculino</option>
+                            <option value="F">Feminino</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>Nacionalidade <span class="req">*</span></label>
+                        <input type="text" name="nacionalidade" class="form-control" value="Portugal" required>
+                    </div>
+                    <div class="form-group">
+                        <label>País Nascimento <span class="req">*</span></label>
+                        <input type="text" name="pais_nascimento" class="form-control" value="Portugal" required>
+                    </div>
+                </div>
+
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>Tipo Documento <span class="req">*</span></label>
+                        <select name="tipo_doc_id" class="form-control" required>
+                            <option value="Cartão Cidadão">Cartão Cidadão</option>
+                            <option value="Passaporte">Passaporte</option>
+                            <option value="Outro">Outro</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label>Nº Documento <span class="req">*</span></label>
+                        <input type="text" name="num_doc_id" class="form-control" placeholder="12345678" required>
+                    </div>
+                </div>
+
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>Validade Doc. <span class="req">*</span></label>
+                        <input type="date" name="validade_doc_id" class="form-control" required>
+                    </div>
+                    <div class="form-group">
+                        <label>Nº Contribuinte (NIF) <span class="req">*</span></label>
+                        <input type="text" name="nif" class="form-control" placeholder="9 Digitos" required>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label>Nº Licença FPB (se já possuir)</label>
+                    <input type="text" name="licenca" class="form-control" placeholder="Ex: 257862">
+                </div>
+
+                <div class="wizard-buttons">
+                    <button type="button" class="btn-wizard btn-prev" onclick="prevStep(2)">&larr; Anterior</button>
+                    <button type="button" class="btn-wizard btn-next" onclick="nextStep(2)">Seguinte &rarr;</button>
+                </div>
+            </div>
+
+            <!-- PASSO 3: MORADA, CONTACTOS & SEGURO -->
+            <div class="step-card" id="step-3">
+                <div class="step-title">
+                    <span class="step-title-icon">3</span>
+                    Morada, Contactos & Seguro
+                </div>
+
+                <div class="form-group">
+                    <label>Morada / Rua <span class="req">*</span></label>
+                    <input type="text" name="morada" class="form-control" placeholder="Rua, Nº, Andar" required>
+                </div>
+
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>Cód. Postal <span class="req">*</span></label>
+                        <input type="text" name="codigo_postal" class="form-control" placeholder="4930-123" required>
+                    </div>
+                    <div class="form-group">
+                        <label>Localidade <span class="req">*</span></label>
+                        <input type="text" name="localidade" class="form-control" placeholder="Valença" required>
+                    </div>
+                </div>
+
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>Concelho <span class="req">*</span></label>
+                        <input type="text" name="concelho" class="form-control" value="Valença" required>
+                    </div>
+                    <div class="form-group">
+                        <label>Distrito <span class="req">*</span></label>
+                        <input type="text" name="distrito" class="form-control" value="Viana do Castelo" required>
+                    </div>
+                </div>
+
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>Telemóvel Atleta</label>
+                        <input type="tel" name="telefone" class="form-control" placeholder="9XXXXXXXX">
+                    </div>
+                    <div class="form-group">
+                        <label>Email Atleta</label>
+                        <input type="email" name="email" class="form-control" placeholder="atleta@email.com">
+                    </div>
+                </div>
+
+                <!-- Seguro Desportivo -->
+                <div class="form-group" style="margin-top: 20px;">
+                    <label>Seguro Desportivo <span class="req">*</span></label>
+                    <select name="tipo_seguro" id="tipo_seguro" class="form-control" required>
+                        <option value="Seguro FPB">Seguro FPB (Federação Portuguesa de Basquetebol)</option>
+                        <option value="Seguro Clube">Seguro Clube (Apólice Própria)</option>
+                    </select>
+                </div>
+
+                <div id="box-seguro-clube" style="display: none; background: #f8fafc; padding: 14px; border-radius: 12px; margin-bottom: 16px;">
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label>Nº Apólice <span class="req">*</span></label>
+                            <input type="text" name="seguro_apolice" class="form-control" placeholder="Apólice">
+                        </div>
+                        <div class="form-group">
+                            <label>Companhia Seguros <span class="req">*</span></label>
+                            <input type="text" name="seguro_companhia" class="form-control" placeholder="Companhia">
+                        </div>
+                    </div>
+                </div>
+
+                <div class="wizard-buttons">
+                    <button type="button" class="btn-wizard btn-prev" onclick="prevStep(3)">&larr; Anterior</button>
+                    <button type="button" class="btn-wizard btn-next" onclick="nextStep(3)">Seguinte &rarr;</button>
+                </div>
+            </div>
+
+            <!-- PASSO 4: ENCARREGADO DE EDUCAÇÃO (SE MENOR) -->
+            <div class="step-card" id="step-4">
+                <div class="step-title">
+                    <span class="step-title-icon">4</span>
+                    Detentor do Poder Paternal (Menores)
+                </div>
+
+                <div id="msg-menor-aviso" class="alert-box alert-info" style="display: block;">
+                    Conforme os dados inseridos, o/a atleta é menor de 18 anos. É obrigatório o preenchimento dos dados do Encarregado de Educação.
+                </div>
+
+                <div class="form-group">
+                    <label>Nome Completo do Encarregado <span class="req">*</span></label>
+                    <input type="text" name="encarregado_nome" class="form-control" placeholder="Nome Completo do Pai / Mãe / Tutor">
+                </div>
+
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>Qualidade <span class="req">*</span></label>
+                        <select name="encarregado_qualidade" class="form-control">
+                            <option value="Pai">Pai</option>
+                            <option value="Mãe">Mãe</option>
+                            <option value="Tutor">Tutor Legal</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label>Tipo Documento <span class="req">*</span></label>
+                        <select name="encarregado_tipo_doc" class="form-control">
+                            <option value="Cartão Cidadão">Cartão Cidadão</option>
+                            <option value="Passaporte">Passaporte</option>
+                            <option value="Outro">Outro</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>Nº Documento Encarregado <span class="req">*</span></label>
+                        <input type="text" name="encarregado_num_doc" class="form-control" placeholder="12345678">
+                    </div>
+                    <div class="form-group">
+                        <label>Validade Doc. <span class="req">*</span></label>
+                        <input type="date" name="encarregado_validade_doc" class="form-control">
+                    </div>
+                </div>
+
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>Telemóvel Encarregado <span class="req">*</span></label>
+                        <input type="tel" name="encarregado_telefone" class="form-control" placeholder="9XXXXXXXX">
+                    </div>
+                    <div class="form-group">
+                        <label>Email Encarregado <span class="req">*</span></label>
+                        <input type="email" name="encarregado_email" class="form-control" placeholder="encarregado@email.com">
+                    </div>
+                </div>
+
+                <div class="wizard-buttons">
+                    <button type="button" class="btn-wizard btn-prev" onclick="prevStep(4)">&larr; Anterior</button>
+                    <button type="button" class="btn-wizard btn-next" onclick="nextStep(4)">Seguinte &rarr;</button>
+                </div>
+            </div>
+
+            <!-- PASSO 5: RGPD, TERMOS & SUBMISSÃO -->
+            <div class="step-card" id="step-5">
+                <div class="step-title">
+                    <span class="step-title-icon">5</span>
+                    Proteção de Dados & Submissão
+                </div>
+
+                <p style="font-size: 0.82rem; color: #475569; margin-bottom: 16px; line-height: 1.5;">
+                    Os dados recolhidos neste formulário destinam-se exclusivamente à inscrição federada junto do Basket Clube de Valença e da Federação Portuguesa de Basquetebol (FPB).
+                </p>
+
+                <div class="checkbox-group" style="margin-bottom: 20px;">
+                    <label class="radio-card selected">
+                        <input type="checkbox" name="rgpd_politica" value="true" checked required>
+                        <div class="radio-card-title" style="font-size: 0.82rem;">
+                            Concordo expressamente com a política de tratamento de dados pessoais da FPB e do BCV. <span class="req">*</span>
+                        </div>
+                    </label>
+
+                    <label class="radio-card selected">
+                        <input type="checkbox" name="rgpd_comunicacoes" value="true" checked>
+                        <div class="radio-card-title" style="font-size: 0.82rem;">
+                            Autorizo a FPB e o BCV a enviar comunicações relevantes sobre atividades e convocatórias.
+                        </div>
+                    </label>
+
+                    <label class="radio-card selected">
+                        <input type="checkbox" name="rgpd_marketing" value="true" checked>
+                        <div class="radio-card-title" style="font-size: 0.82rem;">
+                            Autorizo a utilização da imagem para divulgação desportiva do clube (site e redes sociais).
+                        </div>
+                    </label>
+                </div>
+
+                <div class="alert-box alert-success" id="msg-submissao-sucesso"></div>
+                <div class="alert-box alert-info" id="msg-submissao-erro" style="background-color: #fef2f2; color: #991b1b; border-color: #fecaca;"></div>
+
+                <div class="wizard-buttons">
+                    <button type="button" class="btn-wizard btn-prev" onclick="prevStep(5)">&larr; Anterior</button>
+                    <button type="submit" class="btn-wizard btn-submit" id="btn-submit-form">SUBMETER INSCRIÇÃO &check;</button>
+                </div>
+            </div>
+
+        </form>
+    </main>
+
+    <!-- Supabase Client JS & Config -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="js/config.js"></script>
+
+    <!-- Lógica da Inscrição Wizard -->
+    <script>
+        let currentStep = 1;
+        const totalSteps = 5;
+        let isMenor = true;
+        let supabaseClient = null;
+
+        document.addEventListener('DOMContentLoaded', () => {
+            // Inicializar Supabase
+            if (window.supabase && typeof SUPABASE_URL !== 'undefined') {
+                supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+            }
+
+            // Alternar Seguro Clube
+            document.getElementById('tipo_seguro').addEventListener('change', (e) => {
+                const boxClube = document.getElementById('box-seguro-clube');
+                boxClube.style.display = e.target.value === 'Seguro Clube' ? 'block' : 'none';
+            });
+
+            // Verificar Idade no campo Data Nascimento
+            document.getElementById('data_nascimento').addEventListener('change', (e) => {
+                const dataNasc = new Date(e.target.value);
+                const hoje = new Date();
+                let idade = hoje.getFullYear() - dataNasc.getFullYear();
+                const m = hoje.getMonth() - dataNasc.getMonth();
+                if (m < 0 || (m === 0 && hoje.getDate() < dataNasc.getDate())) {
+                    idade--;
+                }
+                isMenor = idade < 18;
+            });
+
+            // Lógica dos Radios de Tipo de Inscrição
+            const radioReval = document.getElementById('card-revalidacao');
+            const radioPrimeira = document.getElementById('card-primeira');
+            const boxPesquisa = document.getElementById('box-pesquisa-atleta');
+
+            radioReval.addEventListener('click', () => {
+                radioReval.classList.add('selected');
+                radioPrimeira.classList.remove('selected');
+                radioReval.querySelector('input').checked = true;
+                boxPesquisa.style.display = 'block';
+            });
+
+            radioPrimeira.addEventListener('click', () => {
+                radioPrimeira.classList.add('selected');
+                radioReval.classList.remove('selected');
+                radioPrimeira.querySelector('input').checked = true;
+                boxPesquisa.style.display = 'none';
+            });
+
+            // Pesquisa de Atleta para Renovação
+            document.getElementById('btn-pesquisar-atleta').addEventListener('click', pesquisarAtleta);
+        });
+
+        async function pesquisarAtleta() {
+            const query = document.getElementById('input-pesquisa-atleta').value.trim();
+            const msgBox = document.getElementById('msg-pesquisa');
+
+            if (!query) {
+                msgBox.style.display = 'block';
+                msgBox.textContent = 'Por favor, digite o nome ou licença.';
+                return;
+            }
+
+            msgBox.style.display = 'block';
+            msgBox.textContent = 'A pesquisar atleta...';
+
+            try {
+                const { data, error } = await supabaseClient
+                    .from('atletasbcv')
+                    .select('*')
+                    .or(`nome.ilike.%${query}%,licenca.eq.${query}`)
+                    .limit(1);
+
+                if (error) throw error;
+
+                if (data && data.length > 0) {
+                    const atleta = data[0];
+                    msgBox.textContent = `Atleta encontrado: ${atleta.nome}! Dados pré-preenchidos.`;
+
+                    // Preencher campos automaticamente
+                    const form = document.getElementById('form-inscricao');
+                    if (form.elements['nome']) form.elements['nome'].value = atleta.nome || '';
+                    if (form.elements['nickname']) form.elements['nickname'].value = atleta.nickname || '';
+                    if (form.elements['data_nascimento']) form.elements['data_nascimento'].value = atleta.data_nascimento || '';
+                    if (form.elements['sexo']) form.elements['sexo'].value = atleta.sexo || 'M';
+                    if (form.elements['nacionalidade']) form.elements['nacionalidade'].value = atleta.nacionalidade || 'Portugal';
+                    if (form.elements['licenca']) form.elements['licenca'].value = atleta.licenca || '';
+                    if (form.elements['nif']) form.elements['nif'].value = atleta.nif || '';
+                    if (form.elements['num_doc_id']) form.elements['num_doc_id'].value = atleta.num_doc_id || '';
+                } else {
+                    msgBox.textContent = 'Nenhum atleta encontrado com esses dados. Pode prosseguir com o preenchimento manual.';
+                }
+            } catch (err) {
+                console.error(err);
+                msgBox.textContent = 'Erro ao pesquisar. Pode preencher manualmente.';
+            }
+        }
+
+        function updateStepUI() {
+            // Atualizar visibilidade dos cards
+            document.querySelectorAll('.step-card').forEach((card, index) => {
+                if (index + 1 === currentStep) {
+                    card.classList.add('active');
+                } else {
+                    card.classList.remove('active');
+                }
+            });
+
+            // Atualizar barra de progresso
+            const percent = (currentStep / totalSteps) * 100;
+            document.getElementById('progress-fill').style.width = `${percent}%`;
+            document.getElementById('step-label').textContent = `Passo ${currentStep} de ${totalSteps}`;
+
+            const names = [
+                'Tipo de Inscrição',
+                'Dados do Atleta',
+                'Morada & Contactos',
+                'Encarregado Educação',
+                'Proteção de Dados'
+            ];
+            document.getElementById('step-name').textContent = names[currentStep - 1];
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+
+        function nextStep(step) {
+            // Se for o passo 3 e o atleta for maior de idade, pode saltar o passo 4
+            if (step === 3 && !isMenor) {
+                currentStep = 5;
+            } else {
+                currentStep = Math.min(totalSteps, step + 1);
+            }
+            updateStepUI();
+        }
+
+        function prevStep(step) {
+            if (step === 5 && !isMenor) {
+                currentStep = 3;
+            } else {
+                currentStep = Math.max(1, step - 1);
+            }
+            updateStepUI();
+        }
+
+        // Submissão do Formulário
+        document.getElementById('form-inscricao').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const btn = document.getElementById('btn-submit-form');
+            const msgSucesso = document.getElementById('msg-submissao-sucesso');
+            const msgErro = document.getElementById('msg-submissao-erro');
+
+            btn.disabled = true;
+            btn.textContent = 'A SUBMETER INSCRIÇÃO...';
+            msgSucesso.style.display = 'none';
+            msgErro.style.display = 'none';
+
+            const formData = new FormData(e.target);
+            const payload = {
+                tipo_inscricao: formData.get('tipo_inscricao'),
+                estatuto_fpb: formData.get('estatuto_fpb'),
+                nome: formData.get('nome'),
+                nickname: formData.get('nickname'),
+                data_nascimento: formData.get('data_nascimento'),
+                sexo: formData.get('sexo'),
+                nacionalidade: formData.get('nacionalidade'),
+                pais_nascimento: formData.get('pais_nascimento'),
+                tipo_doc_id: formData.get('tipo_doc_id'),
+                num_doc_id: formData.get('num_doc_id'),
+                validade_doc_id: formData.get('validade_doc_id') || null,
+                nif: formData.get('nif'),
+                licenca: formData.get('licenca') || null,
+                morada: formData.get('morada'),
+                codigo_postal: formData.get('codigo_postal'),
+                localidade: formData.get('localidade'),
+                concelho: formData.get('concelho'),
+                distrito: formData.get('distrito'),
+                telefone: formData.get('telefone'),
+                email: formData.get('email'),
+                tipo_seguro: formData.get('tipo_seguro'),
+                seguro_apolice: formData.get('seguro_apolice') || null,
+                seguro_companhia: formData.get('seguro_companhia') || null,
+                encarregado_nome: formData.get('encarregado_nome') || null,
+                encarregado_qualidade: formData.get('encarregado_qualidade') || null,
+                encarregado_tipo_doc: formData.get('encarregado_tipo_doc') || null,
+                encarregado_num_doc: formData.get('encarregado_num_doc') || null,
+                encarregado_validade_doc: formData.get('encarregado_validade_doc') || null,
+                encarregado_email: formData.get('encarregado_email') || null,
+                encarregado_telefone: formData.get('encarregado_telefone') || null,
+                rgpd_politica: true,
+                rgpd_comunicacoes: formData.get('rgpd_comunicacoes') === 'true',
+                rgpd_marketing: formData.get('rgpd_marketing') === 'true',
+                epoca: '2026/2027'
+            };
+
+            try {
+                const { data, error } = await supabaseClient
+                    .from('atletasbcv')
+                    .insert([payload]);
+
+                if (error) throw error;
+
+                msgSucesso.style.display = 'block';
+                msgSucesso.textContent = 'Inscrição submetida com sucesso! O Basket Clube de Valença agradece a sua preferência.';
+                btn.textContent = 'INSCRIÇÃO CONCLUÍDA!';
+            } catch (err) {
+                console.error(err);
+                msgErro.style.display = 'block';
+                msgErro.textContent = 'Ocorreu um erro ao guardar a inscrição: ' + (err.message || 'Tente novamente.');
+                btn.disabled = false;
+                btn.textContent = 'SUBMETER INSCRIÇÃO ✓';
+            }
+        });
+    </script>
+</body>
+</html>

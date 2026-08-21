@@ -44,3 +44,5 @@
 - [2026-06-04] Gemini: Criação da página pública Equipas (equipas.html) com listagem das equipas da época atual.
 - [2026-06-04] Gemini: Correção de bug no menu lateral que limitava a exibição da lista de equipas e remoção do link genérico 'Todas as Equipas'.
 - [2026-06-04] Gemini: Reformulação da visualização de Plantel na página Equipas (equipas.html) para exibir um detalhe focado na equipa selecionada, com cartões individuais de jogador (foto, número, alcunha).
+- [2026-08-22] Gemini: Criação da página mobile inscricao.html (Formulário por Passos / Wizard para época 2026/2027), criação do script update_atletas_fpb_schema.sql com campos do Modelo 1 da FPB, e adição de botão para exportação em PDF da ficha oficial FPB na Gestão de Atletas do Admin.
+
