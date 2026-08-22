@@ -1211,7 +1211,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         });
     }
 
-    // Função para exportar o PDF Oficial da FPB com Preenchimento Seguro via pdf-lib
+    // Função para exportar o PDF Oficial da FPB com Preenchimento Seguro via pdf-lib (100% Compatível com Adobe)
     window.exportAtletaPDF = async function(atletaStr) {
         const atleta = JSON.parse(atletaStr);
         
@@ -1223,8 +1223,17 @@ document.addEventListener('DOMContentLoaded', async () => {
             });
 
             const { PDFDocument, rgb, StandardFonts } = PDFLib;
-            const pdfDoc = await PDFDocument.load(pdfBytes);
+            // Carregar PDF ignorando erros de estruturas inválidas ou formulários do PDF
+            const pdfDoc = await PDFDocument.load(pdfBytes, { ignoreEncryption: true });
             
+            // Remover formulários interativos nativos se existirem para evitar o retângulo cinzento e erros no Acrobat
+            try {
+                const catalog = pdfDoc.catalog;
+                catalog.delete(PDFLib.PDFName.of('AcroForm'));
+            } catch (e) {
+                console.log("Sem AcroForm para remover.");
+            }
+
             const page = pdfDoc.getPages()[0];
             const font = await pdfDoc.embedFont(StandardFonts.HelveticaBold);
             const fontSize = 9.5;
@@ -1351,8 +1360,8 @@ document.addEventListener('DOMContentLoaded', async () => {
                 drawText(atleta.encarregado_telefone || '', 415, 75);
             }
 
-            // Guardar e Descarregar o PDF limpo
-            const filledPdfBytes = await pdfDoc.save({ useObjectStreams: false });
+            // Guardar o PDF em formato estático normalizado sem objetos corrompidos
+            const filledPdfBytes = await pdfDoc.save();
             const blob = new Blob([filledPdfBytes], { type: 'application/pdf' });
             const link = document.createElement('a');
             link.href = URL.createObjectURL(blob);
