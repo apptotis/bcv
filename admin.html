@@ -421,11 +421,13 @@
                 
                 <!-- Tab: Gestão de Atletas -->
                 <div id="tab-atletas" class="tab-pane hidden">
-                    <h2 style="margin-bottom: 20px;">Gestão de Atletas</h2>
-                    
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+                        <h2>Gestão de Atletas</h2>
+                        <button id="btn-toggle-form-atleta" class="btn-primary">Adicionar Atleta</button>
+                    </div>
 
-                    <!-- Formulário de Criação / Edição -->
-                    <div class="welcome-box" style="margin-bottom: 30px;">
+                    <!-- Formulário de Criação / Edição (Oculto por defeito) -->
+                    <div id="form-atleta-container" class="welcome-box hidden" style="margin-bottom: 30px;">
                         <h3 id="form-atleta-title">Adicionar Novo Atleta</h3>
                         <form id="form-atleta" style="display: grid; gap: 15px; margin-top: 15px; max-width: 600px;">
                             <input type="hidden" id="edit-atleta-id">
@@ -460,34 +462,35 @@
                                     </select>
                                 </div>
                             </div>
+
                             <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 15px;">
                                 <div>
-                                    <label style="display:block; margin-bottom:5px; font-size:0.8rem; color:#a0a0ab;">Equipa FPB</label>
-                                    <input type="text" id="atleta-equipafpb" placeholder="Equipa FPB" class="admin-input">
+                                    <label style="display:block; margin-bottom:5px; font-size:0.8rem; color:#a0a0ab;">Equipa FPB (Associação)</label>
+                                    <input type="text" id="atleta-equipafpb" placeholder="Ex: Sub14 M" class="admin-input">
                                 </div>
                                 <div>
                                     <label style="display:block; margin-bottom:5px; font-size:0.8rem; color:#a0a0ab;">Equipa BCV 1</label>
                                     <select id="atleta-equipabcv1" class="admin-input">
-                                        <option value="">A carregar...</option>
+                                        <option value="">Nenhuma / Sem Equipa</option>
                                     </select>
                                 </div>
                                 <div>
-                                    <label style="display:block; margin-bottom:5px; font-size:0.8rem; color:#a0a0ab;">Equipa BCV 2</label>
+                                    <label style="display:block; margin-bottom:5px; font-size:0.8rem; color:#a0a0ab;">Equipa BCV 2 (Opcional)</label>
                                     <select id="atleta-equipabcv2" class="admin-input">
-                                        <option value="">A carregar...</option>
+                                        <option value="">Nenhuma / Sem Equipa</option>
                                     </select>
                                 </div>
                             </div>
                             
-                            <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 15px;">
+                            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px;">
                                 <div>
-                                    <label style="display:block; margin-bottom:5px; font-size:0.8rem; color:#a0a0ab;">Nº Camisola</label>
-                                    <input type="number" id="atleta-numero" placeholder="Nº" class="admin-input">
+                                    <label style="display:block; margin-bottom:5px; font-size:0.8rem; color:#a0a0ab;">Número de Camisola (#)</label>
+                                    <input type="number" id="atleta-numero" placeholder="Ex: 7" min="0" max="99" class="admin-input">
                                 </div>
                                 <div>
                                     <label style="display:block; margin-bottom:5px; font-size:0.8rem; color:#a0a0ab;">Escalão</label>
                                     <select id="atleta-escalao" required class="admin-input">
-                                        <option value="" disabled selected>Selecionar</option>
+                                        <option value="" disabled selected>Selecionar Escalão</option>
                                         <option value="Mini 8">Mini 8</option>
                                         <option value="Mini 10">Mini 10</option>
                                         <option value="Mini 12">Mini 12</option>
@@ -498,20 +501,76 @@
                                         <option value="Veteranos">Veteranos</option>
                                     </select>
                                 </div>
+                            </div>
+
+                            <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 15px;">
                                 <div>
                                     <label style="display:block; margin-bottom:5px; font-size:0.8rem; color:#a0a0ab;">Sexo</label>
                                     <select id="atleta-sexo" required class="admin-input">
                                         <option value="" disabled selected>Selecionar</option>
-                                        <option value="M">Masculino</option>
-                                        <option value="F">Feminino</option>
+                                        <option value="Masculino">Masculino</option>
+                                        <option value="Feminino">Feminino</option>
                                     </select>
                                 </div>
+                                <div>
+                                    <label style="display:block; margin-bottom:5px; font-size:0.8rem; color:#a0a0ab;">Data de Nascimento</label>
+                                    <input type="date" id="atleta-nascimento" class="admin-input">
+                                </div>
+                                <div>
+                                    <label style="display:block; margin-bottom:5px; font-size:0.8rem; color:#a0a0ab;">NIF</label>
+                                    <input type="text" id="atleta-nif" placeholder="NIF" class="admin-input">
+                                </div>
                             </div>
-                            
+
+                            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px;">
+                                <div>
+                                    <label style="display:block; margin-bottom:5px; font-size:0.8rem; color:#a0a0ab;">Email de Contacto</label>
+                                    <input type="email" id="atleta-email" placeholder="Email" class="admin-input">
+                                </div>
+                                <div>
+                                    <label style="display:block; margin-bottom:5px; font-size:0.8rem; color:#a0a0ab;">Telefone / Telemóvel</label>
+                                    <input type="tel" id="atleta-telefone" placeholder="Contacto Telefónico" class="admin-input">
+                                </div>
+                            </div>
+
                             <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 15px;">
                                 <div>
-                                    <label style="display:block; margin-bottom:5px; font-size:0.8rem; color:#a0a0ab;">Data Nascimento</label>
-                                    <input type="date" id="atleta-nascimento" class="admin-input">
+                                    <label style="display:block; margin-bottom:5px; font-size:0.8rem; color:#a0a0ab;">Tipo Doc. Identificação</label>
+                                    <select id="atleta-tipo-doc" class="admin-input">
+                                        <option value="Cartão Cidadão">Cartão Cidadão</option>
+                                        <option value="Passaporte">Passaporte</option>
+                                        <option value="Outro">Outro</option>
+                                    </select>
+                                </div>
+                                <div>
+                                    <label style="display:block; margin-bottom:5px; font-size:0.8rem; color:#a0a0ab;">Nº Doc. Identificação</label>
+                                    <input type="text" id="atleta-num-doc" placeholder="Número do Doc" class="admin-input">
+                                </div>
+                                <div>
+                                    <label style="display:block; margin-bottom:5px; font-size:0.8rem; color:#a0a0ab;">Validade do Doc.</label>
+                                    <input type="date" id="atleta-validade-doc" class="admin-input">
+                                </div>
+                            </div>
+
+                            <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 15px;">
+                                <div>
+                                    <label style="display:block; margin-bottom:5px; font-size:0.8rem; color:#a0a0ab;">Morada</label>
+                                    <input type="text" id="atleta-morada" placeholder="Rua, Nº, Andar" class="admin-input">
+                                </div>
+                                <div>
+                                    <label style="display:block; margin-bottom:5px; font-size:0.8rem; color:#a0a0ab;">Código Postal</label>
+                                    <input type="text" id="atleta-cp" placeholder="4900-000" class="admin-input">
+                                </div>
+                                <div>
+                                    <label style="display:block; margin-bottom:5px; font-size:0.8rem; color:#a0a0ab;">Localidade</label>
+                                    <input type="text" id="atleta-localidade" placeholder="Valença" class="admin-input">
+                                </div>
+                            </div>
+
+                            <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 15px;">
+                                <div>
+                                    <label style="display:block; margin-bottom:5px; font-size:0.8rem; color:#a0a0ab;">Naturalidade (País)</label>
+                                    <input type="text" id="atleta-pais-nasc" placeholder="Ex: Portugal" class="admin-input">
                                 </div>
                                 <div>
                                     <label style="display:block; margin-bottom:5px; font-size:0.8rem; color:#a0a0ab;">Nacionalidade</label>
@@ -545,11 +604,11 @@
                     <!-- Barra de Filtros -->
                     <div class="welcome-box" style="margin-bottom: 20px; padding: 15px; background: rgba(0,0,0,0.2);">
                         <h4 style="margin-bottom: 10px; color: #a0a0ab; font-size: 0.9rem;">Filtrar Atletas</h4>
-                        <div style="display: grid; grid-template-columns: 1fr 1fr 1fr 1fr auto; gap: 10px; align-items: end;">
-                            <div>
+                        <div style="display: flex; gap: 15px; align-items: flex-end;">
+                            <div style="flex: 1; max-width: 300px;">
                                 <label style="display:block; margin-bottom:5px; font-size:0.8rem;">Escalão</label>
                                 <select id="filter-escalao" class="admin-input" style="margin-bottom: 0;">
-                                    <option value="">Todos</option>
+                                    <option value="">Todos os Escalões</option>
                                     <option value="Mini 8">Mini 8</option>
                                     <option value="Mini 10">Mini 10</option>
                                     <option value="Mini 12">Mini 12</option>
@@ -561,27 +620,7 @@
                                 </select>
                             </div>
                             <div>
-                                <label style="display:block; margin-bottom:5px; font-size:0.8rem;">Equipa BCV 1</label>
-                                <select id="filter-equipabcv1" class="admin-input" style="margin-bottom: 0;">
-                                    <option value="">Todas</option>
-                                </select>
-                            </div>
-                            <div>
-                                <label style="display:block; margin-bottom:5px; font-size:0.8rem;">Equipa BCV 2</label>
-                                <select id="filter-equipabcv2" class="admin-input" style="margin-bottom: 0;">
-                                    <option value="">Todas</option>
-                                </select>
-                            </div>
-                            <div>
-                                <label style="display:block; margin-bottom:5px; font-size:0.8rem;">Sexo</label>
-                                <select id="filter-sexo" class="admin-input" style="margin-bottom: 0;">
-                                    <option value="">Ambos</option>
-                                    <option value="M">Masculino</option>
-                                    <option value="F">Feminino</option>
-                                </select>
-                            </div>
-                            <div>
-                                <button type="button" id="btn-clear-filters" class="btn-secondary" style="padding: 12px 15px; margin-bottom: 0;">Limpar</button>
+                                <button type="button" id="btn-clear-filters" class="btn-secondary" style="padding: 12px 18px; margin-bottom: 0;">Limpar Filtro</button>
                             </div>
                         </div>
                     </div>

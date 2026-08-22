@@ -1385,43 +1385,45 @@ document.addEventListener('DOMContentLoaded', async () => {
         html2pdf().set(opt).from(container).save();
     };
 
+    // Toggle do formulário de atleta (Adicionar Atleta)
+    const btnToggleFormAtleta = document.getElementById('btn-toggle-form-atleta');
+    const formAtletaContainer = document.getElementById('form-atleta-container');
+
+    if (btnToggleFormAtleta && formAtletaContainer) {
+        btnToggleFormAtleta.addEventListener('click', () => {
+            const isHidden = formAtletaContainer.classList.contains('hidden');
+            if (isHidden) {
+                formAtletaContainer.classList.remove('hidden');
+                btnToggleFormAtleta.textContent = 'Esconder Formulário';
+            } else {
+                formAtletaContainer.classList.add('hidden');
+                btnToggleFormAtleta.textContent = 'Adicionar Atleta';
+                resetAtletaForm();
+            }
+        });
+    }
+
     const filterEscalao = document.getElementById('filter-escalao');
-    const filterEquipabcv1 = document.getElementById('filter-equipabcv1');
-    const filterEquipabcv2 = document.getElementById('filter-equipabcv2');
-    const filterSexo = document.getElementById('filter-sexo');
     const btnClearFilters = document.getElementById('btn-clear-filters');
 
     function applyAtletasFilters() {
         if (!currentAtletas) return;
         
         const fEscalao = filterEscalao ? filterEscalao.value : '';
-        const fEq1 = filterEquipabcv1 ? filterEquipabcv1.value : '';
-        const fEq2 = filterEquipabcv2 ? filterEquipabcv2.value : '';
-        const fSexo = filterSexo ? filterSexo.value : '';
 
         const filtrados = currentAtletas.filter(a => {
-            let pass = true;
-            if (fEscalao && a.escalao !== fEscalao) pass = false;
-            if (fEq1 && a.equipabcv1 !== fEq1) pass = false;
-            if (fEq2 && a.equipabcv2 !== fEq2) pass = false;
-            if (fSexo && a.sexo !== fSexo) pass = false;
-            return pass;
+            if (fEscalao && a.escalao !== fEscalao) return false;
+            return true;
         });
 
         renderAtletasTable(filtrados);
     }
 
     if (filterEscalao) filterEscalao.addEventListener('change', applyAtletasFilters);
-    if (filterEquipabcv1) filterEquipabcv1.addEventListener('change', applyAtletasFilters);
-    if (filterEquipabcv2) filterEquipabcv2.addEventListener('change', applyAtletasFilters);
-    if (filterSexo) filterSexo.addEventListener('change', applyAtletasFilters);
 
     if (btnClearFilters) {
         btnClearFilters.addEventListener('click', () => {
             if (filterEscalao) filterEscalao.value = '';
-            if (filterEquipabcv1) filterEquipabcv1.value = '';
-            if (filterEquipabcv2) filterEquipabcv2.value = '';
-            if (filterSexo) filterSexo.value = '';
             applyAtletasFilters();
         });
     }
