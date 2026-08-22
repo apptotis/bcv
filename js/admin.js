@@ -1309,8 +1309,19 @@ document.addEventListener('DOMContentLoaded', async () => {
             const atleta = typeof atletaStr === 'string' ? JSON.parse(atletaStr) : atletaStr;
             
             if (!window.PDFLib) {
-                alert('A carregar biblioteca de PDF... Por favor tente novamente em alguns segundos.');
-                return;
+                await new Promise((resolve, reject) => {
+                    const s = document.createElement('script');
+                    s.src = 'js/pdf-lib.min.js';
+                    s.onload = resolve;
+                    s.onerror = () => {
+                        const s2 = document.createElement('script');
+                        s2.src = 'https://cdn.jsdelivr.net/npm/pdf-lib@1.17.1/dist/pdf-lib.min.js';
+                        s2.onload = resolve;
+                        s2.onerror = () => reject(new Error('Falha ao carregar biblioteca PDF'));
+                        document.head.appendChild(s2);
+                    };
+                    document.head.appendChild(s);
+                });
             }
 
             const { PDFDocument } = window.PDFLib;
