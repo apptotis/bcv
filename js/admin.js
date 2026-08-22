@@ -20,13 +20,20 @@ document.addEventListener('DOMContentLoaded', async () => {
     // 3. Verificar Sessão Atual no arranque
     async function checkSession() {
         try {
-            const { data: { session }, error } = await supabase.auth.getSession();
+            console.log("A verificar sessão do Supabase...");
+            const { data, error } = await supabase.auth.getSession();
             
-            if (session) {
-                console.log("Sessão ativa encontrada:", session.user.email);
-                verifyAdminRole(session.user);
+            if (error) {
+                console.error("Erro ao obter sessão:", error);
+                showLogin();
+                return;
+            }
+
+            if (data && data.session) {
+                console.log("Sessão ativa encontrada:", data.session.user.email);
+                await verifyAdminRole(data.session.user);
             } else {
-                console.log("Nenhuma sessão ativa. A mostrar login.");
+                console.log("Nenhuma sessão ativa. A mostrar formulário de login.");
                 showLogin();
             }
         } catch (e) {
