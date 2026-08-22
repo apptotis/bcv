@@ -1211,315 +1211,161 @@ document.addEventListener('DOMContentLoaded', async () => {
         });
     }
 
-    // Função para exportar a Ficha do Modelo 1 FPB Pixel-Perfect (Réplica exata da ficha oficial)
-    window.exportAtletaPDF = function(atletaStr) {
+    // Função para exportar o PDF Oficial da FPB com Preenchimento Direto sobre o documento original (pdf-lib)
+    window.exportAtletaPDF = async function(atletaStr) {
         const atleta = JSON.parse(atletaStr);
         
-        const printWindow = window.open('', '_blank');
-        if (!printWindow) {
-            alert('Por favor, permita pop-ups para visualizar a ficha de inscrição em PDF.');
-            return;
+        try {
+            // 1. Carregar o PDF Oficial FPB original
+            const pdfBytes = await fetch('assets/Modelo_1_FPB.pdf').then(res => {
+                if (!res.ok) throw new Error('Não foi possível carregar assets/Modelo_1_FPB.pdf');
+                return res.arrayBuffer();
+            });
+
+            const { PDFDocument, rgb, StandardFonts } = PDFLib;
+            const pdfDoc = await PDFDocument.load(pdfBytes);
+            const pages = pdfDoc.getPages();
+            const page = pages[0];
+
+            const font = await pdfDoc.embedFont(StandardFonts.HelveticaBold);
+            const fontSize = 9;
+            const color = rgb(0, 0, 0);
+
+            const drawText = (text, x, y, size = fontSize) => {
+                if (!text) return;
+                page.drawText(String(text), { x, y, size, font, color });
+            };
+
+            const drawCheck = (condition, x, y) => {
+                if (condition) {
+                    page.drawText('X', { x, y, size: 10, font, color });
+                }
+            };
+
+            // Formatar datas DD/MM/AAAA
+            const fmtDate = (dStr) => {
+                if (!dStr) return { d: '', m: '', a: '' };
+                const parts = dStr.split('-');
+                if (parts.length === 3) return { d: parts[2], m: parts[1], a: parts[0] };
+                return { d: '', m: '', a: '' };
+            };
+
+            const nasc = fmtDate(atleta.data_nascimento);
+            const valDoc = fmtDate(atleta.validade_doc_id);
+            const valEncDoc = fmtDate(atleta.encarregado_validade_doc);
+
+            // ==========================================
+            // COORDENADAS DE PREENCHIMENTO NO MODELO 1 FPB
+            // ==========================================
+
+            // 1. Tipo de Inscrição & Estatuto
+            drawCheck(atleta.tipo_inscricao === 'Primeira Inscrição', 147, 765);
+            drawCheck(atleta.tipo_inscricao !== 'Primeira Inscrição', 147, 747);
+            drawText(atleta.licenca || '', 110, 729);
+
+            drawCheck(!atleta.estatuto_fpb || atleta.estatuto_fpb === 'FBP', 227, 765);
+            drawCheck(atleta.estatuto_fpb === 'Sem FBP Comunitário', 227, 747);
+            drawCheck(atleta.estatuto_fpb === 'Sem FBP Não Comunitário', 227, 729);
+
+            // Época & Associação & Sexo
+            drawText(atleta.epoca || '2026 / 2027', 450, 765, 10);
+            drawText('ABVC', 415, 730);
+            drawCheck(atleta.sexo === 'F' || atleta.sexo === 'Feminino', 445, 706);
+            drawCheck(atleta.sexo === 'M' || atleta.sexo === 'Masculino', 525, 706);
+
+            // Clube
+            drawText('BASKET CLUBE DE VALENÇA', 95, 706, 9.5);
+
+            // 2. Escalão
+            const esc = (atleta.escalao || '').toLowerCase();
+            drawCheck(esc.includes('baby'), 119, 663);
+            drawCheck(esc.includes('mini 8') || esc.includes('mini8'), 167, 663);
+            drawCheck(esc.includes('mini 10') || esc.includes('mini10'), 220, 663);
+            drawCheck(esc.includes('mini 12') || esc.includes('mini12'), 274, 663);
+            drawCheck(esc.includes('sub-14') || esc.includes('sub14'), 330, 663);
+            drawCheck(esc.includes('sub-16') || esc.includes('sub16'), 384, 663);
+            drawCheck(esc.includes('sub-18') || esc.includes('sub18'), 438, 663);
+            drawCheck(esc.includes('sénior') || esc.includes('seniores'), 495, 663);
+            drawCheck(esc.includes('master') || esc.includes('veterano'), 550, 663);
+            drawCheck(esc.includes('bcr'), 588, 663);
+
+            // 3. Identificação do(a) Jogador(a)
+            drawText(atleta.nome || '', 135, 622);
+            
+            drawText(nasc.d, 135, 604);
+            drawText(nasc.m, 160, 604);
+            drawText(nasc.a, 185, 604);
+            
+            drawText(atleta.nacionalidade || 'Portugal', 280, 604);
+            drawText(atleta.pais_nascimento || 'Portugal', 460, 604);
+
+            // Tipo Doc
+            drawCheck(!atleta.tipo_doc_id || atleta.tipo_doc_id === 'Cartão Cidadão', 205, 586);
+            drawCheck(atleta.tipo_doc_id === 'Passaporte', 274, 586);
+            drawCheck(atleta.tipo_doc_id && atleta.tipo_doc_id !== 'Cartão Cidadão' && atleta.tipo_doc_id !== 'Passaporte', 315, 586);
+
+            drawText(atleta.num_doc_id || '', 135, 568);
+            drawText(valDoc.d, 260, 568);
+            drawText(valDoc.m, 285, 568);
+            drawText(valDoc.a, 310, 568);
+            drawText(atleta.nif || '', 415, 568);
+
+            drawText(atleta.telefone || '', 95, 549);
+            drawText('', 225, 549); // Telefone
+            drawText(atleta.email || '', 330, 549);
+
+            drawText(atleta.distrito || 'Viana do Castelo', 95, 531);
+            drawText(atleta.concelho || 'Valença', 330, 531);
+
+            drawText(atleta.morada || '', 95, 513);
+            drawText(atleta.codigo_postal || '', 330, 513);
+            drawText(atleta.localidade || 'Valença', 415, 513);
+
+            // 4. Seguro Desportivo
+            drawCheck(atleta.tipo_seguro !== 'Seguro Clube', 119, 477);
+            drawCheck(atleta.tipo_seguro === 'Seguro Clube', 205, 477);
+            drawText(atleta.seguro_apolice || '', 285, 477);
+            drawText(atleta.seguro_companhia || '', 390, 477);
+
+            // 5. RGPD / Consentimentos
+            drawCheck(true, 76, 400); // SIM Política
+            drawCheck(atleta.rgpd_comunicacoes, 76, 370); // SIM Comunicações
+            drawCheck(!atleta.rgpd_comunicacoes, 97, 370); // NÃO Comunicações
+            drawCheck(atleta.rgpd_marketing, 76, 355); // SIM Marketing
+            drawCheck(!atleta.rgpd_marketing, 97, 355); // NÃO Marketing
+
+            // 6. Autorização Detentor Poder Paternal (Menores)
+            if (atleta.encarregado_nome) {
+                drawText(atleta.encarregado_nome, 65, 275);
+                drawCheck(atleta.encarregado_qualidade === 'Pai', 67, 258);
+                drawCheck(atleta.encarregado_qualidade === 'Mãe', 93, 258);
+                drawCheck(atleta.encarregado_qualidade === 'Tutor', 124, 258);
+
+                drawCheck(!atleta.encarregado_tipo_doc || atleta.encarregado_tipo_doc === 'Cartão Cidadão', 260, 258);
+                drawCheck(atleta.encarregado_tipo_doc === 'Passaporte', 320, 258);
+                drawCheck(atleta.encarregado_tipo_doc && atleta.encarregado_tipo_doc !== 'Cartão Cidadão' && atleta.encarregado_tipo_doc !== 'Passaporte', 362, 258);
+
+                drawText(atleta.encarregado_num_doc || '', 445, 258);
+                drawText(valEncDoc.d, 55, 240);
+                drawText(valEncDoc.m, 80, 240);
+                drawText(valEncDoc.a, 105, 240);
+
+                drawText(atleta.encarregado_email || '', 175, 195);
+                drawText(atleta.encarregado_telefone || '', 415, 195);
+            }
+
+            // Guardar e Descarregar o PDF preenchido
+            const filledPdfBytes = await pdfDoc.save();
+            const blob = new Blob([filledPdfBytes], { type: 'application/pdf' });
+            const link = document.createElement('a');
+            link.href = URL.createObjectURL(blob);
+            link.download = `Inscricao_FPB_${(atleta.nome || 'Atleta').replace(/\s+/g, '_')}.pdf`;
+            link.click();
+
+        } catch (err) {
+            console.error("Erro ao gerar PDF preenchível:", err);
+            alert("Erro ao gerar o PDF oficial preenchido: " + err.message);
         }
-
-        // Formatar datas para DD/MM/AAAA
-        const fmtDate = (dStr) => {
-            if (!dStr) return { d: '', m: '', a: '' };
-            const parts = dStr.split('-');
-            if (parts.length === 3) return { d: parts[2], m: parts[1], a: parts[0] };
-            return { d: '', m: '', a: '' };
-        };
-
-        const nasc = fmtDate(atleta.data_nascimento);
-        const valDoc = fmtDate(atleta.validade_doc_id);
-        const valEncDoc = fmtDate(atleta.encarregado_validade_doc);
-
-        const isM = atleta.sexo === 'M' || atleta.sexo === 'Masculino';
-        const isF = atleta.sexo === 'F' || atleta.sexo === 'Feminino';
-
-        const escalao = (atleta.escalao || '').toLowerCase();
-
-        printWindow.document.write(`
-            <!DOCTYPE html>
-            <html lang="pt">
-            <head>
-                <meta charset="UTF-8">
-                <title>Inscrição FPB - ${atleta.nome || 'Atleta'}</title>
-                <style>
-                    @page { size: A4 portrait; margin: 8mm 10mm; }
-                    * { box-sizing: border-box; font-family: Arial, Helvetica, sans-serif; }
-                    body { margin: 0; padding: 0; background: #fff; font-size: 10px; color: #000; line-height: 1.15; }
-                    
-                    /* Tabela e Caixas */
-                    .box { border: 1.5px solid #000; padding: 4px 6px; position: relative; margin-bottom: 5px; }
-                    .flex { display: flex; align-items: center; }
-                    .between { display: flex; justify-content: space-between; align-items: center; }
-                    
-                    .chk-box { display: inline-block; width: 14px; height: 14px; border: 1px solid #000; text-align: center; line-height: 12px; font-weight: bold; font-size: 10px; vertical-align: middle; margin-left: 4px; margin-right: 4px; }
-                    
-                    /* Cabeçalho */
-                    .header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 8px; }
-                    .header-logo { width: 45px; height: 45px; object-fit: contain; }
-                    .header-titles { text-align: center; flex: 1; }
-                    .header-titles h1 { font-size: 14px; font-weight: 900; margin: 0; text-transform: uppercase; letter-spacing: 0.5px; }
-                    .header-titles h2 { font-size: 12px; font-style: italic; margin: 2px 0 0 0; font-weight: normal; }
-
-                    /* Secção Topo */
-                    .top-grid { display: grid; grid-template-columns: 2.2fr 3fr 2.5fr; gap: 6px; margin-bottom: 6px; }
-                    .top-box { border: 1.5px solid #000; padding: 5px; height: 100%; display: flex; flex-direction: column; justify-content: space-between; }
-                    
-                    /* Títulos de Blocos */
-                    .section-title { font-weight: bold; font-style: italic; font-size: 10.5px; margin: 6px 0 3px 0; display: flex; justify-content: space-between; }
-                    
-                    /* Campos Preenchidos com fundo leve */
-                    .field-val { font-weight: bold; font-size: 10.5px; color: #000; }
-                    .field-inline { display: inline-block; border-bottom: 1px dotted #000; min-width: 30px; text-align: center; font-weight: bold; }
-                    
-                    /* Form Tabela de Identificação */
-                    .id-table { width: 100%; border-collapse: collapse; margin-bottom: 4px; }
-                    .id-table td { border: 1px solid #000; padding: 3px 5px; height: 24px; vertical-align: middle; }
-                    
-                    /* Assinaturas */
-                    .sig-block { border: 1.5px solid #000; height: 75px; display: grid; grid-template-columns: 1fr 1fr 1fr; margin-top: 4px; }
-                    .sig-col { border-right: 1px solid #000; display: flex; flex-direction: column; justify-content: flex-end; align-items: center; padding-bottom: 4px; font-size: 9px; font-style: italic; color: #444; }
-                    .sig-col:last-child { border-right: none; }
-
-                    /* RGPD */
-                    .rgpd-text { font-size: 6.5pt; text-align: justify; color: #111; line-height: 1.1; margin-bottom: 4px; }
-                </style>
-            </head>
-            <body>
-
-                <!-- Cabeçalho -->
-                <div class="header">
-                    <img src="assets/emblema_png.png" class="header-logo" alt="FPB">
-                    <div class="header-titles">
-                        <h1>FEDERAÇÃO PORTUGUESA DE BASQUETEBOL</h1>
-                        <h2>INSCRIÇÃO DE JOGADORES</h2>
-                    </div>
-                    <div style="width: 45px;"></div>
-                </div>
-
-                <!-- Quadro Topo: Inscrição / Estatuto / Época -->
-                <div class="top-grid">
-                    <div class="top-box">
-                        <div class="between">
-                            <span>Primeira Inscrição</span>
-                            <span class="chk-box">${atleta.tipo_inscricao === 'Primeira Inscrição' ? 'X' : ''}</span>
-                        </div>
-                        <div class="between" style="margin-top: 3px;">
-                            <span>Revalidação</span>
-                            <span class="chk-box">${atleta.tipo_inscricao !== 'Primeira Inscrição' ? 'X' : ''}</span>
-                        </div>
-                        <div class="between" style="margin-top: 3px;">
-                            <span>Licença FPB</span>
-                            <span style="border: 1px solid #000; padding: 1px 4px; width: 80px; text-align: center; font-weight: bold; background: #f0f4f8;">${atleta.licenca || ''}</span>
-                        </div>
-                    </div>
-
-                    <div class="top-box">
-                        <div class="flex" style="margin-bottom: 3px;">
-                            <strong>Estatuto:</strong>
-                            <span class="chk-box" style="margin-left: auto;">${(!atleta.estatuto_fpb || atleta.estatuto_fpb === 'FBP') ? 'X' : ''}</span> <span style="width: 130px;">FBP</span>
-                        </div>
-                        <div class="flex" style="margin-bottom: 3px;">
-                            <span class="chk-box" style="margin-left: 47px;">${atleta.estatuto_fpb === 'Sem FBP Comunitário' ? 'X' : ''}</span> <span>Sem FBP Comunitário</span>
-                        </div>
-                        <div class="flex">
-                            <span class="chk-box" style="margin-left: 47px;">${atleta.estatuto_fpb === 'Sem FBP Não Comunitário' ? 'X' : ''}</span> <span>Sem FBP Não Comunitário</span>
-                        </div>
-                    </div>
-
-                    <div class="top-box">
-                        <div class="between" style="margin-bottom: 4px;">
-                            <strong>Época</strong>
-                            <span style="border: 1px solid #000; padding: 2px 10px; font-weight: bold; font-size: 11px; background: #f0f4f8;">${atleta.epoca || '2026 / 2027'}</span>
-                        </div>
-                        <div style="font-size: 9px; font-weight: bold; margin-bottom: 2px;">Associação de Basquetebol</div>
-                        <div style="border: 1px solid #000; padding: 2px 4px; font-weight: bold; background: #f0f4f8; text-align: center;">Viana do Castelo (ABVC)</div>
-                        <div class="between" style="margin-top: 4px;">
-                            <span>Feminino <span class="chk-box">${isF ? 'X' : ''}</span></span>
-                            <span>Masculino <span class="chk-box">${isM ? 'X' : ''}</span></span>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Clube -->
-                <div class="box flex">
-                    <strong style="margin-right: 8px;">Clube</strong>
-                    <div style="flex: 1; border: 1px solid #000; padding: 2px 8px; font-weight: bold; background: #f0f4f8; font-size: 11px;">
-                        BASKET CLUBE DE VALENÇA
-                    </div>
-                </div>
-
-                <!-- Escalão -->
-                <div class="section-title">Escalão</div>
-                <div class="box between" style="padding: 5px 4px; font-size: 9px;">
-                    <span>Baby-Basket <span class="chk-box">${escalao.includes('baby') ? 'X' : ''}</span></span>
-                    <span>Mini8 <span class="chk-box">${escalao.includes('mini 8') || escalao.includes('mini8') ? 'X' : ''}</span></span>
-                    <span>Mini10 <span class="chk-box">${escalao.includes('mini 10') || escalao.includes('mini10') ? 'X' : ''}</span></span>
-                    <span>Mini12 <span class="chk-box">${escalao.includes('mini 12') || escalao.includes('mini12') ? 'X' : ''}</span></span>
-                    <span>Sub14 <span class="chk-box">${escalao.includes('sub-14') || escalao.includes('sub14') ? 'X' : ''}</span></span>
-                    <span>Sub16 <span class="chk-box">${escalao.includes('sub-16') || escalao.includes('sub16') ? 'X' : ''}</span></span>
-                    <span>Sub18 <span class="chk-box">${escalao.includes('sub-18') || escalao.includes('sub18') ? 'X' : ''}</span></span>
-                    <span>Sénior <span class="chk-box">${escalao.includes('sénior') || escalao.includes('seniores') ? 'X' : ''}</span></span>
-                    <span>Master <span class="chk-box">${escalao.includes('master') || escalao.includes('veterano') ? 'X' : ''}</span></span>
-                    <span>BCR <span class="chk-box">${escalao.includes('bcr') ? 'X' : ''}</span></span>
-                </div>
-
-                <!-- Identificação do Jogador -->
-                <div class="section-title">Identificação do(a) Jogador(a) (*)</div>
-                <table class="id-table">
-                    <tr>
-                        <td colspan="4">
-                            <strong>Nome Completo:</strong> <span class="field-val" style="margin-left: 6px;">${atleta.nome || ''}</span>
-                        </td>
-                    </tr>
-                    <tr>
-                        <td style="width: 30%;">
-                            <strong>Data de Nascimento:</strong> 
-                            <span class="field-val" style="margin-left: 4px;">${nasc.d} / ${nasc.m} / ${nasc.a}</span>
-                        </td>
-                        <td style="width: 35%;">
-                            <strong>Nacionalidade:</strong> <span class="field-val">${atleta.nacionalidade || 'Portugal'}</span>
-                        </td>
-                        <td colspan="2" style="width: 35%;">
-                            <strong>País de Nascimento:</strong> <span class="field-val">${atleta.pais_nascimento || 'Portugal'}</span>
-                        </td>
-                    </tr>
-                    <tr>
-                        <td colspan="4">
-                            <strong>Tipo Doc. Identificação:</strong>
-                            <span style="margin-left: 8px;">Cartão Cidadão <span class="chk-box">${(!atleta.tipo_doc_id || atleta.tipo_doc_id === 'Cartão Cidadão') ? 'X' : ''}</span></span>
-                            <span style="margin-left: 8px;">Passaporte <span class="chk-box">${atleta.tipo_doc_id === 'Passaporte' ? 'X' : ''}</span></span>
-                            <span style="margin-left: 8px;">Outro <span class="chk-box">${(atleta.tipo_doc_id && atleta.tipo_doc_id !== 'Cartão Cidadão' && atleta.tipo_doc_id !== 'Passaporte') ? 'X' : ''}</span></span>
-                        </td>
-                    </tr>
-                    <tr>
-                        <td style="width: 35%;">
-                            <strong>Doc. Identificação nº:</strong> <span class="field-val">${atleta.num_doc_id || ''}</span>
-                        </td>
-                        <td style="width: 30%;">
-                            <strong>Validade:</strong> <span class="field-val">${valDoc.d} / ${valDoc.m} / ${valDoc.a}</span>
-                        </td>
-                        <td colspan="2" style="width: 35%;">
-                            <strong>Nr. Contribuinte (NIF):</strong> <span class="field-val">${atleta.nif || ''}</span>
-                        </td>
-                    </tr>
-                    <tr>
-                        <td style="width: 30%;">
-                            <strong>Telemóvel:</strong> <span class="field-val">${atleta.telefone || ''}</span>
-                        </td>
-                        <td style="width: 30%;">
-                            <strong>Telefone:</strong> <span class="field-val"></span>
-                        </td>
-                        <td colspan="2" style="width: 40%;">
-                            <strong>Email:</strong> <span class="field-val">${atleta.email || ''}</span>
-                        </td>
-                    </tr>
-                    <tr>
-                        <td style="width: 50%;" colspan="2">
-                            <strong>Distrito:</strong> <span class="field-val">${atleta.distrito || 'Viana do Castelo'}</span>
-                        </td>
-                        <td style="width: 50%;" colspan="2">
-                            <strong>Concelho:</strong> <span class="field-val">${atleta.concelho || 'Valença'}</span>
-                        </td>
-                    </tr>
-                    <tr>
-                        <td colspan="2" style="width: 60%;">
-                            <strong>Morada:</strong> <span class="field-val">${atleta.morada || ''}</span>
-                        </td>
-                        <td style="width: 20%;">
-                            <strong>Cód. Postal:</strong> <span class="field-val">${atleta.codigo_postal || ''}</span>
-                        </td>
-                        <td style="width: 20%;">
-                            <strong>Localidade:</strong> <span class="field-val">${atleta.localidade || 'Valença'}</span>
-                        </td>
-                    </tr>
-                </table>
-                <div style="font-size: 7pt; font-style: italic; margin-bottom: 4px;">(*) Preenchimento obrigatório para todos os campos</div>
-
-                <!-- Seguro Desportivo -->
-                <div class="section-title">Seguro Desportivo</div>
-                <div class="box between" style="padding: 4px 6px;">
-                    <span><strong>Seguro FPB (*)</strong> <span class="chk-box">${atleta.tipo_seguro !== 'Seguro Clube' ? 'X' : ''}</span></span>
-                    <span><strong>Seguro Clube (*)</strong> <span class="chk-box">${atleta.tipo_seguro === 'Seguro Clube' ? 'X' : ''}</span></span>
-                    <span><strong>Nº Apólice (**)</strong> <span class="field-val" style="border: 1px solid #000; padding: 1px 6px; min-width: 80px; display: inline-block; background: #f0f4f8;">${atleta.seguro_apolice || ''}</span></span>
-                    <span><strong>Companhia (**)</strong> <span class="field-val" style="border: 1px solid #000; padding: 1px 6px; min-width: 90px; display: inline-block; background: #f0f4f8;">${atleta.seguro_companhia || ''}</span></span>
-                </div>
-                <div style="font-size: 6.5pt; font-style: italic; margin-bottom: 4px;">(*) Obrigatório selecionar um Seguro Desportivo (FPB ou Clube), (**) Preenchimento obrigatório da apólice e companhia para o Seguro Clube</div>
-
-                <!-- Tratamento de Dados Pessoais -->
-                <div class="section-title">Tratamento de Dados Pessoais</div>
-                <div class="rgpd-text">
-                    Os dados pessoais recolhidos neste impresso são objeto de tratamento por parte do Clube, da respetiva Associação Distrital e da Federação Portuguesa de Basquetebol, para efeitos de inscrição federada. O não fornecimento dos dados inviabiliza a inscrição. O tratamento dos dados pessoais é feito na medida do estritamente necessário para a prossecução das finalidades referidas...
-                </div>
-
-                <div style="margin-bottom: 3px;">
-                    <strong>SIM <span class="chk-box">X</span> NÃO <span class="chk-box"></span></strong>
-                    <span style="margin-left: 6px;">Concordo com a política de tratamento de dados pessoais.</span>
-                </div>
-                <div style="font-size: 7.5pt; margin-bottom: 2px;">Autorizo a Federação Portuguesa de Basquetebol a tratar os dados pessoais acima identificados, com o objetivo de:</div>
-                <div style="margin-bottom: 2px;">
-                    <strong>SIM <span class="chk-box">${atleta.rgpd_comunicacoes ? 'X' : ''}</span> NÃO <span class="chk-box">${!atleta.rgpd_comunicacoes ? 'X' : ''}</span></strong>
-                    <span style="margin-left: 6px;">Receber comunicações relevantes sobre atividades, passatempos e ofertas.</span>
-                </div>
-                <div style="margin-bottom: 4px;">
-                    <strong>SIM <span class="chk-box">${atleta.rgpd_marketing ? 'X' : ''}</span> NÃO <span class="chk-box">${!atleta.rgpd_marketing ? 'X' : ''}</span></strong>
-                    <span style="margin-left: 6px;">Utilização em ações de marketing para divulgação e promoção em notícias e eventos.</span>
-                </div>
-
-                <!-- Assinaturas -->
-                <div class="section-title">Assinaturas</div>
-                <div class="sig-block">
-                    <div class="sig-col">
-                        <span>Jogador(a)</span>
-                    </div>
-                    <div class="sig-col">
-                        <span>/ &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; /</span>
-                        <span style="margin-top: 2px;">Data</span>
-                    </div>
-                    <div class="sig-col">
-                        <span>Diretor(a) e Carimbo Clube</span>
-                    </div>
-                </div>
-
-                <!-- Autorização Detentor do Poder Paternal -->
-                <div class="section-title" style="margin-top: 6px;">Autorização do Detentor do Poder Paternal do Jogador(a) Menor de Idade</div>
-                <div class="box" style="padding: 6px; line-height: 1.5; font-size: 8.5pt;">
-                    Eu, <span class="field-inline" style="width: 260px;">${atleta.encarregado_nome || ''}</span> detentor do poder paternal do jogador(a) acima identificado, na qualidade de 
-                    Pai <span class="chk-box">${atleta.encarregado_qualidade === 'Pai' ? 'X' : ''}</span> 
-                    Mãe <span class="chk-box">${atleta.encarregado_qualidade === 'Mãe' ? 'X' : ''}</span> 
-                    Tutor <span class="chk-box">${atleta.encarregado_qualidade === 'Tutor' ? 'X' : ''}</span> (*), titular do 
-                    Cartão Cidadão <span class="chk-box">${(!atleta.encarregado_tipo_doc || atleta.encarregado_tipo_doc === 'Cartão Cidadão') ? 'X' : ''}</span> 
-                    Passaporte <span class="chk-box">${atleta.encarregado_tipo_doc === 'Passaporte' ? 'X' : ''}</span> 
-                    Outro <span class="chk-box">${(atleta.encarregado_tipo_doc && atleta.encarregado_tipo_doc !== 'Cartão Cidadão' && atleta.encarregado_tipo_doc !== 'Passaporte') ? 'X' : ''}</span> (*) 
-                    com o número <span class="field-inline" style="width: 100px;">${atleta.encarregado_num_doc || ''}</span> e data de validade 
-                    <span class="field-inline" style="width: 70px;">${valEncDoc.d} / ${valEncDoc.m} / ${valEncDoc.a}</span>, autorizo a inscrição do jogador(a) neste Clube na época desportiva indicada...
-                    <br><br>
-                    <div class="between">
-                        <span>Assinatura _______________________________________________________</span>
-                    </div>
-                    <div class="between" style="margin-top: 4px;">
-                        <span>Email: <span class="field-val">${atleta.encarregado_email || ''}</span></span>
-                        <span>Telefone: <span class="field-val">${atleta.encarregado_telefone || ''}</span></span>
-                    </div>
-                </div>
-                <div class="between" style="font-size: 7pt; margin-top: 2px;">
-                    <span>(*) Assinalar a opção adequada para o efeito</span>
-                    <strong>(Modelo 1) <span style="margin-left: 200px;">v202405</span></strong>
-                </div>
-
-                <script>
-                    window.onload = function() {
-                        setTimeout(function() {
-                            window.print();
-                        }, 400);
-                    };
-                </script>
-            </body>
-            </html>
-        `);
-        printWindow.document.close();
     };
 
     const filterEscalao = document.getElementById('filter-escalao');
