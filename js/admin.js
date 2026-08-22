@@ -1295,6 +1295,7 @@ document.addEventListener('DOMContentLoaded', async () => {
                 <td style="padding: 10px; text-align: center;">${numCamisolaHtml}</td>
                 <td style="padding: 10px; text-align: center; white-space: nowrap;">
                     <button class="btn-action" onclick="window.exportAtletaPDF('${atletaJson}')" title="Descarregar Ficha FPB (PDF)" style="background: rgba(126, 34, 206, 0.15); color: #7e22ce; border: 1px solid rgba(126, 34, 206, 0.3); font-weight: bold; margin-right: 4px; padding: 4px 8px;">📄 FPB</button>
+                    <button class="btn-action" onclick="window.exportAtletaEMDPDF('${atletaJson}')" title="Descarregar Exame Médico Desportivo (PDF)" style="background: rgba(16, 185, 129, 0.15); color: #10b981; border: 1px solid rgba(16, 185, 129, 0.3); font-weight: bold; margin-right: 4px; padding: 4px 8px;">🩺 EMD</button>
                     <button class="btn-action" onclick="window.editAtleta('${atletaJson}')" title="Editar" style="padding: 4px 8px; margin-right: 4px;">✏️ Editar</button>
                     <button class="btn-action delete" onclick="window.deleteAtleta('${atleta.id}')" title="Anular Atleta" style="padding: 4px 8px;">🗑️ Anular</button>
                 </td>
@@ -1553,6 +1554,153 @@ document.addEventListener('DOMContentLoaded', async () => {
         }
     };
 
+    // Função para exportar PDF Oficial do Exame Médico Desportivo (IPDJ) usando pdf-lib
+    window.exportAtletaEMDPDF = async function(atletaStr) {
+        try {
+            const atleta = typeof atletaStr === 'string' ? JSON.parse(atletaStr) : atletaStr;
+            
+            if (!window.PDFLib) {
+                await new Promise((resolve, reject) => {
+                    const s = document.createElement('script');
+                    s.src = 'js/pdf-lib.min.js';
+                    s.onload = resolve;
+                    s.onerror = () => {
+                        const s2 = document.createElement('script');
+                        s2.src = 'https://cdn.jsdelivr.net/npm/pdf-lib@1.17.1/dist/pdf-lib.min.js';
+                        s2.onload = resolve;
+                        s2.onerror = () => reject(new Error('Falha ao carregar biblioteca PDF'));
+                        document.head.appendChild(s2);
+                    };
+                    document.head.appendChild(s);
+                });
+            }
+
+            const { PDFDocument } = window.PDFLib;
+
+            // Carregar o ficheiro PDF oficial do IPDJ
+            const response = await fetch('assets/ipdj-exame-medico.pdf');
+            if (!response.ok) {
+                throw new Error('Não foi possível carregar o ficheiro template assets/ipdj-exame-medico.pdf');
+            }
+            const existingPdfBytes = await response.arrayBuffer();
+
+            const pdfDoc = await PDFDocument.load(existingPdfBytes);
+            const form = pdfDoc.getForm();
+
+            const safeSetText = (fieldName, value) => {
+                try {
+                    if (value !== undefined && value !== null && value !== '') {
+                        const field = form.getTextField(fieldName);
+                        field.setText(String(value));
+                    }
+                } catch (err) {
+                    console.warn(`Campo texto não encontrado no PDF EMD: ${fieldName}`, err);
+                }
+            };
+
+            const safeSelectRadio = (radioName, value) => {
+                try {
+                    const radio = form.getRadioGroup(radioName);
+                    radio.select(value);
+                } catch (err) {
+                    console.warn(`Radio não encontrado no PDF EMD: ${radioName}`, err);
+                }
+            };
+
+            // 1. Identificação Geral
+            safeSetText('nome', atleta.nome || '');
+            safeSetText('cc', atleta.num_doc_id || '');
+            safeSetText('nacionalidade', atleta.nacionalidade || 'Portuguesa');
+            safeSetText('morada', atleta.morada || '');
+            safeSetText('cpostal', atleta.codigo_postal || '');
+            safeSetText('localidade', atleta.localidade || '');
+            safeSetText('telemovel', atleta.telefone || '');
+            safeSetText('clube', 'BASKET CLUBE DE VALENÇA');
+            safeSetText('modalidade', 'BASQUETEBOL');
+            safeSetText('escalao', atleta.escalao || '');
+
+            // Formatação da Data de Nascimento
+            if (atleta.data_nascimento) {
+                const parts = atleta.data_nascimento.includes('-')
+                    ? atleta.data_nascimento.split('-')
+                    : atleta.data_nascimento.split('/');
+                if (parts.length === 3) {
+                    const dnFormatada = parts[0].length === 4
+                        ? `${parts[2]}/${parts[1]}/${parts[0]}`
+                        : `${parts[0]}/${parts[1]}/${parts[2]}`;
+                    safeSetText('datanasc', dnFormatada);
+                } else {
+                    safeSetText('datanasc', atleta.data_nascimento);
+                }
+            }
+
+            // Data Atual
+            const hoje = new Date();
+            const dataHojeFormatada = `${String(hoje.getDate()).padStart(2, '0')}/${String(hoje.getMonth() + 1).padStart(2, '0')}/${hoje.getFullYear()}`;
+            safeSetText('data', dataHojeFormatada);
+
+            // 2. Mapeamento das 19 Perguntas EMD
+            const emdResp = atleta.emd_respostas || {};
+            const anoFieldNames = {
+                1: 'ANO1Esteve internado no Hospital ou Clínica',
+                2: 'ANO2Foi operado',
+                3: 'ANO3Perdas de consciencia Epilepsia',
+                4: 'ANO4Teve alguma lesão no desporto',
+                5: 'ANO5Hábitos alcoólicos  tabágicos',
+                6: 'ANO6Consome narcóticos estimulantesou outras substancias',
+                7: 'ANO7Toma regularmente algum medicamento',
+                8: 'ANO8Doenças alérgicas',
+                9: 'ANO9Asma pneumotorax tuberculoseoutras doenças pulmonares',
+                10: 'ANO10Doenças do aparelho digestivo',
+                11: 'ANO11Doenças do coração',
+                12: 'ANO12Doenças renais',
+                13: 'ANO13Doenças ósseas coluna ou articulações',
+                14: 'ANO14Diabetes',
+                15: 'ANO15Doenças do sangue',
+                16: 'ANO16Doenças mentais',
+                17: 'ANO17Doenças da pele',
+                18: 'ANO18Teve alguma doença aqui não mencionada',
+                19: 'ANO19Já fez um exame médico desportivo'
+            };
+
+            for (let i = 1; i <= 19; i++) {
+                const qKey = 'q' + i;
+                const item = emdResp[qKey];
+                const isSim = item && item.resposta === 'SIM';
+                const radioName = '1.' + i;
+                const anoFieldName = anoFieldNames[i];
+
+                if (isSim) {
+                    safeSelectRadio(radioName, 'Escolha1');
+                    if (item.ano) {
+                        safeSetText(anoFieldName, item.ano);
+                    }
+                } else {
+                    safeSelectRadio(radioName, i === 4 ? '2' : '0');
+                }
+            }
+
+            // 3. Pergunta 20 (Resultado Anterior)
+            safeSetText('20Resultado do exame anterior', atleta.emd_resultado_anterior || 'Apto sem restrições');
+
+            // Gerar bytes e efetuar download
+            const pdfBytes = await pdfDoc.save();
+            const blob = new Blob([pdfBytes], { type: 'application/pdf' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `Exame_Medico_${(atleta.nome || 'Atleta').replace(/\s+/g, '_')}.pdf`;
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            URL.revokeObjectURL(url);
+
+        } catch (error) {
+            console.error('Erro ao gerar PDF do Exame Médico:', error);
+            alert('❌ Erro ao gerar PDF do Exame Médico: ' + error.message);
+        }
+    };
+
     // Modal Popup de Atleta (Criar / Editar)
     const btnToggleFormAtleta = document.getElementById('btn-toggle-form-atleta');
     const formAtletaContainer = document.getElementById('form-atleta-container');
@@ -1633,6 +1781,21 @@ document.addEventListener('DOMContentLoaded', async () => {
         document.getElementById('atleta-nascimento').value = atleta.data_nascimento || '';
         document.getElementById('atleta-nacionalidade').value = atleta.nacionalidade || '';
         document.getElementById('atleta-licenca').value = atleta.licenca || '';
+
+        if (document.getElementById('atleta-tipo-doc')) document.getElementById('atleta-tipo-doc').value = atleta.tipo_doc_id || 'Cartão Cidadão';
+        if (document.getElementById('atleta-num-doc')) document.getElementById('atleta-num-doc').value = atleta.num_doc_id || '';
+        if (document.getElementById('atleta-validade-doc')) document.getElementById('atleta-validade-doc').value = atleta.validade_doc_id || '';
+        if (document.getElementById('atleta-morada')) document.getElementById('atleta-morada').value = atleta.morada || '';
+        if (document.getElementById('atleta-cp')) document.getElementById('atleta-cp').value = atleta.codigo_postal || '';
+        if (document.getElementById('atleta-localidade')) document.getElementById('atleta-localidade').value = atleta.localidade || '';
+        if (document.getElementById('atleta-pais-nasc')) document.getElementById('atleta-pais-nasc').value = atleta.pais_nascimento || '';
+
+        // Equipamento
+        if (document.getElementById('atleta-equip-tam')) document.getElementById('atleta-equip-tam').value = atleta.equipamento_tamanho || '';
+        if (document.getElementById('atleta-equip-calcao')) document.getElementById('atleta-equip-calcao').value = atleta.equipamento_tamanho_calcao || '';
+        if (document.getElementById('atleta-equip-num1')) document.getElementById('atleta-equip-num1').value = atleta.equipamento_numero_1 || '';
+        if (document.getElementById('atleta-equip-num2')) document.getElementById('atleta-equip-num2').value = atleta.equipamento_numero_2 || '';
+        if (document.getElementById('atleta-equip-nome')) document.getElementById('atleta-equip-nome').value = atleta.equipamento_nome_camisola || '';
         
         if (atleta.foto) {
             fotoUrlInput.value = atleta.foto;
@@ -1692,14 +1855,29 @@ document.addEventListener('DOMContentLoaded', async () => {
                 nickname: document.getElementById('atleta-nickname').value || null,
                 epoca: document.getElementById('atleta-epoca').value,
                 funcao: document.getElementById('atleta-funcao').value,
-
                 numero_camisola: document.getElementById('atleta-numero').value ? parseInt(document.getElementById('atleta-numero').value) : null,
                 escalao: document.getElementById('atleta-escalao').value,
                 sexo: document.getElementById('atleta-sexo').value,
                 data_nascimento: document.getElementById('atleta-nascimento').value || null,
                 nacionalidade: document.getElementById('atleta-nacionalidade').value,
                 licenca: document.getElementById('atleta-licenca').value,
-                foto: fotoUrlInput.value // Default to existing or empty
+                foto: fotoUrlInput.value,
+
+                // Documentos e Residência
+                tipo_doc_id: document.getElementById('atleta-tipo-doc') ? document.getElementById('atleta-tipo-doc').value : 'Cartão Cidadão',
+                num_doc_id: document.getElementById('atleta-num-doc') ? document.getElementById('atleta-num-doc').value : null,
+                validade_doc_id: document.getElementById('atleta-validade-doc') ? (document.getElementById('atleta-validade-doc').value || null) : null,
+                morada: document.getElementById('atleta-morada') ? document.getElementById('atleta-morada').value : null,
+                codigo_postal: document.getElementById('atleta-cp') ? document.getElementById('atleta-cp').value : null,
+                localidade: document.getElementById('atleta-localidade') ? document.getElementById('atleta-localidade').value : null,
+                pais_nascimento: document.getElementById('atleta-pais-nasc') ? document.getElementById('atleta-pais-nasc').value : null,
+
+                // Equipamento
+                equipamento_tamanho: document.getElementById('atleta-equip-tam') ? document.getElementById('atleta-equip-tam').value : null,
+                equipamento_tamanho_calcao: document.getElementById('atleta-equip-calcao') ? document.getElementById('atleta-equip-calcao').value : null,
+                equipamento_numero_1: document.getElementById('atleta-equip-num1') ? document.getElementById('atleta-equip-num1').value : null,
+                equipamento_numero_2: document.getElementById('atleta-equip-num2') ? document.getElementById('atleta-equip-num2').value : null,
+                equipamento_nome_camisola: document.getElementById('atleta-equip-nome') ? document.getElementById('atleta-equip-nome').value : null
             };
 
             try {

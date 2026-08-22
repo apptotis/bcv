@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Inscrição de Atletas 2026/2027 - Basket Clube de Valença</title>
+    <title>Inscrição Oficial de Atletas 2026/2027 - Basket Clube de Valença</title>
     <link rel="icon" type="image/png" href="assets/emblema_png.png">
     
     <!-- Fontes Google -->
@@ -19,7 +19,7 @@
         .inscricao-body {
             background-color: #f4f6f9;
             min-height: 100vh;
-            padding-bottom: 40px;
+            padding-bottom: 50px;
         }
 
         .inscricao-header {
@@ -38,7 +38,7 @@
             align-items: center;
             justify-content: center;
             gap: 12px;
-            margin-bottom: 16px;
+            margin-bottom: 14px;
             text-decoration: none;
             color: #ffffff;
         }
@@ -57,44 +57,101 @@
         }
 
         .inscricao-title {
-            font-size: 1.4rem;
+            font-size: 1.35rem;
             font-weight: 700;
-            margin-bottom: 6px;
+            margin-bottom: 4px;
         }
 
         .inscricao-subtitle {
-            font-size: 0.88rem;
+            font-size: 0.85rem;
             opacity: 0.85;
         }
 
         /* Container do Formulário */
         .inscricao-container {
-            max-width: 600px;
+            max-width: 650px;
             margin: -20px auto 0 auto;
             padding: 0 16px;
         }
 
-        /* Progresso por Passos */
-        .wizard-progress {
+        /* Macro Fases (3 Fases) */
+        .macro-phases-bar {
+            display: grid;
+            grid-template-columns: 1fr 1fr 1fr;
+            gap: 8px;
             background: #ffffff;
             border-radius: 16px;
-            padding: 16px 20px;
+            padding: 8px;
             box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
-            margin-bottom: 20px;
+            margin-bottom: 16px;
+        }
+
+        .macro-phase-item {
+            text-align: center;
+            padding: 8px 4px;
+            border-radius: 10px;
+            background: #f8fafc;
+            border: 1.5px solid transparent;
+            transition: all 0.2s ease;
+        }
+
+        .macro-phase-item.active {
+            background: #f3e8ff;
+            border-color: #7e22ce;
+        }
+
+        .macro-phase-item.completed {
+            background: #f0fdf4;
+            border-color: #22c55e;
+        }
+
+        .macro-phase-num {
+            font-size: 0.72rem;
+            font-weight: 700;
+            color: #64748b;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            margin-bottom: 2px;
+        }
+
+        .macro-phase-item.active .macro-phase-num {
+            color: #7e22ce;
+        }
+
+        .macro-phase-item.completed .macro-phase-num {
+            color: #16a34a;
+        }
+
+        .macro-phase-title {
+            font-size: 0.78rem;
+            font-weight: 700;
+            color: #1e293b;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        /* Progresso por Passos Internos */
+        .wizard-progress {
+            background: #ffffff;
+            border-radius: 14px;
+            padding: 12px 18px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.04);
+            margin-bottom: 18px;
         }
 
         .progress-bar-bg {
             background: #e2e8f0;
-            height: 8px;
+            height: 7px;
             border-radius: 4px;
             overflow: hidden;
-            margin-bottom: 12px;
+            margin-bottom: 8px;
         }
 
         .progress-bar-fill {
-            background: linear-gradient(90deg, #4c1d95, #6d28d9);
+            background: linear-gradient(90deg, #4c1d95, #7e22ce);
             height: 100%;
-            width: 20%;
+            width: 14%;
             transition: width 0.3s ease;
         }
 
@@ -125,7 +182,7 @@
         }
 
         @keyframes fadeIn {
-            from { opacity: 0; transform: translateY(100px); }
+            from { opacity: 0; transform: translateY(12px); }
             to { opacity: 1; transform: translateY(0); }
         }
 
@@ -152,6 +209,57 @@
             justify-content: center;
             font-size: 0.95rem;
             font-weight: 800;
+        }
+
+        /* Intro Cards */
+        .intro-phases-grid {
+            display: flex;
+            flex-direction: column;
+            gap: 14px;
+            margin: 20px 0 24px 0;
+        }
+
+        .intro-phase-card {
+            display: flex;
+            align-items: flex-start;
+            gap: 14px;
+            padding: 16px;
+            background: #f8fafc;
+            border: 1.5px solid #e2e8f0;
+            border-radius: 14px;
+            transition: all 0.2s ease;
+        }
+
+        .intro-phase-card:hover {
+            border-color: #cbd5e1;
+            background: #ffffff;
+        }
+
+        .intro-phase-icon {
+            font-size: 1.6rem;
+            width: 44px;
+            height: 44px;
+            border-radius: 12px;
+            background: #ffffff;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+            flex-shrink: 0;
+        }
+
+        .intro-phase-content h4 {
+            font-size: 0.95rem;
+            font-weight: 700;
+            color: #1e293b;
+            margin-bottom: 3px;
+        }
+
+        .intro-phase-content p {
+            font-size: 0.8rem;
+            color: #64748b;
+            line-height: 1.4;
+            margin: 0;
         }
 
         /* Grupos de Formulário */
@@ -198,6 +306,20 @@
             flex: 1;
         }
 
+        /* Badge de Escalão Automático */
+        .escalao-badge-box {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            background: #ede9fe;
+            color: #6d28d9;
+            padding: 6px 12px;
+            border-radius: 8px;
+            font-size: 0.82rem;
+            font-weight: 700;
+            margin-top: 6px;
+        }
+
         /* Radio & Checkbox Customizados */
         .radio-group, .checkbox-group {
             display: flex;
@@ -238,7 +360,91 @@
             color: #64748b;
         }
 
-        /* Pesquisa Atleta Existente com Autocomplete */
+        /* Questionário EMD (20 Perguntas) */
+        .emd-question-card {
+            background: #f8fafc;
+            border: 1.5px solid #e2e8f0;
+            border-radius: 14px;
+            padding: 14px 16px;
+            margin-bottom: 12px;
+            transition: all 0.2s ease;
+        }
+
+        .emd-question-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .emd-question-text {
+            font-size: 0.88rem;
+            font-weight: 600;
+            color: #1e293b;
+            flex: 1;
+        }
+
+        .emd-toggle-buttons {
+            display: flex;
+            gap: 6px;
+            flex-shrink: 0;
+        }
+
+        .btn-toggle-option {
+            padding: 6px 14px;
+            border-radius: 8px;
+            border: 1.5px solid #cbd5e1;
+            background: #ffffff;
+            font-size: 0.8rem;
+            font-weight: 700;
+            color: #64748b;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .btn-toggle-option.active-nao {
+            background: #f1f5f9;
+            border-color: #94a3b8;
+            color: #334155;
+        }
+
+        .btn-toggle-option.active-sim {
+            background: #f3e8ff;
+            border-color: #7e22ce;
+            color: #7e22ce;
+        }
+
+        .emd-ano-box {
+            margin-top: 10px;
+            padding-top: 10px;
+            border-top: 1px dashed #cbd5e1;
+            display: none;
+        }
+
+        .emd-ano-box.active {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .emd-ano-box label {
+            font-size: 0.8rem;
+            font-weight: 600;
+            color: #7e22ce;
+            margin: 0;
+            white-space: nowrap;
+        }
+
+        .emd-ano-input {
+            width: 100px;
+            padding: 6px 10px;
+            border-radius: 8px;
+            border: 1.5px solid #cbd5e1;
+            font-size: 0.85rem;
+            text-align: center;
+        }
+
+        /* Pesquisa Atleta Existente */
         .search-box {
             background-color: #f8fafc;
             border: 1.5px dashed #cbd5e1;
@@ -250,13 +456,13 @@
 
         .search-results-list {
             position: absolute;
-            top: calc(100% - 10px);
-            left: 16px;
-            right: 16px;
+            top: 100%;
+            left: 0;
+            right: 0;
             background: #ffffff;
-            border: 1px solid #cbd5e1;
+            border: 1.5px solid #7e22ce;
             border-radius: 12px;
-            box-shadow: 0 10px 25px rgba(0,0,0,0.1);
+            box-shadow: 0 10px 25px rgba(0,0,0,0.15);
             max-height: 220px;
             overflow-y: auto;
             z-index: 100;
@@ -264,27 +470,22 @@
         }
 
         .search-result-item {
-            padding: 12px 16px;
+            padding: 10px 14px;
             border-bottom: 1px solid #f1f5f9;
             cursor: pointer;
             display: flex;
             justify-content: space-between;
             align-items: center;
-            transition: background 0.15s ease;
+            font-size: 0.88rem;
         }
 
         .search-result-item:hover {
-            background-color: #f3e8ff;
-        }
-
-        .search-result-item:last-child {
-            border-bottom: none;
+            background: #f3e8ff;
         }
 
         .search-result-name {
             font-weight: 700;
             color: #1e293b;
-            font-size: 0.9rem;
         }
 
         .search-result-info {
@@ -292,7 +493,7 @@
             color: #64748b;
         }
 
-        /* Botões de Ação do Wizard */
+        /* Botões do Wizard */
         .wizard-buttons {
             display: flex;
             gap: 12px;
@@ -337,13 +538,14 @@
             box-shadow: 0 4px 12px rgba(22, 163, 74, 0.25);
         }
 
-        /* Modal Mensagem Sucesso */
+        /* Mensagens de Alerta */
         .alert-box {
-            padding: 12px 16px;
-            border-radius: 10px;
-            font-size: 0.85rem;
+            padding: 14px 16px;
+            border-radius: 12px;
+            font-size: 0.88rem;
             margin-bottom: 16px;
             display: none;
+            line-height: 1.4;
         }
 
         .alert-info {
@@ -357,6 +559,12 @@
             color: #166534;
             border: 1px solid #bbf7d0;
         }
+
+        .alert-error {
+            background-color: #fef2f2;
+            color: #991b1b;
+            border: 1px solid #fecaca;
+        }
     </style>
 </head>
 <body class="inscricao-body">
@@ -367,28 +575,86 @@
             <img src="assets/emblema_png.png" alt="Basket Clube de Valença">
             <span>BASKET CLUBE DE VALENÇA</span>
         </a>
-        <h1 class="inscricao-title">Ficha de Inscrição Oficial</h1>
-        <p class="inscricao-subtitle">Época Desportiva 2026 / 2027 • Modelo FPB</p>
+        <h1 class="inscricao-title">Inscrição Oficial de Atletas</h1>
+        <p class="inscricao-subtitle">Época Desportiva 2026 / 2027 • Processo Integrado</p>
     </header>
 
     <!-- Contentor Principal -->
     <main class="inscricao-container">
 
-        <!-- Barra de Progresso -->
-        <div class="wizard-progress">
+        <!-- Barra de Macro-Fases (3 Fases) -->
+        <div class="macro-phases-bar" id="macro-bar">
+            <div class="macro-phase-item active" id="macro-1">
+                <div class="macro-phase-num">Fase 1</div>
+                <div class="macro-phase-title">📄 Federação FPB</div>
+            </div>
+            <div class="macro-phase-item" id="macro-2">
+                <div class="macro-phase-num">Fase 2</div>
+                <div class="macro-phase-title">🩺 Exame Médico</div>
+            </div>
+            <div class="macro-phase-item" id="macro-3">
+                <div class="macro-phase-num">Fase 3</div>
+                <div class="macro-phase-title">🎽 Equipamento</div>
+            </div>
+        </div>
+
+        <!-- Barra de Progresso Sub-passos -->
+        <div class="wizard-progress" id="progress-container" style="display: none;">
             <div class="progress-bar-bg">
                 <div class="progress-bar-fill" id="progress-fill"></div>
             </div>
             <div class="progress-steps-text">
-                <span id="step-label">Passo 1 de 5</span>
+                <span id="step-label">Passo 1 de 7</span>
                 <span id="step-name" class="active">Tipo de Inscrição</span>
             </div>
         </div>
 
         <form id="form-inscricao" autocomplete="on">
 
-            <!-- PASSO 1: TIPO DE INSCRIÇÃO -->
-            <div class="step-card active" id="step-1">
+            <!-- PASSO 0: VISÃO GERAL / INTRODUÇÃO -->
+            <div class="step-card active" id="step-0">
+                <div class="step-title">
+                    <span class="step-title-icon">ℹ️</span>
+                    Processo de Inscrição BCV
+                </div>
+
+                <p style="font-size: 0.9rem; color: #475569; line-height: 1.5; margin-bottom: 12px;">
+                    Bem-vindo(a) à inscrição para a <strong>Época 2026/2027</strong>. A inscrição completa de cada atleta é composta por <strong>3 etapas obrigatórias</strong>:
+                </p>
+
+                <div class="intro-phases-grid">
+                    <div class="intro-phase-card">
+                        <div class="intro-phase-icon">📄</div>
+                        <div class="intro-phase-content">
+                            <h4>1. Inscrição na Federação (FPB)</h4>
+                            <p>Dados de identificação, morada, contactos e seguro federativo (Modelo 1 oficial).</p>
+                        </div>
+                    </div>
+
+                    <div class="intro-phase-card">
+                        <div class="intro-phase-icon">🩺</div>
+                        <div class="intro-phase-content">
+                            <h4>2. Exame Médico Desportivo (IPDJ)</h4>
+                            <p>Declarações pessoais de saúde com 20 questões para a ficha médica oficial.</p>
+                        </div>
+                    </div>
+
+                    <div class="intro-phase-card">
+                        <div class="intro-phase-icon">🎽</div>
+                        <div class="intro-phase-content">
+                            <h4>3. Kit de Equipamento BCV</h4>
+                            <p>Tamanhos da camisola e calções, número pretendido e nome para estampar nas costas.</p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="wizard-buttons">
+                    <button type="button" class="btn-wizard btn-next" onclick="startWizard()">INICIAR INSCRIÇÃO &rarr;</button>
+                </div>
+            </div>
+
+            <!-- PASSO 1 (FASE 1): TIPO DE INSCRIÇÃO -->
+            <div class="step-card" id="step-1">
                 <div class="step-title">
                     <span class="step-title-icon">1</span>
                     Tipo de Inscrição na Época 2026/2027
@@ -438,12 +704,12 @@
                 </div>
 
                 <div class="wizard-buttons">
-                    <div></div> <!-- Spacer -->
+                    <button type="button" class="btn-wizard btn-prev" onclick="goToStep(0)">&larr; Introdução</button>
                     <button type="button" class="btn-wizard btn-next" onclick="nextStep(1)">Seguinte &rarr;</button>
                 </div>
             </div>
 
-            <!-- PASSO 2: DADOS PESSOAIS DO ATLETA -->
+            <!-- PASSO 2 (FASE 1): DADOS PESSOAIS DO ATLETA -->
             <div class="step-card" id="step-2">
                 <div class="step-title">
                     <span class="step-title-icon">2</span>
@@ -459,6 +725,9 @@
                     <div class="form-group">
                         <label>Data Nascimento <span class="req">*</span></label>
                         <input type="date" name="data_nascimento" id="data_nascimento" class="form-control" required>
+                        <div id="escalao-feedback" class="escalao-badge-box" style="display: none;">
+                            🏀 Escalão: <span id="escalao-nome-span">Sub-14</span>
+                        </div>
                     </div>
                     <div class="form-group">
                         <label>Sexo <span class="req">*</span></label>
@@ -517,7 +786,7 @@
                 </div>
             </div>
 
-            <!-- PASSO 3: MORADA, CONTACTOS & SEGURO -->
+            <!-- PASSO 3 (FASE 1): MORADA, CONTACTOS & SEGURO -->
             <div class="step-card" id="step-3">
                 <div class="step-title">
                     <span class="step-title-icon">3</span>
@@ -553,34 +822,32 @@
 
                 <div class="form-row">
                     <div class="form-group">
-                        <label>Telemóvel Atleta</label>
-                        <input type="tel" name="telefone" class="form-control" placeholder="9XXXXXXXX">
+                        <label>Telefone / Telemóvel <span class="req">*</span></label>
+                        <input type="tel" name="telefone" class="form-control" placeholder="912 345 678" required>
                     </div>
                     <div class="form-group">
-                        <label>Email Atleta</label>
-                        <input type="email" name="email" class="form-control" placeholder="atleta@email.com">
+                        <label>Email do Atleta/Contacto <span class="req">*</span></label>
+                        <input type="email" name="email" class="form-control" placeholder="atleta@exemplo.com" required>
                     </div>
                 </div>
 
                 <!-- Seguro Desportivo -->
-                <div class="form-group" style="margin-top: 20px;">
+                <div class="form-group" style="margin-top: 10px;">
                     <label>Seguro Desportivo <span class="req">*</span></label>
                     <select name="tipo_seguro" id="tipo_seguro" class="form-control" required>
-                        <option value="Seguro FPB">Seguro FPB (Federação Portuguesa de Basquetebol)</option>
-                        <option value="Seguro Clube">Seguro Clube (Apólice Própria)</option>
+                        <option value="Seguro FPB">Seguro Federativo FPB (Padrão)</option>
+                        <option value="Seguro Clube">Seguro Próprio / Outro</option>
                     </select>
                 </div>
 
-                <div id="box-seguro-clube" style="display: none; background: #f8fafc; padding: 14px; border-radius: 12px; margin-bottom: 16px;">
-                    <div class="form-row">
-                        <div class="form-group">
-                            <label>Nº Apólice <span class="req">*</span></label>
-                            <input type="text" name="seguro_apolice" class="form-control" placeholder="Apólice">
-                        </div>
-                        <div class="form-group">
-                            <label>Companhia Seguros <span class="req">*</span></label>
-                            <input type="text" name="seguro_companhia" class="form-control" placeholder="Companhia">
-                        </div>
+                <div id="box-seguro-clube" style="display: none; background: #faf5ff; padding: 12px; border-radius: 12px; margin-bottom: 16px; border: 1px dashed #7e22ce;">
+                    <div class="form-group">
+                        <label>Companhia de Seguros</label>
+                        <input type="text" name="seguro_companhia" class="form-control" placeholder="Nome da Companhia">
+                    </div>
+                    <div class="form-group">
+                        <label>Nº Apólice</label>
+                        <input type="text" name="seguro_apolice" class="form-control" placeholder="Número da Apólice">
                     </div>
                 </div>
 
@@ -590,29 +857,30 @@
                 </div>
             </div>
 
-            <!-- PASSO 4: ENCARREGADO DE EDUCAÇÃO (SE MENOR) -->
+            <!-- PASSO 4 (FASE 1): ENCARREGADO DE EDUCAÇÃO -->
             <div class="step-card" id="step-4">
                 <div class="step-title">
                     <span class="step-title-icon">4</span>
-                    Detentor do Poder Paternal (Menores)
+                    Encarregado(a) de Educação
                 </div>
 
-                <div id="msg-menor-aviso" class="alert-box alert-info" style="display: block;">
-                    Conforme os dados inseridos, o/a atleta é menor de 18 anos. É obrigatório o preenchimento dos dados do Encarregado de Educação.
+                <div class="alert-box alert-info" style="display: block; margin-bottom: 15px;">
+                    Obrigatório para atletas <strong>menores de 18 anos</strong>.
                 </div>
 
                 <div class="form-group">
-                    <label>Nome Completo do Encarregado <span class="req">*</span></label>
-                    <input type="text" name="encarregado_nome" class="form-control" placeholder="Nome Completo do Pai / Mãe / Tutor">
+                    <label>Nome do Encarregado de Educação <span class="req">*</span></label>
+                    <input type="text" name="encarregado_nome" class="form-control" placeholder="Nome do Pai/Mãe/Tutor">
                 </div>
 
                 <div class="form-row">
                     <div class="form-group">
-                        <label>Qualidade <span class="req">*</span></label>
+                        <label>Grau de Parentesco <span class="req">*</span></label>
                         <select name="encarregado_qualidade" class="form-control">
                             <option value="Pai">Pai</option>
                             <option value="Mãe">Mãe</option>
-                            <option value="Tutor">Tutor Legal</option>
+                            <option value="Tutor Legal">Tutor Legal</option>
+                            <option value="Outro">Outro</option>
                         </select>
                     </div>
                     <div class="form-group">
@@ -620,30 +888,29 @@
                         <select name="encarregado_tipo_doc" class="form-control">
                             <option value="Cartão Cidadão">Cartão Cidadão</option>
                             <option value="Passaporte">Passaporte</option>
-                            <option value="Outro">Outro</option>
                         </select>
                     </div>
                 </div>
 
                 <div class="form-row">
                     <div class="form-group">
-                        <label>Nº Documento Encarregado <span class="req">*</span></label>
+                        <label>Nº Documento <span class="req">*</span></label>
                         <input type="text" name="encarregado_num_doc" class="form-control" placeholder="12345678">
                     </div>
                     <div class="form-group">
-                        <label>Validade Doc. <span class="req">*</span></label>
+                        <label>Validade Doc.</label>
                         <input type="date" name="encarregado_validade_doc" class="form-control">
                     </div>
                 </div>
 
                 <div class="form-row">
                     <div class="form-group">
-                        <label>Telemóvel Encarregado <span class="req">*</span></label>
-                        <input type="tel" name="encarregado_telefone" class="form-control" placeholder="9XXXXXXXX">
+                        <label>Email do Encarregado <span class="req">*</span></label>
+                        <input type="email" name="encarregado_email" class="form-control" placeholder="encarregado@email.com">
                     </div>
                     <div class="form-group">
-                        <label>Email Encarregado <span class="req">*</span></label>
-                        <input type="email" name="encarregado_email" class="form-control" placeholder="encarregado@email.com">
+                        <label>Telefone do Encarregado <span class="req">*</span></label>
+                        <input type="tel" name="encarregado_telefone" class="form-control" placeholder="912 345 678">
                     </div>
                 </div>
 
@@ -653,46 +920,160 @@
                 </div>
             </div>
 
-            <!-- PASSO 5: RGPD, TERMOS & SUBMISSÃO -->
+            <!-- PASSO 5 (FASE 1): TRATAMENTO DE DADOS (RGPD) -->
             <div class="step-card" id="step-5">
                 <div class="step-title">
                     <span class="step-title-icon">5</span>
-                    Proteção de Dados & Submissão
+                    Proteção de Dados & Consentimento
                 </div>
 
-                <p style="font-size: 0.82rem; color: #475569; margin-bottom: 16px; line-height: 1.5;">
-                    Os dados recolhidos neste formulário destinam-se exclusivamente à inscrição federada junto do Basket Clube de Valença e da Federação Portuguesa de Basquetebol (FPB).
-                </p>
+                <div class="form-group">
+                    <div class="checkbox-group">
+                        <label class="radio-card selected" style="cursor: default;">
+                            <input type="checkbox" name="rgpd_politica" value="true" checked required>
+                            <div>
+                                <div class="radio-card-title">Regulamento Geral sobre a Proteção de Dados (RGPD) <span class="req">*</span></div>
+                                <div class="radio-card-desc">Autorizo o tratamento dos dados pessoais para efeitos de filiação na FPB e gestão desportiva no Basket Clube de Valença.</div>
+                            </div>
+                        </label>
 
-                <div class="checkbox-group" style="margin-bottom: 20px;">
-                    <label class="radio-card selected">
-                        <input type="checkbox" name="rgpd_politica" value="true" checked required>
-                        <div class="radio-card-title" style="font-size: 0.82rem;">
-                            Concordo expressamente com a política de tratamento de dados pessoais da FPB e do BCV. <span class="req">*</span>
-                        </div>
-                    </label>
+                        <label class="radio-card">
+                            <input type="checkbox" name="rgpd_comunicacoes" value="true" checked>
+                            <div>
+                                <div class="radio-card-title">Comunicações e Convocatórias</div>
+                                <div class="radio-card-desc">Autorizo o envio de emails/SMS com horários de treinos, convocatórias de jogos e eventos do clube.</div>
+                            </div>
+                        </label>
 
-                    <label class="radio-card selected">
-                        <input type="checkbox" name="rgpd_comunicacoes" value="true" checked>
-                        <div class="radio-card-title" style="font-size: 0.82rem;">
-                            Autorizo a FPB e o BCV a enviar comunicações relevantes sobre atividades e convocatórias.
-                        </div>
-                    </label>
-
-                    <label class="radio-card selected">
-                        <input type="checkbox" name="rgpd_marketing" value="true" checked>
-                        <div class="radio-card-title" style="font-size: 0.82rem;">
-                            Autorizo a utilização da imagem para divulgação desportiva do clube (site e redes sociais).
-                        </div>
-                    </label>
+                        <label class="radio-card">
+                            <input type="checkbox" name="rgpd_marketing" value="true" checked>
+                            <div>
+                                <div class="radio-card-title">Imagens e Fotografias Desportivas</div>
+                                <div class="radio-card-desc">Autorizo a captação e divulgação de fotos de jogos e treinos no website e redes sociais oficiais do BCV.</div>
+                            </div>
+                        </label>
+                    </div>
                 </div>
 
-                <div class="alert-box alert-success" id="msg-submissao-sucesso"></div>
-                <div class="alert-box alert-info" id="msg-submissao-erro" style="background-color: #fef2f2; color: #991b1b; border-color: #fecaca;"></div>
+                <div class="alert-box alert-success" style="display: block; margin-top: 15px;">
+                    ✅ <strong>Fase 1 (FPB) Concluída!</strong> Ao avançar, irá preencher as <strong>Declarações do Exame Médico Desportivo</strong>.
+                </div>
 
                 <div class="wizard-buttons">
                     <button type="button" class="btn-wizard btn-prev" onclick="prevStep(5)">&larr; Anterior</button>
-                    <button type="submit" class="btn-wizard btn-submit" id="btn-submit-form">SUBMETER INSCRIÇÃO &check;</button>
+                    <button type="button" class="btn-wizard btn-next" onclick="nextStep(5)">Avançar para Exame Médico (Fase 2) &rarr;</button>
+                </div>
+            </div>
+
+            <!-- PASSO 6 (FASE 2): EXAME MÉDICO DESPORTIVO (IPDJ) -->
+            <div class="step-card" id="step-6">
+                <div class="step-title">
+                    <span class="step-title-icon">🩺</span>
+                    Exame Médico Desportivo (Declarações Pessoais)
+                </div>
+
+                <p style="font-size: 0.85rem; color: #475569; margin-bottom: 16px;">
+                    Questionário oficial do <strong>IPDJ</strong> a preencher pelo atleta ou encarregado de educação. Caso selecione <strong>SIM</strong> em alguma questão, indique o <strong>Ano</strong> em que ocorreu.
+                </p>
+
+                <!-- 19 Perguntas EMD -->
+                <div id="emd-questions-container">
+                    <!-- Geradas dinamicamente via JS -->
+                </div>
+
+                <!-- Pergunta 20 -->
+                <div class="emd-question-card" style="background: #ffffff; border: 2px solid #e2e8f0;">
+                    <div class="form-group" style="margin-bottom: 0;">
+                        <label style="font-weight: 700; color: #1e293b;">20. Resultado do exame médico desportivo anterior: <span class="req">*</span></label>
+                        <select name="emd_resultado_anterior" class="form-control" required style="margin-top: 6px;">
+                            <option value="Apto sem restrições">Apto sem restrições</option>
+                            <option value="Apto com restrições">Apto com restrições</option>
+                            <option value="Não Apto">Não Apto</option>
+                            <option value="Primeiro Exame (Nunca realizou)">Primeiro Exame (Nunca realizou)</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="alert-box alert-success" style="display: block; margin-top: 15px;">
+                    ✅ <strong>Fase 2 (Exame Médico) Concluída!</strong> O último passo são os <strong>Dados para o Equipamento Oficial</strong>.
+                </div>
+
+                <div class="wizard-buttons">
+                    <button type="button" class="btn-wizard btn-prev" onclick="prevStep(6)">&larr; Voltar (Fase 1)</button>
+                    <button type="button" class="btn-wizard btn-next" onclick="nextStep(6)">Avançar para Equipamentos (Fase 3) &rarr;</button>
+                </div>
+            </div>
+
+            <!-- PASSO 7 (FASE 3): EQUIPAMENTO OFICIAL BCV -->
+            <div class="step-card" id="step-7">
+                <div class="step-title">
+                    <span class="step-title-icon">🎽</span>
+                    Kit de Equipamento Oficial BCV
+                </div>
+
+                <p style="font-size: 0.85rem; color: #475569; margin-bottom: 16px;">
+                    Selecione os tamanhos e personalize o equipamento oficial de jogo para a <strong>Época 2026/2027</strong>.
+                </p>
+
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>Tamanho da Camisola <span class="req">*</span></label>
+                        <select name="equipamento_tamanho" class="form-control" required>
+                            <option value="">Selecione o tamanho...</option>
+                            <option value="6">6 anos</option>
+                            <option value="8">8 anos</option>
+                            <option value="10">10 anos</option>
+                            <option value="12">12 anos</option>
+                            <option value="14">14 anos</option>
+                            <option value="S">S (Adulto)</option>
+                            <option value="M">M (Adulto)</option>
+                            <option value="L">L (Adulto)</option>
+                            <option value="XL">XL (Adulto)</option>
+                            <option value="XXL">XXL (Adulto)</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label>Tamanho dos Calções <span class="req">*</span></label>
+                        <select name="equipamento_tamanho_calcao" class="form-control" required>
+                            <option value="">Selecione o tamanho...</option>
+                            <option value="6">6 anos</option>
+                            <option value="8">8 anos</option>
+                            <option value="10">10 anos</option>
+                            <option value="12">12 anos</option>
+                            <option value="14">14 anos</option>
+                            <option value="S">S (Adulto)</option>
+                            <option value="M">M (Adulto)</option>
+                            <option value="L">L (Adulto)</option>
+                            <option value="XL">XL (Adulto)</option>
+                            <option value="XXL">XXL (Adulto)</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label>Nome a estampar nas costas da camisola <span class="req">*</span></label>
+                    <input type="text" name="equipamento_nome_camisola" class="form-control" placeholder="Ex: SILVA ou CARLOS" required>
+                    <small style="color: #64748b; font-size: 0.76rem;">Recomenda-se apenas um nome próprio ou apelido em maiúsculas.</small>
+                </div>
+
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>1ª Opção de Nº da Camisola <span class="req">*</span></label>
+                        <input type="number" name="equipamento_numero_1" class="form-control" placeholder="Ex: 7" min="0" max="99" required>
+                    </div>
+                    <div class="form-group">
+                        <label>2ª Opção de Nº (Alternativa) <span class="req">*</span></label>
+                        <input type="number" name="equipamento_numero_2" class="form-control" placeholder="Ex: 14" min="0" max="99" required>
+                    </div>
+                </div>
+
+                <!-- Mensagens de Submissão -->
+                <div class="alert-box alert-success" id="msg-submissao-sucesso"></div>
+                <div class="alert-box alert-error" id="msg-submissao-erro"></div>
+
+                <div class="wizard-buttons">
+                    <button type="button" class="btn-wizard btn-prev" onclick="prevStep(7)">&larr; Anterior</button>
+                    <button type="submit" class="btn-wizard btn-submit" id="btn-submit-form">SUBMETER INSCRIÇÃO COMPLETA &check;</button>
                 </div>
             </div>
 
@@ -705,10 +1086,33 @@
 
     <!-- Lógica da Inscrição Wizard -->
     <script>
-        let currentStep = 1;
-        const totalSteps = 5;
+        let currentStep = 0; // 0 = Intro, 1..5 = FPB, 6 = EMD, 7 = Equipamento
+        const totalSteps = 7;
         let isMenor = true;
         let supabaseClient = null;
+
+        // As 19 Perguntas Oficiais do IPDJ (Exame Médico Desportivo)
+        const emdPerguntas = [
+            { id: 1, text: "1. Esteve internado no Hospital ou Clínica?" },
+            { id: 2, text: "2. Foi operado?" },
+            { id: 3, text: "3. Perdas de consciência? Epilepsia?" },
+            { id: 4, text: "4. Teve alguma lesão no desporto?" },
+            { id: 5, text: "5. Hábitos alcoólicos / tabágicos?" },
+            { id: 6, text: "6. Consome narcóticos, estimulantes? (ou outras substâncias)" },
+            { id: 7, text: "7. Toma regularmente algum medicamento?" },
+            { id: 8, text: "8. Doenças alérgicas?" },
+            { id: 9, text: "9. Asma, pneumotórax, tuberculose? (outras doenças pulmonares)" },
+            { id: 10, text: "10. Doenças do aparelho digestivo?" },
+            { id: 11, text: "11. Doenças do coração?" },
+            { id: 12, text: "12. Doenças renais?" },
+            { id: 13, text: "13. Doenças ósseas (coluna ou articulações)?" },
+            { id: 14, text: "14. Diabetes" },
+            { id: 15, text: "15. Doenças do sangue?" },
+            { id: 16, text: "16. Doenças mentais?" },
+            { id: 17, text: "17. Doenças da pele?" },
+            { id: 18, text: "18. Teve alguma doença aqui não mencionada?" },
+            { id: 19, text: "19. Já fez um exame médico desportivo?" }
+        ];
 
         document.addEventListener('DOMContentLoaded', () => {
             // Inicializar Supabase
@@ -716,110 +1120,203 @@
                 supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
             }
 
-            // Alternar Seguro Clube
-            document.getElementById('tipo_seguro').addEventListener('change', (e) => {
-                const boxClube = document.getElementById('box-seguro-clube');
-                boxClube.style.display = e.target.value === 'Seguro Clube' ? 'block' : 'none';
-            });
+            // Gerar Perguntas EMD no DOM
+            renderEmdQuestions();
 
-            // Verificar Idade no campo Data Nascimento
-            document.getElementById('data_nascimento').addEventListener('change', (e) => {
-                const dataNasc = new Date(e.target.value);
-                const hoje = new Date();
-                let idade = hoje.getFullYear() - dataNasc.getFullYear();
-                const m = hoje.getMonth() - dataNasc.getMonth();
-                if (m < 0 || (m === 0 && hoje.getDate() < dataNasc.getDate())) {
-                    idade--;
-                }
-                isMenor = idade < 18;
-            });
+            // Alternar Seguro Clube
+            const tipoSeguroEl = document.getElementById('tipo_seguro');
+            if (tipoSeguroEl) {
+                tipoSeguroEl.addEventListener('change', (e) => {
+                    const boxClube = document.getElementById('box-seguro-clube');
+                    boxClube.style.display = e.target.value === 'Seguro Clube' ? 'block' : 'none';
+                });
+            }
+
+            // Verificar Idade e Cálculo de Escalão no campo Data Nascimento
+            const dataNascInput = document.getElementById('data_nascimento');
+            if (dataNascInput) {
+                dataNascInput.addEventListener('change', (e) => {
+                    atualizarIdadeEEscalao(e.target.value);
+                });
+            }
 
             // Lógica dos Radios de Tipo de Inscrição
             const radioReval = document.getElementById('card-revalidacao');
             const radioPrimeira = document.getElementById('card-primeira');
             const boxPesquisa = document.getElementById('box-pesquisa-atleta');
 
-            radioReval.addEventListener('click', () => {
-                radioReval.classList.add('selected');
-                radioPrimeira.classList.remove('selected');
-                radioReval.querySelector('input').checked = true;
-                boxPesquisa.style.display = 'block';
-            });
+            if (radioReval && radioPrimeira) {
+                radioReval.addEventListener('click', () => {
+                    radioReval.classList.add('selected');
+                    radioPrimeira.classList.remove('selected');
+                    radioReval.querySelector('input').checked = true;
+                    boxPesquisa.style.display = 'block';
+                });
 
-            radioPrimeira.addEventListener('click', () => {
-                radioPrimeira.classList.add('selected');
-                radioReval.classList.remove('selected');
-                radioPrimeira.querySelector('input').checked = true;
-                boxPesquisa.style.display = 'none';
-            });
+                radioPrimeira.addEventListener('click', () => {
+                    radioPrimeira.classList.add('selected');
+                    radioReval.classList.remove('selected');
+                    radioPrimeira.querySelector('input').checked = true;
+                    boxPesquisa.style.display = 'none';
+                });
+            }
 
             // Pesquisa de Atleta para Renovação
-            document.getElementById('btn-pesquisar-atleta').addEventListener('click', () => {
-                const val = document.getElementById('input-pesquisa-atleta').value.trim();
-                if (val) pesquisarAtletaQuery(val);
-            });
+            const btnPesquisar = document.getElementById('btn-pesquisar-atleta');
+            if (btnPesquisar) {
+                btnPesquisar.addEventListener('click', () => {
+                    const val = document.getElementById('input-pesquisa-atleta').value.trim();
+                    if (val) pesquisarAtletaQuery(val);
+                });
+            }
 
             // Live Autocomplete ao digitar
             const inputPesquisa = document.getElementById('input-pesquisa-atleta');
             const searchResultsList = document.getElementById('search-results-list');
             let searchTimeout = null;
 
-            inputPesquisa.addEventListener('input', (e) => {
-                const query = e.target.value.trim();
-                clearTimeout(searchTimeout);
+            if (inputPesquisa && searchResultsList) {
+                inputPesquisa.addEventListener('input', (e) => {
+                    const query = e.target.value.trim();
+                    clearTimeout(searchTimeout);
 
-                if (query.length < 2) {
-                    searchResultsList.style.display = 'none';
-                    searchResultsList.innerHTML = '';
-                    return;
-                }
-
-                searchTimeout = setTimeout(async () => {
-                    try {
-                        const { data, error } = await supabaseClient
-                            .from('atletasbcv')
-                            .select('*')
-                            .or(`nome.ilike.%${query}%,licenca.ilike.%${query}%`)
-                            .limit(6);
-
-                        if (error) throw error;
-
+                    if (query.length < 2) {
+                        searchResultsList.style.display = 'none';
                         searchResultsList.innerHTML = '';
-                        if (data && data.length > 0) {
-                            searchResultsList.style.display = 'block';
-                            data.forEach(atleta => {
-                                const div = document.createElement('div');
-                                div.className = 'search-result-item';
-                                div.innerHTML = `
-                                    <div>
-                                        <div class="search-result-name">${atleta.nome}</div>
-                                        <div class="search-result-info">${atleta.escalao || ''} • Licença: ${atleta.licenca || 'N/A'}</div>
-                                    </div>
-                                    <span style="color: #7e22ce; font-weight: 700;">Selecionar &rarr;</span>
-                                `;
-                                div.addEventListener('click', () => {
-                                    preencherDadosAtleta(atleta);
-                                    searchResultsList.style.display = 'none';
-                                });
-                                searchResultsList.appendChild(div);
-                            });
-                        } else {
-                            searchResultsList.style.display = 'block';
-                            searchResultsList.innerHTML = '<div class="search-result-item" style="color: #64748b; cursor: default;">Nenhum atleta encontrado.</div>';
-                        }
-                    } catch (err) {
-                        console.error("Erro na pesquisa live:", err);
+                        return;
                     }
-                }, 300);
-            });
 
-            // Ocultar dropdown ao clicar fora
-            document.addEventListener('click', (e) => {
-                if (!e.target.closest('#box-pesquisa-atleta')) {
-                    searchResultsList.style.display = 'none';
-                }
-            });
+                    searchTimeout = setTimeout(async () => {
+                        try {
+                            const { data, error } = await supabaseClient
+                                .from('atletasbcv')
+                                .select('*')
+                                .or(`nome.ilike.%${query}%,licenca.ilike.%${query}%`)
+                                .limit(6);
+
+                            if (error) throw error;
+
+                            searchResultsList.innerHTML = '';
+                            if (data && data.length > 0) {
+                                searchResultsList.style.display = 'block';
+                                data.forEach(atleta => {
+                                    const div = document.createElement('div');
+                                    div.className = 'search-result-item';
+                                    div.innerHTML = `
+                                        <div>
+                                            <div class="search-result-name">${atleta.nome}</div>
+                                            <div class="search-result-info">${atleta.escalao || ''} • Licença: ${atleta.licenca || 'N/A'}</div>
+                                        </div>
+                                        <span style="color: #7e22ce; font-weight: 700;">Selecionar &rarr;</span>
+                                    `;
+                                    div.addEventListener('click', () => {
+                                        preencherDadosAtleta(atleta);
+                                        searchResultsList.style.display = 'none';
+                                    });
+                                    searchResultsList.appendChild(div);
+                                });
+                            } else {
+                                searchResultsList.style.display = 'block';
+                                searchResultsList.innerHTML = '<div class="search-result-item" style="color: #64748b; cursor: default;">Nenhum atleta encontrado.</div>';
+                            }
+                        } catch (err) {
+                            console.error("Erro na pesquisa live:", err);
+                        }
+                    }, 300);
+                });
+
+                document.addEventListener('click', (e) => {
+                    if (!e.target.closest('#box-pesquisa-atleta')) {
+                        searchResultsList.style.display = 'none';
+                    }
+                });
+            }
         });
+
+        // Função de Cálculo do Escalão FPB (Época 2026/2027)
+        function calcularEscalaoFPB(anoNasc) {
+            if (!anoNasc || isNaN(anoNasc)) return 'A Atribuir';
+            if (anoNasc >= 2020) return 'BabyBasket';
+            if (anoNasc >= 2018) return 'Mini 8';
+            if (anoNasc >= 2016) return 'Mini 10';
+            if (anoNasc >= 2014) return 'Mini 12';
+            if (anoNasc >= 2012) return 'Sub 14';
+            if (anoNasc >= 2010) return 'Sub 16';
+            if (anoNasc >= 2008) return 'Sub 18';
+            if (anoNasc >= 2006) return 'Sub 20';
+            return 'Seniores';
+        }
+
+        function atualizarIdadeEEscalao(dataStr) {
+            if (!dataStr) return;
+            const dataNasc = new Date(dataStr);
+            const hoje = new Date();
+            let idade = hoje.getFullYear() - dataNasc.getFullYear();
+            const m = hoje.getMonth() - dataNasc.getMonth();
+            if (m < 0 || (m === 0 && hoje.getDate() < dataNasc.getDate())) {
+                idade--;
+            }
+            isMenor = idade < 18;
+
+            const escalao = calcularEscalaoFPB(dataNasc.getFullYear());
+            const feedback = document.getElementById('escalao-feedback');
+            const spanNome = document.getElementById('escalao-nome-span');
+            if (feedback && spanNome) {
+                feedback.style.display = 'inline-flex';
+                spanNome.textContent = `${escalao} (${dataNasc.getFullYear()})`;
+            }
+        }
+
+        function renderEmdQuestions() {
+            const container = document.getElementById('emd-questions-container');
+            if (!container) return;
+            container.innerHTML = '';
+
+            emdPerguntas.forEach(q => {
+                const card = document.createElement('div');
+                card.className = 'emd-question-card';
+                card.id = `card-q-${q.id}`;
+                card.innerHTML = `
+                    <div class="emd-question-header">
+                        <div class="emd-question-text">${q.text}</div>
+                        <div class="emd-toggle-buttons">
+                            <button type="button" class="btn-toggle-option active-nao" id="btn-nao-${q.id}" onclick="setEmdResponse(${q.id}, 'NÃO')">NÃO</button>
+                            <button type="button" class="btn-toggle-option" id="btn-sim-${q.id}" onclick="setEmdResponse(${q.id}, 'SIM')">SIM</button>
+                        </div>
+                    </div>
+                    <div class="emd-ano-box" id="box-ano-${q.id}">
+                        <label>Ano em que ocorreu:</label>
+                        <input type="number" class="emd-ano-input" id="ano-input-${q.id}" placeholder="Ex: 2024" min="1990" max="2027">
+                    </div>
+                    <input type="hidden" name="emd_q_${q.id}_resp" id="hidden-resp-${q.id}" value="NÃO">
+                `;
+                container.appendChild(card);
+            });
+        }
+
+        window.setEmdResponse = function(qId, resp) {
+            const btnNao = document.getElementById(`btn-nao-${qId}`);
+            const btnSim = document.getElementById(`btn-sim-${qId}`);
+            const boxAno = document.getElementById(`box-ano-${qId}`);
+            const anoInput = document.getElementById(`ano-input-${qId}`);
+            const hiddenResp = document.getElementById(`hidden-resp-${qId}`);
+
+            hiddenResp.value = resp;
+
+            if (resp === 'SIM') {
+                btnSim.className = 'btn-toggle-option active-sim';
+                btnNao.className = 'btn-toggle-option';
+                boxAno.className = 'emd-ano-box active';
+                anoInput.required = true;
+                anoInput.focus();
+            } else {
+                btnNao.className = 'btn-toggle-option active-nao';
+                btnSim.className = 'btn-toggle-option';
+                boxAno.className = 'emd-ano-box';
+                anoInput.required = false;
+                anoInput.value = '';
+            }
+        };
 
         function preencherDadosAtleta(atleta) {
             const msgBox = document.getElementById('msg-pesquisa');
@@ -830,14 +1327,19 @@
             if (form.elements['nome']) form.elements['nome'].value = atleta.nome || '';
             if (form.elements['data_nascimento']) {
                 form.elements['data_nascimento'].value = atleta.data_nascimento || '';
-                // Disparar evento de mudança de data para recalcular se é menor
-                form.elements['data_nascimento'].dispatchEvent(new Event('change'));
+                atualizarIdadeEEscalao(atleta.data_nascimento);
             }
             if (form.elements['sexo']) form.elements['sexo'].value = atleta.sexo || 'M';
             if (form.elements['nacionalidade']) form.elements['nacionalidade'].value = atleta.nacionalidade || 'Portugal';
             if (form.elements['licenca']) form.elements['licenca'].value = atleta.licenca || '';
             if (form.elements['nif']) form.elements['nif'].value = atleta.nif || '';
             if (form.elements['num_doc_id']) form.elements['num_doc_id'].value = atleta.num_doc_id || '';
+            if (form.elements['morada']) form.elements['morada'].value = atleta.morada || '';
+            if (form.elements['codigo_postal']) form.elements['codigo_postal'].value = atleta.codigo_postal || '';
+            if (form.elements['localidade']) form.elements['localidade'].value = atleta.localidade || '';
+            if (form.elements['telefone']) form.elements['telefone'].value = atleta.telefone || '';
+            if (form.elements['email']) form.elements['email'].value = atleta.email || '';
+            if (form.elements['equipamento_nome_camisola']) form.elements['equipamento_nome_camisola'].value = atleta.nickname || atleta.equipamento_nome_camisola || '';
         }
 
         async function pesquisarAtletaQuery(query) {
@@ -865,29 +1367,67 @@
             }
         }
 
+        function startWizard() {
+            currentStep = 1;
+            document.getElementById('progress-container').style.display = 'block';
+            updateStepUI();
+        }
+
+        function goToStep(step) {
+            currentStep = step;
+            if (step === 0) {
+                document.getElementById('progress-container').style.display = 'none';
+            } else {
+                document.getElementById('progress-container').style.display = 'block';
+            }
+            updateStepUI();
+        }
+
         function updateStepUI() {
             // Atualizar visibilidade dos cards
-            document.querySelectorAll('.step-card').forEach((card, index) => {
-                if (index + 1 === currentStep) {
-                    card.classList.add('active');
-                } else {
-                    card.classList.remove('active');
-                }
+            document.querySelectorAll('.step-card').forEach((card) => {
+                card.classList.remove('active');
             });
+            const activeCard = document.getElementById(`step-${currentStep}`);
+            if (activeCard) activeCard.classList.add('active');
 
-            // Atualizar barra de progresso
-            const percent = (currentStep / totalSteps) * 100;
-            document.getElementById('progress-fill').style.width = `${percent}%`;
-            document.getElementById('step-label').textContent = `Passo ${currentStep} de ${totalSteps}`;
+            // Atualizar Macro Fases
+            const macro1 = document.getElementById('macro-1');
+            const macro2 = document.getElementById('macro-2');
+            const macro3 = document.getElementById('macro-3');
 
-            const names = [
-                'Tipo de Inscrição',
-                'Dados do Atleta',
-                'Morada & Contactos',
-                'Encarregado Educação',
-                'Proteção de Dados'
-            ];
-            document.getElementById('step-name').textContent = names[currentStep - 1];
+            macro1.className = 'macro-phase-item';
+            macro2.className = 'macro-phase-item';
+            macro3.className = 'macro-phase-item';
+
+            if (currentStep <= 5) {
+                macro1.classList.add('active');
+            } else if (currentStep === 6) {
+                macro1.classList.add('completed');
+                macro2.classList.add('active');
+            } else if (currentStep === 7) {
+                macro1.classList.add('completed');
+                macro2.classList.add('completed');
+                macro3.classList.add('active');
+            }
+
+            if (currentStep > 0) {
+                const percent = (currentStep / totalSteps) * 100;
+                document.getElementById('progress-fill').style.width = `${percent}%`;
+                document.getElementById('step-label').textContent = `Passo ${currentStep} de ${totalSteps}`;
+
+                const names = [
+                    'Tipo de Inscrição',
+                    'Identificação do Atleta',
+                    'Morada & Contactos',
+                    'Encarregado de Educação',
+                    'Proteção de Dados',
+                    'Exame Médico (IPDJ)',
+                    'Equipamento BCV'
+                ];
+                document.getElementById('step-name').textContent = names[currentStep - 1];
+            }
+
             window.scrollTo({ top: 0, behavior: 'smooth' });
         }
 
@@ -899,7 +1439,6 @@
             let isValid = true;
 
             inputs.forEach(input => {
-                // Verificar se é visível e required
                 if (input.hasAttribute('required') && input.offsetParent !== null) {
                     if (!input.checkValidity()) {
                         input.reportValidity();
@@ -913,12 +1452,11 @@
         }
 
         function nextStep(step) {
-            // Validar campos obrigatórios do passo atual
             if (!validateCurrentStep(step)) {
                 return;
             }
 
-            // Se for o passo 3 e o atleta for maior de idade, pode saltar o passo 4
+            // Se for passo 3 e não for menor, salta o passo 4 do encarregado de educação
             if (step === 3 && !isMenor) {
                 currentStep = 5;
             } else {
@@ -931,12 +1469,15 @@
             if (step === 5 && !isMenor) {
                 currentStep = 3;
             } else {
-                currentStep = Math.max(1, step - 1);
+                currentStep = Math.max(0, step - 1);
+            }
+            if (currentStep === 0) {
+                document.getElementById('progress-container').style.display = 'none';
             }
             updateStepUI();
         }
 
-        // Submissão do Formulário
+        // Submissão Completa do Formulário
         document.getElementById('form-inscricao').addEventListener('submit', async (e) => {
             e.preventDefault();
             const btn = document.getElementById('btn-submit-form');
@@ -944,12 +1485,31 @@
             const msgErro = document.getElementById('msg-submissao-erro');
 
             btn.disabled = true;
-            btn.textContent = 'A SUBMETER INSCRIÇÃO...';
+            btn.textContent = 'A SUBMETER INSCRIÇÃO COMPLETA...';
             msgSucesso.style.display = 'none';
             msgErro.style.display = 'none';
 
             const formData = new FormData(e.target);
+
+            // Recolher Respostas das 19 Perguntas EMD
+            const emdRespostas = {};
+            emdPerguntas.forEach(q => {
+                const resp = document.getElementById(`hidden-resp-${q.id}`).value || 'NÃO';
+                const ano = document.getElementById(`ano-input-${q.id}`).value || null;
+                emdRespostas[`q${q.id}`] = {
+                    pergunta: q.text,
+                    resposta: resp,
+                    ano: resp === 'SIM' ? ano : null
+                };
+            });
+
+            // Determinar Escalão Automático
+            const dataNascVal = formData.get('data_nascimento');
+            const anoNasc = dataNascVal ? new Date(dataNascVal).getFullYear() : null;
+            const escalaoCalculado = calcularEscalaoFPB(anoNasc);
+
             const payload = {
+                // 1. Dados Federativos FPB
                 tipo_inscricao: formData.get('tipo_inscricao'),
                 estatuto_fpb: formData.get('estatuto_fpb'),
                 nome: formData.get('nome'),
@@ -983,8 +1543,20 @@
                 rgpd_comunicacoes: formData.get('rgpd_comunicacoes') === 'true',
                 rgpd_marketing: formData.get('rgpd_marketing') === 'true',
                 epoca: '2026/2027',
-                escalao: 'A Atribuir',
-                funcao: 'Jogador'
+                escalao: escalaoCalculado,
+                funcao: 'Jogador',
+
+                // 2. Dados do Exame Médico Desportivo (IPDJ)
+                emd_respostas: emdRespostas,
+                emd_resultado_anterior: formData.get('emd_resultado_anterior') || 'Apto sem restrições',
+
+                // 3. Dados de Equipamento Oficial BCV
+                equipamento_tamanho: formData.get('equipamento_tamanho'),
+                equipamento_tamanho_calcao: formData.get('equipamento_tamanho_calcao'),
+                equipamento_nome_camisola: formData.get('equipamento_nome_camisola'),
+                equipamento_numero_1: formData.get('equipamento_numero_1'),
+                equipamento_numero_2: formData.get('equipamento_numero_2'),
+                nickname: formData.get('equipamento_nome_camisola') // Sincronizado para visualização
             };
 
             try {
@@ -995,14 +1567,22 @@
                 if (error) throw error;
 
                 msgSucesso.style.display = 'block';
-                msgSucesso.textContent = 'Inscrição submetida com sucesso! O Basket Clube de Valença agradece a sua preferência.';
-                btn.textContent = 'INSCRIÇÃO CONCLUÍDA!';
+                msgSucesso.innerHTML = `
+                    <div style="font-size: 1.1rem; font-weight: 800; margin-bottom: 6px;">🎉 INSCRIÇÃO CONCLUÍDA COM SUCESSO!</div>
+                    <p style="margin: 0;">Todos os dados da <strong>Federação (FPB)</strong>, <strong>Exame Médico (IPDJ)</strong> e <strong>Equipamento BCV</strong> foram registados com sucesso para a Época 2026/2027.</p>
+                `;
+                btn.textContent = 'INSCRIÇÃO SUBMETIDA COM SUCESSO ✓';
+                btn.style.background = '#15803d';
+
+                // Scroll até à mensagem de sucesso
+                msgSucesso.scrollIntoView({ behavior: 'smooth' });
+
             } catch (err) {
                 console.error(err);
                 msgErro.style.display = 'block';
                 msgErro.textContent = 'Ocorreu um erro ao guardar a inscrição: ' + (err.message || 'Tente novamente.');
                 btn.disabled = false;
-                btn.textContent = 'SUBMETER INSCRIÇÃO ✓';
+                btn.textContent = 'SUBMETER INSCRIÇÃO COMPLETA ✓';
             }
         });
     </script>
