@@ -1257,7 +1257,11 @@ document.addEventListener('DOMContentLoaded', async () => {
                 return { d: '', m: '', a: '' };
             };
 
-                        // ==========================================
+            const nasc = fmtDate(atleta.data_nascimento);
+            const valDoc = fmtDate(atleta.validade_doc_id);
+            const valEncDoc = fmtDate(atleta.encarregado_validade_doc);
+
+            // ==========================================
             // COORDENADAS CIRÚRGICAS AJUSTADAS SEÇÃO A SEÇÃO
             // Origem (0,0) Canto Inferior Esquerdo (A4: 595 x 842 pt)
             // ==========================================
