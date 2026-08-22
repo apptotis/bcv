@@ -1085,12 +1085,58 @@ document.addEventListener('DOMContentLoaded', async () => {
         });
     }
 
-    window.resetAtletaForm = function() {
-        if (formAtleta) formAtleta.reset();
+    window.editAtleta = function(atletaStr) {
+        const atleta = JSON.parse(atletaStr);
+        
+        editAtletaIdInput.value = atleta.id;
+        document.getElementById('atleta-nome').value = atleta.nome || '';
+        document.getElementById('atleta-nickname').value = atleta.nickname || '';
+        document.getElementById('atleta-epoca').value = atleta.epoca || '';
+        document.getElementById('atleta-funcao').value = atleta.funcao || '';
+        document.getElementById('atleta-numero').value = atleta.numero_camisola || '';
+        document.getElementById('atleta-escalao').value = atleta.escalao || '';
+        document.getElementById('atleta-sexo').value = atleta.sexo || '';
+        document.getElementById('atleta-nascimento').value = atleta.data_nascimento || '';
+        document.getElementById('atleta-nacionalidade').value = atleta.nacionalidade || '';
+        document.getElementById('atleta-licenca').value = atleta.licenca || '';
+        
+        if (atleta.foto) {
+            fotoUrlInput.value = atleta.foto;
+            fotoImg.src = atleta.foto;
+            fotoPreviewDiv.style.display = 'block';
+        }
+        
+        formAtletaTitle.textContent = 'Editar Atleta: ' + atleta.nome;
+        btnSaveAtleta.textContent = 'Guardar Alterações';
+        
+        openAtletaModal();
+        if (btnCancelAtleta) btnCancelAtleta.classList.remove('hidden');
+        if (atletaMsg) atletaMsg.classList.add('hidden');
+    };
+
+    window.deleteAtleta = async function(id) {
+        if (!confirm('Tem a certeza que deseja apagar este atleta?')) return;
+
+        try {
+            const { error } = await supabase.from('atletasbcv').delete().eq('id', id);
+            if (error) throw error;
+            
+            alert('Atleta apagado com sucesso!');
+            loadAtletas();
+        } catch (error) {
+            console.error("Erro ao apagar atleta:", error);
+            alert("Erro ao apagar atleta: " + error.message);
+        }
+    };
+
+    function resetAtletaForm() {
+        if (!formAtleta) return;
+        formAtleta.reset();
         editAtletaIdInput.value = '';
         fotoUrlInput.value = '';
+        fotoFileInput.value = '';
         fotoPreviewDiv.style.display = 'none';
-        fotoImg.src = '';
+        
         formAtletaTitle.textContent = 'Adicionar Novo Atleta';
         btnSaveAtleta.textContent = 'Adicionar Atleta';
         if (btnCancelAtleta) btnCancelAtleta.classList.add('hidden');
@@ -1098,56 +1144,37 @@ document.addEventListener('DOMContentLoaded', async () => {
     }
 
     if (btnCancelAtleta) {
-        btnCancelAtleta.addEventListener('click', resetAtletaForm);
-    }
-
-    async function populateEquipasDropdowns() {
-        const { data: equipas, error } = await supabase
-            .from('equipasbcv')
-            .select('nome, escalao')
-            .order('nome', { ascending: true });
-            
-        if (!error && equipas) {
-            const select1 = document.getElementById('atleta-equipabcv1');
-            const select2 = document.getElementById('atleta-equipabcv2');
-            const filter1 = document.getElementById('filter-equipabcv1');
-            const filter2 = document.getElementById('filter-equipabcv2');
-            
-            let optionsHtml = '<option value="">Nenhuma / Sem Equipa</option>';
-            let filterOptionsHtml = '<option value="">Todas</option>';
-            
-            equipas.forEach(eq => {
-                const label = `${eq.nome} (${eq.escalao})`;
-                optionsHtml += `<option value="${label}">${label}</option>`;
-                filterOptionsHtml += `<option value="${label}">${label}</option>`;
-            });
-            
-            if (select1 && select2) {
-                const val1 = select1.value;
-                const val2 = select2.value;
-                select1.innerHTML = optionsHtml;
-                select2.innerHTML = optionsHtml;
-                if (val1) select1.value = val1;
-                if (val2) select2.value = val2;
-            }
-            
-            if (filter1 && filter2) {
-                const fval1 = filter1.value;
-                const fval2 = filter2.value;
-                filter1.innerHTML = filterOptionsHtml;
-                filter2.innerHTML = filterOptionsHtml;
-                if (fval1) filter1.value = fval1;
-                if (fval2) filter2.value = fval2;
-            }
-        }
+        btnCancelAtleta.addEventListener('click', closeAtletaModal);
     }
 
     let currentAtletas = [];
 
+    // Função de filtragem combinada em tempo real (Pesquisa por Nome/Nickname + Escalão)
+    function applyAtletasFilters() {
+        const searchVal = (document.getElementById('filter-search-atleta')?.value || '').toLowerCase().trim();
+        const escalaoVal = document.getElementById('filter-escalao')?.value || '';
+
+        const filtrados = currentAtletas.filter(atleta => {
+            const matchesSearch = !searchVal || 
+                (atleta.nome && atleta.nome.toLowerCase().includes(searchVal)) || 
+                (atleta.nickname && atleta.nickname.toLowerCase().includes(searchVal));
+
+            const matchesEscalao = !escalaoVal || atleta.escalao === escalaoVal;
+
+            return matchesSearch && matchesEscalao;
+        });
+
+        renderAtletasTable(filtrados);
+    }
+
+    const filterSearchInput = document.getElementById('filter-search-atleta');
+    const filterEscalaoSelect = document.getElementById('filter-escalao');
+
+    if (filterSearchInput) filterSearchInput.addEventListener('input', applyAtletasFilters);
+    if (filterEscalaoSelect) filterEscalaoSelect.addEventListener('change', applyAtletasFilters);
+
     window.loadAtletas = async function() {
         if (!atletasTableBody) return;
-        
-        populateEquipasDropdowns();
         
         try {
             atletasTableBody.innerHTML = '<tr><td colspan="6" style="padding: 10px;">A carregar atletas...</td></tr>';
@@ -1158,7 +1185,6 @@ document.addEventListener('DOMContentLoaded', async () => {
                 .order('nome', { ascending: true });
 
             if (error) {
-                // If the table doesn't exist yet, show a friendly message instead of a harsh error
                 if (error.code === '42P01') {
                     atletasTableBody.innerHTML = '<tr><td colspan="6" style="padding: 10px;">A tabela "atletasbcv" não existe na base de dados. Por favor, crie-a no Supabase.</td></tr>';
                     return;
@@ -1167,12 +1193,77 @@ document.addEventListener('DOMContentLoaded', async () => {
             }
 
             currentAtletas = atletas || [];
-            renderAtletasTable(currentAtletas);
+            applyAtletasFilters();
             
         } catch (error) {
             console.error("Erro ao carregar atletas:", error);
             atletasTableBody.innerHTML = `<tr><td colspan="6" style="color: red; padding: 10px;">Erro: ${error.message}</td></tr>`;
         }
+    }
+
+    // Submeter formulário de Atleta
+    if (formAtleta) {
+        formAtleta.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            const atletaId = editAtletaIdInput.value;
+            const isEditMode = !!atletaId;
+            
+            btnSaveAtleta.textContent = isEditMode ? "A guardar..." : "A adicionar...";
+            btnSaveAtleta.disabled = true;
+            atletaMsg.classList.add('hidden');
+
+            const atletaData = {
+                nome: document.getElementById('atleta-nome').value,
+                nickname: document.getElementById('atleta-nickname').value || null,
+                epoca: document.getElementById('atleta-epoca').value,
+                funcao: document.getElementById('atleta-funcao').value,
+                numero_camisola: document.getElementById('atleta-numero').value ? parseInt(document.getElementById('atleta-numero').value) : null,
+                escalao: document.getElementById('atleta-escalao').value,
+                sexo: document.getElementById('atleta-sexo').value,
+                data_nascimento: document.getElementById('atleta-nascimento').value || null,
+                nacionalidade: document.getElementById('atleta-nacionalidade').value,
+                licenca: document.getElementById('atleta-licenca').value,
+                foto: fotoUrlInput.value
+            };
+
+            try {
+                const fotoFile = fotoFileInput.files[0];
+                if (fotoFile) {
+                    const fileName = `atleta_${Date.now()}_${fotoFile.name.replace(/\s/g, '_')}`;
+                    const { error: uploadError } = await supabase.storage.from('fotos').upload(fileName, fotoFile);
+                    
+                    if (uploadError) throw uploadError;
+                    
+                    const { data: publicData } = supabase.storage.from('fotos').getPublicUrl(fileName);
+                    atletaData.foto = publicData.publicUrl;
+                }
+
+                if (isEditMode) {
+                    const { error } = await supabase.from('atletasbcv').update(atletaData).eq('id', atletaId);
+                    if (error) throw error;
+                    alert("✅ Atleta atualizado com sucesso!");
+                } else {
+                    const { error } = await supabase.from('atletasbcv').insert([atletaData]);
+                    if (error) throw error;
+                    alert("✅ Atleta adicionado com sucesso!");
+                }
+
+                closeAtletaModal();
+                loadAtletas();
+
+            } catch (error) {
+                console.error("Erro ao guardar atleta:", error);
+                if (error.code === '42P01') {
+                     alert("❌ Erro: A tabela 'atletasbcv' não existe no Supabase.");
+                } else {
+                     alert("❌ Erro ao guardar: " + error.message);
+                }
+            } finally {
+                btnSaveAtleta.textContent = isEditMode ? "Guardar Alterações" : "Adicionar Atleta";
+                btnSaveAtleta.disabled = false;
+            }
+        });
     }
 
     function renderAtletasTable(lista) {
@@ -1385,20 +1476,42 @@ document.addEventListener('DOMContentLoaded', async () => {
         html2pdf().set(opt).from(container).save();
     };
 
-    // Toggle do formulário de atleta (Adicionar Atleta)
+    // Modal Popup de Atleta (Criar / Editar)
     const btnToggleFormAtleta = document.getElementById('btn-toggle-form-atleta');
     const formAtletaContainer = document.getElementById('form-atleta-container');
+    const btnCloseModalAtleta = document.getElementById('btn-close-modal-atleta');
 
-    if (btnToggleFormAtleta && formAtletaContainer) {
+    function openAtletaModal() {
+        if (formAtletaContainer) {
+            formAtletaContainer.classList.remove('hidden');
+        }
+    }
+
+    function closeAtletaModal() {
+        if (formAtletaContainer) {
+            formAtletaContainer.classList.add('hidden');
+            resetAtletaForm();
+        }
+    }
+
+    if (btnToggleFormAtleta) {
         btnToggleFormAtleta.addEventListener('click', () => {
-            const isHidden = formAtletaContainer.classList.contains('hidden');
-            if (isHidden) {
-                formAtletaContainer.classList.remove('hidden');
-                btnToggleFormAtleta.textContent = 'Esconder Formulário';
-            } else {
-                formAtletaContainer.classList.add('hidden');
-                btnToggleFormAtleta.textContent = 'Adicionar Atleta';
-                resetAtletaForm();
+            resetAtletaForm();
+            formAtletaTitle.textContent = 'Adicionar Novo Atleta';
+            btnSaveAtleta.textContent = 'Adicionar Atleta';
+            openAtletaModal();
+        });
+    }
+
+    if (btnCloseModalAtleta) {
+        btnCloseModalAtleta.addEventListener('click', closeAtletaModal);
+    }
+
+    // Fechar a modal se clicar no fundo escuro
+    if (formAtletaContainer) {
+        formAtletaContainer.addEventListener('click', (e) => {
+            if (e.target === formAtletaContainer) {
+                closeAtletaModal();
             }
         });
     }

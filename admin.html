@@ -426,11 +426,15 @@
                         <button id="btn-toggle-form-atleta" class="btn-primary">Adicionar Atleta</button>
                     </div>
 
-                    <!-- Formulário de Criação / Edição (Oculto por defeito) -->
-                    <div id="form-atleta-container" class="welcome-box hidden" style="margin-bottom: 30px;">
-                        <h3 id="form-atleta-title">Adicionar Novo Atleta</h3>
-                        <form id="form-atleta" style="display: grid; gap: 15px; margin-top: 15px; max-width: 600px;">
-                            <input type="hidden" id="edit-atleta-id">
+                    <!-- Modal Popup de Criação / Edição de Atleta -->
+                    <div id="form-atleta-container" class="admin-modal-overlay hidden">
+                        <div class="admin-modal-content">
+                            <div class="admin-modal-header">
+                                <h3 id="form-atleta-title">Adicionar Novo Atleta</h3>
+                                <button type="button" id="btn-close-modal-atleta" class="admin-modal-close" title="Fechar">&times;</button>
+                            </div>
+                            <form id="form-atleta" style="display: grid; gap: 15px;">
+                                <input type="hidden" id="edit-atleta-id">
                             
                             <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px;">
                                 <div>
@@ -583,6 +587,7 @@
                             <p id="atleta-msg" class="hidden"></p>
                         </form>
                     </div>
+                </div>
 
                     <!-- Barra de Filtros -->
                     <div class="welcome-box" style="margin-bottom: 20px; padding: 15px; background: rgba(0,0,0,0.2);">
