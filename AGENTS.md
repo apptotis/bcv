@@ -47,6 +47,8 @@
 - [2026-08-22] Gemini: Criação da página mobile inscricao.html (Formulário por Passos / Wizard para época 2026/2027), criação do script update_atletas_fpb_schema.sql com campos do Modelo 1 da FPB, e adição de botão para exportação em PDF da ficha oficial FPB na Gestão de Atletas do Admin.
 - [2026-08-22] Gemini: Melhorias no inscricao.html (banner recto sem cantos arredondados, autocomplete ao pesquisar atleta em tempo real e validação nativa de campos obrigatórios ao avançar de passo no wizard).
 - [2026-08-22] Gemini: Correção de erro na submissão de inscrição enviando valores predefinidos para colunas com restrição NOT NULL (equipafpb, escalao, funcao).
+- [2026-08-22] Gemini: Ocultação por defeito do formulário/card 'Adicionar Novo Atleta' na aba Atletas do Admin e resolução da geração de PDF em branco no html2pdf anexando o container ao DOM.
+
 
 
 
