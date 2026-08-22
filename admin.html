@@ -21,8 +21,8 @@
     
     <!-- Supabase SDK -->
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-    <!-- pdf-lib para preenchimento direto do PDF oficial FPB -->
-    <script src="https://unpkg.com/pdf-lib@1.17.1/dist/pdf-lib.min.js"></script>
+    <!-- Geração de PDF Modelo FPB -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
 </head>
 
 <body>
@@ -424,8 +424,8 @@
                     <h2 style="margin-bottom: 20px;">Gestão de Atletas</h2>
                     
 
-                    <!-- Formulário de Criação / Edição (Escondido por defeito) -->
-                    <div class="welcome-box hidden" id="form-atleta-container" style="margin-bottom: 30px;">
+                    <!-- Formulário de Criação / Edição -->
+                    <div class="welcome-box" style="margin-bottom: 30px;">
                         <h3 id="form-atleta-title">Adicionar Novo Atleta</h3>
                         <form id="form-atleta" style="display: grid; gap: 15px; margin-top: 15px; max-width: 600px;">
                             <input type="hidden" id="edit-atleta-id">
@@ -460,6 +460,25 @@
                                     </select>
                                 </div>
                             </div>
+                            <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 15px;">
+                                <div>
+                                    <label style="display:block; margin-bottom:5px; font-size:0.8rem; color:#a0a0ab;">Equipa FPB</label>
+                                    <input type="text" id="atleta-equipafpb" placeholder="Equipa FPB" class="admin-input">
+                                </div>
+                                <div>
+                                    <label style="display:block; margin-bottom:5px; font-size:0.8rem; color:#a0a0ab;">Equipa BCV 1</label>
+                                    <select id="atleta-equipabcv1" class="admin-input">
+                                        <option value="">A carregar...</option>
+                                    </select>
+                                </div>
+                                <div>
+                                    <label style="display:block; margin-bottom:5px; font-size:0.8rem; color:#a0a0ab;">Equipa BCV 2</label>
+                                    <select id="atleta-equipabcv2" class="admin-input">
+                                        <option value="">A carregar...</option>
+                                    </select>
+                                </div>
+                            </div>
+                            
                             <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 15px;">
                                 <div>
                                     <label style="display:block; margin-bottom:5px; font-size:0.8rem; color:#a0a0ab;">Nº Camisola</label>
@@ -526,15 +545,11 @@
                     <!-- Barra de Filtros -->
                     <div class="welcome-box" style="margin-bottom: 20px; padding: 15px; background: rgba(0,0,0,0.2);">
                         <h4 style="margin-bottom: 10px; color: #a0a0ab; font-size: 0.9rem;">Filtrar Atletas</h4>
-                        <div style="display: grid; grid-template-columns: 2fr 1fr auto; gap: 12px; align-items: end;">
-                            <div>
-                                <label style="display:block; margin-bottom:5px; font-size:0.8rem;">Pesquisar por Nome ou Nickname</label>
-                                <input type="text" id="filter-search-atleta" placeholder="Escreva para pesquisar..." class="admin-input" style="margin-bottom: 0;">
-                            </div>
+                        <div style="display: grid; grid-template-columns: 1fr 1fr 1fr 1fr auto; gap: 10px; align-items: end;">
                             <div>
                                 <label style="display:block; margin-bottom:5px; font-size:0.8rem;">Escalão</label>
                                 <select id="filter-escalao" class="admin-input" style="margin-bottom: 0;">
-                                    <option value="">Todos os Escalões</option>
+                                    <option value="">Todos</option>
                                     <option value="Mini 8">Mini 8</option>
                                     <option value="Mini 10">Mini 10</option>
                                     <option value="Mini 12">Mini 12</option>
@@ -546,7 +561,27 @@
                                 </select>
                             </div>
                             <div>
-                                <button type="button" id="btn-clear-filters" class="btn-secondary" style="padding: 12px 18px; margin-bottom: 0;">Limpar</button>
+                                <label style="display:block; margin-bottom:5px; font-size:0.8rem;">Equipa BCV 1</label>
+                                <select id="filter-equipabcv1" class="admin-input" style="margin-bottom: 0;">
+                                    <option value="">Todas</option>
+                                </select>
+                            </div>
+                            <div>
+                                <label style="display:block; margin-bottom:5px; font-size:0.8rem;">Equipa BCV 2</label>
+                                <select id="filter-equipabcv2" class="admin-input" style="margin-bottom: 0;">
+                                    <option value="">Todas</option>
+                                </select>
+                            </div>
+                            <div>
+                                <label style="display:block; margin-bottom:5px; font-size:0.8rem;">Sexo</label>
+                                <select id="filter-sexo" class="admin-input" style="margin-bottom: 0;">
+                                    <option value="">Ambos</option>
+                                    <option value="M">Masculino</option>
+                                    <option value="F">Feminino</option>
+                                </select>
+                            </div>
+                            <div>
+                                <button type="button" id="btn-clear-filters" class="btn-secondary" style="padding: 12px 15px; margin-bottom: 0;">Limpar</button>
                             </div>
                         </div>
                     </div>
@@ -559,14 +594,15 @@
                                 <tr style="border-bottom: 1px solid rgba(255,255,255,0.1);">
                                     <th style="padding: 10px; width: 60px;">Foto</th>
                                     <th style="padding: 10px;">Nome</th>
-                                    <th style="padding: 10px;">Alcunha / Nickname</th>
-                                    <th style="padding: 10px; width: 70px; text-align: center;">Nº</th>
-                                    <th style="padding: 10px;">Escalão</th>
-                                    <th style="padding: 10px; text-align: center; width: 160px;">Ações</th>
+                                    <th style="padding: 10px;">Época/Função</th>
+                                    <th style="padding: 10px;">Equipas (FPB / BCV)</th>
+                                    <th style="padding: 10px; width: 60px;">Nº</th>
+                                    <th style="padding: 10px;">Licença</th>
+                                    <th style="padding: 10px; text-align: center; width: 120px;">Ações</th>
                                 </tr>
                             </thead>
                             <tbody id="atletas-table-body">
-                                <tr><td colspan="6" style="padding: 10px;">A carregar atletas...</td></tr>
+                                <tr><td colspan="7" style="padding: 10px;">A carregar atletas...</td></tr>
                             </tbody>
                         </table>
                     </div>

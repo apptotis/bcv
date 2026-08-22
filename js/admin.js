@@ -3,8 +3,6 @@
  */
 
 document.addEventListener('DOMContentLoaded', async () => {
-    console.log("admin.js carregado com sucesso!");
-    
     // 1. Inicializar Supabase a partir do config.js
     const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
@@ -19,25 +17,11 @@ document.addEventListener('DOMContentLoaded', async () => {
 
     // 3. Verificar Sessão Atual no arranque
     async function checkSession() {
-        try {
-            console.log("A verificar sessão do Supabase...");
-            const { data, error } = await supabase.auth.getSession();
-            
-            if (error) {
-                console.error("Erro ao obter sessão:", error);
-                showLogin();
-                return;
-            }
-
-            if (data && data.session) {
-                console.log("Sessão ativa encontrada:", data.session.user.email);
-                await verifyAdminRole(data.session.user);
-            } else {
-                console.log("Nenhuma sessão ativa. A mostrar formulário de login.");
-                showLogin();
-            }
-        } catch (e) {
-            console.error("Erro no checkSession:", e);
+        const { data: { session }, error } = await supabase.auth.getSession();
+        
+        if (session) {
+            verifyAdminRole(session.user);
+        } else {
             showLogin();
         }
     }
@@ -50,19 +34,20 @@ document.addEventListener('DOMContentLoaded', async () => {
                 .from('users')
                 .select('nome, role')
                 .eq('id', user.id)
-                .maybeSingle();
+                .single();
+
+            if (error) throw error;
 
             const allowedRoles = ['admin', 'editor', 'treinador'];
-            const userRole = profile?.role || 'admin'; // Predefinição segura se profile for nulo
 
-            if (!profile || allowedRoles.includes(userRole)) {
+            if (profile && allowedRoles.includes(profile.role)) {
                 // Acesso permitido
                 if (adminNameSpan) {
-                    adminNameSpan.textContent = profile?.nome || user.email || 'Administrador';
+                    adminNameSpan.textContent = profile.nome || 'Utilizador';
                 }
                 
                 // Configurar permissões de visualização consoante o role
-                setupRolePermissions(userRole);
+                setupRolePermissions(profile.role);
                 
                 showAdminPanel();
             } else {
@@ -71,7 +56,7 @@ document.addEventListener('DOMContentLoaded', async () => {
             }
         } catch (error) {
             console.error("Erro na verificação de role:", error);
-            showError(error.message || "Erro de permissões.");
+            showError(error.message);
             await supabase.auth.signOut();
             showLogin();
         }
@@ -125,8 +110,7 @@ document.addEventListener('DOMContentLoaded', async () => {
                 await verifyAdminRole(data.user);
             }
         } catch (error) {
-            console.error("Erro no login:", error);
-            showError("Erro no login: " + (error.message || "Credenciais inválidas."));
+            showError("Credenciais inválidas ou acesso negado.");
         } finally {
             btnLogin.textContent = "Aceder";
             btnLogin.disabled = false;
@@ -183,7 +167,7 @@ document.addEventListener('DOMContentLoaded', async () => {
             // Obter todos os atletas que tenham data_nascimento
             const { data: atletas, error } = await supabase
                 .from('atletasbcv')
-                .select('nome, foto, escalao, data_nascimento')
+                .select('nome, foto, equipa, data_nascimento')
                 .not('data_nascimento', 'is', null);
 
             if (error) {
@@ -239,7 +223,7 @@ document.addEventListener('DOMContentLoaded', async () => {
                     ${fotoHtml}
                     <div>
                         <div style="font-weight: bold; font-size: 1.1rem; color: var(--text-primary);">${atleta.nome} 🎉</div>
-                        <div style="color: var(--text-secondary); font-size: 0.9rem;">${atleta.escalao || 'Atleta'} • ${idade} anos</div>
+                        <div style="color: var(--text-secondary); font-size: 0.9rem;">${atleta.equipa} • ${idade} anos</div>
                     </div>
                 `;
                 container.appendChild(item);
@@ -1109,8 +1093,6 @@ document.addEventListener('DOMContentLoaded', async () => {
         fotoImg.src = '';
         formAtletaTitle.textContent = 'Adicionar Novo Atleta';
         btnSaveAtleta.textContent = 'Adicionar Atleta';
-        const formContainer = document.getElementById('form-atleta-container');
-        if (formContainer) formContainer.classList.add('hidden');
         if (btnCancelAtleta) btnCancelAtleta.classList.add('hidden');
         if (atletaMsg) atletaMsg.classList.add('hidden');
     }
@@ -1119,48 +1101,53 @@ document.addEventListener('DOMContentLoaded', async () => {
         btnCancelAtleta.addEventListener('click', resetAtletaForm);
     }
 
-
+    async function populateEquipasDropdowns() {
+        const { data: equipas, error } = await supabase
+            .from('equipasbcv')
+            .select('nome, escalao')
+            .order('nome', { ascending: true });
+            
+        if (!error && equipas) {
+            const select1 = document.getElementById('atleta-equipabcv1');
+            const select2 = document.getElementById('atleta-equipabcv2');
+            const filter1 = document.getElementById('filter-equipabcv1');
+            const filter2 = document.getElementById('filter-equipabcv2');
+            
+            let optionsHtml = '<option value="">Nenhuma / Sem Equipa</option>';
+            let filterOptionsHtml = '<option value="">Todas</option>';
+            
+            equipas.forEach(eq => {
+                const label = `${eq.nome} (${eq.escalao})`;
+                optionsHtml += `<option value="${label}">${label}</option>`;
+                filterOptionsHtml += `<option value="${label}">${label}</option>`;
+            });
+            
+            if (select1 && select2) {
+                const val1 = select1.value;
+                const val2 = select2.value;
+                select1.innerHTML = optionsHtml;
+                select2.innerHTML = optionsHtml;
+                if (val1) select1.value = val1;
+                if (val2) select2.value = val2;
+            }
+            
+            if (filter1 && filter2) {
+                const fval1 = filter1.value;
+                const fval2 = filter2.value;
+                filter1.innerHTML = filterOptionsHtml;
+                filter2.innerHTML = filterOptionsHtml;
+                if (fval1) filter1.value = fval1;
+                if (fval2) filter2.value = fval2;
+            }
+        }
+    }
 
     let currentAtletas = [];
 
-    // Função de filtragem combinada em tempo real (Pesquisa por Nome/Nickname + Escalão)
-    function applyAtletasFilters() {
-        const searchVal = (document.getElementById('filter-search-atleta')?.value || '').toLowerCase().trim();
-        const escalaoVal = document.getElementById('filter-escalao')?.value || '';
-
-        const filtrados = currentAtletas.filter(atleta => {
-            const matchesSearch = !searchVal || 
-                (atleta.nome && atleta.nome.toLowerCase().includes(searchVal)) || 
-                (atleta.nickname && atleta.nickname.toLowerCase().includes(searchVal));
-
-            const matchesEscalao = !escalaoVal || atleta.escalao === escalaoVal;
-
-            return matchesSearch && matchesEscalao;
-        });
-
-        renderAtletasTable(filtrados);
-    }
-
-    const filterSearchInput = document.getElementById('filter-search-atleta');
-    const filterEscalaoSelect = document.getElementById('filter-escalao');
-    const btnClearFilters = document.getElementById('btn-clear-filters');
-
-    if (filterSearchInput) {
-        filterSearchInput.addEventListener('input', applyAtletasFilters);
-    }
-    if (filterEscalaoSelect) {
-        filterEscalaoSelect.addEventListener('change', applyAtletasFilters);
-    }
-    if (btnClearFilters) {
-        btnClearFilters.addEventListener('click', () => {
-            if (filterSearchInput) filterSearchInput.value = '';
-            if (filterEscalaoSelect) filterEscalaoSelect.value = '';
-            renderAtletasTable(currentAtletas);
-        });
-    }
-
     window.loadAtletas = async function() {
         if (!atletasTableBody) return;
+        
+        populateEquipasDropdowns();
         
         try {
             atletasTableBody.innerHTML = '<tr><td colspan="6" style="padding: 10px;">A carregar atletas...</td></tr>';
@@ -1180,7 +1167,7 @@ document.addEventListener('DOMContentLoaded', async () => {
             }
 
             currentAtletas = atletas || [];
-            applyAtletasFilters();
+            renderAtletasTable(currentAtletas);
             
         } catch (error) {
             console.error("Erro ao carregar atletas:", error);
@@ -1205,190 +1192,194 @@ document.addEventListener('DOMContentLoaded', async () => {
                 ? `<img src="${atleta.foto}" style="width: 40px; height: 40px; object-fit: cover; border-radius: 50%;">` 
                 : '<div style="width: 40px; height: 40px; background: rgba(255,255,255,0.1); border-radius: 50%; display:flex; align-items:center; justify-content:center; font-size: 1.2rem;">👤</div>';
 
-            const numCamisolaHtml = atleta.numero_camisola !== null && atleta.numero_camisola !== undefined && atleta.numero_camisola !== '' 
-                ? `<span style="font-weight: 800; color: #7e22ce; background: rgba(126, 34, 206, 0.1); padding: 3px 8px; border-radius: 6px; font-size: 0.9rem;">#${atleta.numero_camisola}</span>`
-                : '<span style="color: #a0a0ab;">-</span>';
-
             tr.innerHTML = `
                 <td style="padding: 10px;">${fotoHtml}</td>
-                <td style="padding: 10px;"><strong>${atleta.nome || '-'}</strong></td>
-                <td style="padding: 10px;">${atleta.nickname ? `<span style="color: var(--accent-primary); font-weight: 600;">"${atleta.nickname}"</span>` : '<span style="color: #a0a0ab;">-</span>'}</td>
-                <td style="padding: 10px; text-align: center;">${numCamisolaHtml}</td>
-                <td style="padding: 10px;">${atleta.escalao || '-'}</td>
-                <td style="padding: 10px; text-align: center; white-space: nowrap;">
-                    <button class="btn-action" onclick="window.exportAtletaPDF('${atletaJson}')" title="Descarregar Ficha FPB (PDF)" style="background: rgba(126, 34, 206, 0.15); color: #7e22ce; border: 1px solid rgba(126, 34, 206, 0.3); font-weight: bold; margin-right: 4px; padding: 4px 8px;">📄 FPB</button>
-                    <button class="btn-action" onclick="window.editAtleta('${atletaJson}')" title="Editar" style="padding: 4px 8px; margin-right: 4px;">✏️ Editar</button>
-                    <button class="btn-action delete" onclick="window.deleteAtleta('${atleta.id}')" title="Anular Atleta" style="padding: 4px 8px;">🗑️ Anular</button>
+                <td style="padding: 10px;"><strong>${atleta.nome || '-'}</strong>${atleta.nickname ? `<br><span style="font-size: 0.85rem; color: var(--accent-primary); font-weight: 600;">"${atleta.nickname}"</span>` : ''}</td>
+                <td style="padding: 10px;">${atleta.epoca || '-'} <br><small style="color: #a0a0ab;">${atleta.funcao || '-'}</small></td>
+                <td style="padding: 10px;"><small style="color: #a0a0ab;">FPB:</small> ${atleta.equipafpb || '-'}<br><small style="color: #a0a0ab;">BCV:</small> ${atleta.equipabcv1 || '-'} ${atleta.equipabcv2 ? '/ ' + atleta.equipabcv2 : ''}</td>
+                <td style="padding: 10px;">${atleta.numero_camisola || '-'}</td>
+                <td style="padding: 10px;">${atleta.licenca || '-'}</td>
+                <td style="padding: 10px; text-align: center;">
+                    <button class="btn-action" onclick="window.exportAtletaPDF('${atletaJson}')" title="Descarregar Ficha FPB (PDF)" style="background: rgba(76, 29, 149, 0.2); color: #9333ea; border: 1px solid rgba(147, 51, 234, 0.3); font-weight: bold; margin-right: 4px;">📄 FPB</button>
+                    <button class="btn-action" onclick="window.editAtleta('${atletaJson}')" title="Editar">✏️</button>
+                    <button class="btn-action delete" onclick="window.deleteAtleta('${atleta.id}')" title="Apagar">🗑️</button>
                 </td>
             `;
             atletasTableBody.appendChild(tr);
         });
     }
 
-    // Função para exportar o PDF Oficial da FPB com Preenchimento Seguro via pdf-lib (100% Compatível com Adobe)
-    window.exportAtletaPDF = async function(atletaStr) {
+    // Função para exportar PDF do Modelo FPB
+    window.exportAtletaPDF = function(atletaStr) {
         const atleta = JSON.parse(atletaStr);
         
-        try {
-            // 1. Carregar o PDF Oficial FPB original
-            const pdfBytes = await fetch('assets/Modelo_1_FPB.pdf').then(res => {
-                if (!res.ok) throw new Error('Não foi possível carregar assets/Modelo_1_FPB.pdf');
-                return res.arrayBuffer();
-            });
+        // Criar elemento HTML temporário no formato do Modelo 1 da FPB
+        const container = document.createElement('div');
+        container.style.width = '750px';
+        container.style.padding = '20px';
+        container.style.fontFamily = 'Arial, sans-serif';
+        container.style.fontSize = '12px';
+        container.style.color = '#000';
+        container.style.background = '#fff';
 
-            const { PDFDocument, rgb, StandardFonts } = PDFLib;
-            // Carregar PDF ignorando erros de estruturas inválidas ou formulários do PDF
-            const pdfDoc = await PDFDocument.load(pdfBytes, { ignoreEncryption: true });
-            
-            // Remover formulários interativos nativos se existirem para evitar o retângulo cinzento e erros no Acrobat
-            try {
-                const catalog = pdfDoc.catalog;
-                catalog.delete(PDFLib.PDFName.of('AcroForm'));
-            } catch (e) {
-                console.log("Sem AcroForm para remover.");
-            }
+        container.innerHTML = `
+            <div style="border: 2px solid #000; padding: 15px; position: relative;">
+                <!-- Cabeçalho -->
+                <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 2px solid #000; padding-bottom: 10px; margin-bottom: 10px;">
+                    <div style="display: flex; align-items: center; gap: 10px;">
+                        <img src="assets/emblema_png.png" style="width: 50px; height: 50px; object-fit: contain;">
+                        <div>
+                            <h2 style="margin: 0; font-size: 16px; font-weight: bold;">FEDERAÇÃO PORTUGUESA DE BASQUETEBOL</h2>
+                            <h3 style="margin: 2px 0 0 0; font-size: 14px; font-style: italic;">INSCRIÇÃO DE JOGADORES</h3>
+                        </div>
+                    </div>
+                </div>
 
-            const page = pdfDoc.getPages()[0];
-            const font = await pdfDoc.embedFont(StandardFonts.HelveticaBold);
-            const fontSize = 9.5;
-            const color = rgb(0, 0, 0);
+                <!-- Tabela de Dados Gerais -->
+                <table style="width: 100%; border-collapse: collapse; margin-bottom: 10px; border: 1px solid #000;">
+                    <tr>
+                        <td style="border: 1px solid #000; padding: 6px; width: 45%;">
+                            <strong>Primeira Inscrição:</strong> ${atleta.tipo_inscricao === 'Primeira Inscrição' ? '[X]' : '[ ]'}<br>
+                            <strong>Revalidação:</strong> ${atleta.tipo_inscricao !== 'Primeira Inscrição' ? '[X]' : '[ ]'}<br>
+                            <strong>Licença FPB:</strong> ${atleta.licenca || '----------------'}
+                        </td>
+                        <td style="border: 1px solid #000; padding: 6px; width: 35%;">
+                            <strong>Estatuto:</strong> ${atleta.estatuto_fpb || 'FBP'}<br>
+                            <strong>Sexo:</strong> ${atleta.sexo === 'F' ? 'Feminino [X]' : 'Masculino [X]'}
+                        </td>
+                        <td style="border: 1px solid #000; padding: 6px; width: 20%; text-align: center;">
+                            <strong>Época:</strong><br>
+                            <span style="font-size: 14px; font-weight: bold;">${atleta.epoca || '2026 / 2027'}</span>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td colspan="2" style="border: 1px solid #000; padding: 6px;">
+                            <strong>Clube:</strong> BASKET CLUBE DE VALENÇA
+                        </td>
+                        <td style="border: 1px solid #000; padding: 6px;">
+                            <strong>Associação:</strong> ABVC
+                        </td>
+                    </tr>
+                </table>
 
-            const drawText = (text, x, y, size = fontSize) => {
-                if (!text) return;
-                page.drawText(String(text), { x, y, size, font, color });
-            };
+                <!-- Identificação do Jogador -->
+                <div style="background: #eee; padding: 4px 6px; font-weight: bold; border: 1px solid #000; border-bottom: none;">
+                    Identificação do(a) Jogador(a)
+                </div>
+                <table style="width: 100%; border-collapse: collapse; margin-bottom: 10px; border: 1px solid #000;">
+                    <tr>
+                        <td colspan="3" style="border: 1px solid #000; padding: 6px;">
+                            <strong>Nome Completo:</strong> ${atleta.nome || ''}
+                        </td>
+                    </tr>
+                    <tr>
+                        <td style="border: 1px solid #000; padding: 6px;">
+                            <strong>Data Nascimento:</strong> ${atleta.data_nascimento || ''}
+                        </td>
+                        <td style="border: 1px solid #000; padding: 6px;">
+                            <strong>Nacionalidade:</strong> ${atleta.nacionalidade || 'Portugal'}
+                        </td>
+                        <td style="border: 1px solid #000; padding: 6px;">
+                            <strong>País Nasc.:</strong> ${atleta.pais_nascimento || 'Portugal'}
+                        </td>
+                    </tr>
+                    <tr>
+                        <td style="border: 1px solid #000; padding: 6px;">
+                            <strong>Doc. Identificação:</strong> ${atleta.tipo_doc_id || 'Cartão Cidadão'} - ${atleta.num_doc_id || '--------'}
+                        </td>
+                        <td style="border: 1px solid #000; padding: 6px;">
+                            <strong>Validade:</strong> ${atleta.validade_doc_id || '--------'}
+                        </td>
+                        <td style="border: 1px solid #000; padding: 6px;">
+                            <strong>NIF:</strong> ${atleta.nif || '--------'}
+                        </td>
+                    </tr>
+                    <tr>
+                        <td style="border: 1px solid #000; padding: 6px;">
+                            <strong>Telemóvel:</strong> ${atleta.telefone || '--------'}
+                        </td>
+                        <td colspan="2" style="border: 1px solid #000; padding: 6px;">
+                            <strong>Email:</strong> ${atleta.email || '--------'}
+                        </td>
+                    </tr>
+                    <tr>
+                        <td colspan="3" style="border: 1px solid #000; padding: 6px;">
+                            <strong>Morada:</strong> ${atleta.morada || '--------------------------------'} | 
+                            <strong>Cód. Postal:</strong> ${atleta.codigo_postal || '--------'} | 
+                            <strong>Localidade:</strong> ${atleta.localidade || 'Valença'}
+                        </td>
+                    </tr>
+                </table>
 
-            const drawCheck = (condition, x, y) => {
-                if (condition) {
-                    page.drawText('X', { x, y, size: 10, font, color });
-                }
-            };
+                <!-- Seguro Desportivo -->
+                <div style="background: #eee; padding: 4px 6px; font-weight: bold; border: 1px solid #000; border-bottom: none;">
+                    Seguro Desportivo
+                </div>
+                <table style="width: 100%; border-collapse: collapse; margin-bottom: 10px; border: 1px solid #000;">
+                    <tr>
+                        <td style="border: 1px solid #000; padding: 6px;">
+                            <strong>Seguro FPB:</strong> ${atleta.tipo_seguro !== 'Seguro Clube' ? '[X]' : '[ ]'} | 
+                            <strong>Seguro Clube:</strong> ${atleta.tipo_seguro === 'Seguro Clube' ? '[X]' : '[ ]'}
+                        </td>
+                        <td style="border: 1px solid #000; padding: 6px;">
+                            <strong>Nº Apólice:</strong> ${atleta.seguro_apolice || '--------'}
+                        </td>
+                        <td style="border: 1px solid #000; padding: 6px;">
+                            <strong>Companhia:</strong> ${atleta.seguro_companhia || '--------'}
+                        </td>
+                    </tr>
+                </table>
 
-            const fmtDate = (dStr) => {
-                if (!dStr) return { d: '', m: '', a: '' };
-                const parts = dStr.split('-');
-                if (parts.length === 3) return { d: parts[2], m: parts[1], a: parts[0] };
-                return { d: '', m: '', a: '' };
-            };
+                <!-- Poder Paternal -->
+                <div style="background: #eee; padding: 4px 6px; font-weight: bold; border: 1px solid #000; border-bottom: none;">
+                    Autorização do Detentor do Poder Paternal (Menor de Idade)
+                </div>
+                <table style="width: 100%; border-collapse: collapse; margin-bottom: 15px; border: 1px solid #000;">
+                    <tr>
+                        <td colspan="2" style="border: 1px solid #000; padding: 6px;">
+                            <strong>Encarregado de Educação:</strong> ${atleta.encarregado_nome || '--------------------------------'}
+                        </td>
+                        <td style="border: 1px solid #000; padding: 6px;">
+                            <strong>Qualidade:</strong> ${atleta.encarregado_qualidade || 'Pai/Mãe'}
+                        </td>
+                    </tr>
+                    <tr>
+                        <td style="border: 1px solid #000; padding: 6px;">
+                            <strong>Doc. Identificação:</strong> ${atleta.encarregado_num_doc || '--------'}
+                        </td>
+                        <td style="border: 1px solid #000; padding: 6px;">
+                            <strong>Telemóvel:</strong> ${atleta.encarregado_telefone || '--------'}
+                        </td>
+                        <td style="border: 1px solid #000; padding: 6px;">
+                            <strong>Email:</strong> ${atleta.encarregado_email || '--------'}
+                        </td>
+                    </tr>
+                </table>
 
-            const nasc = fmtDate(atleta.data_nascimento);
-            const valDoc = fmtDate(atleta.validade_doc_id);
-            const valEncDoc = fmtDate(atleta.encarregado_validade_doc);
+                <!-- Assinaturas -->
+                <table style="width: 100%; border-collapse: collapse; margin-top: 30px;">
+                    <tr>
+                        <td style="width: 45%; text-align: center; border-top: 1px solid #000; padding-top: 5px;">
+                            Assinatura do(a) Jogador(a) / Encarregado(a)
+                        </td>
+                        <td style="width: 10%;"></td>
+                        <td style="width: 45%; text-align: center; border-top: 1px solid #000; padding-top: 5px;">
+                            Direção e Carimbo do Clube
+                        </td>
+                    </tr>
+                </table>
+            </div>
+        `;
 
-            // ==========================================
-            // COORDENADAS CIRÚRGICAS AJUSTADAS SEÇÃO A SEÇÃO
-            // Origem (0,0) Canto Inferior Esquerdo (A4: 595 x 842 pt)
-            // ==========================================
+        const opt = {
+            margin: 10,
+            filename: `Inscricao_FPB_${(atleta.nome || 'Atleta').replace(/\s+/g, '_')}.pdf`,
+            image: { type: 'jpeg', quality: 0.98 },
+            html2canvas: { scale: 2 },
+            jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' }
+        };
 
-            // 1. Tipo de Inscrição / Licença / Estatuto
-            drawCheck(atleta.tipo_inscricao === 'Primeira Inscrição', 147, 734);
-            drawCheck(atleta.tipo_inscricao !== 'Primeira Inscrição', 147, 716);
-            drawText(atleta.licenca || '', 185, 698, 9);
-
-            drawCheck(!atleta.estatuto_fpb || atleta.estatuto_fpb === 'FBP', 227, 734);
-            drawCheck(atleta.estatuto_fpb === 'Sem FBP Comunitário', 227, 716);
-            drawCheck(atleta.estatuto_fpb === 'Sem FBP Não Comunitário', 227, 698);
-
-            // Época & Associação & Sexo & Clube
-            drawText(atleta.epoca || '2026 / 2027', 450, 735, 9.5);
-            drawText('ABVC', 415, 699, 9);
-
-            drawCheck(atleta.sexo === 'F' || atleta.sexo === 'Feminino', 445, 673);
-            drawCheck(atleta.sexo === 'M' || atleta.sexo === 'Masculino', 525, 673);
-
-            drawText('BASKET CLUBE DE VALENÇA', 160, 674, 9.5);
-
-            // 2. Escalão
-            const esc = (atleta.escalao || '').toLowerCase();
-            drawCheck(esc.includes('baby'), 119, 630);
-            drawCheck(esc.includes('mini 8') || esc.includes('mini8'), 167, 630);
-            drawCheck(esc.includes('mini 10') || esc.includes('mini10'), 220, 630);
-            drawCheck(esc.includes('mini 12') || esc.includes('mini12'), 274, 630);
-            drawCheck(esc.includes('sub-14') || esc.includes('sub14'), 330, 630);
-            drawCheck(esc.includes('sub-16') || esc.includes('sub16'), 384, 630);
-            drawCheck(esc.includes('sub-18') || esc.includes('sub18'), 438, 630);
-            drawCheck(esc.includes('sénior') || esc.includes('seniores'), 495, 630);
-            drawCheck(esc.includes('master') || esc.includes('veterano'), 550, 630);
-            drawCheck(esc.includes('bcr'), 588, 630);
-
-            // 3. Identificação do(a) Jogador(a)
-            // Nome completo dentro da caixa cinzenta superior
-            drawText(atleta.nome || '', 225, 590, 9.5);
-            
-            // Data de nascimento: subida +12pt em Y e X espaçado
-            drawText(nasc.d, 135, 578);
-            drawText(nasc.m, 160, 578);
-            drawText(nasc.a, 185, 578);
-            
-            drawText(atleta.nacionalidade || 'Portugal', 280, 578);
-            drawText(atleta.pais_nascimento || 'Portugal', 460, 578);
-
-            // Tipo Doc (Cartão Cidadão / Passaporte / Outro)
-            drawCheck(!atleta.tipo_doc_id || atleta.tipo_doc_id === 'Cartão Cidadão', 205, 556);
-            drawCheck(atleta.tipo_doc_id === 'Passaporte', 274, 556);
-            drawCheck(atleta.tipo_doc_id && atleta.tipo_doc_id !== 'Cartão Cidadão' && atleta.tipo_doc_id !== 'Passaporte', 315, 556);
-
-            drawText(atleta.num_doc_id || '', 135, 534);
-            drawText(valDoc.d, 260, 534);
-            drawText(valDoc.m, 285, 534);
-            drawText(valDoc.a, 310, 534);
-            drawText(atleta.nif || '', 415, 534);
-
-            drawText(atleta.telefone || '', 95, 511);
-            drawText(atleta.email || '', 330, 511);
-
-            drawText(atleta.distrito || 'Viana do Castelo', 95, 488);
-            drawText(atleta.concelho || 'Valença', 330, 488);
-
-            drawText(atleta.morada || '', 95, 465);
-            drawText(atleta.codigo_postal || '', 330, 465);
-            drawText(atleta.localidade || 'Valença', 415, 465);
-
-            // 4. Seguro Desportivo
-            drawCheck(atleta.tipo_seguro !== 'Seguro Clube', 119, 424);
-            drawCheck(atleta.tipo_seguro === 'Seguro Clube', 205, 424);
-            drawText(atleta.seguro_apolice || '', 285, 424);
-            drawText(atleta.seguro_companhia || '', 390, 424);
-
-            // 5. RGPD / Consentimentos
-            drawCheck(true, 76, 346); // SIM Política
-            drawCheck(atleta.rgpd_comunicacoes, 76, 301); // SIM Comunicações
-            drawCheck(!atleta.rgpd_comunicacoes, 97, 301); // NÃO Comunicações
-            drawCheck(atleta.rgpd_marketing, 76, 282); // SIM Marketing
-            drawCheck(!atleta.rgpd_marketing, 137, 282); // NÃO Marketing
-
-            // 6. Autorização Detentor Poder Paternal (Menores)
-            if (atleta.encarregado_nome) {
-                drawText(atleta.encarregado_nome, 65, 187);
-                drawCheck(atleta.encarregado_qualidade === 'Pai', 67, 168);
-                drawCheck(atleta.encarregado_qualidade === 'Mãe', 93, 168);
-                drawCheck(atleta.encarregado_qualidade === 'Tutor', 124, 168);
-
-                drawCheck(!atleta.encarregado_tipo_doc || atleta.encarregado_tipo_doc === 'Cartão Cidadão', 260, 168);
-                drawCheck(atleta.encarregado_tipo_doc === 'Passaporte', 320, 168);
-                drawCheck(atleta.encarregado_tipo_doc && atleta.encarregado_tipo_doc !== 'Cartão Cidadão' && atleta.encarregado_tipo_doc !== 'Passaporte', 362, 168);
-
-                drawText(atleta.encarregado_num_doc || '', 445, 168);
-                drawText(valEncDoc.d, 55, 146);
-                drawText(valEncDoc.m, 80, 146);
-                drawText(valEncDoc.a, 140, 146);
-
-                drawText(atleta.encarregado_email || '', 175, 88);
-                drawText(atleta.encarregado_telefone || '', 415, 88);
-            }
-
-            // Guardar o PDF em formato estático normalizado sem objetos corrompidos
-            const filledPdfBytes = await pdfDoc.save();
-            const blob = new Blob([filledPdfBytes], { type: 'application/pdf' });
-            const link = document.createElement('a');
-            link.href = URL.createObjectURL(blob);
-            link.download = `Inscricao_FPB_${(atleta.nome || 'Atleta').replace(/\s+/g, '_')}.pdf`;
-            link.click();
-
-        } catch (err) {
-            console.error("Erro ao gerar PDF preenchível:", err);
-            alert("Erro ao gerar o PDF oficial preenchido: " + err.message);
-        }
+        html2pdf().set(opt).from(container).save();
     };
 
     const filterEscalao = document.getElementById('filter-escalao');
@@ -1440,6 +1431,9 @@ document.addEventListener('DOMContentLoaded', async () => {
         document.getElementById('atleta-nickname').value = atleta.nickname || '';
         document.getElementById('atleta-epoca').value = atleta.epoca || '';
         document.getElementById('atleta-funcao').value = atleta.funcao || '';
+        document.getElementById('atleta-equipafpb').value = atleta.equipafpb || '';
+        document.getElementById('atleta-equipabcv1').value = atleta.equipabcv1 || '';
+        document.getElementById('atleta-equipabcv2').value = atleta.equipabcv2 || '';
         document.getElementById('atleta-numero').value = atleta.numero_camisola || '';
         document.getElementById('atleta-escalao').value = atleta.escalao || '';
         document.getElementById('atleta-sexo').value = atleta.sexo || '';
@@ -1458,8 +1452,6 @@ document.addEventListener('DOMContentLoaded', async () => {
         
         formAtletaTitle.textContent = 'Editar Atleta: ' + atleta.nome;
         btnSaveAtleta.textContent = 'Guardar Alterações';
-        const formContainer = document.getElementById('form-atleta-container');
-        if (formContainer) formContainer.classList.remove('hidden');
         if (btnCancelAtleta) btnCancelAtleta.classList.remove('hidden');
         if (atletaMsg) atletaMsg.classList.add('hidden');
         
@@ -1500,6 +1492,9 @@ document.addEventListener('DOMContentLoaded', async () => {
                 nickname: document.getElementById('atleta-nickname').value || null,
                 epoca: document.getElementById('atleta-epoca').value,
                 funcao: document.getElementById('atleta-funcao').value,
+                equipafpb: document.getElementById('atleta-equipafpb').value || null,
+                equipabcv1: document.getElementById('atleta-equipabcv1').value || null,
+                equipabcv2: document.getElementById('atleta-equipabcv2').value || null,
                 numero_camisola: document.getElementById('atleta-numero').value ? parseInt(document.getElementById('atleta-numero').value) : null,
                 escalao: document.getElementById('atleta-escalao').value,
                 sexo: document.getElementById('atleta-sexo').value,
