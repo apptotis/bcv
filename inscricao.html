@@ -455,11 +455,6 @@
                     <input type="text" name="nome" class="form-control" placeholder="Nome Completo" required>
                 </div>
 
-                <div class="form-group">
-                    <label>Alcunha / Nome de Camisola (Nickname)</label>
-                    <input type="text" name="nickname" class="form-control" placeholder="Ex: Carlitos">
-                </div>
-
                 <div class="form-row">
                     <div class="form-group">
                         <label>Data Nascimento <span class="req">*</span></label>
@@ -833,7 +828,6 @@
 
             const form = document.getElementById('form-inscricao');
             if (form.elements['nome']) form.elements['nome'].value = atleta.nome || '';
-            if (form.elements['nickname']) form.elements['nickname'].value = atleta.nickname || '';
             if (form.elements['data_nascimento']) {
                 form.elements['data_nascimento'].value = atleta.data_nascimento || '';
                 // Disparar evento de mudança de data para recalcular se é menor
@@ -959,7 +953,6 @@
                 tipo_inscricao: formData.get('tipo_inscricao'),
                 estatuto_fpb: formData.get('estatuto_fpb'),
                 nome: formData.get('nome'),
-                nickname: formData.get('nickname'),
                 data_nascimento: formData.get('data_nascimento'),
                 sexo: formData.get('sexo'),
                 nacionalidade: formData.get('nacionalidade'),

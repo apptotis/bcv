@@ -49,3 +49,4 @@
 - [2026-08-22] Gemini: Correção de erro na submissão de inscrição enviando valores predefinidos para colunas com restrição NOT NULL (equipafpb, escalao, funcao).
 - [2026-08-22] Gemini: Ocultação por defeito do formulário/card 'Adicionar Novo Atleta' na aba Atletas do Admin e resolução da geração de PDF em branco no html2pdf anexando o container ao DOM.
 - [2026-08-22] Gemini: Implementação completa da exportação em PDF do Modelo 1 da FPB no Admin usando a biblioteca pdf-lib, preenchendo de forma vetorial e nativa os campos interativos oficiais (AcroForm) do ficheiro assets/Modelo_1_FPB.pdf com os dados do atleta.
+- [2026-08-23] Gemini: Remoção do campo 'Alcunha / Nome de Camisola (Nickname)' do Passo 2 (Identificação do Atleta) e limpeza do preenchimento e payload no formulário inscricao.html.
