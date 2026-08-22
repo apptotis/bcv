@@ -1250,6 +1250,10 @@ document.addEventListener('DOMContentLoaded', async () => {
                 return { d: '', m: '', a: '' };
             };
 
+            const nasc = fmtDate(atleta.data_nascimento);
+            const valDoc = fmtDate(atleta.validade_doc_id);
+            const valEncDoc = fmtDate(atleta.encarregado_validade_doc);
+
             // ==========================================
             // COORDENADAS RECALIBRADAS AO MILÍMETRO (A4: 595pt x 842pt)
             // Origem (0,0) canto INFERIOR ESQUERDO da folha
