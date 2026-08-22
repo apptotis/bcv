@@ -109,7 +109,8 @@ document.addEventListener('DOMContentLoaded', async () => {
                 await verifyAdminRole(data.user);
             }
         } catch (error) {
-            showError("Credenciais inválidas ou acesso negado.");
+            console.error("Erro no login:", error);
+            showError("Erro no login: " + (error.message || "Credenciais inválidas."));
         } finally {
             btnLogin.textContent = "Aceder";
             btnLogin.disabled = false;
