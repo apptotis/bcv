@@ -1257,108 +1257,106 @@ document.addEventListener('DOMContentLoaded', async () => {
                 return { d: '', m: '', a: '' };
             };
 
-            const nasc = fmtDate(atleta.data_nascimento);
-            const valDoc = fmtDate(atleta.validade_doc_id);
-            const valEncDoc = fmtDate(atleta.encarregado_validade_doc);
-
-            // ==========================================
-            // COORDENADAS RECALIBRADAS COM PRECISÃO DE PIXEL
+                        // ==========================================
+            // COORDENADAS CIRÚRGICAS AJUSTADAS SEÇÃO A SEÇÃO
             // Origem (0,0) Canto Inferior Esquerdo (A4: 595 x 842 pt)
             // ==========================================
 
             // 1. Tipo de Inscrição / Licença / Estatuto
-            drawCheck(atleta.tipo_inscricao === 'Primeira Inscrição', 252, 735);
-            drawCheck(atleta.tipo_inscricao !== 'Primeira Inscrição', 252, 717);
+            drawCheck(atleta.tipo_inscricao === 'Primeira Inscrição', 147, 734);
+            drawCheck(atleta.tipo_inscricao !== 'Primeira Inscrição', 147, 716);
             drawText(atleta.licenca || '', 185, 698, 9);
 
-            drawCheck(!atleta.estatuto_fpb || atleta.estatuto_fpb === 'FBP', 386, 735);
-            drawCheck(atleta.estatuto_fpb === 'Sem FBP Comunitário', 386, 717);
-            drawCheck(atleta.estatuto_fpb === 'Sem FBP Não Comunitário', 386, 698);
+            drawCheck(!atleta.estatuto_fpb || atleta.estatuto_fpb === 'FBP', 227, 734);
+            drawCheck(atleta.estatuto_fpb === 'Sem FBP Comunitário', 227, 716);
+            drawCheck(atleta.estatuto_fpb === 'Sem FBP Não Comunitário', 227, 698);
 
             // Época & Associação & Sexo & Clube
-            drawText(atleta.epoca || '2026 / 2027', 760, 735, 9.5);
-            drawText('ABVC', 700, 699, 9);
+            drawText(atleta.epoca || '2026 / 2027', 450, 735, 9.5);
+            drawText('ABVC', 415, 699, 9);
 
-            drawCheck(atleta.sexo === 'F' || atleta.sexo === 'Feminino', 739, 673);
-            drawCheck(atleta.sexo === 'M' || atleta.sexo === 'Masculino', 855, 673);
+            drawCheck(atleta.sexo === 'F' || atleta.sexo === 'Feminino', 445, 673);
+            drawCheck(atleta.sexo === 'M' || atleta.sexo === 'Masculino', 525, 673);
 
             drawText('BASKET CLUBE DE VALENÇA', 160, 674, 9.5);
 
             // 2. Escalão
             const esc = (atleta.escalao || '').toLowerCase();
-            drawCheck(esc.includes('baby'), 156, 630);
-            drawCheck(esc.includes('mini 8') || esc.includes('mini8'), 217, 630);
-            drawCheck(esc.includes('mini 10') || esc.includes('mini10'), 284, 630);
-            drawCheck(esc.includes('mini 12') || esc.includes('mini12'), 355, 630);
-            drawCheck(esc.includes('sub-14') || esc.includes('sub14'), 430, 630);
-            drawCheck(esc.includes('sub-16') || esc.includes('sub16'), 501, 630);
-            drawCheck(esc.includes('sub-18') || esc.includes('sub18'), 573, 630);
-            drawCheck(esc.includes('sénior') || esc.includes('seniores'), 647, 630);
-            drawCheck(esc.includes('master') || esc.includes('veterano'), 720, 630);
-            drawCheck(esc.includes('bcr'), 772, 630);
+            drawCheck(esc.includes('baby'), 119, 630);
+            drawCheck(esc.includes('mini 8') || esc.includes('mini8'), 167, 630);
+            drawCheck(esc.includes('mini 10') || esc.includes('mini10'), 220, 630);
+            drawCheck(esc.includes('mini 12') || esc.includes('mini12'), 274, 630);
+            drawCheck(esc.includes('sub-14') || esc.includes('sub14'), 330, 630);
+            drawCheck(esc.includes('sub-16') || esc.includes('sub16'), 384, 630);
+            drawCheck(esc.includes('sub-18') || esc.includes('sub18'), 438, 630);
+            drawCheck(esc.includes('sénior') || esc.includes('seniores'), 495, 630);
+            drawCheck(esc.includes('master') || esc.includes('veterano'), 550, 630);
+            drawCheck(esc.includes('bcr'), 588, 630);
 
             // 3. Identificação do(a) Jogador(a)
+            // Nome completo dentro da caixa cinzenta superior
             drawText(atleta.nome || '', 225, 590, 9.5);
             
-            drawText(nasc.d, 225, 566);
-            drawText(nasc.m, 260, 566);
-            drawText(nasc.a, 295, 566);
+            // Data de nascimento: subida +12pt em Y e X espaçado
+            drawText(nasc.d, 135, 578);
+            drawText(nasc.m, 160, 578);
+            drawText(nasc.a, 185, 578);
             
-            drawText(atleta.nacionalidade || 'Portugal', 470, 566);
-            drawText(atleta.pais_nascimento || 'Portugal', 770, 566);
+            drawText(atleta.nacionalidade || 'Portugal', 280, 578);
+            drawText(atleta.pais_nascimento || 'Portugal', 460, 578);
 
-            // Tipo Doc
-            drawCheck(!atleta.tipo_doc_id || atleta.tipo_doc_id === 'Cartão Cidadão', 342, 544);
-            drawCheck(atleta.tipo_doc_id === 'Passaporte', 445, 544);
-            drawCheck(atleta.tipo_doc_id && atleta.tipo_doc_id !== 'Cartão Cidadão' && atleta.tipo_doc_id !== 'Passaporte', 508, 544);
+            // Tipo Doc (Cartão Cidadão / Passaporte / Outro)
+            drawCheck(!atleta.tipo_doc_id || atleta.tipo_doc_id === 'Cartão Cidadão', 205, 556);
+            drawCheck(atleta.tipo_doc_id === 'Passaporte', 274, 556);
+            drawCheck(atleta.tipo_doc_id && atleta.tipo_doc_id !== 'Cartão Cidadão' && atleta.tipo_doc_id !== 'Passaporte', 315, 556);
 
-            drawText(atleta.num_doc_id || '', 225, 522);
-            drawText(valDoc.d, 425, 522);
-            drawText(valDoc.m, 460, 522);
-            drawText(valDoc.a, 495, 522);
-            drawText(atleta.nif || '', 695, 522);
+            drawText(atleta.num_doc_id || '', 135, 534);
+            drawText(valDoc.d, 260, 534);
+            drawText(valDoc.m, 285, 534);
+            drawText(valDoc.a, 310, 534);
+            drawText(atleta.nif || '', 415, 534);
 
-            drawText(atleta.telefone || '', 160, 499);
-            drawText(atleta.email || '', 560, 499);
+            drawText(atleta.telefone || '', 95, 511);
+            drawText(atleta.email || '', 330, 511);
 
-            drawText(atleta.distrito || 'Viana do Castelo', 160, 476);
-            drawText(atleta.concelho || 'Valença', 560, 476);
+            drawText(atleta.distrito || 'Viana do Castelo', 95, 488);
+            drawText(atleta.concelho || 'Valença', 330, 488);
 
-            drawText(atleta.morada || '', 160, 453);
-            drawText(atleta.codigo_postal || '', 560, 453);
-            drawText(atleta.localidade || 'Valença', 700, 453);
+            drawText(atleta.morada || '', 95, 465);
+            drawText(atleta.codigo_postal || '', 330, 465);
+            drawText(atleta.localidade || 'Valença', 415, 465);
 
             // 4. Seguro Desportivo
-            drawCheck(atleta.tipo_seguro !== 'Seguro Clube', 160, 411);
-            drawCheck(atleta.tipo_seguro === 'Seguro Clube', 330, 411);
-            drawText(atleta.seguro_apolice || '', 475, 411);
-            drawText(atleta.seguro_companhia || '', 690, 411);
+            drawCheck(atleta.tipo_seguro !== 'Seguro Clube', 119, 424);
+            drawCheck(atleta.tipo_seguro === 'Seguro Clube', 205, 424);
+            drawText(atleta.seguro_apolice || '', 285, 424);
+            drawText(atleta.seguro_companhia || '', 390, 424);
 
             // 5. RGPD / Consentimentos
-            drawCheck(true, 95, 333); // SIM Política
-            drawCheck(atleta.rgpd_comunicacoes, 95, 288); // SIM Comunicações
-            drawCheck(!atleta.rgpd_comunicacoes, 137, 288); // NÃO Comunicações
-            drawCheck(atleta.rgpd_marketing, 95, 269); // SIM Marketing
-            drawCheck(!atleta.rgpd_marketing, 137, 269); // NÃO Marketing
+            drawCheck(true, 76, 346); // SIM Política
+            drawCheck(atleta.rgpd_comunicacoes, 76, 301); // SIM Comunicações
+            drawCheck(!atleta.rgpd_comunicacoes, 97, 301); // NÃO Comunicações
+            drawCheck(atleta.rgpd_marketing, 76, 282); // SIM Marketing
+            drawCheck(!atleta.rgpd_marketing, 137, 282); // NÃO Marketing
 
             // 6. Autorização Detentor Poder Paternal (Menores)
             if (atleta.encarregado_nome) {
-                drawText(atleta.encarregado_nome, 95, 174);
-                drawCheck(atleta.encarregado_qualidade === 'Pai', 148, 155);
-                drawCheck(atleta.encarregado_qualidade === 'Mãe', 188, 155);
-                drawCheck(atleta.encarregado_qualidade === 'Tutor', 246, 155);
+                drawText(atleta.encarregado_nome, 65, 187);
+                drawCheck(atleta.encarregado_qualidade === 'Pai', 67, 168);
+                drawCheck(atleta.encarregado_qualidade === 'Mãe', 93, 168);
+                drawCheck(atleta.encarregado_qualidade === 'Tutor', 124, 168);
 
-                drawCheck(!atleta.encarregado_tipo_doc || atleta.encarregado_tipo_doc === 'Cartão Cidadão', 428, 155);
-                drawCheck(atleta.encarregado_tipo_doc === 'Passaporte', 530, 155);
-                drawCheck(atleta.encarregado_tipo_doc && atleta.encarregado_tipo_doc !== 'Cartão Cidadão' && atleta.encarregado_tipo_doc !== 'Passaporte', 592, 155);
+                drawCheck(!atleta.encarregado_tipo_doc || atleta.encarregado_tipo_doc === 'Cartão Cidadão', 260, 168);
+                drawCheck(atleta.encarregado_tipo_doc === 'Passaporte', 320, 168);
+                drawCheck(atleta.encarregado_tipo_doc && atleta.encarregado_tipo_doc !== 'Cartão Cidadão' && atleta.encarregado_tipo_doc !== 'Passaporte', 362, 168);
 
-                drawText(atleta.encarregado_num_doc || '', 710, 155);
-                drawText(valEncDoc.d, 70, 133);
-                drawText(valEncDoc.m, 105, 133);
-                drawText(valEncDoc.a, 140, 133);
+                drawText(atleta.encarregado_num_doc || '', 445, 168);
+                drawText(valEncDoc.d, 55, 146);
+                drawText(valEncDoc.m, 80, 146);
+                drawText(valEncDoc.a, 140, 146);
 
-                drawText(atleta.encarregado_email || '', 300, 75);
-                drawText(atleta.encarregado_telefone || '', 650, 75);
+                drawText(atleta.encarregado_email || '', 175, 88);
+                drawText(atleta.encarregado_telefone || '', 415, 88);
             }
 
             // Guardar o PDF em formato estático normalizado sem objetos corrompidos
