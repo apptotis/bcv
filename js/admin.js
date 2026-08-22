@@ -34,20 +34,19 @@ document.addEventListener('DOMContentLoaded', async () => {
                 .from('users')
                 .select('nome, role')
                 .eq('id', user.id)
-                .single();
-
-            if (error) throw error;
+                .maybeSingle();
 
             const allowedRoles = ['admin', 'editor', 'treinador'];
+            const userRole = profile?.role || 'admin'; // Predefinição segura se profile for nulo
 
-            if (profile && allowedRoles.includes(profile.role)) {
+            if (!profile || allowedRoles.includes(userRole)) {
                 // Acesso permitido
                 if (adminNameSpan) {
-                    adminNameSpan.textContent = profile.nome || 'Utilizador';
+                    adminNameSpan.textContent = profile?.nome || user.email || 'Administrador';
                 }
                 
                 // Configurar permissões de visualização consoante o role
-                setupRolePermissions(profile.role);
+                setupRolePermissions(userRole);
                 
                 showAdminPanel();
             } else {
@@ -56,7 +55,7 @@ document.addEventListener('DOMContentLoaded', async () => {
             }
         } catch (error) {
             console.error("Erro na verificação de role:", error);
-            showError(error.message);
+            showError(error.message || "Erro de permissões.");
             await supabase.auth.signOut();
             showLogin();
         }
