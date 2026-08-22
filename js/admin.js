@@ -1103,46 +1103,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         btnCancelAtleta.addEventListener('click', resetAtletaForm);
     }
 
-    async function populateEquipasDropdowns() {
-        const { data: equipas, error } = await supabase
-            .from('equipasbcv')
-            .select('nome, escalao')
-            .order('nome', { ascending: true });
-            
-        if (!error && equipas) {
-            const select1 = document.getElementById('atleta-equipabcv1');
-            const select2 = document.getElementById('atleta-equipabcv2');
-            const filter1 = document.getElementById('filter-equipabcv1');
-            const filter2 = document.getElementById('filter-equipabcv2');
-            
-            let optionsHtml = '<option value="">Nenhuma / Sem Equipa</option>';
-            let filterOptionsHtml = '<option value="">Todas</option>';
-            
-            equipas.forEach(eq => {
-                const label = `${eq.nome} (${eq.escalao})`;
-                optionsHtml += `<option value="${label}">${label}</option>`;
-                filterOptionsHtml += `<option value="${label}">${label}</option>`;
-            });
-            
-            if (select1 && select2) {
-                const val1 = select1.value;
-                const val2 = select2.value;
-                select1.innerHTML = optionsHtml;
-                select2.innerHTML = optionsHtml;
-                if (val1) select1.value = val1;
-                if (val2) select2.value = val2;
-            }
-            
-            if (filter1 && filter2) {
-                const fval1 = filter1.value;
-                const fval2 = filter2.value;
-                filter1.innerHTML = filterOptionsHtml;
-                filter2.innerHTML = filterOptionsHtml;
-                if (fval1) filter1.value = fval1;
-                if (fval2) filter2.value = fval2;
-            }
-        }
-    }
+
 
     let currentAtletas = [];
 
