@@ -1211,192 +1211,175 @@ document.addEventListener('DOMContentLoaded', async () => {
         });
     }
 
-    // Função para exportar PDF do Modelo FPB
+    // Função para exportar PDF do Modelo FPB utilizando Janela de Impressão Nativa do Navegador (100% fiável)
     window.exportAtletaPDF = function(atletaStr) {
         const atleta = JSON.parse(atletaStr);
         
-        // Criar elemento HTML temporário no formato do Modelo 1 da FPB
-        const container = document.createElement('div');
-        container.style.width = '750px';
-        container.style.padding = '20px';
-        container.style.fontFamily = 'Arial, sans-serif';
-        container.style.fontSize = '12px';
-        container.style.color = '#000';
-        container.style.background = '#fff';
+        const printWindow = window.open('', '_blank');
+        if (!printWindow) {
+            alert('Por favor, permita pop-ups para visualizar a ficha de inscrição em PDF.');
+            return;
+        }
 
-        container.innerHTML = `
-            <div style="border: 2px solid #000; padding: 15px; position: relative;">
-                <!-- Cabeçalho -->
-                <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 2px solid #000; padding-bottom: 10px; margin-bottom: 10px;">
-                    <div style="display: flex; align-items: center; gap: 10px;">
-                        <img src="assets/emblema_png.png" style="width: 50px; height: 50px; object-fit: contain;">
-                        <div>
-                            <h2 style="margin: 0; font-size: 16px; font-weight: bold;">FEDERAÇÃO PORTUGUESA DE BASQUETEBOL</h2>
-                            <h3 style="margin: 2px 0 0 0; font-size: 14px; font-style: italic;">INSCRIÇÃO DE JOGADORES</h3>
-                        </div>
-                    </div>
+        printWindow.document.write(`
+            <!DOCTYPE html>
+            <html lang="pt">
+            <head>
+                <meta charset="UTF-8">
+                <title>Ficha de Inscrição FPB - ${atleta.nome || 'Atleta'}</title>
+                <style>
+                    @page { size: A4 portrait; margin: 12mm; }
+                    body { font-family: Arial, sans-serif; font-size: 11px; color: #000; margin: 0; padding: 0; background: #fff; }
+                    .pdf-border { border: 2px solid #000; padding: 12px; }
+                    .header-table { width: 100%; border-collapse: collapse; border-bottom: 2px solid #000; padding-bottom: 8px; margin-bottom: 8px; }
+                    .header-title h2 { margin: 0; font-size: 15px; font-weight: bold; }
+                    .header-title h3 { margin: 2px 0 0 0; font-size: 13px; font-style: italic; }
+                    .sec-title { background: #e2e8f0; padding: 4px 6px; font-weight: bold; border: 1px solid #000; border-bottom: none; font-size: 11px; margin-top: 6px; }
+                    table.data-table { width: 100%; border-collapse: collapse; margin-bottom: 6px; border: 1px solid #000; }
+                    table.data-table td { border: 1px solid #000; padding: 5px 6px; vertical-align: top; }
+                    .sig-table { width: 100%; border-collapse: collapse; margin-top: 25px; }
+                    .sig-cell { width: 45%; text-align: center; border-top: 1px solid #000; padding-top: 4px; font-size: 10px; }
+                </style>
+            </head>
+            <body>
+                <div class="pdf-border">
+                    <table class="header-table">
+                        <tr>
+                            <td style="width: 60px;">
+                                <img src="assets/emblema_png.png" style="width: 48px; height: 48px; object-fit: contain;">
+                            </td>
+                            <td class="header-title">
+                                <h2>FEDERAÇÃO PORTUGUESA DE BASQUETEBOL</h2>
+                                <h3>INSCRIÇÃO DE JOGADORES (MODELO 1)</h3>
+                            </td>
+                        </tr>
+                    </table>
+
+                    <table class="data-table">
+                        <tr>
+                            <td style="width: 45%;">
+                                <strong>Primeira Inscrição:</strong> ${atleta.tipo_inscricao === 'Primeira Inscrição' ? '[ X ]' : '[ &nbsp; ]'}<br>
+                                <strong>Revalidação:</strong> ${atleta.tipo_inscricao !== 'Primeira Inscrição' ? '[ X ]' : '[ &nbsp; ]'}<br>
+                                <strong>Licença FPB Nº:</strong> ${atleta.licenca || '----------------'}
+                            </td>
+                            <td style="width: 35%;">
+                                <strong>Estatuto:</strong> ${atleta.estatuto_fpb || 'FBP'}<br>
+                                <strong>Sexo:</strong> ${atleta.sexo === 'F' ? 'Feminino [ X ]' : 'Masculino [ X ]'}
+                            </td>
+                            <td style="width: 20%; text-align: center;">
+                                <strong>Época Desportiva:</strong><br>
+                                <span style="font-size: 13px; font-weight: bold;">${atleta.epoca || '2026 / 2027'}</span>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td colspan="2">
+                                <strong>Clube:</strong> BASKET CLUBE DE VALENÇA
+                            </td>
+                            <td>
+                                <strong>Associação:</strong> ABVC
+                            </td>
+                        </tr>
+                    </table>
+
+                    <div class="sec-title">Identificação do(a) Jogador(a)</div>
+                    <table class="data-table">
+                        <tr>
+                            <td colspan="3">
+                                <strong>Nome Completo:</strong> ${atleta.nome || ''} ${atleta.nickname ? `("${atleta.nickname}")` : ''}
+                            </td>
+                        </tr>
+                        <tr>
+                            <td><strong>Data Nascimento:</strong> ${atleta.data_nascimento || '----------'}</td>
+                            <td><strong>Nacionalidade:</strong> ${atleta.nacionalidade || 'Portugal'}</td>
+                            <td><strong>País Nascimento:</strong> ${atleta.pais_nascimento || 'Portugal'}</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Doc. Identificação:</strong> ${atleta.tipo_doc_id || 'Cartão Cidadão'} - ${atleta.num_doc_id || '----------'}</td>
+                            <td><strong>Validade:</strong> ${atleta.validade_doc_id || '----------'}</td>
+                            <td><strong>NIF / Contribuinte:</strong> ${atleta.nif || '----------'}</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Telemóvel:</strong> ${atleta.telefone || '----------'}</td>
+                            <td colspan="2"><strong>Email:</strong> ${atleta.email || '----------'}</td>
+                        </tr>
+                        <tr>
+                            <td colspan="3">
+                                <strong>Morada:</strong> ${atleta.morada || '--------------------------------------------------'}<br>
+                                <strong>Cód. Postal:</strong> ${atleta.codigo_postal || '--------'} | 
+                                <strong>Localidade:</strong> ${atleta.localidade || 'Valença'} | 
+                                <strong>Concelho:</strong> ${atleta.concelho || 'Valença'} | 
+                                <strong>Distrito:</strong> ${atleta.distrito || 'Viana do Castelo'}
+                            </td>
+                        </tr>
+                    </table>
+
+                    <div class="sec-title">Seguro Desportivo</div>
+                    <table class="data-table">
+                        <tr>
+                            <td style="width: 45%;">
+                                <strong>Seguro FPB:</strong> ${atleta.tipo_seguro !== 'Seguro Clube' ? '[ X ]' : '[ &nbsp; ]'}<br>
+                                <strong>Seguro Clube:</strong> ${atleta.tipo_seguro === 'Seguro Clube' ? '[ X ]' : '[ &nbsp; ]'}
+                            </td>
+                            <td style="width: 30%;">
+                                <strong>Nº Apólice:</strong> ${atleta.seguro_apolice || '----------'}
+                            </td>
+                            <td style="width: 25%;">
+                                <strong>Companhia:</strong> ${atleta.seguro_companhia || '----------'}
+                            </td>
+                        </tr>
+                    </table>
+
+                    <div class="sec-title">Autorização do Detentor do Poder Paternal (Menores de Idade)</div>
+                    <table class="data-table">
+                        <tr>
+                            <td colspan="2">
+                                <strong>Nome Encarregado de Educação:</strong> ${atleta.encarregado_nome || '--------------------------------------------------'}
+                            </td>
+                            <td>
+                                <strong>Qualidade:</strong> ${atleta.encarregado_qualidade || 'Pai / Mãe / Tutor'}
+                            </td>
+                        </tr>
+                        <tr>
+                            <td><strong>Doc. Identificação:</strong> ${atleta.encarregado_num_doc || '----------'}</td>
+                            <td><strong>Telemóvel:</strong> ${atleta.encarregado_telefone || '----------'}</td>
+                            <td><strong>Email:</strong> ${atleta.encarregado_email || '----------'}</td>
+                        </tr>
+                    </table>
+
+                    <div class="sec-title">Tratamento de Dados Pessoais & RGPD</div>
+                    <p style="font-size: 9px; margin: 4px 0 8px 0; text-align: justify; line-height: 1.2;">
+                        Concordo com a política de tratamento de dados da FPB [ X ] &nbsp;&nbsp;|&nbsp;&nbsp; 
+                        Autorizo comunicações de atividades [ ${atleta.rgpd_comunicacoes ? 'X' : '&nbsp;'} ] &nbsp;&nbsp;|&nbsp;&nbsp; 
+                        Autorizo divulgação de imagem / marketing [ ${atleta.rgpd_marketing ? 'X' : '&nbsp;'} ]
+                    </p>
+
+                    <table class="sig-table">
+                        <tr>
+                            <td class="sig-cell">
+                                <br><br>
+                                __________________________________________<br>
+                                Assinatura do(a) Jogador(a) / Encarregado(a)
+                            </td>
+                            <td style="width: 10%;"></td>
+                            <td class="sig-cell">
+                                <br><br>
+                                __________________________________________<br>
+                                Direção e Carimbo do Clube (BCV)
+                            </td>
+                        </tr>
+                    </table>
                 </div>
-
-                <!-- Tabela de Dados Gerais -->
-                <table style="width: 100%; border-collapse: collapse; margin-bottom: 10px; border: 1px solid #000;">
-                    <tr>
-                        <td style="border: 1px solid #000; padding: 6px; width: 45%;">
-                            <strong>Primeira Inscrição:</strong> ${atleta.tipo_inscricao === 'Primeira Inscrição' ? '[X]' : '[ ]'}<br>
-                            <strong>Revalidação:</strong> ${atleta.tipo_inscricao !== 'Primeira Inscrição' ? '[X]' : '[ ]'}<br>
-                            <strong>Licença FPB:</strong> ${atleta.licenca || '----------------'}
-                        </td>
-                        <td style="border: 1px solid #000; padding: 6px; width: 35%;">
-                            <strong>Estatuto:</strong> ${atleta.estatuto_fpb || 'FBP'}<br>
-                            <strong>Sexo:</strong> ${atleta.sexo === 'F' ? 'Feminino [X]' : 'Masculino [X]'}
-                        </td>
-                        <td style="border: 1px solid #000; padding: 6px; width: 20%; text-align: center;">
-                            <strong>Época:</strong><br>
-                            <span style="font-size: 14px; font-weight: bold;">${atleta.epoca || '2026 / 2027'}</span>
-                        </td>
-                    </tr>
-                    <tr>
-                        <td colspan="2" style="border: 1px solid #000; padding: 6px;">
-                            <strong>Clube:</strong> BASKET CLUBE DE VALENÇA
-                        </td>
-                        <td style="border: 1px solid #000; padding: 6px;">
-                            <strong>Associação:</strong> ABVC
-                        </td>
-                    </tr>
-                </table>
-
-                <!-- Identificação do Jogador -->
-                <div style="background: #eee; padding: 4px 6px; font-weight: bold; border: 1px solid #000; border-bottom: none;">
-                    Identificação do(a) Jogador(a)
-                </div>
-                <table style="width: 100%; border-collapse: collapse; margin-bottom: 10px; border: 1px solid #000;">
-                    <tr>
-                        <td colspan="3" style="border: 1px solid #000; padding: 6px;">
-                            <strong>Nome Completo:</strong> ${atleta.nome || ''}
-                        </td>
-                    </tr>
-                    <tr>
-                        <td style="border: 1px solid #000; padding: 6px;">
-                            <strong>Data Nascimento:</strong> ${atleta.data_nascimento || ''}
-                        </td>
-                        <td style="border: 1px solid #000; padding: 6px;">
-                            <strong>Nacionalidade:</strong> ${atleta.nacionalidade || 'Portugal'}
-                        </td>
-                        <td style="border: 1px solid #000; padding: 6px;">
-                            <strong>País Nasc.:</strong> ${atleta.pais_nascimento || 'Portugal'}
-                        </td>
-                    </tr>
-                    <tr>
-                        <td style="border: 1px solid #000; padding: 6px;">
-                            <strong>Doc. Identificação:</strong> ${atleta.tipo_doc_id || 'Cartão Cidadão'} - ${atleta.num_doc_id || '--------'}
-                        </td>
-                        <td style="border: 1px solid #000; padding: 6px;">
-                            <strong>Validade:</strong> ${atleta.validade_doc_id || '--------'}
-                        </td>
-                        <td style="border: 1px solid #000; padding: 6px;">
-                            <strong>NIF:</strong> ${atleta.nif || '--------'}
-                        </td>
-                    </tr>
-                    <tr>
-                        <td style="border: 1px solid #000; padding: 6px;">
-                            <strong>Telemóvel:</strong> ${atleta.telefone || '--------'}
-                        </td>
-                        <td colspan="2" style="border: 1px solid #000; padding: 6px;">
-                            <strong>Email:</strong> ${atleta.email || '--------'}
-                        </td>
-                    </tr>
-                    <tr>
-                        <td colspan="3" style="border: 1px solid #000; padding: 6px;">
-                            <strong>Morada:</strong> ${atleta.morada || '--------------------------------'} | 
-                            <strong>Cód. Postal:</strong> ${atleta.codigo_postal || '--------'} | 
-                            <strong>Localidade:</strong> ${atleta.localidade || 'Valença'}
-                        </td>
-                    </tr>
-                </table>
-
-                <!-- Seguro Desportivo -->
-                <div style="background: #eee; padding: 4px 6px; font-weight: bold; border: 1px solid #000; border-bottom: none;">
-                    Seguro Desportivo
-                </div>
-                <table style="width: 100%; border-collapse: collapse; margin-bottom: 10px; border: 1px solid #000;">
-                    <tr>
-                        <td style="border: 1px solid #000; padding: 6px;">
-                            <strong>Seguro FPB:</strong> ${atleta.tipo_seguro !== 'Seguro Clube' ? '[X]' : '[ ]'} | 
-                            <strong>Seguro Clube:</strong> ${atleta.tipo_seguro === 'Seguro Clube' ? '[X]' : '[ ]'}
-                        </td>
-                        <td style="border: 1px solid #000; padding: 6px;">
-                            <strong>Nº Apólice:</strong> ${atleta.seguro_apolice || '--------'}
-                        </td>
-                        <td style="border: 1px solid #000; padding: 6px;">
-                            <strong>Companhia:</strong> ${atleta.seguro_companhia || '--------'}
-                        </td>
-                    </tr>
-                </table>
-
-                <!-- Poder Paternal -->
-                <div style="background: #eee; padding: 4px 6px; font-weight: bold; border: 1px solid #000; border-bottom: none;">
-                    Autorização do Detentor do Poder Paternal (Menor de Idade)
-                </div>
-                <table style="width: 100%; border-collapse: collapse; margin-bottom: 15px; border: 1px solid #000;">
-                    <tr>
-                        <td colspan="2" style="border: 1px solid #000; padding: 6px;">
-                            <strong>Encarregado de Educação:</strong> ${atleta.encarregado_nome || '--------------------------------'}
-                        </td>
-                        <td style="border: 1px solid #000; padding: 6px;">
-                            <strong>Qualidade:</strong> ${atleta.encarregado_qualidade || 'Pai/Mãe'}
-                        </td>
-                    </tr>
-                    <tr>
-                        <td style="border: 1px solid #000; padding: 6px;">
-                            <strong>Doc. Identificação:</strong> ${atleta.encarregado_num_doc || '--------'}
-                        </td>
-                        <td style="border: 1px solid #000; padding: 6px;">
-                            <strong>Telemóvel:</strong> ${atleta.encarregado_telefone || '--------'}
-                        </td>
-                        <td style="border: 1px solid #000; padding: 6px;">
-                            <strong>Email:</strong> ${atleta.encarregado_email || '--------'}
-                        </td>
-                    </tr>
-                </table>
-
-                <!-- Assinaturas -->
-                <table style="width: 100%; border-collapse: collapse; margin-top: 30px;">
-                    <tr>
-                        <td style="width: 45%; text-align: center; border-top: 1px solid #000; padding-top: 5px;">
-                            Assinatura do(a) Jogador(a) / Encarregado(a)
-                        </td>
-                        <td style="width: 10%;"></td>
-                        <td style="width: 45%; text-align: center; border-top: 1px solid #000; padding-top: 5px;">
-                            Direção e Carimbo do Clube
-                        </td>
-                    </tr>
-                </table>
-            </div>
-        `;
-
-        const opt = {
-            margin: 5,
-            filename: `Inscricao_FPB_${(atleta.nome || 'Atleta').replace(/\s+/g, '_')}.pdf`,
-            image: { type: 'jpeg', quality: 0.98 },
-            html2canvas: { scale: 2, useCORS: true, allowTaint: true, logging: false },
-            jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' }
-        };
-
-        // Anexar temporariamente ao DOM no fundo do ecrã para garantir que o html2canvas renderiza tudo
-        container.style.position = 'fixed';
-        container.style.left = '0px';
-        container.style.top = '0px';
-        container.style.zIndex = '-9999';
-        container.style.opacity = '1';
-        document.body.appendChild(container);
-
-        setTimeout(() => {
-            html2pdf().set(opt).from(container).save().then(() => {
-                if (document.body.contains(container)) document.body.removeChild(container);
-            }).catch(err => {
-                console.error("Erro ao gerar PDF:", err);
-                if (document.body.contains(container)) document.body.removeChild(container);
-            });
-        }, 300);
+                <script>
+                    window.onload = function() {
+                        setTimeout(function() {
+                            window.print();
+                        }, 400);
+                    };
+                </script>
+            </body>
+            </html>
+        `);
+        printWindow.document.close();
     };
 
     const filterEscalao = document.getElementById('filter-escalao');
