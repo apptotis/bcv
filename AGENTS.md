@@ -48,9 +48,4 @@
 - [2026-08-22] Gemini: Melhorias no inscricao.html (banner recto sem cantos arredondados, autocomplete ao pesquisar atleta em tempo real e validação nativa de campos obrigatórios ao avançar de passo no wizard).
 - [2026-08-22] Gemini: Correção de erro na submissão de inscrição enviando valores predefinidos para colunas com restrição NOT NULL (equipafpb, escalao, funcao).
 - [2026-08-22] Gemini: Ocultação por defeito do formulário/card 'Adicionar Novo Atleta' na aba Atletas do Admin e resolução da geração de PDF em branco no html2pdf anexando o container ao DOM.
-- [2026-08-22] Gemini: Implementação da Opção A com biblioteca pdf-lib preenchendo diretamente no ficheiro PDF original da federação (assets/Modelo_1_FPB.pdf) com coordenadas exatas.
-
-
-
-
-
+- [2026-08-22] Gemini: Implementação completa da exportação em PDF do Modelo 1 da FPB no Admin usando a biblioteca pdf-lib, preenchendo de forma vetorial e nativa os campos interativos oficiais (AcroForm) do ficheiro assets/Modelo_1_FPB.pdf com os dados do atleta.

@@ -1303,177 +1303,243 @@ document.addEventListener('DOMContentLoaded', async () => {
         });
     }
 
-    // Função para exportar PDF do Modelo FPB
-    window.exportAtletaPDF = function(atletaStr) {
-        const atleta = JSON.parse(atletaStr);
-        
-        // Criar elemento HTML temporário no formato do Modelo 1 da FPB
-        const container = document.createElement('div');
-        container.style.width = '750px';
-        container.style.padding = '20px';
-        container.style.fontFamily = 'Arial, sans-serif';
-        container.style.fontSize = '12px';
-        container.style.color = '#000';
-        container.style.background = '#fff';
+    // Função para exportar PDF Oficial do Modelo 1 da FPB usando pdf-lib
+    window.exportAtletaPDF = async function(atletaStr) {
+        try {
+            const atleta = typeof atletaStr === 'string' ? JSON.parse(atletaStr) : atletaStr;
+            
+            if (!window.PDFLib) {
+                alert('A carregar biblioteca de PDF... Por favor tente novamente em alguns segundos.');
+                return;
+            }
 
-        container.innerHTML = `
-            <div style="border: 2px solid #000; padding: 15px; position: relative;">
-                <!-- Cabeçalho -->
-                <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 2px solid #000; padding-bottom: 10px; margin-bottom: 10px;">
-                    <div style="display: flex; align-items: center; gap: 10px;">
-                        <img src="assets/emblema_png.png" style="width: 50px; height: 50px; object-fit: contain;">
-                        <div>
-                            <h2 style="margin: 0; font-size: 16px; font-weight: bold;">FEDERAÇÃO PORTUGUESA DE BASQUETEBOL</h2>
-                            <h3 style="margin: 2px 0 0 0; font-size: 14px; font-style: italic;">INSCRIÇÃO DE JOGADORES</h3>
-                        </div>
-                    </div>
-                </div>
+            const { PDFDocument } = window.PDFLib;
 
-                <!-- Tabela de Dados Gerais -->
-                <table style="width: 100%; border-collapse: collapse; margin-bottom: 10px; border: 1px solid #000;">
-                    <tr>
-                        <td style="border: 1px solid #000; padding: 6px; width: 45%;">
-                            <strong>Primeira Inscrição:</strong> ${atleta.tipo_inscricao === 'Primeira Inscrição' ? '[X]' : '[ ]'}<br>
-                            <strong>Revalidação:</strong> ${atleta.tipo_inscricao !== 'Primeira Inscrição' ? '[X]' : '[ ]'}<br>
-                            <strong>Licença FPB:</strong> ${atleta.licenca || '----------------'}
-                        </td>
-                        <td style="border: 1px solid #000; padding: 6px; width: 35%;">
-                            <strong>Estatuto:</strong> ${atleta.estatuto_fpb || 'FBP'}<br>
-                            <strong>Sexo:</strong> ${atleta.sexo === 'F' ? 'Feminino [X]' : 'Masculino [X]'}
-                        </td>
-                        <td style="border: 1px solid #000; padding: 6px; width: 20%; text-align: center;">
-                            <strong>Época:</strong><br>
-                            <span style="font-size: 14px; font-weight: bold;">${atleta.epoca || '2026 / 2027'}</span>
-                        </td>
-                    </tr>
-                    <tr>
-                        <td colspan="2" style="border: 1px solid #000; padding: 6px;">
-                            <strong>Clube:</strong> BASKET CLUBE DE VALENÇA
-                        </td>
-                        <td style="border: 1px solid #000; padding: 6px;">
-                            <strong>Associação:</strong> ABVC
-                        </td>
-                    </tr>
-                </table>
+            // Carregar o ficheiro PDF oficial do Modelo 1 da FPB
+            const response = await fetch('assets/Modelo_1_FPB.pdf');
+            if (!response.ok) {
+                throw new Error('Não foi possível carregar o ficheiro template assets/Modelo_1_FPB.pdf');
+            }
+            const existingPdfBytes = await response.arrayBuffer();
 
-                <!-- Identificação do Jogador -->
-                <div style="background: #eee; padding: 4px 6px; font-weight: bold; border: 1px solid #000; border-bottom: none;">
-                    Identificação do(a) Jogador(a)
-                </div>
-                <table style="width: 100%; border-collapse: collapse; margin-bottom: 10px; border: 1px solid #000;">
-                    <tr>
-                        <td colspan="3" style="border: 1px solid #000; padding: 6px;">
-                            <strong>Nome Completo:</strong> ${atleta.nome || ''}
-                        </td>
-                    </tr>
-                    <tr>
-                        <td style="border: 1px solid #000; padding: 6px;">
-                            <strong>Data Nascimento:</strong> ${atleta.data_nascimento || ''}
-                        </td>
-                        <td style="border: 1px solid #000; padding: 6px;">
-                            <strong>Nacionalidade:</strong> ${atleta.nacionalidade || 'Portugal'}
-                        </td>
-                        <td style="border: 1px solid #000; padding: 6px;">
-                            <strong>País Nasc.:</strong> ${atleta.pais_nascimento || 'Portugal'}
-                        </td>
-                    </tr>
-                    <tr>
-                        <td style="border: 1px solid #000; padding: 6px;">
-                            <strong>Doc. Identificação:</strong> ${atleta.tipo_doc_id || 'Cartão Cidadão'} - ${atleta.num_doc_id || '--------'}
-                        </td>
-                        <td style="border: 1px solid #000; padding: 6px;">
-                            <strong>Validade:</strong> ${atleta.validade_doc_id || '--------'}
-                        </td>
-                        <td style="border: 1px solid #000; padding: 6px;">
-                            <strong>NIF:</strong> ${atleta.nif || '--------'}
-                        </td>
-                    </tr>
-                    <tr>
-                        <td style="border: 1px solid #000; padding: 6px;">
-                            <strong>Telemóvel:</strong> ${atleta.telefone || '--------'}
-                        </td>
-                        <td colspan="2" style="border: 1px solid #000; padding: 6px;">
-                            <strong>Email:</strong> ${atleta.email || '--------'}
-                        </td>
-                    </tr>
-                    <tr>
-                        <td colspan="3" style="border: 1px solid #000; padding: 6px;">
-                            <strong>Morada:</strong> ${atleta.morada || '--------------------------------'} | 
-                            <strong>Cód. Postal:</strong> ${atleta.codigo_postal || '--------'} | 
-                            <strong>Localidade:</strong> ${atleta.localidade || 'Valença'}
-                        </td>
-                    </tr>
-                </table>
+            // Carregar no PDFDocument
+            const pdfDoc = await PDFDocument.load(existingPdfBytes);
+            const form = pdfDoc.getForm();
 
-                <!-- Seguro Desportivo -->
-                <div style="background: #eee; padding: 4px 6px; font-weight: bold; border: 1px solid #000; border-bottom: none;">
-                    Seguro Desportivo
-                </div>
-                <table style="width: 100%; border-collapse: collapse; margin-bottom: 10px; border: 1px solid #000;">
-                    <tr>
-                        <td style="border: 1px solid #000; padding: 6px;">
-                            <strong>Seguro FPB:</strong> ${atleta.tipo_seguro !== 'Seguro Clube' ? '[X]' : '[ ]'} | 
-                            <strong>Seguro Clube:</strong> ${atleta.tipo_seguro === 'Seguro Clube' ? '[X]' : '[ ]'}
-                        </td>
-                        <td style="border: 1px solid #000; padding: 6px;">
-                            <strong>Nº Apólice:</strong> ${atleta.seguro_apolice || '--------'}
-                        </td>
-                        <td style="border: 1px solid #000; padding: 6px;">
-                            <strong>Companhia:</strong> ${atleta.seguro_companhia || '--------'}
-                        </td>
-                    </tr>
-                </table>
+            const safeSetText = (fieldName, value) => {
+                try {
+                    if (value !== undefined && value !== null && value !== '') {
+                        const field = form.getTextField(fieldName);
+                        field.setText(String(value));
+                    }
+                } catch (err) {
+                    console.warn(`Campo texto não encontrado no PDF: ${fieldName}`, err);
+                }
+            };
 
-                <!-- Poder Paternal -->
-                <div style="background: #eee; padding: 4px 6px; font-weight: bold; border: 1px solid #000; border-bottom: none;">
-                    Autorização do Detentor do Poder Paternal (Menor de Idade)
-                </div>
-                <table style="width: 100%; border-collapse: collapse; margin-bottom: 15px; border: 1px solid #000;">
-                    <tr>
-                        <td colspan="2" style="border: 1px solid #000; padding: 6px;">
-                            <strong>Encarregado de Educação:</strong> ${atleta.encarregado_nome || '--------------------------------'}
-                        </td>
-                        <td style="border: 1px solid #000; padding: 6px;">
-                            <strong>Qualidade:</strong> ${atleta.encarregado_qualidade || 'Pai/Mãe'}
-                        </td>
-                    </tr>
-                    <tr>
-                        <td style="border: 1px solid #000; padding: 6px;">
-                            <strong>Doc. Identificação:</strong> ${atleta.encarregado_num_doc || '--------'}
-                        </td>
-                        <td style="border: 1px solid #000; padding: 6px;">
-                            <strong>Telemóvel:</strong> ${atleta.encarregado_telefone || '--------'}
-                        </td>
-                        <td style="border: 1px solid #000; padding: 6px;">
-                            <strong>Email:</strong> ${atleta.encarregado_email || '--------'}
-                        </td>
-                    </tr>
-                </table>
+            const safeCheck = (fieldName, condition = true) => {
+                try {
+                    if (condition) {
+                        const cb = form.getCheckBox(fieldName);
+                        cb.check();
+                    }
+                } catch (err) {
+                    console.warn(`Checkbox não encontrada no PDF: ${fieldName}`, err);
+                }
+            };
 
-                <!-- Assinaturas -->
-                <table style="width: 100%; border-collapse: collapse; margin-top: 30px;">
-                    <tr>
-                        <td style="width: 45%; text-align: center; border-top: 1px solid #000; padding-top: 5px;">
-                            Assinatura do(a) Jogador(a) / Encarregado(a)
-                        </td>
-                        <td style="width: 10%;"></td>
-                        <td style="width: 45%; text-align: center; border-top: 1px solid #000; padding-top: 5px;">
-                            Direção e Carimbo do Clube
-                        </td>
-                    </tr>
-                </table>
-            </div>
-        `;
+            // 1. Dados do Clube e Época
+            safeSetText('Clube', 'BASKET CLUBE DE VALENÇA');
+            safeSetText('associacao', 'ABVC');
 
-        const opt = {
-            margin: 10,
-            filename: `Inscricao_FPB_${(atleta.nome || 'Atleta').replace(/\s+/g, '_')}.pdf`,
-            image: { type: 'jpeg', quality: 0.98 },
-            html2canvas: { scale: 2 },
-            jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' }
-        };
+            let ep1 = '2026', ep2 = '2027';
+            if (atleta.epoca && atleta.epoca.includes('/')) {
+                const epParts = atleta.epoca.split('/');
+                ep1 = epParts[0].trim();
+                ep2 = epParts[1].trim();
+            }
+            safeSetText('epoca1', ep1);
+            safeSetText('epoca2', ep2);
 
-        html2pdf().set(opt).from(container).save();
+            // 2. Tipo de Inscrição e Licença
+            if (atleta.tipo_inscricao === 'Primeira Inscrição') {
+                safeCheck('primeira');
+            } else {
+                safeCheck('revalidacao');
+            }
+            safeSetText('nr_licenca', atleta.licenca || '');
+
+            // 3. Sexo e Escalão
+            if (atleta.sexo === 'F') {
+                safeCheck('Feminino');
+            } else {
+                safeCheck('Masculino');
+            }
+
+            const esc = (atleta.escalao || '').toLowerCase().replace(/[\s\-_]/g, '');
+            if (esc.includes('baby')) safeCheck('BabyBasket');
+            else if (esc.includes('mini8') || esc === 'sub8') safeCheck('Mini8');
+            else if (esc.includes('mini10') || esc === 'sub10') safeCheck('Mini10');
+            else if (esc.includes('mini12') || esc === 'sub12') safeCheck('Mini12');
+            else if (esc.includes('sub14')) safeCheck('Sub14');
+            else if (esc.includes('sub16')) safeCheck('Sub16');
+            else if (esc.includes('sub18')) safeCheck('Sub18');
+            else if (esc.includes('senior') || esc.includes('sénior')) safeCheck('Sénior');
+            else if (esc.includes('master')) safeCheck('Master');
+            else if (esc.includes('bcr')) safeCheck('BCR');
+
+            // 4. Identificação do Jogador
+            safeSetText('Nome Completo', atleta.nome || '');
+            safeSetText('Nacionalidade', atleta.nacionalidade || 'Portuguesa');
+            safeSetText('País de Nascimento', atleta.pais_nascimento || 'Portugal');
+
+            if (atleta.data_nascimento) {
+                const parts = atleta.data_nascimento.includes('-') 
+                    ? atleta.data_nascimento.split('-') 
+                    : atleta.data_nascimento.split('/');
+                if (parts.length === 3) {
+                    if (parts[0].length === 4) { // YYYY-MM-DD
+                        safeSetText('dn_ano', parts[0]);
+                        safeSetText('dn_mes', parts[1]);
+                        safeSetText('dn_dia', parts[2]);
+                    } else { // DD-MM-YYYY
+                        safeSetText('dn_dia', parts[0]);
+                        safeSetText('dn_mes', parts[1]);
+                        safeSetText('dn_ano', parts[2]);
+                    }
+                }
+            }
+
+            // 5. Documento de Identificação
+            const tipoDoc = (atleta.tipo_doc_id || '').toLowerCase();
+            if (tipoDoc.includes('passaporte')) {
+                safeCheck('Passaporte');
+            } else if (tipoDoc.includes('outro') || (tipoDoc && !tipoDoc.includes('cidad'))) {
+                safeCheck('Outro');
+                safeSetText('outro_descricao', atleta.tipo_doc_id);
+            } else {
+                safeCheck('Cartão Cidadão');
+            }
+
+            safeSetText('nr_identificacao', atleta.num_doc_id || '');
+
+            if (atleta.validade_doc_id) {
+                const parts = atleta.validade_doc_id.includes('-') 
+                    ? atleta.validade_doc_id.split('-') 
+                    : atleta.validade_doc_id.split('/');
+                if (parts.length === 3) {
+                    if (parts[0].length === 4) {
+                        safeSetText('val_ano', parts[0]);
+                        safeSetText('val_mes', parts[1]);
+                        safeSetText('val_dia', parts[2]);
+                    } else {
+                        safeSetText('val_dia', parts[0]);
+                        safeSetText('val_mes', parts[1]);
+                        safeSetText('val_ano', parts[2]);
+                    }
+                }
+            }
+
+            safeSetText('Nr Contribuinte', atleta.nif || '');
+
+            // 6. Contactos e Morada
+            safeSetText('Morada', atleta.morada || '');
+            safeSetText('Localidade', atleta.localidade || 'Valença');
+
+            if (atleta.codigo_postal) {
+                const cpClean = atleta.codigo_postal.replace(/[^\d\-]/g, '');
+                if (cpClean.includes('-')) {
+                    const cpParts = cpClean.split('-');
+                    safeSetText('codpostal', cpParts[0]);
+                    safeSetText('cp3', cpParts[1]);
+                } else if (cpClean.length >= 4) {
+                    safeSetText('codpostal', cpClean.substring(0, 4));
+                    if (cpClean.length > 4) safeSetText('cp3', cpClean.substring(4, 7));
+                } else {
+                    safeSetText('codpostal', cpClean);
+                }
+            }
+
+            safeSetText('Concelho', atleta.concelho || 'Valença');
+            safeSetText('Distrito', atleta.distrito || 'Viana do Castelo');
+            safeSetText('Telemóvel', atleta.telefone || '');
+            safeSetText('Telefone', atleta.telefone || '');
+            safeSetText('Email', atleta.email || '');
+
+            // 7. Seguro Desportivo
+            if (atleta.tipo_seguro === 'Seguro Clube') {
+                safeCheck('Seguro Clube');
+                safeSetText('N Apólice', atleta.seguro_apolice || '');
+                safeSetText('Companhia', atleta.seguro_companhia || '');
+            } else {
+                safeCheck('Seguro FPB');
+            }
+
+            // 8. Autorizações / RGPD
+            safeCheck('SIM');
+            safeCheck('SIM_2');
+            safeCheck('SIM_3');
+            safeCheck('fpb');
+
+            // 9. Poder Paternal (Menores de Idade)
+            if (atleta.encarregado_nome) {
+                safeSetText('nome_paternal', atleta.encarregado_nome);
+                
+                const qual = (atleta.encarregado_qualidade || '').toLowerCase();
+                if (qual.includes('mãe') || qual.includes('mae')) safeCheck('mae');
+                else if (qual.includes('pai')) safeCheck('pai');
+                else if (qual.includes('tutor')) safeCheck('Tutor');
+
+                const encTipoDoc = (atleta.encarregado_tipo_doc || '').toLowerCase();
+                if (encTipoDoc.includes('passaporte')) safeCheck('passaporte_2');
+                else if (encTipoDoc.includes('outro')) safeCheck('Outro_2');
+                else if (atleta.encarregado_num_doc) safeCheck('titular do Cartão Cidadão');
+
+                safeSetText('paternal_id', atleta.encarregado_num_doc || '');
+
+                if (atleta.encarregado_validade_doc) {
+                    const parts = atleta.encarregado_validade_doc.includes('-') 
+                        ? atleta.encarregado_validade_doc.split('-') 
+                        : atleta.encarregado_validade_doc.split('/');
+                    if (parts.length === 3) {
+                        if (parts[0].length === 4) {
+                            safeSetText('paternal_ano', parts[0]);
+                            safeSetText('paternal_mes', parts[1]);
+                            safeSetText('paternal_dia', parts[2]);
+                        } else {
+                            safeSetText('paternal_dia', parts[0]);
+                            safeSetText('paternal_mes', parts[1]);
+                            safeSetText('paternal_ano', parts[2]);
+                        }
+                    }
+                }
+
+                safeSetText('paternal_telefone', atleta.encarregado_telefone || '');
+                safeSetText('email_paternal', atleta.encarregado_email || '');
+            }
+
+            // 10. Data de Emissão / Assinatura
+            const hoje = new Date();
+            safeSetText('ass_dia', String(hoje.getDate()).padStart(2, '0'));
+            safeSetText('ass_mes', String(hoje.getMonth() + 1).padStart(2, '0'));
+            safeSetText('ass_ano', String(hoje.getFullYear()));
+
+            // Gerar bytes e efetuar download
+            const pdfBytes = await pdfDoc.save();
+            const blob = new Blob([pdfBytes], { type: 'application/pdf' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `Inscricao_FPB_${(atleta.nome || 'Atleta').replace(/\s+/g, '_')}.pdf`;
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            URL.revokeObjectURL(url);
+
+        } catch (error) {
+            console.error('Erro ao gerar PDF da FPB:', error);
+            alert('Erro ao gerar ficha oficial da FPB: ' + error.message);
+        }
     };
 
     // Modal Popup de Atleta (Criar / Editar)
