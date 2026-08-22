@@ -526,11 +526,15 @@
                     <!-- Barra de Filtros -->
                     <div class="welcome-box" style="margin-bottom: 20px; padding: 15px; background: rgba(0,0,0,0.2);">
                         <h4 style="margin-bottom: 10px; color: #a0a0ab; font-size: 0.9rem;">Filtrar Atletas</h4>
-                        <div style="display: grid; grid-template-columns: 1fr 1fr auto; gap: 10px; align-items: end;">
+                        <div style="display: grid; grid-template-columns: 2fr 1fr auto; gap: 12px; align-items: end;">
+                            <div>
+                                <label style="display:block; margin-bottom:5px; font-size:0.8rem;">Pesquisar por Nome ou Nickname</label>
+                                <input type="text" id="filter-search-atleta" placeholder="Escreva para pesquisar..." class="admin-input" style="margin-bottom: 0;">
+                            </div>
                             <div>
                                 <label style="display:block; margin-bottom:5px; font-size:0.8rem;">Escalão</label>
                                 <select id="filter-escalao" class="admin-input" style="margin-bottom: 0;">
-                                    <option value="">Todos</option>
+                                    <option value="">Todos os Escalões</option>
                                     <option value="Mini 8">Mini 8</option>
                                     <option value="Mini 10">Mini 10</option>
                                     <option value="Mini 12">Mini 12</option>
@@ -542,15 +546,7 @@
                                 </select>
                             </div>
                             <div>
-                                <label style="display:block; margin-bottom:5px; font-size:0.8rem;">Sexo</label>
-                                <select id="filter-sexo" class="admin-input" style="margin-bottom: 0;">
-                                    <option value="">Ambos</option>
-                                    <option value="M">Masculino</option>
-                                    <option value="F">Feminino</option>
-                                </select>
-                            </div>
-                            <div>
-                                <button type="button" id="btn-clear-filters" class="btn-secondary" style="padding: 12px 15px; margin-bottom: 0;">Limpar</button>
+                                <button type="button" id="btn-clear-filters" class="btn-secondary" style="padding: 12px 18px; margin-bottom: 0;">Limpar</button>
                             </div>
                         </div>
                     </div>

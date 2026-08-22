@@ -1146,10 +1146,44 @@ document.addEventListener('DOMContentLoaded', async () => {
 
     let currentAtletas = [];
 
+    // Função de filtragem combinada em tempo real (Pesquisa por Nome/Nickname + Escalão)
+    function applyAtletasFilters() {
+        const searchVal = (document.getElementById('filter-search-atleta')?.value || '').toLowerCase().trim();
+        const escalaoVal = document.getElementById('filter-escalao')?.value || '';
+
+        const filtrados = currentAtletas.filter(atleta => {
+            const matchesSearch = !searchVal || 
+                (atleta.nome && atleta.nome.toLowerCase().includes(searchVal)) || 
+                (atleta.nickname && atleta.nickname.toLowerCase().includes(searchVal));
+
+            const matchesEscalao = !escalaoVal || atleta.escalao === escalaoVal;
+
+            return matchesSearch && matchesEscalao;
+        });
+
+        renderAtletasTable(filtrados);
+    }
+
+    const filterSearchInput = document.getElementById('filter-search-atleta');
+    const filterEscalaoSelect = document.getElementById('filter-escalao');
+    const btnClearFilters = document.getElementById('btn-clear-filters');
+
+    if (filterSearchInput) {
+        filterSearchInput.addEventListener('input', applyAtletasFilters);
+    }
+    if (filterEscalaoSelect) {
+        filterEscalaoSelect.addEventListener('change', applyAtletasFilters);
+    }
+    if (btnClearFilters) {
+        btnClearFilters.addEventListener('click', () => {
+            if (filterSearchInput) filterSearchInput.value = '';
+            if (filterEscalaoSelect) filterEscalaoSelect.value = '';
+            renderAtletasTable(currentAtletas);
+        });
+    }
+
     window.loadAtletas = async function() {
         if (!atletasTableBody) return;
-        
-        populateEquipasDropdowns();
         
         try {
             atletasTableBody.innerHTML = '<tr><td colspan="6" style="padding: 10px;">A carregar atletas...</td></tr>';
@@ -1169,7 +1203,7 @@ document.addEventListener('DOMContentLoaded', async () => {
             }
 
             currentAtletas = atletas || [];
-            renderAtletasTable(currentAtletas);
+            applyAtletasFilters();
             
         } catch (error) {
             console.error("Erro ao carregar atletas:", error);
