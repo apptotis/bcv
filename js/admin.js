@@ -1211,7 +1211,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         });
     }
 
-    // Função para exportar o PDF Oficial da FPB com Preenchimento Direto nos campos do PDF (AcroForm + pdf-lib)
+    // Função para exportar o PDF Oficial da FPB com Preenchimento Seguro via pdf-lib
     window.exportAtletaPDF = async function(atletaStr) {
         const atleta = JSON.parse(atletaStr);
         
@@ -1225,167 +1225,134 @@ document.addEventListener('DOMContentLoaded', async () => {
             const { PDFDocument, rgb, StandardFonts } = PDFLib;
             const pdfDoc = await PDFDocument.load(pdfBytes);
             
-            // Obter formulário nativo do PDF (AcroForm), se existir
-            const form = pdfDoc.getForm();
-            const fields = form.getFields();
+            const page = pdfDoc.getPages()[0];
+            const font = await pdfDoc.embedFont(StandardFonts.HelveticaBold);
+            const fontSize = 9.5;
+            const color = rgb(0, 0, 0);
 
-            // Se o PDF tiver campos nativos de formulário, preencher nativamente
-            if (fields && fields.length > 0) {
-                console.log("Campos nativos encontrados no PDF:", fields.map(f => f.getName()));
-                
-                // Mapeamento dinâmico de campos nativos se existirem
-                fields.forEach(field => {
-                    const name = field.getName();
-                    try {
-                        if (field.constructor.name === 'PDFTextField') {
-                            if (name.includes('Nome') || name.includes('nome')) field.setText(atleta.nome || '');
-                            else if (name.includes('Licença') || name.includes('licenca')) field.setText(atleta.licenca || '');
-                            else if (name.includes('Época') || name.includes('epoca')) field.setText(atleta.epoca || '2026/2027');
-                            else if (name.includes('NIF') || name.includes('nif')) field.setText(atleta.nif || '');
-                            else if (name.includes('Morada') || name.includes('morada')) field.setText(atleta.morada || '');
-                            else if (name.includes('Telemóvel') || name.includes('telefone')) field.setText(atleta.telefone || '');
-                            else if (name.includes('Email') || name.includes('email')) field.setText(atleta.email || '');
-                        } else if (field.constructor.name === 'PDFCheckBox') {
-                            if (name.includes('Revalidação') && atleta.tipo_inscricao !== 'Primeira Inscrição') field.check();
-                            if (name.includes('Primeira') && atleta.tipo_inscricao === 'Primeira Inscrição') field.check();
-                            if (name.includes('Masculino') && (atleta.sexo === 'M' || atleta.sexo === 'Masculino')) field.check();
-                            if (name.includes('Feminino') && (atleta.sexo === 'F' || atleta.sexo === 'Feminino')) field.check();
-                        }
-                    } catch (e) {
-                        console.warn("Erro ao preencher campo nativo:", name, e);
-                    }
-                });
+            const drawText = (text, x, y, size = fontSize) => {
+                if (!text) return;
+                page.drawText(String(text), { x, y, size, font, color });
+            };
 
-                // Aplanar o formulário para fundir o texto com a página e remover retângulos cinzentos
-                form.flatten();
-
-            } else {
-                // Se não houver campos nativos interativos, desenhar texto com coordenadas recalibradas
-                const page = pdfDoc.getPages()[0];
-                const font = await pdfDoc.embedFont(StandardFonts.HelveticaBold);
-                const fontSize = 9.5;
-                const color = rgb(0, 0, 0);
-
-                const drawText = (text, x, y, size = fontSize) => {
-                    if (!text) return;
-                    page.drawText(String(text), { x, y, size, font, color });
-                };
-
-                const drawCheck = (condition, x, y) => {
-                    if (condition) {
-                        page.drawText('X', { x, y, size: 10, font, color });
-                    }
-                };
-
-                const fmtDate = (dStr) => {
-                    if (!dStr) return { d: '', m: '', a: '' };
-                    const parts = dStr.split('-');
-                    if (parts.length === 3) return { d: parts[2], m: parts[1], a: parts[0] };
-                    return { d: '', m: '', a: '' };
-                };
-
-                const nasc = fmtDate(atleta.data_nascimento);
-                const valDoc = fmtDate(atleta.validade_doc_id);
-                const valEncDoc = fmtDate(atleta.encarregado_validade_doc);
-
-                // 1. Tipo de Inscrição / Licença / Estatuto
-                drawCheck(atleta.tipo_inscricao === 'Primeira Inscrição', 147, 734);
-                drawCheck(atleta.tipo_inscricao !== 'Primeira Inscrição', 147, 716);
-                drawText(atleta.licenca || '', 110, 698);
-
-                drawCheck(!atleta.estatuto_fpb || atleta.estatuto_fpb === 'FBP', 227, 734);
-                drawCheck(atleta.estatuto_fpb === 'Sem FBP Comunitário', 227, 716);
-                drawCheck(atleta.estatuto_fpb === 'Sem FBP Não Comunitário', 227, 698);
-
-                // Época & Associação & Sexo & Clube
-                drawText(atleta.epoca || '2026 / 2027', 450, 735);
-                drawText('ABVC', 415, 699);
-
-                drawCheck(atleta.sexo === 'F' || atleta.sexo === 'Feminino', 445, 673);
-                drawCheck(atleta.sexo === 'M' || atleta.sexo === 'Masculino', 525, 673);
-
-                drawText('BASKET CLUBE DE VALENÇA', 95, 674);
-
-                // 2. Escalão
-                const esc = (atleta.escalao || '').toLowerCase();
-                drawCheck(esc.includes('baby'), 119, 630);
-                drawCheck(esc.includes('mini 8') || esc.includes('mini8'), 167, 630);
-                drawCheck(esc.includes('mini 10') || esc.includes('mini10'), 220, 630);
-                drawCheck(esc.includes('mini 12') || esc.includes('mini12'), 274, 630);
-                drawCheck(esc.includes('sub-14') || esc.includes('sub14'), 330, 630);
-                drawCheck(esc.includes('sub-16') || esc.includes('sub16'), 384, 630);
-                drawCheck(esc.includes('sub-18') || esc.includes('sub18'), 438, 630);
-                drawCheck(esc.includes('sénior') || esc.includes('seniores'), 495, 630);
-                drawCheck(esc.includes('master') || esc.includes('veterano'), 550, 630);
-                drawCheck(esc.includes('bcr'), 588, 630);
-
-                // 3. Identificação do(a) Jogador(a)
-                drawText(atleta.nome || '', 135, 590);
-                
-                drawText(nasc.d, 135, 566);
-                drawText(nasc.m, 160, 566);
-                drawText(nasc.a, 185, 566);
-                
-                drawText(atleta.nacionalidade || 'Portugal', 280, 566);
-                drawText(atleta.pais_nascimento || 'Portugal', 460, 566);
-
-                // Tipo Doc
-                drawCheck(!atleta.tipo_doc_id || atleta.tipo_doc_id === 'Cartão Cidadão', 205, 544);
-                drawCheck(atleta.tipo_doc_id === 'Passaporte', 274, 544);
-                drawCheck(atleta.tipo_doc_id && atleta.tipo_doc_id !== 'Cartão Cidadão' && atleta.tipo_doc_id !== 'Passaporte', 315, 544);
-
-                drawText(atleta.num_doc_id || '', 135, 522);
-                drawText(valDoc.d, 260, 522);
-                drawText(valDoc.m, 285, 522);
-                drawText(valDoc.a, 310, 522);
-                drawText(atleta.nif || '', 415, 522);
-
-                drawText(atleta.telefone || '', 95, 499);
-                drawText(atleta.email || '', 330, 499);
-
-                drawText(atleta.distrito || 'Viana do Castelo', 95, 476);
-                drawText(atleta.concelho || 'Valença', 330, 476);
-
-                drawText(atleta.morada || '', 95, 453);
-                drawText(atleta.codigo_postal || '', 330, 453);
-                drawText(atleta.localidade || 'Valença', 415, 453);
-
-                // 4. Seguro Desportivo
-                drawCheck(atleta.tipo_seguro !== 'Seguro Clube', 119, 411);
-                drawCheck(atleta.tipo_seguro === 'Seguro Clube', 205, 411);
-                drawText(atleta.seguro_apolice || '', 285, 411);
-                drawText(atleta.seguro_companhia || '', 390, 411);
-
-                // 5. RGPD / Consentimentos
-                drawCheck(true, 76, 333); // SIM Política
-                drawCheck(atleta.rgpd_comunicacoes, 76, 288); // SIM Comunicações
-                drawCheck(!atleta.rgpd_comunicacoes, 97, 288); // NÃO Comunicações
-                drawCheck(atleta.rgpd_marketing, 76, 269); // SIM Marketing
-                drawCheck(!atleta.rgpd_marketing, 137, 269); // NÃO Marketing
-
-                // 6. Autorização Detentor Poder Paternal (Menores)
-                if (atleta.encarregado_nome) {
-                    drawText(atleta.encarregado_nome, 65, 174);
-                    drawCheck(atleta.encarregado_qualidade === 'Pai', 67, 155);
-                    drawCheck(atleta.encarregado_qualidade === 'Mãe', 93, 155);
-                    drawCheck(atleta.encarregado_qualidade === 'Tutor', 124, 155);
-
-                    drawCheck(!atleta.encarregado_tipo_doc || atleta.encarregado_tipo_doc === 'Cartão Cidadão', 260, 155);
-                    drawCheck(atleta.encarregado_tipo_doc === 'Passaporte', 320, 155);
-                    drawCheck(atleta.encarregado_tipo_doc && atleta.encarregado_tipo_doc !== 'Cartão Cidadão' && atleta.encarregado_tipo_doc !== 'Passaporte', 362, 155);
-
-                    drawText(atleta.encarregado_num_doc || '', 445, 155);
-                    drawText(valEncDoc.d, 55, 133);
-                    drawText(valEncDoc.m, 80, 133);
-                    drawText(valEncDoc.a, 105, 133);
-
-                    drawText(atleta.encarregado_email || '', 175, 75);
-                    drawText(atleta.encarregado_telefone || '', 415, 75);
+            const drawCheck = (condition, x, y) => {
+                if (condition) {
+                    page.drawText('X', { x, y, size: 10, font, color });
                 }
+            };
+
+            const fmtDate = (dStr) => {
+                if (!dStr) return { d: '', m: '', a: '' };
+                const parts = dStr.split('-');
+                if (parts.length === 3) return { d: parts[2], m: parts[1], a: parts[0] };
+                return { d: '', m: '', a: '' };
+            };
+
+            const nasc = fmtDate(atleta.data_nascimento);
+            const valDoc = fmtDate(atleta.validade_doc_id);
+            const valEncDoc = fmtDate(atleta.encarregado_validade_doc);
+
+            // ==========================================
+            // PREENCHIMENTO DIRETO NAS COORDENADAS RECALIBRADAS
+            // ==========================================
+
+            // 1. Tipo de Inscrição / Licença / Estatuto
+            drawCheck(atleta.tipo_inscricao === 'Primeira Inscrição', 147, 734);
+            drawCheck(atleta.tipo_inscricao !== 'Primeira Inscrição', 147, 716);
+            drawText(atleta.licenca || '', 110, 698);
+
+            drawCheck(!atleta.estatuto_fpb || atleta.estatuto_fpb === 'FBP', 227, 734);
+            drawCheck(atleta.estatuto_fpb === 'Sem FBP Comunitário', 227, 716);
+            drawCheck(atleta.estatuto_fpb === 'Sem FBP Não Comunitário', 227, 698);
+
+            // Época & Associação & Sexo & Clube
+            drawText(atleta.epoca || '2026 / 2027', 450, 735);
+            drawText('ABVC', 415, 699);
+
+            drawCheck(atleta.sexo === 'F' || atleta.sexo === 'Feminino', 445, 673);
+            drawCheck(atleta.sexo === 'M' || atleta.sexo === 'Masculino', 525, 673);
+
+            drawText('BASKET CLUBE DE VALENÇA', 95, 674);
+
+            // 2. Escalão
+            const esc = (atleta.escalao || '').toLowerCase();
+            drawCheck(esc.includes('baby'), 119, 630);
+            drawCheck(esc.includes('mini 8') || esc.includes('mini8'), 167, 630);
+            drawCheck(esc.includes('mini 10') || esc.includes('mini10'), 220, 630);
+            drawCheck(esc.includes('mini 12') || esc.includes('mini12'), 274, 630);
+            drawCheck(esc.includes('sub-14') || esc.includes('sub14'), 330, 630);
+            drawCheck(esc.includes('sub-16') || esc.includes('sub16'), 384, 630);
+            drawCheck(esc.includes('sub-18') || esc.includes('sub18'), 438, 630);
+            drawCheck(esc.includes('sénior') || esc.includes('seniores'), 495, 630);
+            drawCheck(esc.includes('master') || esc.includes('veterano'), 550, 630);
+            drawCheck(esc.includes('bcr'), 588, 630);
+
+            // 3. Identificação do(a) Jogador(a)
+            drawText(atleta.nome || '', 135, 590);
+            
+            drawText(nasc.d, 135, 566);
+            drawText(nasc.m, 160, 566);
+            drawText(nasc.a, 185, 566);
+            
+            drawText(atleta.nacionalidade || 'Portugal', 280, 566);
+            drawText(atleta.pais_nascimento || 'Portugal', 460, 566);
+
+            // Tipo Doc
+            drawCheck(!atleta.tipo_doc_id || atleta.tipo_doc_id === 'Cartão Cidadão', 205, 544);
+            drawCheck(atleta.tipo_doc_id === 'Passaporte', 274, 544);
+            drawCheck(atleta.tipo_doc_id && atleta.tipo_doc_id !== 'Cartão Cidadão' && atleta.tipo_doc_id !== 'Passaporte', 315, 544);
+
+            drawText(atleta.num_doc_id || '', 135, 522);
+            drawText(valDoc.d, 260, 522);
+            drawText(valDoc.m, 285, 522);
+            drawText(valDoc.a, 310, 522);
+            drawText(atleta.nif || '', 415, 522);
+
+            drawText(atleta.telefone || '', 95, 499);
+            drawText(atleta.email || '', 330, 499);
+
+            drawText(atleta.distrito || 'Viana do Castelo', 95, 476);
+            drawText(atleta.concelho || 'Valença', 330, 476);
+
+            drawText(atleta.morada || '', 95, 453);
+            drawText(atleta.codigo_postal || '', 330, 453);
+            drawText(atleta.localidade || 'Valença', 415, 453);
+
+            // 4. Seguro Desportivo
+            drawCheck(atleta.tipo_seguro !== 'Seguro Clube', 119, 411);
+            drawCheck(atleta.tipo_seguro === 'Seguro Clube', 205, 411);
+            drawText(atleta.seguro_apolice || '', 285, 411);
+            drawText(atleta.seguro_companhia || '', 390, 411);
+
+            // 5. RGPD / Consentimentos
+            drawCheck(true, 76, 333); // SIM Política
+            drawCheck(atleta.rgpd_comunicacoes, 76, 288); // SIM Comunicações
+            drawCheck(!atleta.rgpd_comunicacoes, 97, 288); // NÃO Comunicações
+            drawCheck(atleta.rgpd_marketing, 76, 269); // SIM Marketing
+            drawCheck(!atleta.rgpd_marketing, 137, 269); // NÃO Marketing
+
+            // 6. Autorização Detentor Poder Paternal (Menores)
+            if (atleta.encarregado_nome) {
+                drawText(atleta.encarregado_nome, 65, 174);
+                drawCheck(atleta.encarregado_qualidade === 'Pai', 67, 155);
+                drawCheck(atleta.encarregado_qualidade === 'Mãe', 93, 155);
+                drawCheck(atleta.encarregado_qualidade === 'Tutor', 124, 155);
+
+                drawCheck(!atleta.encarregado_tipo_doc || atleta.encarregado_tipo_doc === 'Cartão Cidadão', 260, 155);
+                drawCheck(atleta.encarregado_tipo_doc === 'Passaporte', 320, 155);
+                drawCheck(atleta.encarregado_tipo_doc && atleta.encarregado_tipo_doc !== 'Cartão Cidadão' && atleta.encarregado_tipo_doc !== 'Passaporte', 362, 155);
+
+                drawText(atleta.encarregado_num_doc || '', 445, 155);
+                drawText(valEncDoc.d, 55, 133);
+                drawText(valEncDoc.m, 80, 133);
+                drawText(valEncDoc.a, 105, 133);
+
+                drawText(atleta.encarregado_email || '', 175, 75);
+                drawText(atleta.encarregado_telefone || '', 415, 75);
             }
 
-            // Guardar e Descarregar o PDF preenchido e aplanado
-            const filledPdfBytes = await pdfDoc.save();
+            // Guardar e Descarregar o PDF limpo
+            const filledPdfBytes = await pdfDoc.save({ useObjectStreams: false });
             const blob = new Blob([filledPdfBytes], { type: 'application/pdf' });
             const link = document.createElement('a');
             link.href = URL.createObjectURL(blob);
