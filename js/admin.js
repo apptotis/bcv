@@ -1192,17 +1192,19 @@ document.addEventListener('DOMContentLoaded', async () => {
                 ? `<img src="${atleta.foto}" style="width: 40px; height: 40px; object-fit: cover; border-radius: 50%;">` 
                 : '<div style="width: 40px; height: 40px; background: rgba(255,255,255,0.1); border-radius: 50%; display:flex; align-items:center; justify-content:center; font-size: 1.2rem;">👤</div>';
 
+            const numCamisolaHtml = atleta.numero_camisola !== null && atleta.numero_camisola !== undefined && atleta.numero_camisola !== '' 
+                ? `<span style="font-weight: 800; color: #7e22ce; background: rgba(126, 34, 206, 0.1); padding: 3px 8px; border-radius: 6px; font-size: 0.9rem;">#${atleta.numero_camisola}</span>`
+                : '<span style="color: #a0a0ab;">-</span>';
+
             tr.innerHTML = `
                 <td style="padding: 10px;">${fotoHtml}</td>
-                <td style="padding: 10px;"><strong>${atleta.nome || '-'}</strong>${atleta.nickname ? `<br><span style="font-size: 0.85rem; color: var(--accent-primary); font-weight: 600;">"${atleta.nickname}"</span>` : ''}</td>
-                <td style="padding: 10px;">${atleta.epoca || '-'} <br><small style="color: #a0a0ab;">${atleta.funcao || '-'}</small></td>
-                <td style="padding: 10px;"><small style="color: #a0a0ab;">FPB:</small> ${atleta.equipafpb || '-'}<br><small style="color: #a0a0ab;">BCV:</small> ${atleta.equipabcv1 || '-'} ${atleta.equipabcv2 ? '/ ' + atleta.equipabcv2 : ''}</td>
-                <td style="padding: 10px;">${atleta.numero_camisola || '-'}</td>
-                <td style="padding: 10px;">${atleta.licenca || '-'}</td>
-                <td style="padding: 10px; text-align: center;">
-                    <button class="btn-action" onclick="window.exportAtletaPDF('${atletaJson}')" title="Descarregar Ficha FPB (PDF)" style="background: rgba(76, 29, 149, 0.2); color: #9333ea; border: 1px solid rgba(147, 51, 234, 0.3); font-weight: bold; margin-right: 4px;">📄 FPB</button>
-                    <button class="btn-action" onclick="window.editAtleta('${atletaJson}')" title="Editar">✏️</button>
-                    <button class="btn-action delete" onclick="window.deleteAtleta('${atleta.id}')" title="Apagar">🗑️</button>
+                <td style="padding: 10px;"><strong>${atleta.nome || '-'}</strong></td>
+                <td style="padding: 10px;">${atleta.nickname ? `<span style="color: var(--accent-primary); font-weight: 600;">"${atleta.nickname}"</span>` : '<span style="color: #a0a0ab;">-</span>'}</td>
+                <td style="padding: 10px; text-align: center;">${numCamisolaHtml}</td>
+                <td style="padding: 10px; text-align: center; white-space: nowrap;">
+                    <button class="btn-action" onclick="window.exportAtletaPDF('${atletaJson}')" title="Descarregar Ficha FPB (PDF)" style="background: rgba(126, 34, 206, 0.15); color: #7e22ce; border: 1px solid rgba(126, 34, 206, 0.3); font-weight: bold; margin-right: 4px; padding: 4px 8px;">📄 FPB</button>
+                    <button class="btn-action" onclick="window.editAtleta('${atletaJson}')" title="Editar" style="padding: 4px 8px; margin-right: 4px;">✏️ Editar</button>
+                    <button class="btn-action delete" onclick="window.deleteAtleta('${atleta.id}')" title="Anular Atleta" style="padding: 4px 8px;">🗑️ Anular</button>
                 </td>
             `;
             atletasTableBody.appendChild(tr);
