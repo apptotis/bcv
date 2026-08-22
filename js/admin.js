@@ -3,6 +3,8 @@
  */
 
 document.addEventListener('DOMContentLoaded', async () => {
+    console.log("admin.js carregado com sucesso!");
+    
     // 1. Inicializar Supabase a partir do config.js
     const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
@@ -17,11 +19,18 @@ document.addEventListener('DOMContentLoaded', async () => {
 
     // 3. Verificar Sessão Atual no arranque
     async function checkSession() {
-        const { data: { session }, error } = await supabase.auth.getSession();
-        
-        if (session) {
-            verifyAdminRole(session.user);
-        } else {
+        try {
+            const { data: { session }, error } = await supabase.auth.getSession();
+            
+            if (session) {
+                console.log("Sessão ativa encontrada:", session.user.email);
+                verifyAdminRole(session.user);
+            } else {
+                console.log("Nenhuma sessão ativa. A mostrar login.");
+                showLogin();
+            }
+        } catch (e) {
+            console.error("Erro no checkSession:", e);
             showLogin();
         }
     }
