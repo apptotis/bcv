@@ -1355,11 +1355,6 @@ document.addEventListener('DOMContentLoaded', async () => {
 
                 drawText(atleta.encarregado_email || '', 300, 75);
                 drawText(atleta.encarregado_telefone || '', 650, 75);
-            }Doc.m, 80, 133);
-                drawText(valEncDoc.a, 105, 133);
-
-                drawText(atleta.encarregado_email || '', 175, 75);
-                drawText(atleta.encarregado_telefone || '', 415, 75);
             }
 
             // Guardar o PDF em formato estático normalizado sem objetos corrompidos
