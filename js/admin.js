@@ -167,7 +167,7 @@ document.addEventListener('DOMContentLoaded', async () => {
             // Obter todos os atletas que tenham data_nascimento
             const { data: atletas, error } = await supabase
                 .from('atletasbcv')
-                .select('nome, foto, equipa, data_nascimento')
+                .select('nome, foto, escalao, data_nascimento')
                 .not('data_nascimento', 'is', null);
 
             if (error) {
@@ -223,7 +223,7 @@ document.addEventListener('DOMContentLoaded', async () => {
                     ${fotoHtml}
                     <div>
                         <div style="font-weight: bold; font-size: 1.1rem; color: var(--text-primary);">${atleta.nome} 🎉</div>
-                        <div style="color: var(--text-secondary); font-size: 0.9rem;">${atleta.equipa} • ${idade} anos</div>
+                        <div style="color: var(--text-secondary); font-size: 0.9rem;">${atleta.escalao || 'Atleta'} • ${idade} anos</div>
                     </div>
                 `;
                 container.appendChild(item);
