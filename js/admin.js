@@ -1242,6 +1242,14 @@ document.addEventListener('DOMContentLoaded', async () => {
                 }
             };
 
+            // Helper para formatar data DD/MM/AAAA
+            const fmtDate = (dStr) => {
+                if (!dStr) return { d: '', m: '', a: '' };
+                const parts = dStr.split('-');
+                if (parts.length === 3) return { d: parts[2], m: parts[1], a: parts[0] };
+                return { d: '', m: '', a: '' };
+            };
+
             const nasc = fmtDate(atleta.data_nascimento);
             const valDoc = fmtDate(atleta.validade_doc_id);
             const valEncDoc = fmtDate(atleta.encarregado_validade_doc);
