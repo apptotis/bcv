@@ -1199,6 +1199,7 @@ document.addEventListener('DOMContentLoaded', async () => {
             tr.innerHTML = `
                 <td style="padding: 10px;">${fotoHtml}</td>
                 <td style="padding: 10px;"><strong>${atleta.nome || '-'}</strong></td>
+                <td style="padding: 10px;"><span style="background: rgba(255,255,255,0.08); padding: 3px 8px; border-radius: 6px; font-size: 0.85rem;">${atleta.escalao || '-'}</span></td>
                 <td style="padding: 10px;">${atleta.nickname ? `<span style="color: var(--accent-primary); font-weight: 600;">"${atleta.nickname}"</span>` : '<span style="color: #a0a0ab;">-</span>'}</td>
                 <td style="padding: 10px; text-align: center;">${numCamisolaHtml}</td>
                 <td style="padding: 10px; text-align: center; white-space: nowrap;">
