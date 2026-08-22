@@ -1093,6 +1093,8 @@ document.addEventListener('DOMContentLoaded', async () => {
         fotoImg.src = '';
         formAtletaTitle.textContent = 'Adicionar Novo Atleta';
         btnSaveAtleta.textContent = 'Adicionar Atleta';
+        const formContainer = document.getElementById('form-atleta-container');
+        if (formContainer) formContainer.classList.add('hidden');
         if (btnCancelAtleta) btnCancelAtleta.classList.add('hidden');
         if (atletaMsg) atletaMsg.classList.add('hidden');
     }
@@ -1375,11 +1377,24 @@ document.addEventListener('DOMContentLoaded', async () => {
             margin: 10,
             filename: `Inscricao_FPB_${(atleta.nome || 'Atleta').replace(/\s+/g, '_')}.pdf`,
             image: { type: 'jpeg', quality: 0.98 },
-            html2canvas: { scale: 2 },
+            html2canvas: { scale: 2, useCORS: true },
             jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' }
         };
 
-        html2pdf().set(opt).from(container).save();
+        // Anexar temporariamente ao DOM (invisível fora de tela) para que o html2canvas consiga renderizar
+        container.style.position = 'absolute';
+        container.style.left = '-9999px';
+        container.style.top = '-9999px';
+        document.body.appendChild(container);
+
+        html2pdf().set(opt).from(container).save().then(() => {
+            document.body.removeChild(container);
+        }).catch(err => {
+            console.error("Erro ao gerar PDF:", err);
+            if (document.body.contains(container)) {
+                document.body.removeChild(container);
+            }
+        });
     };
 
     const filterEscalao = document.getElementById('filter-escalao');
@@ -1452,6 +1467,8 @@ document.addEventListener('DOMContentLoaded', async () => {
         
         formAtletaTitle.textContent = 'Editar Atleta: ' + atleta.nome;
         btnSaveAtleta.textContent = 'Guardar Alterações';
+        const formContainer = document.getElementById('form-atleta-container');
+        if (formContainer) formContainer.classList.remove('hidden');
         if (btnCancelAtleta) btnCancelAtleta.classList.remove('hidden');
         if (atletaMsg) atletaMsg.classList.add('hidden');
         
