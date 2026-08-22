@@ -1374,27 +1374,29 @@ document.addEventListener('DOMContentLoaded', async () => {
         `;
 
         const opt = {
-            margin: 10,
+            margin: 5,
             filename: `Inscricao_FPB_${(atleta.nome || 'Atleta').replace(/\s+/g, '_')}.pdf`,
             image: { type: 'jpeg', quality: 0.98 },
-            html2canvas: { scale: 2, useCORS: true },
+            html2canvas: { scale: 2, useCORS: true, allowTaint: true, logging: false },
             jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' }
         };
 
-        // Anexar temporariamente ao DOM (invisível fora de tela) para que o html2canvas consiga renderizar
-        container.style.position = 'absolute';
-        container.style.left = '-9999px';
-        container.style.top = '-9999px';
+        // Anexar temporariamente ao DOM no fundo do ecrã para garantir que o html2canvas renderiza tudo
+        container.style.position = 'fixed';
+        container.style.left = '0px';
+        container.style.top = '0px';
+        container.style.zIndex = '-9999';
+        container.style.opacity = '1';
         document.body.appendChild(container);
 
-        html2pdf().set(opt).from(container).save().then(() => {
-            document.body.removeChild(container);
-        }).catch(err => {
-            console.error("Erro ao gerar PDF:", err);
-            if (document.body.contains(container)) {
-                document.body.removeChild(container);
-            }
-        });
+        setTimeout(() => {
+            html2pdf().set(opt).from(container).save().then(() => {
+                if (document.body.contains(container)) document.body.removeChild(container);
+            }).catch(err => {
+                console.error("Erro ao gerar PDF:", err);
+                if (document.body.contains(container)) document.body.removeChild(container);
+            });
+        }, 300);
     };
 
     const filterEscalao = document.getElementById('filter-escalao');
