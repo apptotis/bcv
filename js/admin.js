@@ -1457,6 +1457,13 @@ document.addEventListener('DOMContentLoaded', async () => {
         
         formAtletaTitle.textContent = 'Editar Atleta: ' + atleta.nome;
         btnSaveAtleta.textContent = 'Guardar Alterações';
+        
+        if (formAtletaContainer) {
+            formAtletaContainer.classList.remove('hidden');
+            if (btnToggleFormAtleta) btnToggleFormAtleta.textContent = 'Esconder Formulário';
+            formAtletaContainer.scrollIntoView({ behavior: 'smooth' });
+        }
+        
         if (btnCancelAtleta) btnCancelAtleta.classList.remove('hidden');
         if (atletaMsg) atletaMsg.classList.add('hidden');
         
