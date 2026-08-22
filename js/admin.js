@@ -1198,7 +1198,6 @@ document.addEventListener('DOMContentLoaded', async () => {
                 <td style="padding: 10px;">${fotoHtml}</td>
                 <td style="padding: 10px;"><strong>${atleta.nome || '-'}</strong>${atleta.nickname ? `<br><span style="font-size: 0.85rem; color: var(--accent-primary); font-weight: 600;">"${atleta.nickname}"</span>` : ''}</td>
                 <td style="padding: 10px;">${atleta.epoca || '-'} <br><small style="color: #a0a0ab;">${atleta.funcao || '-'}</small></td>
-                <td style="padding: 10px;"><small style="color: #a0a0ab;">FPB:</small> ${atleta.equipafpb || '-'}<br><small style="color: #a0a0ab;">BCV:</small> ${atleta.equipabcv1 || '-'} ${atleta.equipabcv2 ? '/ ' + atleta.equipabcv2 : ''}</td>
                 <td style="padding: 10px;">${atleta.numero_camisola || '-'}</td>
                 <td style="padding: 10px;">${atleta.licenca || '-'}</td>
                 <td style="padding: 10px; text-align: center;">
@@ -1426,9 +1425,6 @@ document.addEventListener('DOMContentLoaded', async () => {
         document.getElementById('atleta-nickname').value = atleta.nickname || '';
         document.getElementById('atleta-epoca').value = atleta.epoca || '';
         document.getElementById('atleta-funcao').value = atleta.funcao || '';
-        document.getElementById('atleta-equipafpb').value = atleta.equipafpb || '';
-        document.getElementById('atleta-equipabcv1').value = atleta.equipabcv1 || '';
-        document.getElementById('atleta-equipabcv2').value = atleta.equipabcv2 || '';
         document.getElementById('atleta-numero').value = atleta.numero_camisola || '';
         document.getElementById('atleta-escalao').value = atleta.escalao || '';
         document.getElementById('atleta-sexo').value = atleta.sexo || '';
@@ -1489,9 +1485,6 @@ document.addEventListener('DOMContentLoaded', async () => {
                 nickname: document.getElementById('atleta-nickname').value || null,
                 epoca: document.getElementById('atleta-epoca').value,
                 funcao: document.getElementById('atleta-funcao').value,
-                equipafpb: document.getElementById('atleta-equipafpb').value || null,
-                equipabcv1: document.getElementById('atleta-equipabcv1').value || null,
-                equipabcv2: document.getElementById('atleta-equipabcv2').value || null,
                 numero_camisola: document.getElementById('atleta-numero').value ? parseInt(document.getElementById('atleta-numero').value) : null,
                 escalao: document.getElementById('atleta-escalao').value,
                 sexo: document.getElementById('atleta-sexo').value,

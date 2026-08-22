@@ -462,25 +462,6 @@
                             </div>
                             <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 15px;">
                                 <div>
-                                    <label style="display:block; margin-bottom:5px; font-size:0.8rem; color:#a0a0ab;">Equipa FPB</label>
-                                    <input type="text" id="atleta-equipafpb" placeholder="Equipa FPB" class="admin-input">
-                                </div>
-                                <div>
-                                    <label style="display:block; margin-bottom:5px; font-size:0.8rem; color:#a0a0ab;">Equipa BCV 1</label>
-                                    <select id="atleta-equipabcv1" class="admin-input">
-                                        <option value="">A carregar...</option>
-                                    </select>
-                                </div>
-                                <div>
-                                    <label style="display:block; margin-bottom:5px; font-size:0.8rem; color:#a0a0ab;">Equipa BCV 2</label>
-                                    <select id="atleta-equipabcv2" class="admin-input">
-                                        <option value="">A carregar...</option>
-                                    </select>
-                                </div>
-                            </div>
-                            
-                            <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 15px;">
-                                <div>
                                     <label style="display:block; margin-bottom:5px; font-size:0.8rem; color:#a0a0ab;">Nº Camisola</label>
                                     <input type="number" id="atleta-numero" placeholder="Nº" class="admin-input">
                                 </div>
@@ -545,7 +526,7 @@
                     <!-- Barra de Filtros -->
                     <div class="welcome-box" style="margin-bottom: 20px; padding: 15px; background: rgba(0,0,0,0.2);">
                         <h4 style="margin-bottom: 10px; color: #a0a0ab; font-size: 0.9rem;">Filtrar Atletas</h4>
-                        <div style="display: grid; grid-template-columns: 1fr 1fr 1fr 1fr auto; gap: 10px; align-items: end;">
+                        <div style="display: grid; grid-template-columns: 1fr 1fr auto; gap: 10px; align-items: end;">
                             <div>
                                 <label style="display:block; margin-bottom:5px; font-size:0.8rem;">Escalão</label>
                                 <select id="filter-escalao" class="admin-input" style="margin-bottom: 0;">
@@ -558,18 +539,6 @@
                                     <option value="Sub-18">Sub-18</option>
                                     <option value="Seniores">Seniores</option>
                                     <option value="Veteranos">Veteranos</option>
-                                </select>
-                            </div>
-                            <div>
-                                <label style="display:block; margin-bottom:5px; font-size:0.8rem;">Equipa BCV 1</label>
-                                <select id="filter-equipabcv1" class="admin-input" style="margin-bottom: 0;">
-                                    <option value="">Todas</option>
-                                </select>
-                            </div>
-                            <div>
-                                <label style="display:block; margin-bottom:5px; font-size:0.8rem;">Equipa BCV 2</label>
-                                <select id="filter-equipabcv2" class="admin-input" style="margin-bottom: 0;">
-                                    <option value="">Todas</option>
                                 </select>
                             </div>
                             <div>
@@ -595,14 +564,13 @@
                                     <th style="padding: 10px; width: 60px;">Foto</th>
                                     <th style="padding: 10px;">Nome</th>
                                     <th style="padding: 10px;">Época/Função</th>
-                                    <th style="padding: 10px;">Equipas (FPB / BCV)</th>
                                     <th style="padding: 10px; width: 60px;">Nº</th>
                                     <th style="padding: 10px;">Licença</th>
                                     <th style="padding: 10px; text-align: center; width: 120px;">Ações</th>
                                 </tr>
                             </thead>
                             <tbody id="atletas-table-body">
-                                <tr><td colspan="7" style="padding: 10px;">A carregar atletas...</td></tr>
+                                <tr><td colspan="6" style="padding: 10px;">A carregar atletas...</td></tr>
                             </tbody>
                         </table>
                     </div>
