@@ -52,3 +52,4 @@
 - [2026-08-23] Gemini: Remoção do campo 'Alcunha / Nome de Camisola (Nickname)' do Passo 2 (Identificação do Atleta) e limpeza do preenchimento e payload no formulário inscricao.html.
 - [2026-08-23] Gemini: Implementação completa da Inscrição Integrada em 3 Fases (1. Federação FPB, 2. Exame Médico Desportivo IPDJ com 20 perguntas, 3. Equipamento Oficial BCV), cálculo automático de escalão por data de nascimento, script SQL update_atletas_emd_equipamento.sql e exportação vetorial de PDF do Exame Médico Desportivo (ipdj-exame-medico.pdf) e gestão de equipamentos no Admin.
 - [2026-08-23] Gemini: Otimização mobile do cabeçalho de inscricao.html (nome do clube e título em linha única, remoção do texto 'Processo Integrado' e redesenho das abas das 3 fases sem corte de texto).
+- [2026-08-23] Gemini: Aumento do espaçamento e margem superior (respiro visual) entre o banner cabeçalho e as abas das fases em inscricao.html.
