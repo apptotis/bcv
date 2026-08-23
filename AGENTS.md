@@ -55,3 +55,4 @@
 - [2026-08-23] Gemini: Aumento do espaçamento e margem superior (respiro visual) entre o banner cabeçalho e as abas das fases em inscricao.html.
 - [2026-08-23] Gemini: Remoção dos ícones nas abas das 3 fases em inscricao.html para garantir espaço horizontal perfeito e leitura integral dos títulos (Federação FPB, Exame Médico, Equipamento).
 - [2026-08-23] Gemini: Correção da tabela de anos de nascimento para escalões (2015/2016 -> Mini 12) e implementação da barra horizontal de largura total para feedback de escalão no Passo 2.
+- [2026-08-23] Gemini: Criação de script SQL unificado (setup_completo_atletasbcv_inscricoes.sql) com permissões públicas RLS (anon/auth) e suporte no inscricao.html para atualizar atletas existentes em revalidação ou criar novos.

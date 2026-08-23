@@ -1157,6 +1157,7 @@
         const totalSteps = 7;
         let isMenor = true;
         let supabaseClient = null;
+        let selectedAtletaId = null; // Guarda o ID se for revalidação de atleta existente
 
         // As 19 Perguntas Oficiais do IPDJ (Exame Médico Desportivo)
         const emdPerguntas = [
@@ -1225,6 +1226,7 @@
                     radioReval.classList.remove('selected');
                     radioPrimeira.querySelector('input').checked = true;
                     boxPesquisa.style.display = 'none';
+                    selectedAtletaId = null;
                 });
             }
 
@@ -1257,34 +1259,30 @@
                         try {
                             const { data, error } = await supabaseClient
                                 .from('atletasbcv')
-                                .select('*')
+                                .select('id, nome, licenca, data_nascimento')
                                 .or(`nome.ilike.%${query}%,licenca.ilike.%${query}%`)
-                                .limit(6);
+                                .limit(5);
 
                             if (error) throw error;
 
-                            searchResultsList.innerHTML = '';
                             if (data && data.length > 0) {
-                                searchResultsList.style.display = 'block';
+                                searchResultsList.innerHTML = '';
                                 data.forEach(atleta => {
-                                    const div = document.createElement('div');
-                                    div.className = 'search-result-item';
-                                    div.innerHTML = `
-                                        <div>
-                                            <div class="search-result-name">${atleta.nome}</div>
-                                            <div class="search-result-info">${atleta.escalao || ''} • Licença: ${atleta.licenca || 'N/A'}</div>
-                                        </div>
-                                        <span style="color: #7e22ce; font-weight: 700;">Selecionar &rarr;</span>
+                                    const item = document.createElement('div');
+                                    item.className = 'search-result-item';
+                                    item.innerHTML = `
+                                        <strong>${atleta.nome}</strong>
+                                        <div class="search-result-meta">Licença: ${atleta.licenca || 'S/N'} • Nasc: ${atleta.data_nascimento || 'N/D'}</div>
                                     `;
-                                    div.addEventListener('click', () => {
+                                    item.addEventListener('click', () => {
                                         preencherDadosAtleta(atleta);
                                         searchResultsList.style.display = 'none';
                                     });
-                                    searchResultsList.appendChild(div);
+                                    searchResultsList.appendChild(item);
                                 });
-                            } else {
                                 searchResultsList.style.display = 'block';
-                                searchResultsList.innerHTML = '<div class="search-result-item" style="color: #64748b; cursor: default;">Nenhum atleta encontrado.</div>';
+                            } else {
+                                searchResultsList.style.display = 'none';
                             }
                         } catch (err) {
                             console.error("Erro na pesquisa live:", err);
@@ -1388,6 +1386,7 @@
         };
 
         function preencherDadosAtleta(atleta) {
+            selectedAtletaId = atleta.id || null;
             const msgBox = document.getElementById('msg-pesquisa');
             msgBox.style.display = 'block';
             msgBox.textContent = `Atleta selecionado: ${atleta.nome}! Dados pré-preenchidos.`;
@@ -1635,11 +1634,24 @@
             };
 
             try {
-                const { data, error } = await supabaseClient
-                    .from('atletasbcv')
-                    .insert([payload]);
+                let dbError = null;
 
-                if (error) throw error;
+                if (selectedAtletaId) {
+                    console.log('A atualizar inscrição de atleta existente (ID):', selectedAtletaId);
+                    const { error } = await supabaseClient
+                        .from('atletasbcv')
+                        .update(payload)
+                        .eq('id', selectedAtletaId);
+                    dbError = error;
+                } else {
+                    console.log('A inserir nova inscrição de atleta...');
+                    const { error } = await supabaseClient
+                        .from('atletasbcv')
+                        .insert([payload]);
+                    dbError = error;
+                }
+
+                if (dbError) throw dbError;
 
                 msgSucesso.style.display = 'block';
                 msgSucesso.innerHTML = `
@@ -1653,11 +1665,19 @@
                 msgSucesso.scrollIntoView({ behavior: 'smooth' });
 
             } catch (err) {
-                console.error(err);
+                console.error('Erro na submissão:', err);
                 msgErro.style.display = 'block';
-                msgErro.textContent = 'Ocorreu um erro ao guardar a inscrição: ' + (err.message || 'Tente novamente.');
+                const detalhe = err.message || err.details || err.hint || JSON.stringify(err);
+                msgErro.innerHTML = `
+                    <strong>Ocorreu um erro ao guardar a inscrição:</strong><br>
+                    <span>${detalhe}</span>
+                    <div style="margin-top: 8px; font-size: 0.8rem; opacity: 0.85;">
+                        Se o erro indicar coluna em falta ou permissão, certifique-se de executar o script SQL no Supabase.
+                    </div>
+                `;
                 btn.disabled = false;
                 btn.textContent = 'SUBMETER INSCRIÇÃO COMPLETA ✓';
+                msgErro.scrollIntoView({ behavior: 'smooth' });
             }
         });
     </script>
