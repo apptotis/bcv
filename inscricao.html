@@ -94,15 +94,16 @@
 
         .macro-phase-item {
             display: flex;
+            flex-direction: column;
             align-items: center;
             justify-content: center;
-            gap: 6px;
-            padding: 9px 5px;
+            padding: 9px 4px;
             border-radius: 10px;
             background: #f8fafc;
             border: 1.5px solid transparent;
             transition: all 0.2s ease;
             min-width: 0;
+            text-align: center;
         }
 
         .macro-phase-item.active {
@@ -115,25 +116,14 @@
             border-color: #22c55e;
         }
 
-        .macro-phase-icon {
-            font-size: 1rem;
-            flex-shrink: 0;
-        }
-
-        .macro-phase-text {
-            display: flex;
-            flex-direction: column;
-            text-align: left;
-            min-width: 0;
-        }
-
         .macro-phase-num {
             font-size: 0.65rem;
-            font-weight: 700;
+            font-weight: 800;
             color: #64748b;
             text-transform: uppercase;
+            letter-spacing: 0.4px;
             line-height: 1;
-            margin-bottom: 3px;
+            margin-bottom: 4px;
         }
 
         .macro-phase-item.active .macro-phase-num {
@@ -145,7 +135,7 @@
         }
 
         .macro-phase-title {
-            font-size: 0.74rem;
+            font-size: 0.78rem;
             font-weight: 700;
             color: #1e293b;
             line-height: 1.1;
@@ -606,25 +596,16 @@
         <!-- Barra de Macro-Fases (3 Fases) -->
         <div class="macro-phases-bar" id="macro-bar">
             <div class="macro-phase-item active" id="macro-1">
-                <span class="macro-phase-icon">📄</span>
-                <div class="macro-phase-text">
-                    <span class="macro-phase-num">Fase 1</span>
-                    <span class="macro-phase-title">Federação</span>
-                </div>
+                <span class="macro-phase-num">Fase 1</span>
+                <span class="macro-phase-title">Federação FPB</span>
             </div>
             <div class="macro-phase-item" id="macro-2">
-                <span class="macro-phase-icon">🩺</span>
-                <div class="macro-phase-text">
-                    <span class="macro-phase-num">Fase 2</span>
-                    <span class="macro-phase-title">Exame EMD</span>
-                </div>
+                <span class="macro-phase-num">Fase 2</span>
+                <span class="macro-phase-title">Exame Médico</span>
             </div>
             <div class="macro-phase-item" id="macro-3">
-                <span class="macro-phase-icon">🎽</span>
-                <div class="macro-phase-text">
-                    <span class="macro-phase-num">Fase 3</span>
-                    <span class="macro-phase-title">Equipamento</span>
-                </div>
+                <span class="macro-phase-num">Fase 3</span>
+                <span class="macro-phase-title">Equipamento</span>
             </div>
         </div>
 
