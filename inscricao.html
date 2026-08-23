@@ -25,7 +25,7 @@
         .inscricao-header {
             background: linear-gradient(135deg, var(--bcv-purple-dark, #2b1055) 0%, var(--bcv-purple, #4c1d95) 100%);
             color: #ffffff;
-            padding: 24px 20px 32px 20px;
+            padding: 18px 12px 28px 12px;
             text-align: center;
             border-bottom-left-radius: 0px;
             border-bottom-right-radius: 0px;
@@ -34,65 +34,75 @@
         }
 
         .inscricao-brand {
-            display: flex;
+            display: inline-flex;
             align-items: center;
             justify-content: center;
-            gap: 12px;
-            margin-bottom: 14px;
+            gap: 8px;
+            margin-bottom: 10px;
             text-decoration: none;
             color: #ffffff;
+            max-width: 100%;
         }
 
         .inscricao-brand img {
-            width: 44px;
-            height: 44px;
+            width: 32px;
+            height: 32px;
             object-fit: contain;
+            flex-shrink: 0;
         }
 
         .inscricao-brand span {
             font-family: 'Outfit', sans-serif;
-            font-size: 1.25rem;
+            font-size: clamp(0.85rem, 4.3vw, 1.2rem);
             font-weight: 800;
-            letter-spacing: 0.5px;
+            letter-spacing: 0.3px;
+            white-space: nowrap;
         }
 
         .inscricao-title {
-            font-size: 1.35rem;
-            font-weight: 700;
+            font-size: clamp(1.02rem, 5.2vw, 1.45rem);
+            font-weight: 800;
             margin-bottom: 4px;
+            white-space: nowrap;
+            letter-spacing: -0.2px;
         }
 
         .inscricao-subtitle {
-            font-size: 0.85rem;
-            opacity: 0.85;
+            font-size: 0.82rem;
+            opacity: 0.9;
+            margin: 0;
         }
 
         /* Container do Formulário */
         .inscricao-container {
             max-width: 650px;
-            margin: -20px auto 0 auto;
-            padding: 0 16px;
+            margin: -16px auto 0 auto;
+            padding: 0 14px;
         }
 
         /* Macro Fases (3 Fases) */
         .macro-phases-bar {
-            display: grid;
+            display: none; /* Oculto no passo 0 inicial */
             grid-template-columns: 1fr 1fr 1fr;
-            gap: 8px;
+            gap: 6px;
             background: #ffffff;
-            border-radius: 16px;
-            padding: 8px;
+            border-radius: 14px;
+            padding: 6px;
             box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
-            margin-bottom: 16px;
+            margin-bottom: 14px;
         }
 
         .macro-phase-item {
-            text-align: center;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 5px;
             padding: 8px 4px;
             border-radius: 10px;
             background: #f8fafc;
             border: 1.5px solid transparent;
             transition: all 0.2s ease;
+            min-width: 0;
         }
 
         .macro-phase-item.active {
@@ -105,12 +115,24 @@
             border-color: #22c55e;
         }
 
+        .macro-phase-icon {
+            font-size: 0.95rem;
+            flex-shrink: 0;
+        }
+
+        .macro-phase-text {
+            display: flex;
+            flex-direction: column;
+            text-align: left;
+            min-width: 0;
+        }
+
         .macro-phase-num {
-            font-size: 0.72rem;
+            font-size: 0.62rem;
             font-weight: 700;
             color: #64748b;
             text-transform: uppercase;
-            letter-spacing: 0.5px;
+            line-height: 1;
             margin-bottom: 2px;
         }
 
@@ -123,12 +145,11 @@
         }
 
         .macro-phase-title {
-            font-size: 0.78rem;
+            font-size: 0.72rem;
             font-weight: 700;
             color: #1e293b;
+            line-height: 1.1;
             white-space: nowrap;
-            overflow: hidden;
-            text-overflow: ellipsis;
         }
 
         /* Progresso por Passos Internos */
@@ -576,7 +597,7 @@
             <span>BASKET CLUBE DE VALENÇA</span>
         </a>
         <h1 class="inscricao-title">Inscrição Oficial de Atletas</h1>
-        <p class="inscricao-subtitle">Época Desportiva 2026 / 2027 • Processo Integrado</p>
+        <p class="inscricao-subtitle">Época Desportiva 2026 / 2027</p>
     </header>
 
     <!-- Contentor Principal -->
@@ -585,16 +606,25 @@
         <!-- Barra de Macro-Fases (3 Fases) -->
         <div class="macro-phases-bar" id="macro-bar">
             <div class="macro-phase-item active" id="macro-1">
-                <div class="macro-phase-num">Fase 1</div>
-                <div class="macro-phase-title">📄 Federação FPB</div>
+                <span class="macro-phase-icon">📄</span>
+                <div class="macro-phase-text">
+                    <span class="macro-phase-num">Fase 1</span>
+                    <span class="macro-phase-title">Federação</span>
+                </div>
             </div>
             <div class="macro-phase-item" id="macro-2">
-                <div class="macro-phase-num">Fase 2</div>
-                <div class="macro-phase-title">🩺 Exame Médico</div>
+                <span class="macro-phase-icon">🩺</span>
+                <div class="macro-phase-text">
+                    <span class="macro-phase-num">Fase 2</span>
+                    <span class="macro-phase-title">Exame EMD</span>
+                </div>
             </div>
             <div class="macro-phase-item" id="macro-3">
-                <div class="macro-phase-num">Fase 3</div>
-                <div class="macro-phase-title">🎽 Equipamento</div>
+                <span class="macro-phase-icon">🎽</span>
+                <div class="macro-phase-text">
+                    <span class="macro-phase-num">Fase 3</span>
+                    <span class="macro-phase-title">Equipamento</span>
+                </div>
             </div>
         </div>
 
@@ -1390,6 +1420,12 @@
             });
             const activeCard = document.getElementById(`step-${currentStep}`);
             if (activeCard) activeCard.classList.add('active');
+
+            // Atualizar visibilidade da barra de macro fases
+            const macroBar = document.getElementById('macro-bar');
+            if (macroBar) {
+                macroBar.style.display = currentStep > 0 ? 'grid' : 'none';
+            }
 
             // Atualizar Macro Fases
             const macro1 = document.getElementById('macro-1');
