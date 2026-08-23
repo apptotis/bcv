@@ -317,18 +317,65 @@
             flex: 1;
         }
 
-        /* Badge de Escalão Automático */
-        .escalao-badge-box {
-            display: inline-flex;
+        /* Barra de Escalão Horizontal Completa */
+        .escalao-full-bar {
+            width: 100%;
+            background: linear-gradient(135deg, #f5f3ff 0%, #ede9fe 100%);
+            border: 1.5px solid #c4b5fd;
+            border-radius: 12px;
+            padding: 10px 14px;
+            margin-bottom: 16px;
+            display: flex;
             align-items: center;
-            gap: 6px;
-            background: #ede9fe;
-            color: #6d28d9;
-            padding: 6px 12px;
-            border-radius: 8px;
-            font-size: 0.82rem;
+            justify-content: space-between;
+            box-sizing: border-box;
+            animation: fadeIn 0.25s ease-in-out;
+        }
+
+        .escalao-full-content {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .escalao-icon {
+            font-size: 1.3rem;
+            flex-shrink: 0;
+        }
+
+        .escalao-text-group {
+            display: flex;
+            flex-direction: column;
+            text-align: left;
+        }
+
+        .escalao-label {
+            font-size: 0.72rem;
             font-weight: 700;
-            margin-top: 6px;
+            color: #6d28d9;
+            text-transform: uppercase;
+            letter-spacing: 0.3px;
+            line-height: 1;
+            margin-bottom: 2px;
+        }
+
+        .escalao-value {
+            font-size: 0.95rem;
+            font-weight: 800;
+            color: #4c1d95;
+            line-height: 1.2;
+        }
+
+        .escalao-tag {
+            background: #7e22ce;
+            color: #ffffff;
+            font-size: 0.68rem;
+            font-weight: 700;
+            padding: 4px 8px;
+            border-radius: 6px;
+            text-transform: uppercase;
+            letter-spacing: 0.4px;
+            flex-shrink: 0;
         }
 
         /* Radio & Checkbox Customizados */
@@ -736,9 +783,6 @@
                     <div class="form-group">
                         <label>Data Nascimento <span class="req">*</span></label>
                         <input type="date" name="data_nascimento" id="data_nascimento" class="form-control" required>
-                        <div id="escalao-feedback" class="escalao-badge-box" style="display: none;">
-                            🏀 Escalão: <span id="escalao-nome-span">Sub-14</span>
-                        </div>
                     </div>
                     <div class="form-group">
                         <label>Sexo <span class="req">*</span></label>
@@ -747,6 +791,18 @@
                             <option value="F">Feminino</option>
                         </select>
                     </div>
+                </div>
+
+                <!-- Barra Horizontal Completa de Escalão -->
+                <div id="escalao-feedback" class="escalao-full-bar" style="display: none;">
+                    <div class="escalao-full-content">
+                        <span class="escalao-icon">🏀</span>
+                        <div class="escalao-text-group">
+                            <span class="escalao-label">Escalão Atribuído (FPB):</span>
+                            <span class="escalao-value" id="escalao-nome-span">Mini 12</span>
+                        </div>
+                    </div>
+                    <span class="escalao-tag">Automático</span>
                 </div>
 
                 <div class="form-row">
@@ -1247,14 +1303,16 @@
         // Função de Cálculo do Escalão FPB (Época 2026/2027)
         function calcularEscalaoFPB(anoNasc) {
             if (!anoNasc || isNaN(anoNasc)) return 'A Atribuir';
-            if (anoNasc >= 2020) return 'BabyBasket';
-            if (anoNasc >= 2018) return 'Mini 8';
-            if (anoNasc >= 2016) return 'Mini 10';
-            if (anoNasc >= 2014) return 'Mini 12';
-            if (anoNasc >= 2012) return 'Sub 14';
-            if (anoNasc >= 2010) return 'Sub 16';
-            if (anoNasc >= 2008) return 'Sub 18';
-            if (anoNasc >= 2006) return 'Sub 20';
+            const ano = parseInt(anoNasc);
+
+            if (ano >= 2020) return 'BabyBasket';
+            if (ano === 2019) return 'Mini 8';
+            if (ano === 2017 || ano === 2018) return 'Mini 10';
+            if (ano === 2015 || ano === 2016) return 'Mini 12';
+            if (ano === 2013 || ano === 2014) return 'Sub 14';
+            if (ano === 2011 || ano === 2012) return 'Sub 16';
+            if (ano === 2009 || ano === 2010) return 'Sub 18';
+            if (ano === 2007 || ano === 2008) return 'Sub 20';
             return 'Seniores';
         }
 
@@ -1273,8 +1331,8 @@
             const feedback = document.getElementById('escalao-feedback');
             const spanNome = document.getElementById('escalao-nome-span');
             if (feedback && spanNome) {
-                feedback.style.display = 'inline-flex';
-                spanNome.textContent = `${escalao} (${dataNasc.getFullYear()})`;
+                feedback.style.display = 'flex';
+                spanNome.textContent = `${escalao} (Ano ${dataNasc.getFullYear()})`;
             }
         }
 
