@@ -1159,6 +1159,15 @@
         let supabaseClient = null;
         let selectedAtletaId = null; // Guarda o ID se for revalidação de atleta existente
 
+        function getSupabaseClient() {
+            if (!supabaseClient) {
+                if (window.supabase && typeof SUPABASE_URL !== 'undefined' && typeof SUPABASE_ANON_KEY !== 'undefined') {
+                    supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+                }
+            }
+            return supabaseClient;
+        }
+
         // As 19 Perguntas Oficiais do IPDJ (Exame Médico Desportivo)
         const emdPerguntas = [
             { id: 1, text: "1. Esteve internado no Hospital ou Clínica?" },
@@ -1257,7 +1266,10 @@
 
                     searchTimeout = setTimeout(async () => {
                         try {
-                            const { data, error } = await supabaseClient
+                            const client = getSupabaseClient();
+                            if (!client) return;
+
+                            const { data, error } = await client
                                 .from('atletasbcv')
                                 .select('id, nome, licenca, data_nascimento')
                                 .or(`nome.ilike.%${query}%,licenca.ilike.%${query}%`)
@@ -1416,7 +1428,10 @@
             msgBox.textContent = 'A pesquisar atleta...';
 
             try {
-                const { data, error } = await supabaseClient
+                const client = getSupabaseClient();
+                if (!client) throw new Error("Supabase não inicializado.");
+
+                const { data, error } = await client
                     .from('atletasbcv')
                     .select('*')
                     .or(`nome.ilike.%${query}%,licenca.eq.${query}`)
@@ -1634,18 +1649,23 @@
             };
 
             try {
+                const client = getSupabaseClient();
+                if (!client) {
+                    throw new Error("Não foi possível estabelecer ligação ao Supabase. Verifique a sua ligação.");
+                }
+
                 let dbError = null;
 
                 if (selectedAtletaId) {
                     console.log('A atualizar inscrição de atleta existente (ID):', selectedAtletaId);
-                    const { error } = await supabaseClient
+                    const { error } = await client
                         .from('atletasbcv')
                         .update(payload)
                         .eq('id', selectedAtletaId);
                     dbError = error;
                 } else {
                     console.log('A inserir nova inscrição de atleta...');
-                    const { error } = await supabaseClient
+                    const { error } = await client
                         .from('atletasbcv')
                         .insert([payload]);
                     dbError = error;
