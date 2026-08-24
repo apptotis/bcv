@@ -1157,9 +1157,10 @@ document.addEventListener('DOMContentLoaded', async () => {
 
     let currentAtletas = [];
 
-    // Função de filtragem combinada em tempo real (Pesquisa por Nome/Nickname + Escalão)
+    // Função de filtragem combinada em tempo real (Pesquisa + Estado/Época + Escalão)
     function applyAtletasFilters() {
         const searchVal = (document.getElementById('filter-search-atleta')?.value || '').toLowerCase().trim();
+        const epocaVal = document.getElementById('filter-epoca-atleta')?.value || '';
         const escalaoVal = document.getElementById('filter-escalao')?.value || '';
 
         const filtrados = currentAtletas.filter(atleta => {
@@ -1167,25 +1168,43 @@ document.addEventListener('DOMContentLoaded', async () => {
                 (atleta.nome && atleta.nome.toLowerCase().includes(searchVal)) || 
                 (atleta.nickname && atleta.nickname.toLowerCase().includes(searchVal));
 
+            let matchesEpoca = true;
+            if (epocaVal === '2026/2027') {
+                matchesEpoca = atleta.epoca === '2026/2027';
+            } else if (epocaVal === 'pendente') {
+                matchesEpoca = atleta.epoca !== '2026/2027';
+            }
+
             const matchesEscalao = !escalaoVal || atleta.escalao === escalaoVal;
 
-            return matchesSearch && matchesEscalao;
+            return matchesSearch && matchesEpoca && matchesEscalao;
         });
 
         renderAtletasTable(filtrados);
     }
 
     const filterSearchInput = document.getElementById('filter-search-atleta');
+    const filterEpocaSelect = document.getElementById('filter-epoca-atleta');
     const filterEscalaoSelect = document.getElementById('filter-escalao');
+    const btnClearFilters = document.getElementById('btn-clear-filters');
 
     if (filterSearchInput) filterSearchInput.addEventListener('input', applyAtletasFilters);
+    if (filterEpocaSelect) filterEpocaSelect.addEventListener('change', applyAtletasFilters);
     if (filterEscalaoSelect) filterEscalaoSelect.addEventListener('change', applyAtletasFilters);
+    if (btnClearFilters) {
+        btnClearFilters.addEventListener('click', () => {
+            if (filterSearchInput) filterSearchInput.value = '';
+            if (filterEpocaSelect) filterEpocaSelect.value = '';
+            if (filterEscalaoSelect) filterEscalaoSelect.value = '';
+            applyAtletasFilters();
+        });
+    }
 
     window.loadAtletas = async function() {
         if (!atletasTableBody) return;
         
         try {
-            atletasTableBody.innerHTML = '<tr><td colspan="6" style="padding: 10px;">A carregar atletas...</td></tr>';
+            atletasTableBody.innerHTML = '<tr><td colspan="7" style="padding: 10px;">A carregar atletas...</td></tr>';
             
             const { data: atletas, error } = await supabase
                 .from('atletasbcv')
@@ -1194,7 +1213,7 @@ document.addEventListener('DOMContentLoaded', async () => {
 
             if (error) {
                 if (error.code === '42P01') {
-                    atletasTableBody.innerHTML = '<tr><td colspan="6" style="padding: 10px;">A tabela "atletasbcv" não existe na base de dados. Por favor, crie-a no Supabase.</td></tr>';
+                    atletasTableBody.innerHTML = '<tr><td colspan="7" style="padding: 10px;">A tabela "atletasbcv" não existe na base de dados. Por favor, crie-a no Supabase.</td></tr>';
                     return;
                 }
                 throw error;
@@ -1205,7 +1224,7 @@ document.addEventListener('DOMContentLoaded', async () => {
             
         } catch (error) {
             console.error("Erro ao carregar atletas:", error);
-            atletasTableBody.innerHTML = `<tr><td colspan="6" style="color: red; padding: 10px;">Erro: ${error.message}</td></tr>`;
+            atletasTableBody.innerHTML = `<tr><td colspan="7" style="color: red; padding: 10px;">Erro: ${error.message}</td></tr>`;
         }
     }
 
@@ -1278,27 +1297,33 @@ document.addEventListener('DOMContentLoaded', async () => {
         atletasTableBody.innerHTML = '';
         
         if (!lista || lista.length === 0) {
-            atletasTableBody.innerHTML = '<tr><td colspan="6" style="padding: 10px;">Nenhum atleta encontrado.</td></tr>';
+            atletasTableBody.innerHTML = '<tr><td colspan="7" style="padding: 10px;">Nenhum atleta encontrado com os filtros selecionados.</td></tr>';
             return;
         }
 
         lista.forEach(atleta => {
             const tr = document.createElement('tr');
-            tr.style.borderBottom = '1px solid rgba(255,255,255,0.05)';
+            tr.style.borderBottom = '1px solid rgba(0,0,0,0.05)';
             const atletaJson = JSON.stringify(atleta).replace(/'/g, "&apos;").replace(/"/g, "&quot;");
             
             const fotoHtml = atleta.foto 
                 ? `<img src="${atleta.foto}" style="width: 40px; height: 40px; object-fit: cover; border-radius: 50%;">` 
-                : '<div style="width: 40px; height: 40px; background: rgba(255,255,255,0.1); border-radius: 50%; display:flex; align-items:center; justify-content:center; font-size: 1.2rem;">👤</div>';
+                : '<div style="width: 40px; height: 40px; background: rgba(0,0,0,0.05); border-radius: 50%; display:flex; align-items:center; justify-content:center; font-size: 1.2rem;">👤</div>';
 
             const numCamisolaHtml = atleta.numero_camisola !== null && atleta.numero_camisola !== undefined && atleta.numero_camisola !== '' 
                 ? `<span style="font-weight: 800; color: #7e22ce; background: rgba(126, 34, 206, 0.1); padding: 3px 8px; border-radius: 6px; font-size: 0.9rem;">#${atleta.numero_camisola}</span>`
                 : '<span style="color: #a0a0ab;">-</span>';
 
+            const isInscrito2627 = atleta.epoca === '2026/2027';
+            const statusBadgeHtml = isInscrito2627
+                ? '<span style="background: rgba(22, 163, 74, 0.12); color: #16a34a; padding: 3px 8px; border-radius: 4px; font-weight: 700; font-size: 0.78rem; border: 1px solid rgba(22, 163, 74, 0.3); white-space: nowrap;">🟢 2026/2027</span>'
+                : `<span style="background: rgba(217, 119, 6, 0.12); color: #b45309; padding: 3px 8px; border-radius: 4px; font-weight: 600; font-size: 0.78rem; border: 1px solid rgba(217, 119, 6, 0.3); white-space: nowrap;">🟡 ${atleta.epoca || '2025/2026'} (Pendente)</span>`;
+
             tr.innerHTML = `
                 <td style="padding: 10px;">${fotoHtml}</td>
                 <td style="padding: 10px;"><strong>${atleta.nome || '-'}</strong></td>
-                <td style="padding: 10px;"><span style="background: rgba(255,255,255,0.08); padding: 3px 8px; border-radius: 6px; font-size: 0.85rem;">${atleta.escalao || '-'}</span></td>
+                <td style="padding: 10px;"><span style="background: rgba(0,0,0,0.04); border: 1px solid var(--border-color); padding: 3px 8px; border-radius: 6px; font-size: 0.85rem;">${atleta.escalao || '-'}</span></td>
+                <td style="padding: 10px;">${statusBadgeHtml}</td>
                 <td style="padding: 10px;">${atleta.nickname ? `<span style="color: var(--accent-primary); font-weight: 600;">"${atleta.nickname}"</span>` : '<span style="color: #a0a0ab;">-</span>'}</td>
                 <td style="padding: 10px; text-align: center;">${numCamisolaHtml}</td>
                 <td style="padding: 10px; text-align: center; white-space: nowrap;">

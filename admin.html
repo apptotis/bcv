@@ -669,11 +669,23 @@
                 </div>
 
                     <!-- Barra de Filtros -->
-                    <div class="welcome-box" style="margin-bottom: 20px; padding: 15px; background: rgba(0,0,0,0.2);">
-                        <h4 style="margin-bottom: 10px; color: #a0a0ab; font-size: 0.9rem;">Filtrar Atletas</h4>
-                        <div style="display: flex; gap: 15px; align-items: flex-end;">
-                            <div style="flex: 1; max-width: 300px;">
-                                <label style="display:block; margin-bottom:5px; font-size:0.8rem;">Escalão</label>
+                    <div class="welcome-box" style="margin-bottom: 20px; padding: 15px; background: rgba(0,0,0,0.02); border: 1px solid var(--border-color);">
+                        <h4 style="margin-bottom: 10px; color: var(--text-secondary); font-size: 0.9rem;">Filtrar Atletas</h4>
+                        <div style="display: flex; gap: 15px; align-items: flex-end; flex-wrap: wrap;">
+                            <div style="flex: 1; min-width: 180px;">
+                                <label style="display:block; margin-bottom:5px; font-size:0.8rem; color: var(--text-secondary);">Pesquisa por Nome / Nickname</label>
+                                <input type="text" id="filter-search-atleta" placeholder="Pesquisar..." class="admin-input" style="margin-bottom: 0;">
+                            </div>
+                            <div style="flex: 1; min-width: 180px;">
+                                <label style="display:block; margin-bottom:5px; font-size:0.8rem; color: var(--text-secondary);">Estado da Inscrição / Época</label>
+                                <select id="filter-epoca-atleta" class="admin-input" style="margin-bottom: 0;">
+                                    <option value="">Todas as Épocas</option>
+                                    <option value="2026/2027">🟢 Inscritos (2026/2027)</option>
+                                    <option value="pendente">🟡 Pendentes (2025/2026)</option>
+                                </select>
+                            </div>
+                            <div style="flex: 1; min-width: 160px;">
+                                <label style="display:block; margin-bottom:5px; font-size:0.8rem; color: var(--text-secondary);">Escalão</label>
                                 <select id="filter-escalao" class="admin-input" style="margin-bottom: 0;">
                                     <option value="">Todos os Escalões</option>
                                     <option value="Mini 8">Mini 8</option>
@@ -687,7 +699,7 @@
                                 </select>
                             </div>
                             <div>
-                                <button type="button" id="btn-clear-filters" class="btn-secondary" style="padding: 12px 18px; margin-bottom: 0;">Limpar Filtro</button>
+                                <button type="button" id="btn-clear-filters" class="btn-secondary" style="padding: 12px 18px; margin-bottom: 0;">Limpar Filtros</button>
                             </div>
                         </div>
                     </div>
@@ -698,16 +710,17 @@
                         <table class="admin-table" style="width: 100%; text-align: left; margin-top: 15px; border-collapse: collapse;">
                             <thead>
                                 <tr style="border-bottom: 1px solid rgba(255,255,255,0.1);">
-                                    <th style="padding: 10px; width: 60px;">Foto</th>
+                                    <th style="padding: 10px; width: 50px;">Foto</th>
                                     <th style="padding: 10px;">Nome</th>
                                     <th style="padding: 10px;">Escalão</th>
+                                    <th style="padding: 10px;">Estado / Época</th>
                                     <th style="padding: 10px;">Nickname</th>
-                                    <th style="padding: 10px; width: 70px; text-align: center;">Nº</th>
+                                    <th style="padding: 10px; width: 60px; text-align: center;">Nº</th>
                                     <th style="padding: 10px; text-align: center; width: 180px;">Ações</th>
                                 </tr>
                             </thead>
                             <tbody id="atletas-table-body">
-                                <tr><td colspan="6" style="padding: 10px;">A carregar atletas...</td></tr>
+                                <tr><td colspan="7" style="padding: 10px;">A carregar atletas...</td></tr>
                             </tbody>
                         </table>
                     </div>
