@@ -26,33 +26,37 @@ document.addEventListener('DOMContentLoaded', async () => {
         }
     }
 
-    // 4. Verificar Permissões (Role)
+    // 4. Verificar Permissões (Role e Permissões de Menus)
     async function verifyAdminRole(user) {
         try {
-            // Consultar a tabela public.users para verificar o role
+            // Consultar a tabela public.users para verificar o perfil completo
             const { data: profile, error } = await supabase
                 .from('users')
-                .select('nome, role')
+                .select('nome, role, permissoes')
                 .eq('id', user.id)
                 .single();
 
             if (error) throw error;
 
-            const allowedRoles = ['admin', 'editor', 'treinador'];
+            const isAllowed = profile && (
+                profile.role === 'admin' || 
+                (Array.isArray(profile.permissoes) && profile.permissoes.length > 0) ||
+                ['editor', 'treinador', 'personalizado'].includes(profile.role)
+            );
 
-            if (profile && allowedRoles.includes(profile.role)) {
+            if (isAllowed) {
                 // Acesso permitido
                 if (adminNameSpan) {
                     adminNameSpan.textContent = profile.nome || 'Utilizador';
                 }
                 
-                // Configurar permissões de visualização consoante o role
-                setupRolePermissions(profile.role);
+                // Configurar visibilidade dos menus consoante as permissões
+                setupRolePermissions(profile);
                 
                 showAdminPanel();
             } else {
-                // Tem sessão mas o role não é permitido
-                throw new Error("Acesso Negado: Não tem permissões para aceder a este portal.");
+                // Tem sessão mas não tem permissões suficientes
+                throw new Error("Acesso Negado: Não tem permissões ativas para aceder a este portal.");
             }
         } catch (error) {
             console.error("Erro na verificação de role:", error);
@@ -62,27 +66,30 @@ document.addEventListener('DOMContentLoaded', async () => {
         }
     }
 
-    // Ocultar ou mostrar menus dependendo do role
-    function setupRolePermissions(role) {
-        const usersTabBtn = document.querySelector('[data-tab="tab-users"]');
-        const configTabBtn = document.querySelector('[data-tab="tab-config"]');
-        const galeriaTabBtn = document.querySelector('[data-tab="tab-galeria"]');
-        
-        // Restaurar a visibilidade por defeito (para o caso de troca de contas)
-        if (usersTabBtn) usersTabBtn.closest('li').style.display = 'block';
-        if (configTabBtn) configTabBtn.closest('li').style.display = 'block';
-        if (galeriaTabBtn) galeriaTabBtn.closest('li').style.display = 'block';
+    // Ocultar ou mostrar menus dinamicamente consoante as permissões
+    function setupRolePermissions(profile) {
+        const isAdmin = profile && profile.role === 'admin';
+        const userPerms = (profile && Array.isArray(profile.permissoes)) ? profile.permissoes : [];
+        const role = profile ? profile.role : '';
 
-        if (role !== 'admin') {
-            // Esconder os separadores sensíveis para quem não é admin
-            if (usersTabBtn) usersTabBtn.closest('li').style.display = 'none';
-            if (configTabBtn) configTabBtn.closest('li').style.display = 'none';
-        }
+        const menuMap = [
+            { tab: 'tab-users', allow: isAdmin },
+            { tab: 'tab-noticias', allow: isAdmin || userPerms.includes('noticias') || role === 'editor' },
+            { tab: 'tab-agenda', allow: isAdmin || userPerms.includes('agenda') || role === 'editor' },
+            { tab: 'tab-resultados', allow: isAdmin || userPerms.includes('resultados') },
+            { tab: 'tab-galeria', allow: isAdmin || userPerms.includes('galeria') || role === 'editor' },
+            { tab: 'tab-equipas', allow: isAdmin || userPerms.includes('equipas') || role === 'treinador' },
+            { tab: 'tab-atletas', allow: isAdmin || userPerms.includes('atletas') || role === 'treinador' },
+            { tab: 'tab-config', allow: isAdmin || userPerms.includes('config') }
+        ];
 
-        // Galeria: Apenas admin e editor
-        if (role !== 'admin' && role !== 'editor') {
-            if (galeriaTabBtn) galeriaTabBtn.closest('li').style.display = 'none';
-        }
+        menuMap.forEach(({ tab, allow }) => {
+            const btn = document.querySelector(`[data-tab="${tab}"]`);
+            if (btn) {
+                const li = btn.closest('li');
+                if (li) li.style.display = allow ? 'block' : 'none';
+            }
+        });
     }
 
     // 5. Função de Login
@@ -231,6 +238,45 @@ document.addEventListener('DOMContentLoaded', async () => {
     const editUserIdInput = document.getElementById('edit-user-id');
     const passwordHint = document.getElementById('password-hint');
     const passwordInput = document.getElementById('new-user-password');
+    const roleSelect = document.getElementById('new-user-role');
+    const containerPermissoes = document.getElementById('container-permissoes-custom');
+    const checkboxesPermissoes = document.querySelectorAll('input[name="user_permissoes"]');
+
+    const MODULO_LABELS = {
+        'noticias': 'Notícias',
+        'agenda': 'Agenda',
+        'resultados': 'Resultados',
+        'galeria': 'Galeria',
+        'equipas': 'Equipas',
+        'atletas': 'Atletas',
+        'config': 'Config'
+    };
+
+    if (roleSelect && containerPermissoes) {
+        roleSelect.addEventListener('change', () => {
+            if (roleSelect.value === 'personalizado') {
+                containerPermissoes.style.display = 'block';
+            } else {
+                containerPermissoes.style.display = 'none';
+                checkboxesPermissoes.forEach(cb => cb.checked = false);
+            }
+        });
+    }
+
+    function getSelectedPermissions() {
+        const selected = [];
+        checkboxesPermissoes.forEach(cb => {
+            if (cb.checked) selected.push(cb.value);
+        });
+        return selected;
+    }
+
+    function setSelectedPermissions(perms) {
+        const list = Array.isArray(perms) ? perms : [];
+        checkboxesPermissoes.forEach(cb => {
+            cb.checked = list.includes(cb.value);
+        });
+    }
 
     function resetUserForm() {
         if(formCreateUser) formCreateUser.reset();
@@ -241,6 +287,8 @@ document.addEventListener('DOMContentLoaded', async () => {
         passwordHint.style.display = 'none';
         passwordInput.required = true;
         document.getElementById('new-user-email').disabled = false;
+        if (containerPermissoes) containerPermissoes.style.display = 'none';
+        checkboxesPermissoes.forEach(cb => cb.checked = false);
         if(createUserMsg) createUserMsg.classList.add('hidden');
     }
 
@@ -250,7 +298,7 @@ document.addEventListener('DOMContentLoaded', async () => {
 
     async function loadUsers() {
         try {
-            usersTableBody.innerHTML = '<tr><td colspan="4" style="padding: 10px;">A carregar utilizadores...</td></tr>';
+            usersTableBody.innerHTML = '<tr><td colspan="6" style="padding: 10px;">A carregar utilizadores...</td></tr>';
             
             const { data: users, error } = await supabase
                 .from('users')
@@ -260,7 +308,7 @@ document.addEventListener('DOMContentLoaded', async () => {
             if (error) throw error;
 
             if (users.length === 0) {
-                usersTableBody.innerHTML = '<tr><td colspan="4" style="padding: 10px;">Nenhum utilizador encontrado.</td></tr>';
+                usersTableBody.innerHTML = '<tr><td colspan="6" style="padding: 10px;">Nenhum utilizador encontrado.</td></tr>';
                 return;
             }
 
@@ -268,22 +316,38 @@ document.addEventListener('DOMContentLoaded', async () => {
             users.forEach(user => {
                 const tr = document.createElement('tr');
                 const userJson = JSON.stringify(user).replace(/'/g, "&apos;").replace(/"/g, "&quot;");
+                const isAdmin = user.role === 'admin';
                 
+                let permissoesBadgeHtml = '';
+                if (isAdmin) {
+                    permissoesBadgeHtml = '<span style="background: rgba(106, 27, 154, 0.12); color: #6a1b9a; padding: 3px 8px; border-radius: 4px; font-weight: 600; font-size: 0.8rem; border: 1px solid rgba(106, 27, 154, 0.25);">⭐ Total (Todos)</span>';
+                } else {
+                    const userPerms = Array.isArray(user.permissoes) ? user.permissoes : [];
+                    if (userPerms.length > 0) {
+                        permissoesBadgeHtml = `<div style="display: flex; flex-wrap: wrap; gap: 4px;">` +
+                            userPerms.map(p => `<span style="background: rgba(0, 0, 0, 0.05); color: var(--text-primary); padding: 2px 6px; border-radius: 4px; font-size: 0.75rem; border: 1px solid var(--border-color);">${MODULO_LABELS[p] || p}</span>`).join('') +
+                            `</div>`;
+                    } else {
+                        permissoesBadgeHtml = '<span style="color: var(--text-secondary); font-size: 0.8rem;">(Nenhum menu)</span>';
+                    }
+                }
+
                 tr.innerHTML = `
-                    <td style="padding: 10px;">${user.nome || '-'}</td>
+                    <td style="padding: 10px; font-weight: 600;">${user.nome || '-'}</td>
                     <td style="padding: 10px;">${user.email || '-'}</td>
-                    <td style="padding: 10px; text-transform: capitalize;">${user.role || 'user'}</td>
+                    <td style="padding: 10px; font-size: 0.85rem;">${isAdmin ? '<strong>Admin</strong>' : 'Personalizado'}</td>
+                    <td style="padding: 10px;">${permissoesBadgeHtml}</td>
                     <td style="padding: 10px;">${user.telemovel || '-'}</td>
-                    <td style="padding: 10px; text-align: center;">
-                        <button class="btn-action" onclick="window.editUser('${userJson}')">✏️</button>
-                        <button class="btn-action delete" onclick="window.deleteUser('${user.id}')">🗑️</button>
+                    <td style="padding: 10px; text-align: center; white-space: nowrap;">
+                        <button class="btn-action" title="Editar Utilizador" onclick="window.editUser('${userJson}')">✏️</button>
+                        <button class="btn-action delete" title="Eliminar Utilizador" onclick="window.deleteUser('${user.id}')">🗑️</button>
                     </td>
                 `;
                 usersTableBody.appendChild(tr);
             });
         } catch (error) {
             console.error("Erro ao carregar users:", error);
-            usersTableBody.innerHTML = '<tr><td colspan="5" style="color: red; padding: 10px;">Erro ao carregar utilizadores.</td></tr>';
+            usersTableBody.innerHTML = '<tr><td colspan="6" style="color: red; padding: 10px;">Erro ao carregar utilizadores.</td></tr>';
         }
     }
 
@@ -296,7 +360,17 @@ document.addEventListener('DOMContentLoaded', async () => {
         document.getElementById('new-user-email').value = user.email || '';
         document.getElementById('new-user-email').disabled = true; // Não deixamos editar o email
         document.getElementById('new-user-phone').value = user.telemovel || '';
-        document.getElementById('new-user-role').value = user.role || '';
+        
+        const isAdmin = user.role === 'admin';
+        document.getElementById('new-user-role').value = isAdmin ? 'admin' : 'personalizado';
+        
+        if (!isAdmin) {
+            containerPermissoes.style.display = 'block';
+            setSelectedPermissions(user.permissoes || []);
+        } else {
+            containerPermissoes.style.display = 'none';
+            checkboxesPermissoes.forEach(cb => cb.checked = false);
+        }
         
         // Em modo edição, password não é obrigatória
         passwordInput.required = false;
@@ -346,7 +420,18 @@ document.addEventListener('DOMContentLoaded', async () => {
         const password = document.getElementById('new-user-password').value;
         const nome = document.getElementById('new-user-name').value;
         const telemovel = document.getElementById('new-user-phone').value;
-        const role = document.getElementById('new-user-role').value;
+        const roleVal = document.getElementById('new-user-role').value;
+        
+        const role = (roleVal === 'admin') ? 'admin' : 'personalizado';
+        const allModules = ['noticias', 'agenda', 'resultados', 'galeria', 'equipas', 'atletas', 'config'];
+        const permissoes = (role === 'admin') ? allModules : getSelectedPermissions();
+
+        if (role !== 'admin' && permissoes.length === 0) {
+            alert('Por favor, selecione pelo menos um menu autorizado para este utilizador.');
+            btnCreateUser.textContent = isEditMode ? "Guardar Alterações" : "Criar Utilizador";
+            btnCreateUser.disabled = false;
+            return;
+        }
 
         try {
             if (isEditMode) {
@@ -356,7 +441,8 @@ document.addEventListener('DOMContentLoaded', async () => {
                     p_nome: nome,
                     p_telemovel: telemovel,
                     p_role: role,
-                    p_password: password || null
+                    p_password: password || null,
+                    p_permissoes: permissoes
                 });
                 if (error) throw error;
                 createUserMsg.textContent = "✅ Utilizador atualizado com sucesso!";
@@ -367,7 +453,8 @@ document.addEventListener('DOMContentLoaded', async () => {
                     p_password: password,
                     p_nome: nome,
                     p_telemovel: telemovel,
-                    p_role: role
+                    p_role: role,
+                    p_permissoes: permissoes
                 });
                 if (error) throw error;
                 createUserMsg.textContent = "✅ Utilizador criado com sucesso!";

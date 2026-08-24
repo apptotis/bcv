@@ -102,11 +102,40 @@
                             
                             <input type="text" id="new-user-phone" placeholder="Telemóvel" class="admin-input">
                             <select id="new-user-role" required class="admin-input">
-                                <option value="" disabled selected>Selecionar Permissão (Role)</option>
-                                <option value="admin">Administrador (Total)</option>
-                                <option value="editor">Editor (Notícias/Agenda)</option>
-                                <option value="treinador">Treinador (Equipas/Atletas)</option>
+                                <option value="" disabled selected>Selecionar Tipo de Acesso</option>
+                                <option value="admin">Administrador Total (Acesso a Tudo)</option>
+                                <option value="personalizado">Personalizado (Definir Menus)</option>
                             </select>
+
+                            <!-- Bloco de Permissões Granulares por Menus -->
+                            <div id="container-permissoes-custom" style="display: none; background: #f8fafc; border: 1px solid var(--border-color); border-radius: 8px; padding: 15px;">
+                                <label style="font-weight: 600; font-size: 0.9rem; color: var(--text-primary); margin-bottom: 10px; display: block;">
+                                    Selecione os Menus com Acesso Autorizado:
+                                </label>
+                                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)); gap: 10px;">
+                                    <label style="display: flex; align-items: center; gap: 8px; cursor: pointer; font-size: 0.9rem; color: var(--text-primary);">
+                                        <input type="checkbox" name="user_permissoes" value="noticias"> 📰 Notícias
+                                    </label>
+                                    <label style="display: flex; align-items: center; gap: 8px; cursor: pointer; font-size: 0.9rem; color: var(--text-primary);">
+                                        <input type="checkbox" name="user_permissoes" value="agenda"> 📅 Agenda
+                                    </label>
+                                    <label style="display: flex; align-items: center; gap: 8px; cursor: pointer; font-size: 0.9rem; color: var(--text-primary);">
+                                        <input type="checkbox" name="user_permissoes" value="resultados"> 🏆 Resultados
+                                    </label>
+                                    <label style="display: flex; align-items: center; gap: 8px; cursor: pointer; font-size: 0.9rem; color: var(--text-primary);">
+                                        <input type="checkbox" name="user_permissoes" value="galeria"> 📸 Galeria
+                                    </label>
+                                    <label style="display: flex; align-items: center; gap: 8px; cursor: pointer; font-size: 0.9rem; color: var(--text-primary);">
+                                        <input type="checkbox" name="user_permissoes" value="equipas"> 🏀 Equipas
+                                    </label>
+                                    <label style="display: flex; align-items: center; gap: 8px; cursor: pointer; font-size: 0.9rem; color: var(--text-primary);">
+                                        <input type="checkbox" name="user_permissoes" value="atletas"> 👥 Atletas
+                                    </label>
+                                    <label style="display: flex; align-items: center; gap: 8px; cursor: pointer; font-size: 0.9rem; color: var(--text-primary);">
+                                        <input type="checkbox" name="user_permissoes" value="config"> ⚙️ Configurações
+                                    </label>
+                                </div>
+                            </div>
                             
                             <div style="display: flex; gap: 10px;">
                                 <button type="submit" id="btn-create-user" class="btn-primary" style="flex: 1;">Criar Utilizador</button>
@@ -125,13 +154,14 @@
                                 <tr style="border-bottom: 1px solid rgba(255,255,255,0.1);">
                                     <th style="padding: 10px;">Nome</th>
                                     <th style="padding: 10px;">Email</th>
-                                    <th style="padding: 10px;">Role</th>
+                                    <th style="padding: 10px;">Tipo</th>
+                                    <th style="padding: 10px;">Menus Autorizados</th>
                                     <th style="padding: 10px;">Telemóvel</th>
                                     <th style="padding: 10px; text-align: center;">Ações</th>
                                 </tr>
                             </thead>
                             <tbody id="users-table-body">
-                                <tr><td colspan="4" style="padding: 10px;">A carregar...</td></tr>
+                                <tr><td colspan="6" style="padding: 10px;">A carregar...</td></tr>
                             </tbody>
                         </table>
                     </div>
