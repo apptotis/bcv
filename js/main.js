@@ -105,11 +105,12 @@ document.addEventListener('DOMContentLoaded', () => {
     // Run on scroll
     window.addEventListener('scroll', revealFunction);
     
-    // 4. Carregar Destaques do Portal (Agenda e Aniversariantes) e Menu Equipas
+    // 4. Carregar Destaques do Portal (Agenda e Aniversariantes), Menu Equipas e Configurações
     if (typeof window.supabase !== 'undefined' && typeof SUPABASE_URL !== 'undefined') {
         const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
         loadPortalHighlights(supabase);
         loadEquipasMenu(supabase);
+        loadGlobalClubConfig(supabase);
     }
 });
 
@@ -354,3 +355,33 @@ async function loadEquipasMenu(supabase) {
         }
     }
 }
+
+async function loadGlobalClubConfig(supabase) {
+    try {
+        const { data, error } = await supabase.from('clube_config').select('*');
+        if (error || !data) return;
+
+        data.forEach(item => {
+            const dados = item.dados || {};
+            if (item.chave === 'redes_sociais') {
+                const linksFb = document.querySelectorAll('a[aria-label="Facebook"], .nav-social-btn a[href*="facebook"], .social-links a[href*="facebook"]');
+                const linksIg = document.querySelectorAll('a[aria-label="Instagram"], .nav-social-btn a[href*="instagram"], .social-links a[href*="instagram"]');
+                const linksYt = document.querySelectorAll('a[aria-label="YouTube"], .nav-social-btn a[href*="youtube"], .social-links a[href*="youtube"]');
+                const linksTt = document.querySelectorAll('a[aria-label="TikTok"], .nav-social-btn a[href*="tiktok"], .social-links a[href*="tiktok"]');
+
+                if (dados.facebook) linksFb.forEach(a => a.href = dados.facebook);
+                if (dados.instagram) linksIg.forEach(a => a.href = dados.instagram);
+                if (dados.youtube) linksYt.forEach(a => a.href = dados.youtube);
+                if (dados.tiktok) linksTt.forEach(a => a.href = dados.tiktok);
+            } else if (item.chave === 'geral') {
+                const bannerEl = document.querySelector('.anniversary-banner');
+                if (bannerEl && dados.banner_aniversario) {
+                    bannerEl.innerHTML = dados.banner_aniversario;
+                }
+            }
+        });
+    } catch (e) {
+        console.warn("Aviso ao carregar clube_config global:", e);
+    }
+}
+

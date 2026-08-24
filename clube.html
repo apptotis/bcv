@@ -167,7 +167,7 @@
                                 <p>Conheça a equipa que lidera e orienta o Basket Clube de Valença rumo ao futuro.</p>
                             </div>
                             
-                            <div style="display: flex; flex-direction: column; gap: 2rem;">
+                            <div id="orgaos-sociais-container" style="display: flex; flex-direction: column; gap: 2rem;">
                                 <!-- Assembleia Geral -->
                                 <div class="feature-box" style="text-align: center;">
                                     <h3 style="color: var(--accent-primary); margin-bottom: 1.5rem;">Assembleia Geral</h3>
@@ -282,22 +282,22 @@
                                     <div style="display: flex; align-items: center; gap: 15px; margin-bottom: 20px;">
                                         <div class="feature-icon" style="margin: 0;">📍</div>
                                         <div>
-                                            <h4>Pavilhão Municipal</h4>
-                                            <p style="color: var(--text-secondary);">Av. Tito Fontes, 4930-610 Valença</p>
+                                            <h4 id="contacto-pavilhao-title">Pavilhão Municipal</h4>
+                                            <p id="contacto-morada" style="color: var(--text-secondary);">Av. Tito Fontes, 4930-610 Valença</p>
                                         </div>
                                     </div>
                                     <div style="display: flex; align-items: center; gap: 15px; margin-bottom: 20px;">
                                         <div class="feature-icon" style="margin: 0;">✉️</div>
                                         <div>
                                             <h4>Email Geral</h4>
-                                            <p style="color: var(--text-secondary);">geral@bcv.pt</p>
+                                            <p id="contacto-email" style="color: var(--text-secondary);">geral@bcv.pt</p>
                                         </div>
                                     </div>
                                     <div style="display: flex; align-items: center; gap: 15px;">
                                         <div class="feature-icon" style="margin: 0;">📱</div>
                                         <div>
                                             <h4>Telefone</h4>
-                                            <p style="color: var(--text-secondary);">+351 900 000 000</p>
+                                            <p id="contacto-telefone" style="color: var(--text-secondary);">+351 900 000 000</p>
                                         </div>
                                     </div>
                                 </div>
@@ -306,9 +306,10 @@
                                 <div class="feature-box" style="display: flex; flex-direction: column; justify-content: center; align-items: center; text-align: center;">
                                     <h3>Segue-nos nas Redes</h3>
                                     <p style="margin-bottom: 20px;">Fica a par de todas as novidades e resultados desportivos.</p>
-                                    <div style="display: flex; gap: 15px;">
-                                        <a href="#" class="btn btn-primary" style="background: #1877F2; color: white;">Facebook</a>
-                                        <a href="#" class="btn btn-primary" style="background: #E1306C; color: white;">Instagram</a>
+                                    <div id="redes-sociais-botoes" style="display: flex; gap: 15px; flex-wrap: wrap; justify-content: center;">
+                                        <a href="https://www.facebook.com/profile.php?id=100039859278453" target="_blank" class="btn btn-primary btn-social-fb" style="background: #1877F2; color: white;">Facebook</a>
+                                        <a href="https://www.instagram.com/bcvalenca" target="_blank" class="btn btn-primary btn-social-ig" style="background: #E1306C; color: white;">Instagram</a>
+                                        <a href="https://www.youtube.com/@BCValenca" target="_blank" class="btn btn-primary btn-social-yt" style="background: #FF0000; color: white;">YouTube</a>
                                     </div>
                                 </div>
                             </div>
@@ -348,11 +349,11 @@
                     <span class="brand-text" style="font-size: 1.2rem; color: #ffffff;">Basket Clube de Valença</span>
                 </a>
                 
-                <div class="social-links" style="display: flex; gap: 20px; font-size: 1.5rem;">
-                    <a href="https://www.facebook.com/profile.php?id=100039859278453" target="_blank" style="color: #ffffff; opacity: 0.8; transition: opacity 0.3s ease;"><i class="fab fa-facebook"></i></a>
-                    <a href="https://www.instagram.com/bcvalenca" target="_blank" style="color: #ffffff; opacity: 0.8; transition: opacity 0.3s ease;"><i class="fab fa-instagram"></i></a>
-                    <a href="https://www.youtube.com/@BCValenca" target="_blank" style="color: #ffffff; opacity: 0.8; transition: opacity 0.3s ease;"><i class="fab fa-youtube"></i></a>
-                    <a href="https://www.tiktok.com/@bcvalenca" target="_blank" style="color: #ffffff; opacity: 0.8; transition: opacity 0.3s ease;"><i class="fab fa-tiktok"></i></a>
+                <div class="social-links" id="footer-social-links" style="display: flex; gap: 20px; font-size: 1.5rem;">
+                    <a href="https://www.facebook.com/profile.php?id=100039859278453" target="_blank" class="social-link-fb" style="color: #ffffff; opacity: 0.8; transition: opacity 0.3s ease;"><i class="fab fa-facebook"></i></a>
+                    <a href="https://www.instagram.com/bcvalenca" target="_blank" class="social-link-ig" style="color: #ffffff; opacity: 0.8; transition: opacity 0.3s ease;"><i class="fab fa-instagram"></i></a>
+                    <a href="https://www.youtube.com/@BCValenca" target="_blank" class="social-link-yt" style="color: #ffffff; opacity: 0.8; transition: opacity 0.3s ease;"><i class="fab fa-youtube"></i></a>
+                    <a href="https://www.tiktok.com/@bcvalenca" target="_blank" class="social-link-tt" style="color: #ffffff; opacity: 0.8; transition: opacity 0.3s ease;"><i class="fab fa-tiktok"></i></a>
                 </div>
             </div>
             
@@ -363,7 +364,9 @@
     </footer>
 
     <!-- Scripts -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="js/config.js"></script>
     <script src="js/main.js"></script>
-    <script src="js/clube.js"></script>
+    <script src="js/clube.js?v=20260825"></script>
 </body>
 </html>

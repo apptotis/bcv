@@ -775,7 +775,184 @@
                     </div>
                 </div>
 
-                <div id="tab-config" class="tab-pane hidden"><h2>Configurações (Em Breve)</h2></div>
+                <!-- TAB: CONFIGURAÇÕES GERAIS E ÓRGÃOS SOCIAIS -->
+                <div id="tab-config" class="tab-pane hidden">
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; flex-wrap: wrap; gap: 10px;">
+                        <div>
+                            <h2>⚙️ Configurações do Clube</h2>
+                            <p style="color: var(--text-secondary); font-size: 0.9rem;">Gira os dados institucionais, contactos, redes sociais e a composição dos órgãos sociais.</p>
+                        </div>
+                    </div>
+
+                    <!-- Sub-menu de Navegação de Configurações -->
+                    <div style="display: flex; gap: 10px; margin-bottom: 25px; border-bottom: 1px solid var(--border-color); padding-bottom: 12px; flex-wrap: wrap;">
+                        <button type="button" class="btn-subconfig active" data-sub="sub-orgaos" style="padding: 8px 16px; border-radius: 8px; border: 1px solid #7e22ce; background: #7e22ce; color: #fff; font-weight: 600; cursor: pointer;">👥 Órgãos Sociais</button>
+                        <button type="button" class="btn-subconfig" data-sub="sub-contactos" style="padding: 8px 16px; border-radius: 8px; border: 1px solid var(--border-color); background: #f8fafc; color: var(--text-primary); font-weight: 600; cursor: pointer;">📍 Contactos & Pavilhão</button>
+                        <button type="button" class="btn-subconfig" data-sub="sub-redes" style="padding: 8px 16px; border-radius: 8px; border: 1px solid var(--border-color); background: #f8fafc; color: var(--text-primary); font-weight: 600; cursor: pointer;">🌐 Redes Sociais</button>
+                        <button type="button" class="btn-subconfig" data-sub="sub-geral" style="padding: 8px 16px; border-radius: 8px; border: 1px solid var(--border-color); background: #f8fafc; color: var(--text-primary); font-weight: 600; cursor: pointer;">🏢 Dados Gerais & Banner</button>
+                    </div>
+
+                    <!-- SUB-SECÇÃO 1: ÓRGÃOS SOCIAIS -->
+                    <div id="sub-orgaos" class="subconfig-content">
+                        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
+                            <h3 style="color: var(--accent-primary); font-size: 1.1rem;">Composição dos Órgãos Sociais</h3>
+                            <button type="button" id="btn-add-orgao" class="btn-primary" style="padding: 8px 16px; font-size: 0.9rem;">➕ Adicionar Membro</button>
+                        </div>
+
+                        <!-- Modal / Formulário de Membro de Órgão Social -->
+                        <div id="modal-orgao-container" class="hidden" style="position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.5); display: flex; align-items: center; justify-content: center; z-index: 9999;">
+                            <div style="background: #ffffff; width: 90%; max-width: 500px; padding: 25px; border-radius: 12px; box-shadow: var(--shadow-lg); border: 1px solid var(--border-color);">
+                                <h3 id="modal-orgao-title" style="margin-bottom: 15px; color: var(--accent-primary);">Adicionar Membro</h3>
+                                <form id="form-orgao-social">
+                                    <input type="hidden" id="orgao-id">
+                                    <div style="margin-bottom: 12px;">
+                                        <label style="display:block; margin-bottom: 5px; font-size: 0.85rem; font-weight: 600;">Órgão Social <span class="req">*</span></label>
+                                        <select id="orgao-tipo" class="admin-input" required style="width: 100%; padding: 10px;">
+                                            <option value="Assembleia Geral">Assembleia Geral</option>
+                                            <option value="Conselho Fiscal">Conselho Fiscal</option>
+                                            <option value="Direção">Direção</option>
+                                            <option value="Gabinete Técnico">Gabinete Técnico</option>
+                                            <option value="Outro">Outro</option>
+                                        </select>
+                                    </div>
+                                    <div style="margin-bottom: 12px;">
+                                        <label style="display:block; margin-bottom: 5px; font-size: 0.85rem; font-weight: 600;">Cargo <span class="req">*</span></label>
+                                        <input type="text" id="orgao-cargo" class="admin-input" placeholder="Ex: Presidente, Secretário, Vogal" required style="width: 100%;">
+                                    </div>
+                                    <div style="margin-bottom: 12px;">
+                                        <label style="display:block; margin-bottom: 5px; font-size: 0.85rem; font-weight: 600;">Nome Completo <span class="req">*</span></label>
+                                        <input type="text" id="orgao-nome" class="admin-input" placeholder="Nome do Membro" required style="width: 100%;">
+                                    </div>
+                                    <div style="margin-bottom: 20px;">
+                                        <label style="display:block; margin-bottom: 5px; font-size: 0.85rem; font-weight: 600;">Ordem de Exibição</label>
+                                        <input type="number" id="orgao-ordem" class="admin-input" value="1" min="1" max="99" style="width: 100%;">
+                                    </div>
+                                    <div style="display: flex; gap: 10px;">
+                                        <button type="submit" id="btn-save-orgao" class="btn-primary" style="flex: 1;">Guardar</button>
+                                        <button type="button" id="btn-close-modal-orgao" class="btn-secondary" style="flex: 1;">Cancelar</button>
+                                    </div>
+                                </form>
+                            </div>
+                        </div>
+
+                        <!-- Tabela de Órgãos Sociais -->
+                        <div class="table-container">
+                            <table class="admin-table">
+                                <thead>
+                                    <tr>
+                                        <th style="padding: 10px;">Órgão</th>
+                                        <th style="padding: 10px;">Cargo</th>
+                                        <th style="padding: 10px;">Nome</th>
+                                        <th style="padding: 10px; width: 60px; text-align: center;">Ordem</th>
+                                        <th style="padding: 10px; width: 140px; text-align: center;">Ações</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="orgaos-table-body">
+                                    <tr><td colspan="5" style="padding: 10px;">A carregar órgãos sociais...</td></tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+
+                    <!-- SUB-SECÇÃO 2: CONTACTOS & PAVILHÃO -->
+                    <div id="sub-contactos" class="subconfig-content hidden">
+                        <div class="welcome-box" style="padding: 20px; background: #ffffff; border: 1px solid var(--border-color); border-radius: 12px; max-width: 700px;">
+                            <h3 style="color: var(--accent-primary); margin-bottom: 15px;">📍 Informações de Contacto</h3>
+                            <form id="form-config-contactos">
+                                <div style="margin-bottom: 15px;">
+                                    <label style="display:block; margin-bottom: 5px; font-weight: 600; font-size: 0.85rem;">Nome do Pavilhão</label>
+                                    <input type="text" id="cfg-pavilhao" class="admin-input" placeholder="Ex: Pavilhão Municipal de Valença" style="width: 100%;">
+                                </div>
+                                <div style="margin-bottom: 15px;">
+                                    <label style="display:block; margin-bottom: 5px; font-weight: 600; font-size: 0.85rem;">Morada Completa</label>
+                                    <input type="text" id="cfg-morada" class="admin-input" placeholder="Ex: Av. Tito Fontes, 4930-610 Valença" style="width: 100%;">
+                                </div>
+                                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-bottom: 15px;">
+                                    <div>
+                                        <label style="display:block; margin-bottom: 5px; font-weight: 600; font-size: 0.85rem;">Email Geral</label>
+                                        <input type="email" id="cfg-email" class="admin-input" placeholder="geral@bcv.pt" style="width: 100%;">
+                                    </div>
+                                    <div>
+                                        <label style="display:block; margin-bottom: 5px; font-weight: 600; font-size: 0.85rem;">Telefone / Telemóvel</label>
+                                        <input type="tel" id="cfg-telefone" class="admin-input" placeholder="+351 900 000 000" style="width: 100%;">
+                                    </div>
+                                </div>
+                                <div style="margin-bottom: 20px;">
+                                    <label style="display:block; margin-bottom: 5px; font-weight: 600; font-size: 0.85rem;">Horário de Funcionamento / Treinos</label>
+                                    <input type="text" id="cfg-horario" class="admin-input" placeholder="Ex: Segunda a Sexta: 17h00 - 21h30" style="width: 100%;">
+                                </div>
+                                <button type="submit" id="btn-save-contactos" class="btn-primary" style="padding: 10px 24px;">💾 Guardar Contactos</button>
+                                <span id="msg-contactos-status" style="margin-left: 15px; font-size: 0.9rem; font-weight: 600;"></span>
+                            </form>
+                        </div>
+                    </div>
+
+                    <!-- SUB-SECÇÃO 3: REDES SOCIAIS -->
+                    <div id="sub-redes" class="subconfig-content hidden">
+                        <div class="welcome-box" style="padding: 20px; background: #ffffff; border: 1px solid var(--border-color); border-radius: 12px; max-width: 700px;">
+                            <h3 style="color: var(--accent-primary); margin-bottom: 15px;">🌐 Links das Redes Sociais Oficiais</h3>
+                            <form id="form-config-redes">
+                                <div style="margin-bottom: 15px;">
+                                    <label style="display:block; margin-bottom: 5px; font-weight: 600; font-size: 0.85rem;">Facebook URL</label>
+                                    <input type="url" id="cfg-facebook" class="admin-input" placeholder="https://facebook.com/..." style="width: 100%;">
+                                </div>
+                                <div style="margin-bottom: 15px;">
+                                    <label style="display:block; margin-bottom: 5px; font-weight: 600; font-size: 0.85rem;">Instagram URL</label>
+                                    <input type="url" id="cfg-instagram" class="admin-input" placeholder="https://instagram.com/..." style="width: 100%;">
+                                </div>
+                                <div style="margin-bottom: 15px;">
+                                    <label style="display:block; margin-bottom: 5px; font-weight: 600; font-size: 0.85rem;">YouTube URL</label>
+                                    <input type="url" id="cfg-youtube" class="admin-input" placeholder="https://youtube.com/..." style="width: 100%;">
+                                </div>
+                                <div style="margin-bottom: 15px;">
+                                    <label style="display:block; margin-bottom: 5px; font-weight: 600; font-size: 0.85rem;">TikTok URL</label>
+                                    <input type="url" id="cfg-tiktok" class="admin-input" placeholder="https://tiktok.com/..." style="width: 100%;">
+                                </div>
+                                <div style="margin-bottom: 20px;">
+                                    <label style="display:block; margin-bottom: 5px; font-weight: 600; font-size: 0.85rem;">WhatsApp Contacto / Link</label>
+                                    <input type="text" id="cfg-whatsapp" class="admin-input" placeholder="Ex: +351 900 000 000 ou link" style="width: 100%;">
+                                </div>
+                                <button type="submit" id="btn-save-redes" class="btn-primary" style="padding: 10px 24px;">💾 Guardar Redes Sociais</button>
+                                <span id="msg-redes-status" style="margin-left: 15px; font-size: 0.9rem; font-weight: 600;"></span>
+                            </form>
+                        </div>
+                    </div>
+
+                    <!-- SUB-SECÇÃO 4: DADOS GERAIS & BANNER -->
+                    <div id="sub-geral" class="subconfig-content hidden">
+                        <div class="welcome-box" style="padding: 20px; background: #ffffff; border: 1px solid var(--border-color); border-radius: 12px; max-width: 700px;">
+                            <h3 style="color: var(--accent-primary); margin-bottom: 15px;">🏢 Dados Gerais do Clube</h3>
+                            <form id="form-config-geral">
+                                <div style="display: grid; grid-template-columns: 2fr 1fr; gap: 15px; margin-bottom: 15px;">
+                                    <div>
+                                        <label style="display:block; margin-bottom: 5px; font-weight: 600; font-size: 0.85rem;">Nome Oficial</label>
+                                        <input type="text" id="cfg-nome-clube" class="admin-input" placeholder="Basket Clube de Valença" style="width: 100%;">
+                                    </div>
+                                    <div>
+                                        <label style="display:block; margin-bottom: 5px; font-weight: 600; font-size: 0.85rem;">Sigla</label>
+                                        <input type="text" id="cfg-sigla" class="admin-input" placeholder="BCV" style="width: 100%;">
+                                    </div>
+                                </div>
+                                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-bottom: 15px;">
+                                    <div>
+                                        <label style="display:block; margin-bottom: 5px; font-weight: 600; font-size: 0.85rem;">Ano de Fundação</label>
+                                        <input type="text" id="cfg-ano-fundacao" class="admin-input" placeholder="1996" style="width: 100%;">
+                                    </div>
+                                    <div>
+                                        <label style="display:block; margin-bottom: 5px; font-weight: 600; font-size: 0.85rem;">NIF do Clube</label>
+                                        <input type="text" id="cfg-nif" class="admin-input" placeholder="500000000" style="width: 100%;">
+                                    </div>
+                                </div>
+                                <div style="margin-bottom: 20px;">
+                                    <label style="display:block; margin-bottom: 5px; font-weight: 600; font-size: 0.85rem;">Texto do Banner de Destaque / Aniversário</label>
+                                    <input type="text" id="cfg-banner" class="admin-input" placeholder="1996 - 2026 | Celebramos 30 Anos..." style="width: 100%;">
+                                </div>
+                                <button type="submit" id="btn-save-geral" class="btn-primary" style="padding: 10px 24px;">💾 Guardar Dados Gerais</button>
+                                <span id="msg-geral-status" style="margin-left: 15px; font-size: 0.9rem; font-weight: 600;"></span>
+                            </form>
+                        </div>
+                    </div>
+                </div>
             </main>
         </div>
     </div>

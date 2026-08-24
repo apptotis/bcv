@@ -55,4 +55,138 @@ document.addEventListener('DOMContentLoaded', () => {
             }
         }
     });
+
+    // =========================================================================
+    // CARREGAMENTO DINÂMICO DE CONFIGURAÇÕES E ÓRGÃOS SOCIAIS (SUPABASE)
+    // =========================================================================
+    
+    async function loadDynamicClubData() {
+        if (typeof supabase === 'undefined') return;
+
+        try {
+            await Promise.all([
+                loadConfiguracoesFront(),
+                loadOrgaosSociaisFront()
+            ]);
+        } catch (e) {
+            console.warn("Aviso ao carregar dados dinâmicos do clube:", e);
+        }
+    }
+
+    async function loadConfiguracoesFront() {
+        try {
+            const { data, error } = await supabase.from('clube_config').select('*');
+            if (error || !data) return;
+
+            data.forEach(item => {
+                const dados = item.dados || {};
+                
+                // Contactos
+                if (item.chave === 'contactos') {
+                    const elPavilhao = document.getElementById('contacto-pavilhao-title');
+                    const elMorada = document.getElementById('contacto-morada');
+                    const elEmail = document.getElementById('contacto-email');
+                    const elTel = document.getElementById('contacto-telefone');
+
+                    if (elPavilhao && dados.pavilhao) elPavilhao.textContent = dados.pavilhao;
+                    if (elMorada && dados.morada) elMorada.textContent = dados.morada;
+                    if (elEmail && dados.email) {
+                        elEmail.textContent = dados.email;
+                        if (elEmail.tagName === 'A') elEmail.href = `mailto:${dados.email}`;
+                    }
+                    if (elTel && dados.telefone) {
+                        elTel.textContent = dados.telefone;
+                        if (elTel.tagName === 'A') elTel.href = `tel:${dados.telefone.replace(/\s+/g, '')}`;
+                    }
+                }
+
+                // Redes Sociais
+                if (item.chave === 'redes_sociais') {
+                    const linksFb = document.querySelectorAll('.btn-social-fb, .social-link-fb, a[aria-label="Facebook"]');
+                    const linksIg = document.querySelectorAll('.btn-social-ig, .social-link-ig, a[aria-label="Instagram"]');
+                    const linksYt = document.querySelectorAll('.btn-social-yt, .social-link-yt, a[aria-label="YouTube"]');
+                    const linksTt = document.querySelectorAll('.social-link-tt, a[aria-label="TikTok"]');
+
+                    if (dados.facebook) linksFb.forEach(a => a.href = dados.facebook);
+                    if (dados.instagram) linksIg.forEach(a => a.href = dados.instagram);
+                    if (dados.youtube) linksYt.forEach(a => a.href = dados.youtube);
+                    if (dados.tiktok) linksTt.forEach(a => a.href = dados.tiktok);
+                }
+
+                // Geral / Banner
+                if (item.chave === 'geral') {
+                    const bannerEl = document.querySelector('.anniversary-banner');
+                    if (bannerEl && dados.banner_aniversario) {
+                        bannerEl.innerHTML = dados.banner_aniversario;
+                    }
+                }
+            });
+        } catch (err) {
+            console.warn("Erro ao ler clube_config:", err);
+        }
+    }
+
+    async function loadOrgaosSociaisFront() {
+        try {
+            const { data, error } = await supabase
+                .from('orgaos_sociais')
+                .select('*')
+                .eq('ativo', true)
+                .order('ordem', { ascending: true });
+
+            if (error || !data || data.length === 0) return;
+
+            const container = document.getElementById('orgaos-sociais-container');
+            if (!container) return;
+
+            // Agrupar por órgão
+            const grupos = {};
+            data.forEach(m => {
+                if (!grupos[m.orgao]) grupos[m.orgao] = [];
+                grupos[m.orgao].push(m);
+            });
+
+            // Ordem recomendada dos órgãos
+            const orgaosOrdem = ['Assembleia Geral', 'Conselho Fiscal', 'Direção', 'Gabinete Técnico'];
+            const outrosOrgaos = Object.keys(grupos).filter(o => !orgaosOrdem.includes(o));
+            const todosOrgaos = [...orgaosOrdem.filter(o => grupos[o]), ...outrosOrgaos];
+
+            container.innerHTML = '';
+
+            todosOrgaos.forEach(orgaoNome => {
+                const membros = grupos[orgaoNome];
+                if (!membros || membros.length === 0) return;
+
+                const box = document.createElement('div');
+                box.className = 'feature-box';
+                box.style.textAlign = 'center';
+
+                const gridClass = membros.length > 3 ? 'grid-4' : 'grid-3';
+
+                let membrosHtml = '';
+                membros.forEach(m => {
+                    membrosHtml += `
+                        <div style="margin-bottom: 15px;">
+                            <strong>${m.cargo}</strong><br>
+                            <span style="color: var(--text-secondary);">${m.nome}</span>
+                        </div>
+                    `;
+                });
+
+                box.innerHTML = `
+                    <h3 style="color: var(--accent-primary); margin-bottom: 1.5rem;">${orgaoNome}</h3>
+                    <div class="${gridClass}">
+                        ${membrosHtml}
+                    </div>
+                `;
+
+                container.appendChild(box);
+            });
+        } catch (err) {
+            console.warn("Erro ao renderizar órgãos sociais:", err);
+        }
+    }
+
+    // Carregar dados dinâmicos do clube
+    loadDynamicClubData();
 });

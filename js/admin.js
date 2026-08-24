@@ -2113,6 +2113,334 @@ document.addEventListener('DOMContentLoaded', async () => {
         else loadResultados();
     };
 
+    // =========================================================================
+    // 12. CONFIGURAÇÕES DINÂMICAS & ÓRGÃOS SOCIAIS
+    // =========================================================================
+    
+    // Sub-abas de configurações
+    const btnSubconfigs = document.querySelectorAll('.btn-subconfig');
+    btnSubconfigs.forEach(btn => {
+        btn.addEventListener('click', () => {
+            const targetSub = btn.getAttribute('data-sub');
+            btnSubconfigs.forEach(b => {
+                b.classList.remove('active');
+                b.style.background = '#f8fafc';
+                b.style.color = 'var(--text-primary)';
+                b.style.borderColor = 'var(--border-color)';
+            });
+            btn.classList.add('active');
+            btn.style.background = '#7e22ce';
+            btn.style.color = '#ffffff';
+            btn.style.borderColor = '#7e22ce';
+
+            document.querySelectorAll('.subconfig-content').forEach(c => c.classList.add('hidden'));
+            const activeSub = document.getElementById(targetSub);
+            if (activeSub) activeSub.classList.remove('hidden');
+        });
+    });
+
+    // Função Principal de Carregamento de Configurações
+    async function loadConfiguracoes() {
+        await Promise.all([
+            loadClubeConfig(),
+            loadOrgaosSociais()
+        ]);
+    }
+
+    // Carregar e Preencher Configurações de Contactos, Redes e Geral
+    async function loadClubeConfig() {
+        try {
+            const { data, error } = await supabase.from('clube_config').select('*');
+            if (error) {
+                console.warn("Tabela 'clube_config' ainda não criada ou inacessível:", error);
+                return;
+            }
+
+            if (!data) return;
+
+            data.forEach(item => {
+                const dados = item.dados || {};
+                if (item.chave === 'contactos') {
+                    if (document.getElementById('cfg-pavilhao')) document.getElementById('cfg-pavilhao').value = dados.pavilhao || '';
+                    if (document.getElementById('cfg-morada')) document.getElementById('cfg-morada').value = dados.morada || '';
+                    if (document.getElementById('cfg-email')) document.getElementById('cfg-email').value = dados.email || '';
+                    if (document.getElementById('cfg-telefone')) document.getElementById('cfg-telefone').value = dados.telefone || '';
+                    if (document.getElementById('cfg-horario')) document.getElementById('cfg-horario').value = dados.horario || '';
+                } else if (item.chave === 'redes_sociais') {
+                    if (document.getElementById('cfg-facebook')) document.getElementById('cfg-facebook').value = dados.facebook || '';
+                    if (document.getElementById('cfg-instagram')) document.getElementById('cfg-instagram').value = dados.instagram || '';
+                    if (document.getElementById('cfg-youtube')) document.getElementById('cfg-youtube').value = dados.youtube || '';
+                    if (document.getElementById('cfg-tiktok')) document.getElementById('cfg-tiktok').value = dados.tiktok || '';
+                    if (document.getElementById('cfg-whatsapp')) document.getElementById('cfg-whatsapp').value = dados.whatsapp || '';
+                } else if (item.chave === 'geral') {
+                    if (document.getElementById('cfg-nome-clube')) document.getElementById('cfg-nome-clube').value = dados.nome_clube || '';
+                    if (document.getElementById('cfg-sigla')) document.getElementById('cfg-sigla').value = dados.sigla || '';
+                    if (document.getElementById('cfg-ano-fundacao')) document.getElementById('cfg-ano-fundacao').value = dados.ano_fundacao || '';
+                    if (document.getElementById('cfg-nif')) document.getElementById('cfg-nif').value = dados.nif || '';
+                    if (document.getElementById('cfg-banner')) document.getElementById('cfg-banner').value = dados.banner_aniversario || '';
+                }
+            });
+        } catch (err) {
+            console.error("Erro ao carregar clube_config:", err);
+        }
+    }
+
+    // Salvar Configurações (Contactos)
+    const formConfigContactos = document.getElementById('form-config-contactos');
+    if (formConfigContactos) {
+        formConfigContactos.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const btn = document.getElementById('btn-save-contactos');
+            const msg = document.getElementById('msg-contactos-status');
+            btn.disabled = true;
+            btn.textContent = "A guardar...";
+
+            const dados = {
+                pavilhao: document.getElementById('cfg-pavilhao').value,
+                morada: document.getElementById('cfg-morada').value,
+                email: document.getElementById('cfg-email').value,
+                telefone: document.getElementById('cfg-telefone').value,
+                horario: document.getElementById('cfg-horario').value
+            };
+
+            try {
+                const { error } = await supabase.from('clube_config').upsert({
+                    chave: 'contactos',
+                    dados: dados,
+                    updated_at: new Date()
+                });
+                if (error) throw error;
+                msg.textContent = "✅ Guardado com sucesso!";
+                msg.style.color = "#16a34a";
+            } catch (err) {
+                console.error("Erro ao guardar contactos:", err);
+                msg.textContent = "❌ Erro ao guardar: " + err.message;
+                msg.style.color = "#dc2626";
+            } finally {
+                btn.disabled = false;
+                btn.textContent = "💾 Guardar Contactos";
+                setTimeout(() => { msg.textContent = ''; }, 4000);
+            }
+        });
+    }
+
+    // Salvar Configurações (Redes Sociais)
+    const formConfigRedes = document.getElementById('form-config-redes');
+    if (formConfigRedes) {
+        formConfigRedes.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const btn = document.getElementById('btn-save-redes');
+            const msg = document.getElementById('msg-redes-status');
+            btn.disabled = true;
+            btn.textContent = "A guardar...";
+
+            const dados = {
+                facebook: document.getElementById('cfg-facebook').value,
+                instagram: document.getElementById('cfg-instagram').value,
+                youtube: document.getElementById('cfg-youtube').value,
+                tiktok: document.getElementById('cfg-tiktok').value,
+                whatsapp: document.getElementById('cfg-whatsapp').value
+            };
+
+            try {
+                const { error } = await supabase.from('clube_config').upsert({
+                    chave: 'redes_sociais',
+                    dados: dados,
+                    updated_at: new Date()
+                });
+                if (error) throw error;
+                msg.textContent = "✅ Guardado com sucesso!";
+                msg.style.color = "#16a34a";
+            } catch (err) {
+                console.error("Erro ao guardar redes sociais:", err);
+                msg.textContent = "❌ Erro ao guardar: " + err.message;
+                msg.style.color = "#dc2626";
+            } finally {
+                btn.disabled = false;
+                btn.textContent = "💾 Guardar Redes Sociais";
+                setTimeout(() => { msg.textContent = ''; }, 4000);
+            }
+        });
+    }
+
+    // Salvar Configurações (Geral)
+    const formConfigGeral = document.getElementById('form-config-geral');
+    if (formConfigGeral) {
+        formConfigGeral.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const btn = document.getElementById('btn-save-geral');
+            const msg = document.getElementById('msg-geral-status');
+            btn.disabled = true;
+            btn.textContent = "A guardar...";
+
+            const dados = {
+                nome_clube: document.getElementById('cfg-nome-clube').value,
+                sigla: document.getElementById('cfg-sigla').value,
+                ano_fundacao: document.getElementById('cfg-ano-fundacao').value,
+                nif: document.getElementById('cfg-nif').value,
+                banner_aniversario: document.getElementById('cfg-banner').value
+            };
+
+            try {
+                const { error } = await supabase.from('clube_config').upsert({
+                    chave: 'geral',
+                    dados: dados,
+                    updated_at: new Date()
+                });
+                if (error) throw error;
+                msg.textContent = "✅ Guardado com sucesso!";
+                msg.style.color = "#16a34a";
+            } catch (err) {
+                console.error("Erro ao guardar dados gerais:", err);
+                msg.textContent = "❌ Erro ao guardar: " + err.message;
+                msg.style.color = "#dc2626";
+            } finally {
+                btn.disabled = false;
+                btn.textContent = "💾 Guardar Dados Gerais";
+                setTimeout(() => { msg.textContent = ''; }, 4000);
+            }
+        });
+    }
+
+    // Carregar Lista de Órgãos Sociais
+    async function loadOrgaosSociais() {
+        const tbody = document.getElementById('orgaos-table-body');
+        if (!tbody) return;
+
+        try {
+            tbody.innerHTML = '<tr><td colspan="5" style="padding: 10px;">A carregar órgãos sociais...</td></tr>';
+            const { data, error } = await supabase
+                .from('orgaos_sociais')
+                .select('*')
+                .order('orgao', { ascending: true })
+                .order('ordem', { ascending: true });
+
+            if (error) {
+                if (error.code === '42P01') {
+                    tbody.innerHTML = '<tr><td colspan="5" style="padding: 10px; color: orange;">A tabela "orgaos_sociais" ainda não existe. Execute o script setup_configuracoes_clube.sql no Supabase.</td></tr>';
+                    return;
+                }
+                throw error;
+            }
+
+            tbody.innerHTML = '';
+            if (!data || data.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="5" style="padding: 15px; text-align: center;">Nenhum membro registado nos órgãos sociais.</td></tr>';
+                return;
+            }
+
+            data.forEach(membro => {
+                const tr = document.createElement('tr');
+                tr.style.borderBottom = "1px solid rgba(0,0,0,0.05)";
+                const membroJson = JSON.stringify(membro).replace(/'/g, "&apos;").replace(/"/g, "&quot;");
+
+                let badgeCor = '#7e22ce';
+                let badgeBg = 'rgba(126, 34, 206, 0.1)';
+                if (membro.orgao === 'Assembleia Geral') { badgeCor = '#2563eb'; badgeBg = 'rgba(37, 99, 235, 0.1)'; }
+                else if (membro.orgao === 'Conselho Fiscal') { badgeCor = '#059669'; badgeBg = 'rgba(5, 150, 105, 0.1)'; }
+
+                tr.innerHTML = `
+                    <td style="padding: 10px;"><span style="background: ${badgeBg}; color: ${badgeCor}; font-weight: 700; font-size: 0.8rem; padding: 3px 8px; border-radius: 4px;">${membro.orgao}</span></td>
+                    <td style="padding: 10px; font-weight: 600;">${membro.cargo}</td>
+                    <td style="padding: 10px;">${membro.nome}</td>
+                    <td style="padding: 10px; text-align: center;"><span style="color: var(--text-secondary); font-weight: 700;">#${membro.ordem || 1}</span></td>
+                    <td style="padding: 10px; text-align: center; white-space: nowrap;">
+                        <button class="btn-action" onclick="window.editOrgaoSocial('${membroJson}')" title="Editar" style="padding: 4px 8px; margin-right: 4px;">✏️ Editar</button>
+                        <button class="btn-action delete" onclick="window.deleteOrgaoSocial('${membro.id}')" title="Eliminar" style="padding: 4px 8px;">🗑️</button>
+                    </td>
+                `;
+                tbody.appendChild(tr);
+            });
+        } catch (err) {
+            console.error("Erro ao carregar órgãos sociais:", err);
+            tbody.innerHTML = `<tr><td colspan="5" style="padding: 10px; color: red;">Erro: ${err.message}</td></tr>`;
+        }
+    }
+
+    // Modal de Órgãos Sociais
+    const modalOrgaoContainer = document.getElementById('modal-orgao-container');
+    const btnAddOrgao = document.getElementById('btn-add-orgao');
+    const btnCloseModalOrgao = document.getElementById('btn-close-modal-orgao');
+    const formOrgaoSocial = document.getElementById('form-orgao-social');
+    const modalOrgaoTitle = document.getElementById('modal-orgao-title');
+
+    if (btnAddOrgao) {
+        btnAddOrgao.addEventListener('click', () => {
+            if (formOrgaoSocial) formOrgaoSocial.reset();
+            document.getElementById('orgao-id').value = '';
+            modalOrgaoTitle.textContent = 'Adicionar Membro';
+            modalOrgaoContainer.classList.remove('hidden');
+        });
+    }
+
+    if (btnCloseModalOrgao) {
+        btnCloseModalOrgao.addEventListener('click', () => {
+            modalOrgaoContainer.classList.add('hidden');
+        });
+    }
+
+    if (formOrgaoSocial) {
+        formOrgaoSocial.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const id = document.getElementById('orgao-id').value;
+            const isEdit = !!id;
+            const btn = document.getElementById('btn-save-orgao');
+            btn.disabled = true;
+            btn.textContent = "A guardar...";
+
+            const payload = {
+                orgao: document.getElementById('orgao-tipo').value,
+                cargo: document.getElementById('orgao-cargo').value,
+                nome: document.getElementById('orgao-nome').value,
+                ordem: parseInt(document.getElementById('orgao-ordem').value) || 1,
+                updated_at: new Date()
+            };
+
+            try {
+                if (isEdit) {
+                    const { error } = await supabase.from('orgaos_sociais').update(payload).eq('id', id);
+                    if (error) throw error;
+                } else {
+                    const { error } = await supabase.from('orgaos_sociais').insert([payload]);
+                    if (error) throw error;
+                }
+
+                modalOrgaoContainer.classList.add('hidden');
+                loadOrgaosSociais();
+            } catch (err) {
+                console.error("Erro ao guardar membro de órgão social:", err);
+                alert("Erro ao guardar: " + err.message);
+            } finally {
+                btn.disabled = false;
+                btn.textContent = "Guardar";
+            }
+        });
+    }
+
+    window.editOrgaoSocial = function(membroStr) {
+        const membro = typeof membroStr === 'string' ? JSON.parse(membroStr) : membroStr;
+        document.getElementById('orgao-id').value = membro.id;
+        document.getElementById('orgao-tipo').value = membro.orgao;
+        document.getElementById('orgao-cargo').value = membro.cargo;
+        document.getElementById('orgao-nome').value = membro.nome;
+        document.getElementById('orgao-ordem').value = membro.ordem || 1;
+
+        modalOrgaoTitle.textContent = 'Editar Membro: ' + membro.nome;
+        modalOrgaoContainer.classList.remove('hidden');
+    };
+
+    window.deleteOrgaoSocial = async function(id) {
+        if (!confirm('Tem a certeza que deseja eliminar este membro dos órgãos sociais?')) return;
+        try {
+            const { error } = await supabase.from('orgaos_sociais').delete().eq('id', id);
+            if (error) throw error;
+            loadOrgaosSociais();
+        } catch (err) {
+            console.error("Erro ao eliminar membro:", err);
+            alert("Erro ao eliminar: " + err.message);
+        }
+    };
+
     // Iniciar carregamento das tabs quando ativadas
     const tabButtons = document.querySelectorAll('.tab-btn');
     tabButtons.forEach(btn => {
@@ -2134,9 +2462,9 @@ document.addEventListener('DOMContentLoaded', async () => {
             if (target === 'tab-agenda') loadAgenda();
             if (target === 'tab-resultados') loadResultados();
             if (target === 'tab-equipas') loadEquipas();
+            if (target === 'tab-config') loadConfiguracoes();
         });
     });
-
 
     // Iniciar
     checkSession();
