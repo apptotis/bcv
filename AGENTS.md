@@ -63,4 +63,5 @@
 - [2026-08-25] Gemini: Remoção da tag 'Automático' e ajuste do card de escalão atribuído em inscricao.html para duas linhas limpas (Escalão Atribuído FPB + Resultado).
 - [2026-08-25] Gemini: Ativação de campos obrigatórios (required) e validação estrita no Passo 4 (Encarregado de Educação) para atletas menores de 18 anos no wizard de inscrição.
 - [2026-08-25] Gemini: Integração completa da secção Encarregado de Educação no formulário/modal de Atletas do Admin e sincronização com a geração oficial de PDF da FPB.
+- [2026-08-25] Gemini: Atualização do campo Associação de Basquetebol no PDF oficial FPB de 'ABVC' para 'AB Viana do Castelo'.
 

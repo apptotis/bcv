@@ -1358,7 +1358,7 @@ document.addEventListener('DOMContentLoaded', async () => {
 
             // 1. Dados do Clube e Época
             safeSetText('Clube', 'BASKET CLUBE DE VALENÇA');
-            safeSetText('associacao', 'ABVC');
+            safeSetText('associacao', 'AB Viana do Castelo');
 
             let ep1 = '2026', ep2 = '2027';
             if (atleta.epoca && atleta.epoca.includes('/')) {
