@@ -1256,71 +1256,6 @@ document.addEventListener('DOMContentLoaded', async () => {
         }
     }
 
-    // Submeter formulário de Atleta
-    if (formAtleta) {
-        formAtleta.addEventListener('submit', async (e) => {
-            e.preventDefault();
-            
-            const atletaId = editAtletaIdInput.value;
-            const isEditMode = !!atletaId;
-            
-            btnSaveAtleta.textContent = isEditMode ? "A guardar..." : "A adicionar...";
-            btnSaveAtleta.disabled = true;
-            atletaMsg.classList.add('hidden');
-
-            const atletaData = {
-                nome: document.getElementById('atleta-nome').value,
-                nickname: document.getElementById('atleta-nickname').value || null,
-                epoca: document.getElementById('atleta-epoca').value,
-                funcao: document.getElementById('atleta-funcao').value,
-                numero_camisola: document.getElementById('atleta-numero').value ? parseInt(document.getElementById('atleta-numero').value) : null,
-                escalao: document.getElementById('atleta-escalao').value,
-                sexo: document.getElementById('atleta-sexo').value,
-                data_nascimento: document.getElementById('atleta-nascimento').value || null,
-                nacionalidade: document.getElementById('atleta-nacionalidade').value,
-                licenca: document.getElementById('atleta-licenca').value,
-                foto: fotoUrlInput.value
-            };
-
-            try {
-                const fotoFile = fotoFileInput.files[0];
-                if (fotoFile) {
-                    const fileName = `atleta_${Date.now()}_${fotoFile.name.replace(/\s/g, '_')}`;
-                    const { error: uploadError } = await supabase.storage.from('fotos').upload(fileName, fotoFile);
-                    
-                    if (uploadError) throw uploadError;
-                    
-                    const { data: publicData } = supabase.storage.from('fotos').getPublicUrl(fileName);
-                    atletaData.foto = publicData.publicUrl;
-                }
-
-                if (isEditMode) {
-                    const { error } = await supabase.from('atletasbcv').update(atletaData).eq('id', atletaId);
-                    if (error) throw error;
-                    alert("✅ Atleta atualizado com sucesso!");
-                } else {
-                    const { error } = await supabase.from('atletasbcv').insert([atletaData]);
-                    if (error) throw error;
-                    alert("✅ Atleta adicionado com sucesso!");
-                }
-
-                closeAtletaModal();
-                loadAtletas();
-
-            } catch (error) {
-                console.error("Erro ao guardar atleta:", error);
-                if (error.code === '42P01') {
-                     alert("❌ Erro: A tabela 'atletasbcv' não existe no Supabase.");
-                } else {
-                     alert("❌ Erro ao guardar: " + error.message);
-                }
-            } finally {
-                btnSaveAtleta.textContent = isEditMode ? "Guardar Alterações" : "Adicionar Atleta";
-                btnSaveAtleta.disabled = false;
-            }
-        });
-    }
-
     function renderAtletasTable(lista) {
         atletasTableBody.innerHTML = '';
         
@@ -1818,6 +1753,10 @@ document.addEventListener('DOMContentLoaded', async () => {
         document.getElementById('atleta-nacionalidade').value = atleta.nacionalidade || '';
         document.getElementById('atleta-licenca').value = atleta.licenca || '';
 
+        if (document.getElementById('atleta-nif')) document.getElementById('atleta-nif').value = atleta.nif || '';
+        if (document.getElementById('atleta-email')) document.getElementById('atleta-email').value = atleta.email || '';
+        if (document.getElementById('atleta-telefone')) document.getElementById('atleta-telefone').value = atleta.telefone || '';
+
         if (document.getElementById('atleta-tipo-doc')) document.getElementById('atleta-tipo-doc').value = atleta.tipo_doc_id || 'Cartão Cidadão';
         if (document.getElementById('atleta-num-doc')) document.getElementById('atleta-num-doc').value = atleta.num_doc_id || '';
         if (document.getElementById('atleta-validade-doc')) document.getElementById('atleta-validade-doc').value = atleta.validade_doc_id || '';
@@ -1825,6 +1764,15 @@ document.addEventListener('DOMContentLoaded', async () => {
         if (document.getElementById('atleta-cp')) document.getElementById('atleta-cp').value = atleta.codigo_postal || '';
         if (document.getElementById('atleta-localidade')) document.getElementById('atleta-localidade').value = atleta.localidade || '';
         if (document.getElementById('atleta-pais-nasc')) document.getElementById('atleta-pais-nasc').value = atleta.pais_nascimento || '';
+
+        // Encarregado de Educação
+        if (document.getElementById('atleta-encarregado-nome')) document.getElementById('atleta-encarregado-nome').value = atleta.encarregado_nome || '';
+        if (document.getElementById('atleta-encarregado-qualidade')) document.getElementById('atleta-encarregado-qualidade').value = atleta.encarregado_qualidade || '';
+        if (document.getElementById('atleta-encarregado-tipo-doc')) document.getElementById('atleta-encarregado-tipo-doc').value = atleta.encarregado_tipo_doc || 'Cartão Cidadão';
+        if (document.getElementById('atleta-encarregado-num-doc')) document.getElementById('atleta-encarregado-num-doc').value = atleta.encarregado_num_doc || '';
+        if (document.getElementById('atleta-encarregado-validade-doc')) document.getElementById('atleta-encarregado-validade-doc').value = atleta.encarregado_validade_doc || '';
+        if (document.getElementById('atleta-encarregado-email')) document.getElementById('atleta-encarregado-email').value = atleta.encarregado_email || '';
+        if (document.getElementById('atleta-encarregado-telefone')) document.getElementById('atleta-encarregado-telefone').value = atleta.encarregado_telefone || '';
 
         // Equipamento
         if (document.getElementById('atleta-equip-tam')) document.getElementById('atleta-equip-tam').value = atleta.equipamento_tamanho || '';
@@ -1900,6 +1848,9 @@ document.addEventListener('DOMContentLoaded', async () => {
                 foto: fotoUrlInput.value,
 
                 // Documentos e Residência
+                nif: document.getElementById('atleta-nif') ? document.getElementById('atleta-nif').value : null,
+                email: document.getElementById('atleta-email') ? document.getElementById('atleta-email').value : null,
+                telefone: document.getElementById('atleta-telefone') ? document.getElementById('atleta-telefone').value : null,
                 tipo_doc_id: document.getElementById('atleta-tipo-doc') ? document.getElementById('atleta-tipo-doc').value : 'Cartão Cidadão',
                 num_doc_id: document.getElementById('atleta-num-doc') ? document.getElementById('atleta-num-doc').value : null,
                 validade_doc_id: document.getElementById('atleta-validade-doc') ? (document.getElementById('atleta-validade-doc').value || null) : null,
@@ -1907,6 +1858,15 @@ document.addEventListener('DOMContentLoaded', async () => {
                 codigo_postal: document.getElementById('atleta-cp') ? document.getElementById('atleta-cp').value : null,
                 localidade: document.getElementById('atleta-localidade') ? document.getElementById('atleta-localidade').value : null,
                 pais_nascimento: document.getElementById('atleta-pais-nasc') ? document.getElementById('atleta-pais-nasc').value : null,
+
+                // Encarregado de Educação
+                encarregado_nome: document.getElementById('atleta-encarregado-nome') ? (document.getElementById('atleta-encarregado-nome').value || null) : null,
+                encarregado_qualidade: document.getElementById('atleta-encarregado-qualidade') ? (document.getElementById('atleta-encarregado-qualidade').value || null) : null,
+                encarregado_tipo_doc: document.getElementById('atleta-encarregado-tipo-doc') ? (document.getElementById('atleta-encarregado-tipo-doc').value || null) : null,
+                encarregado_num_doc: document.getElementById('atleta-encarregado-num-doc') ? (document.getElementById('atleta-encarregado-num-doc').value || null) : null,
+                encarregado_validade_doc: document.getElementById('atleta-encarregado-validade-doc') ? (document.getElementById('atleta-encarregado-validade-doc').value || null) : null,
+                encarregado_email: document.getElementById('atleta-encarregado-email') ? (document.getElementById('atleta-encarregado-email').value || null) : null,
+                encarregado_telefone: document.getElementById('atleta-encarregado-telefone') ? (document.getElementById('atleta-encarregado-telefone').value || null) : null,
 
                 // Equipamento
                 equipamento_tamanho: document.getElementById('atleta-equip-tam') ? document.getElementById('atleta-equip-tam').value : null,
