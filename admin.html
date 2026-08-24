@@ -59,12 +59,12 @@
                 <ul>
                     <li><a href="#" class="tab-btn active" data-tab="tab-dashboard"><span class="icon">📊</span> Dashboard</a></li>
                     <li><a href="#" class="tab-btn" data-tab="tab-users"><span class="icon">🛡️</span> Gestão de Users</a></li>
+                    <li><a href="#" class="tab-btn" data-tab="tab-atletas"><span class="icon">👥</span> Atletas</a></li>
                     <li><a href="#" class="tab-btn" data-tab="tab-noticias"><span class="icon">📰</span> Notícias</a></li>
                     <li><a href="#" class="tab-btn" data-tab="tab-agenda"><span class="icon">📅</span> Agenda</a></li>
                     <li><a href="#" class="tab-btn" data-tab="tab-resultados"><span class="icon">🏆</span> Resultados</a></li>
                     <li><a href="#" class="tab-btn" data-tab="tab-galeria"><span class="icon">📸</span> Galeria</a></li>
                     <li><a href="#" class="tab-btn" data-tab="tab-equipas"><span class="icon">🏀</span> Equipas</a></li>
-                    <li><a href="#" class="tab-btn" data-tab="tab-atletas"><span class="icon">👥</span> Atletas</a></li>
                     <li><a href="#" class="tab-btn" data-tab="tab-config"><span class="icon">⚙️</span> Configurações</a></li>
                 </ul>
             </nav>
@@ -114,6 +114,9 @@
                                 </label>
                                 <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)); gap: 10px;">
                                     <label style="display: flex; align-items: center; gap: 8px; cursor: pointer; font-size: 0.9rem; color: var(--text-primary);">
+                                        <input type="checkbox" name="user_permissoes" value="atletas"> 👥 Atletas
+                                    </label>
+                                    <label style="display: flex; align-items: center; gap: 8px; cursor: pointer; font-size: 0.9rem; color: var(--text-primary);">
                                         <input type="checkbox" name="user_permissoes" value="noticias"> 📰 Notícias
                                     </label>
                                     <label style="display: flex; align-items: center; gap: 8px; cursor: pointer; font-size: 0.9rem; color: var(--text-primary);">
@@ -127,9 +130,6 @@
                                     </label>
                                     <label style="display: flex; align-items: center; gap: 8px; cursor: pointer; font-size: 0.9rem; color: var(--text-primary);">
                                         <input type="checkbox" name="user_permissoes" value="equipas"> 🏀 Equipas
-                                    </label>
-                                    <label style="display: flex; align-items: center; gap: 8px; cursor: pointer; font-size: 0.9rem; color: var(--text-primary);">
-                                        <input type="checkbox" name="user_permissoes" value="atletas"> 👥 Atletas
                                     </label>
                                     <label style="display: flex; align-items: center; gap: 8px; cursor: pointer; font-size: 0.9rem; color: var(--text-primary);">
                                         <input type="checkbox" name="user_permissoes" value="config"> ⚙️ Configurações
