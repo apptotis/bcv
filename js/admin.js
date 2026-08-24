@@ -1802,31 +1802,6 @@ document.addEventListener('DOMContentLoaded', async () => {
         });
     }
 
-    const filterEscalao = document.getElementById('filter-escalao');
-    const btnClearFilters = document.getElementById('btn-clear-filters');
-
-    function applyAtletasFilters() {
-        if (!currentAtletas) return;
-        
-        const fEscalao = filterEscalao ? filterEscalao.value : '';
-
-        const filtrados = currentAtletas.filter(a => {
-            if (fEscalao && a.escalao !== fEscalao) return false;
-            return true;
-        });
-
-        renderAtletasTable(filtrados);
-    }
-
-    if (filterEscalao) filterEscalao.addEventListener('change', applyAtletasFilters);
-
-    if (btnClearFilters) {
-        btnClearFilters.addEventListener('click', () => {
-            if (filterEscalao) filterEscalao.value = '';
-            applyAtletasFilters();
-        });
-    }
-
     window.editAtleta = function(atletaStr) {
         const atleta = JSON.parse(atletaStr);
         
