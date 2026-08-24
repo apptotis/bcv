@@ -60,4 +60,5 @@
 - [2026-08-24] Gemini: Implementação do sistema de permissões granulares por checkboxes de menus na Gestão de Utilizadores do Admin, criação de setup_users_permissoes.sql e adaptação da visibilidade dinâmica da sidebar em js/admin.js.
 - [2026-08-24] Gemini: Reordenação dos itens da sidebar do Admin (Dashboard, Gestão de Users, Atletas, Notícias, Agenda, Resultados, Galeria, Equipas, Configurações).
 - [2026-08-24] Gemini: Adição de coluna de Estado/Época na tabela de Atletas com badges visuais (Inscrito 2026/2027 vs Pendente 2025/2026) e respetivo filtro de estado em admin.html e js/admin.js.
+- [2026-08-25] Gemini: Remoção da tag 'Automático' e ajuste do card de escalão atribuído em inscricao.html para duas linhas limpas (Escalão Atribuído FPB + Resultado).
 
