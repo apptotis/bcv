@@ -936,13 +936,14 @@
 
                 <div class="form-group">
                     <label>Nome do Encarregado de Educação <span class="req">*</span></label>
-                    <input type="text" name="encarregado_nome" class="form-control" placeholder="Nome do Pai/Mãe/Tutor">
+                    <input type="text" name="encarregado_nome" id="encarregado_nome" class="form-control" placeholder="Nome do Pai/Mãe/Tutor" required>
                 </div>
 
                 <div class="form-row">
                     <div class="form-group">
                         <label>Grau de Parentesco <span class="req">*</span></label>
-                        <select name="encarregado_qualidade" class="form-control">
+                        <select name="encarregado_qualidade" id="encarregado_qualidade" class="form-control" required>
+                            <option value="">Selecione o grau...</option>
                             <option value="Pai">Pai</option>
                             <option value="Mãe">Mãe</option>
                             <option value="Tutor Legal">Tutor Legal</option>
@@ -951,7 +952,7 @@
                     </div>
                     <div class="form-group">
                         <label>Tipo Documento <span class="req">*</span></label>
-                        <select name="encarregado_tipo_doc" class="form-control">
+                        <select name="encarregado_tipo_doc" id="encarregado_tipo_doc" class="form-control" required>
                             <option value="Cartão Cidadão">Cartão Cidadão</option>
                             <option value="Passaporte">Passaporte</option>
                         </select>
@@ -961,22 +962,22 @@
                 <div class="form-row">
                     <div class="form-group">
                         <label>Nº Documento <span class="req">*</span></label>
-                        <input type="text" name="encarregado_num_doc" class="form-control" placeholder="12345678">
+                        <input type="text" name="encarregado_num_doc" id="encarregado_num_doc" class="form-control" placeholder="12345678" required>
                     </div>
                     <div class="form-group">
                         <label>Validade Doc.</label>
-                        <input type="date" name="encarregado_validade_doc" class="form-control">
+                        <input type="date" name="encarregado_validade_doc" id="encarregado_validade_doc" class="form-control">
                     </div>
                 </div>
 
                 <div class="form-row">
                     <div class="form-group">
                         <label>Email do Encarregado <span class="req">*</span></label>
-                        <input type="email" name="encarregado_email" class="form-control" placeholder="encarregado@email.com">
+                        <input type="email" name="encarregado_email" id="encarregado_email" class="form-control" placeholder="encarregado@email.com" required>
                     </div>
                     <div class="form-group">
                         <label>Telefone do Encarregado <span class="req">*</span></label>
-                        <input type="tel" name="encarregado_telefone" class="form-control" placeholder="912 345 678">
+                        <input type="tel" name="encarregado_telefone" id="encarregado_telefone" class="form-control" placeholder="912 345 678" required>
                     </div>
                 </div>
 
@@ -1211,9 +1212,11 @@
             // Verificar Idade e Cálculo de Escalão no campo Data Nascimento
             const dataNascInput = document.getElementById('data_nascimento');
             if (dataNascInput) {
-                dataNascInput.addEventListener('change', (e) => {
+                const handleDataNasc = (e) => {
                     atualizarIdadeEEscalao(e.target.value);
-                });
+                };
+                dataNascInput.addEventListener('change', handleDataNasc);
+                dataNascInput.addEventListener('input', handleDataNasc);
             }
 
             // Lógica dos Radios de Tipo de Inscrição
@@ -1325,6 +1328,30 @@
             return 'Seniores';
         }
 
+        function atualizarRequiredEncarregado() {
+            const encInputs = [
+                'encarregado_nome',
+                'encarregado_qualidade',
+                'encarregado_tipo_doc',
+                'encarregado_num_doc',
+                'encarregado_email',
+                'encarregado_telefone'
+            ];
+            const form = document.getElementById('form-inscricao');
+            if (!form) return;
+            
+            encInputs.forEach(name => {
+                const el = form.elements[name];
+                if (el) {
+                    if (isMenor) {
+                        el.setAttribute('required', 'required');
+                    } else {
+                        el.removeAttribute('required');
+                    }
+                }
+            });
+        }
+
         function atualizarIdadeEEscalao(dataStr) {
             if (!dataStr) return;
             const dataNasc = new Date(dataStr);
@@ -1343,6 +1370,8 @@
                 feedback.style.display = 'flex';
                 spanNome.textContent = `${escalao} (Ano ${dataNasc.getFullYear()})`;
             }
+
+            atualizarRequiredEncarregado();
         }
 
         function renderEmdQuestions() {
@@ -1523,18 +1552,25 @@
             const currentCard = document.getElementById(`step-${step}`);
             if (!currentCard) return true;
 
+            // Se for o passo 4 e o atleta for maior de idade (18+), não valida
+            if (step === 4 && !isMenor) {
+                return true;
+            }
+
             const inputs = currentCard.querySelectorAll('input, select, textarea');
             let isValid = true;
 
-            inputs.forEach(input => {
+            for (let i = 0; i < inputs.length; i++) {
+                const input = inputs[i];
                 if (input.hasAttribute('required') && input.offsetParent !== null) {
                     if (!input.checkValidity()) {
                         input.reportValidity();
+                        input.focus();
                         isValid = false;
-                        return false;
+                        break;
                     }
                 }
-            });
+            }
 
             return isValid;
         }
