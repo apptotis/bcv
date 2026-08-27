@@ -1121,50 +1121,6 @@ document.addEventListener('DOMContentLoaded', async () => {
         });
     }
 
-    window.editAtleta = function(atletaStr) {
-        const atleta = JSON.parse(atletaStr);
-        
-        editAtletaIdInput.value = atleta.id;
-        document.getElementById('atleta-nome').value = atleta.nome || '';
-        document.getElementById('atleta-nickname').value = atleta.nickname || '';
-        document.getElementById('atleta-epoca').value = atleta.epoca || '';
-        document.getElementById('atleta-funcao').value = atleta.funcao || '';
-        document.getElementById('atleta-numero').value = atleta.numero_camisola || '';
-        document.getElementById('atleta-escalao').value = atleta.escalao || '';
-        document.getElementById('atleta-sexo').value = atleta.sexo || '';
-        document.getElementById('atleta-nascimento').value = atleta.data_nascimento || '';
-        document.getElementById('atleta-nacionalidade').value = atleta.nacionalidade || '';
-        document.getElementById('atleta-licenca').value = atleta.licenca || '';
-        
-        if (atleta.foto) {
-            fotoUrlInput.value = atleta.foto;
-            fotoImg.src = atleta.foto;
-            fotoPreviewDiv.style.display = 'block';
-        }
-        
-        formAtletaTitle.textContent = 'Editar Atleta: ' + atleta.nome;
-        btnSaveAtleta.textContent = 'Guardar Alterações';
-        
-        openAtletaModal();
-        if (btnCancelAtleta) btnCancelAtleta.classList.remove('hidden');
-        if (atletaMsg) atletaMsg.classList.add('hidden');
-    };
-
-    window.deleteAtleta = async function(id) {
-        if (!confirm('Tem a certeza que deseja apagar este atleta?')) return;
-
-        try {
-            const { error } = await supabase.from('atletasbcv').delete().eq('id', id);
-            if (error) throw error;
-            
-            alert('Atleta apagado com sucesso!');
-            loadAtletas();
-        } catch (error) {
-            console.error("Erro ao apagar atleta:", error);
-            alert("Erro ao apagar atleta: " + error.message);
-        }
-    };
-
     function resetAtletaForm() {
         if (!formAtleta) return;
         formAtleta.reset();
@@ -1285,8 +1241,12 @@ document.addEventListener('DOMContentLoaded', async () => {
                 ? `<img src="${atleta.foto}" style="width: 40px; height: 40px; object-fit: cover; border-radius: 50%;">` 
                 : '<div style="width: 40px; height: 40px; background: rgba(0,0,0,0.05); border-radius: 50%; display:flex; align-items:center; justify-content:center; font-size: 1.2rem;">👤</div>';
 
-            const numCamisolaHtml = atleta.numero_camisola !== null && atleta.numero_camisola !== undefined && atleta.numero_camisola !== '' 
-                ? `<span style="font-weight: 800; color: #7e22ce; background: rgba(126, 34, 206, 0.1); padding: 3px 8px; border-radius: 6px; font-size: 0.9rem;">#${atleta.numero_camisola}</span>`
+            const numCamisolaVal = (atleta.numero_camisola !== null && atleta.numero_camisola !== undefined && atleta.numero_camisola !== '') 
+                ? atleta.numero_camisola 
+                : (atleta.equipamento_numero_1 !== null && atleta.equipamento_numero_1 !== undefined && atleta.equipamento_numero_1 !== '' ? atleta.equipamento_numero_1 : null);
+
+            const numCamisolaHtml = numCamisolaVal !== null
+                ? `<span style="font-weight: 800; color: #7e22ce; background: rgba(126, 34, 206, 0.1); padding: 3px 8px; border-radius: 6px; font-size: 0.9rem;">#${numCamisolaVal}</span>`
                 : '<span style="color: #a0a0ab;">-</span>';
 
             const isInscrito2627 = atleta.epoca === '2026/2027';
@@ -1770,10 +1730,28 @@ document.addEventListener('DOMContentLoaded', async () => {
         editAtletaIdInput.value = atleta.id;
         document.getElementById('atleta-nome').value = atleta.nome || '';
         document.getElementById('atleta-nickname').value = atleta.nickname || '';
-        document.getElementById('atleta-epoca').value = atleta.epoca || '';
+        // Época
+        const selectEpoca = document.getElementById('atleta-epoca');
+        if (selectEpoca) {
+            const epNorm = (atleta.epoca || '').replace('-', '/');
+            selectEpoca.value = epNorm;
+            if (!selectEpoca.value && atleta.epoca) {
+                for (let i = 0; i < selectEpoca.options.length; i++) {
+                    if (selectEpoca.options[i].value.replace('-', '/') === epNorm) {
+                        selectEpoca.selectedIndex = i;
+                        break;
+                    }
+                }
+            }
+        }
+
         document.getElementById('atleta-funcao').value = atleta.funcao || '';
 
-        document.getElementById('atleta-numero').value = atleta.numero_camisola || '';
+        // Número de Camisola (#) com fallback para primeira opção de equipamento
+        const numCamisola = (atleta.numero_camisola !== null && atleta.numero_camisola !== undefined && atleta.numero_camisola !== '')
+            ? atleta.numero_camisola
+            : (atleta.equipamento_numero_1 || '');
+        document.getElementById('atleta-numero').value = numCamisola;
         
         const atletaEscalaoSelect = document.getElementById('atleta-escalao');
         if (atletaEscalaoSelect) {
@@ -1789,7 +1767,19 @@ document.addEventListener('DOMContentLoaded', async () => {
             }
         }
 
-        document.getElementById('atleta-sexo').value = atleta.sexo || '';
+        // Sexo (M / F / Masculino / Feminino)
+        const selectSexo = document.getElementById('atleta-sexo');
+        if (selectSexo) {
+            const sVal = (atleta.sexo || '').toUpperCase();
+            if (sVal === 'M' || sVal.startsWith('MASC')) {
+                selectSexo.value = 'M';
+            } else if (sVal === 'F' || sVal.startsWith('FEM')) {
+                selectSexo.value = 'F';
+            } else {
+                selectSexo.value = atleta.sexo || '';
+            }
+        }
+
         document.getElementById('atleta-nascimento').value = atleta.data_nascimento || '';
         document.getElementById('atleta-nacionalidade').value = atleta.nacionalidade || '';
         document.getElementById('atleta-licenca').value = atleta.licenca || '';
@@ -1818,9 +1808,9 @@ document.addEventListener('DOMContentLoaded', async () => {
         // Equipamento
         if (document.getElementById('atleta-equip-tam')) document.getElementById('atleta-equip-tam').value = atleta.equipamento_tamanho || '';
         if (document.getElementById('atleta-equip-calcao')) document.getElementById('atleta-equip-calcao').value = atleta.equipamento_tamanho_calcao || '';
-        if (document.getElementById('atleta-equip-num1')) document.getElementById('atleta-equip-num1').value = atleta.equipamento_numero_1 || '';
+        if (document.getElementById('atleta-equip-num1')) document.getElementById('atleta-equip-num1').value = atleta.equipamento_numero_1 || atleta.numero_camisola || '';
         if (document.getElementById('atleta-equip-num2')) document.getElementById('atleta-equip-num2').value = atleta.equipamento_numero_2 || '';
-        if (document.getElementById('atleta-equip-nome')) document.getElementById('atleta-equip-nome').value = atleta.equipamento_nome_camisola || '';
+        if (document.getElementById('atleta-equip-nome')) document.getElementById('atleta-equip-nome').value = atleta.equipamento_nome_camisola || atleta.nickname || '';
         
         if (atleta.foto) {
             fotoUrlInput.value = atleta.foto;
@@ -1875,12 +1865,15 @@ document.addEventListener('DOMContentLoaded', async () => {
             btnSaveAtleta.disabled = true;
             atletaMsg.classList.add('hidden');
 
+            const numVal = document.getElementById('atleta-numero').value;
+            const equipNum1Val = document.getElementById('atleta-equip-num1') ? document.getElementById('atleta-equip-num1').value : null;
+
             const atletaData = {
                 nome: document.getElementById('atleta-nome').value,
                 nickname: document.getElementById('atleta-nickname').value || null,
                 epoca: document.getElementById('atleta-epoca').value,
                 funcao: document.getElementById('atleta-funcao').value,
-                numero_camisola: document.getElementById('atleta-numero').value ? parseInt(document.getElementById('atleta-numero').value) : null,
+                numero_camisola: numVal ? parseInt(numVal) : (equipNum1Val ? parseInt(equipNum1Val) : null),
                 escalao: document.getElementById('atleta-escalao').value,
                 sexo: document.getElementById('atleta-sexo').value,
                 data_nascimento: document.getElementById('atleta-nascimento').value || null,
