@@ -61,6 +61,8 @@
                     <li><a href="#" class="tab-btn" data-tab="tab-users"><span class="icon">🛡️</span> Gestão de Users</a></li>
                     <li><a href="#" class="tab-btn" data-tab="tab-atletas"><span class="icon">👥</span> Atletas</a></li>
                     <li><a href="#" class="tab-btn" data-tab="tab-equipamentos"><span class="icon">🎽</span> Equipamentos</a></li>
+                    <li><a href="#" class="tab-btn" data-tab="tab-desportiva"><span class="icon">📋</span> Gestão Desportiva</a></li>
+                    <li><a href="#" class="tab-btn" data-tab="tab-financeira"><span class="icon">💶</span> Gestão Financeira</a></li>
                     <li><a href="#" class="tab-btn" data-tab="tab-noticias"><span class="icon">📰</span> Notícias</a></li>
                     <li><a href="#" class="tab-btn" data-tab="tab-agenda"><span class="icon">📅</span> Agenda</a></li>
                     <li><a href="#" class="tab-btn" data-tab="tab-resultados"><span class="icon">🏆</span> Resultados</a></li>
@@ -161,6 +163,12 @@
                                     </label>
                                     <label style="display: flex; align-items: center; gap: 8px; cursor: pointer; font-size: 0.9rem; color: var(--text-primary);">
                                         <input type="checkbox" name="user_permissoes" value="equipamentos"> 🎽 Equipamentos
+                                    </label>
+                                    <label style="display: flex; align-items: center; gap: 8px; cursor: pointer; font-size: 0.9rem; color: var(--text-primary);">
+                                        <input type="checkbox" name="user_permissoes" value="desportiva"> 📋 Gestão Desportiva
+                                    </label>
+                                    <label style="display: flex; align-items: center; gap: 8px; cursor: pointer; font-size: 0.9rem; color: var(--text-primary);">
+                                        <input type="checkbox" name="user_permissoes" value="financeira"> 💶 Gestão Financeira
                                     </label>
                                     <label style="display: flex; align-items: center; gap: 8px; cursor: pointer; font-size: 0.9rem; color: var(--text-primary);">
                                         <input type="checkbox" name="user_permissoes" value="noticias"> 📰 Notícias
@@ -728,6 +736,382 @@
                     </div>
                 </div>
 
+                <!-- TAB: GESTÃO DESPORTIVA (PRESENÇAS & ASSIDUIDADE) -->
+                <div id="tab-desportiva" class="tab-pane hidden">
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; flex-wrap: wrap; gap: 15px;">
+                        <div>
+                            <h2>📋 Gestão Desportiva (Presenças & Faltas)</h2>
+                            <p style="color: var(--text-secondary); font-size: 0.9rem;">Consulte e analise a assiduidade, presenças e faltas de todos os atletas em treinos e jogos registados pelos diretores de campo.</p>
+                        </div>
+                        <div style="display: flex; gap: 10px; flex-wrap: wrap;">
+                            <button type="button" id="btn-export-desportiva-csv" class="btn-secondary" style="display: flex; align-items: center; gap: 6px; font-weight: 600; padding: 10px 16px;">
+                                📥 Exportar CSV
+                            </button>
+                            <button type="button" id="btn-export-desportiva-pdf" class="btn-primary" style="display: flex; align-items: center; gap: 6px; font-weight: 600; padding: 10px 18px; background: linear-gradient(135deg, #7e22ce, #9333ea);">
+                                📄 Exportar Relatório PDF
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- KPIs de Assiduidade -->
+                    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)); gap: 12px; margin-bottom: 20px;">
+                        <div class="welcome-box" style="margin: 0; padding: 14px; border-left: 4px solid #7e22ce;">
+                            <span style="font-size: 0.72rem; color: var(--text-secondary); font-weight: 700; text-transform: uppercase;">Total Registos</span>
+                            <h3 id="desp-kpi-total" style="font-size: 1.6rem; margin: 4px 0 0; color: #7e22ce;">0</h3>
+                        </div>
+                        <div class="welcome-box" style="margin: 0; padding: 14px; border-left: 4px solid #10b981;">
+                            <span style="font-size: 0.72rem; color: var(--text-secondary); font-weight: 700; text-transform: uppercase;">Presenças 🟢</span>
+                            <h3 id="desp-kpi-presentes" style="font-size: 1.6rem; margin: 4px 0 0; color: #059669;">0</h3>
+                        </div>
+                        <div class="welcome-box" style="margin: 0; padding: 14px; border-left: 4px solid #ef4444;">
+                            <span style="font-size: 0.72rem; color: var(--text-secondary); font-weight: 700; text-transform: uppercase;">Faltas 🔴</span>
+                            <h3 id="desp-kpi-faltas" style="font-size: 1.6rem; margin: 4px 0 0; color: #dc2626;">0</h3>
+                        </div>
+                        <div class="welcome-box" style="margin: 0; padding: 14px; border-left: 4px solid #f59e0b;">
+                            <span style="font-size: 0.72rem; color: var(--text-secondary); font-weight: 700; text-transform: uppercase;">Justificados 🟡</span>
+                            <h3 id="desp-kpi-justificados" style="font-size: 1.6rem; margin: 4px 0 0; color: #d97706;">0</h3>
+                        </div>
+                        <div class="welcome-box" style="margin: 0; padding: 14px; border-left: 4px solid #6366f1;">
+                            <span style="font-size: 0.72rem; color: var(--text-secondary); font-weight: 700; text-transform: uppercase;">Lesionados 🏥</span>
+                            <h3 id="desp-kpi-lesionados" style="font-size: 1.6rem; margin: 4px 0 0; color: #4f46e5;">0</h3>
+                        </div>
+                        <div class="welcome-box" style="margin: 0; padding: 14px; border-left: 4px solid #0284c7;">
+                            <span style="font-size: 0.72rem; color: var(--text-secondary); font-weight: 700; text-transform: uppercase;">Taxa de Assiduidade</span>
+                            <h3 id="desp-kpi-taxa" style="font-size: 1.6rem; margin: 4px 0 0; color: #0284c7;">0%</h3>
+                        </div>
+                    </div>
+
+                    <!-- Filtros -->
+                    <div class="welcome-box" style="margin-bottom: 20px; padding: 15px; background: rgba(0,0,0,0.02); border: 1px solid var(--border-color);">
+                        <h4 style="margin-bottom: 10px; color: var(--text-secondary); font-size: 0.9rem;">Filtros de Pesquisa</h4>
+                        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 12px; align-items: flex-end;">
+                            <div>
+                                <label style="display:block; margin-bottom:4px; font-size:0.8rem; color: var(--text-secondary);">Escalão</label>
+                                <select id="desp-filter-escalao" class="admin-input" style="margin-bottom: 0;">
+                                    <option value="">Todos os Escalões</option>
+                                    <option value="BabyBasket">BabyBasket</option>
+                                    <option value="Mini 8">Mini 8</option>
+                                    <option value="Mini 10">Mini 10</option>
+                                    <option value="Mini 12">Mini 12</option>
+                                    <option value="Sub 14">Sub 14</option>
+                                    <option value="Sub 16">Sub 16</option>
+                                    <option value="Sub 18">Sub 18</option>
+                                    <option value="Sub 20">Sub 20</option>
+                                    <option value="Seniores">Seniores</option>
+                                    <option value="Veteranos">Veteranos</option>
+                                </select>
+                            </div>
+                            <div>
+                                <label style="display:block; margin-bottom:4px; font-size:0.8rem; color: var(--text-secondary);">Estado de Comparência</label>
+                                <select id="desp-filter-estado" class="admin-input" style="margin-bottom: 0;">
+                                    <option value="">Todos os Estados</option>
+                                    <option value="Falta">🔴 Apenas Faltas</option>
+                                    <option value="Presente">🟢 Apenas Presentes</option>
+                                    <option value="Justificado">🟡 Apenas Justificados</option>
+                                    <option value="Lesionado">🏥 Apenas Lesionados</option>
+                                </select>
+                            </div>
+                            <div>
+                                <label style="display:block; margin-bottom:4px; font-size:0.8rem; color: var(--text-secondary);">Tipo de Evento</label>
+                                <select id="desp-filter-tipo" class="admin-input" style="margin-bottom: 0;">
+                                    <option value="">Todos os Tipos</option>
+                                    <option value="Treino">Treino</option>
+                                    <option value="Jogo">Jogo</option>
+                                    <option value="Torneio">Torneio</option>
+                                    <option value="Estágio">Estágio</option>
+                                </select>
+                            </div>
+                            <div>
+                                <label style="display:block; margin-bottom:4px; font-size:0.8rem; color: var(--text-secondary);">Data Específica</label>
+                                <input type="date" id="desp-filter-data" class="admin-input" style="margin-bottom: 0;">
+                            </div>
+                            <div>
+                                <label style="display:block; margin-bottom:4px; font-size:0.8rem; color: var(--text-secondary);">Pesquisar Atleta</label>
+                                <input type="text" id="desp-filter-search" placeholder="Nome do atleta..." class="admin-input" style="margin-bottom: 0;">
+                            </div>
+                            <div>
+                                <button type="button" id="btn-desp-clear-filters" class="btn-secondary" style="padding: 10px 16px; margin-bottom: 0; width: 100%;">Limpar</button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Tabela de Presenças / Assiduidade -->
+                    <div class="admin-table-container">
+                        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
+                            <h3 style="margin: 0;">Histórico de Presenças e Faltas</h3>
+                            <span id="desp-count-info" style="font-size: 0.85rem; color: var(--text-secondary); font-weight: 600;">0 registos</span>
+                        </div>
+                        <table class="admin-table" style="width: 100%; text-align: left; margin-top: 10px; border-collapse: collapse;">
+                            <thead>
+                                <tr style="border-bottom: 1px solid rgba(255,255,255,0.1);">
+                                    <th style="padding: 10px; width: 95px;">Data</th>
+                                    <th style="padding: 10px; width: 80px;">Tipo</th>
+                                    <th style="padding: 10px; width: 100px;">Escalão</th>
+                                    <th style="padding: 10px;">Atleta</th>
+                                    <th style="padding: 10px; width: 60px; text-align: center;">Nº</th>
+                                    <th style="padding: 10px; text-align: center; width: 130px;">Estado</th>
+                                    <th style="padding: 10px;">Registado Por</th>
+                                </tr>
+                            </thead>
+                            <tbody id="desportiva-table-body">
+                                <tr><td colspan="7" style="padding: 15px; text-align: center; color: var(--text-secondary);">A carregar dados desportivos...</td></tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <!-- TAB: GESTÃO FINANCEIRA & QUOTAS -->
+                <div id="tab-financeira" class="tab-pane hidden">
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; flex-wrap: wrap; gap: 15px;">
+                        <div>
+                            <h2>💶 Gestão Financeira & Quotas</h2>
+                            <p style="color: var(--text-secondary); font-size: 0.9rem;">Defina a tabela de preços de mensalidades por escalão e audite todos os pagamentos recebidos no clube.</p>
+                        </div>
+                        <div style="display: flex; gap: 10px; flex-wrap: wrap;">
+                            <button type="button" id="btn-open-modal-pagamento-admin" class="btn-primary" style="display: flex; align-items: center; gap: 6px; font-weight: 700; padding: 10px 18px; background: linear-gradient(135deg, #10b981, #059669);">
+                                ➕ Registar Pagamento
+                            </button>
+                            <button type="button" id="btn-export-financeira-csv" class="btn-secondary" style="display: flex; align-items: center; gap: 6px; font-weight: 600; padding: 10px 16px;">
+                                📥 Exportar CSV
+                            </button>
+                            <button type="button" id="btn-export-financeira-pdf" class="btn-primary" style="display: flex; align-items: center; gap: 6px; font-weight: 600; padding: 10px 18px; background: linear-gradient(135deg, #7e22ce, #9333ea);">
+                                📄 Exportar Extrato PDF
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Sub-menu / Toggle de Secções Financeiras -->
+                    <div style="display: flex; gap: 10px; margin-bottom: 20px; border-bottom: 1px solid var(--border-color); padding-bottom: 12px; flex-wrap: wrap;">
+                        <button type="button" class="btn-subfin active" data-sub="subfin-pagamentos" style="padding: 8px 16px; border-radius: 8px; border: 1px solid #7e22ce; background: #7e22ce; color: #fff; font-weight: 600; cursor: pointer;">📊 Registo Global de Pagamentos</button>
+                        <button type="button" class="btn-subfin" data-sub="subfin-tabela-precos" style="padding: 8px 16px; border-radius: 8px; border: 1px solid var(--border-color); background: #f8fafc; color: var(--text-primary); font-weight: 600; cursor: pointer;">⚙️ Tabela de Preços por Escalão</button>
+                    </div>
+
+                    <!-- SECÇÃO 1: REGISTO GLOBAL DE PAGAMENTOS -->
+                    <div id="subfin-pagamentos" class="subfin-content">
+                        <!-- KPIs Financeiros -->
+                        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px; margin-bottom: 20px;">
+                            <div class="welcome-box" style="margin: 0; padding: 16px; border-left: 4px solid #10b981;">
+                                <span style="font-size: 0.75rem; color: var(--text-secondary); font-weight: 700; text-transform: uppercase;">Total Arrecadado</span>
+                                <h3 id="fin-kpi-total-arrecadado" style="font-size: 1.8rem; margin: 4px 0 0; color: #059669;">0.00 €</h3>
+                            </div>
+                            <div class="welcome-box" style="margin: 0; padding: 16px; border-left: 4px solid #7e22ce;">
+                                <span style="font-size: 0.75rem; color: var(--text-secondary); font-weight: 700; text-transform: uppercase;">⭐ Quotas Anuais</span>
+                                <h3 id="fin-kpi-total-anuais" style="font-size: 1.8rem; margin: 4px 0 0; color: #7e22ce;">0.00 €</h3>
+                            </div>
+                            <div class="welcome-box" style="margin: 0; padding: 16px; border-left: 4px solid #3b82f6;">
+                                <span style="font-size: 0.75rem; color: var(--text-secondary); font-weight: 700; text-transform: uppercase;">📅 Mensalidades</span>
+                                <h3 id="fin-kpi-total-mensalidades" style="font-size: 1.8rem; margin: 4px 0 0; color: #2563eb;">0.00 €</h3>
+                            </div>
+                            <div class="welcome-box" style="margin: 0; padding: 16px; border-left: 4px solid #0f172a;">
+                                <span style="font-size: 0.75rem; color: var(--text-secondary); font-weight: 700; text-transform: uppercase;">Recebimentos por Método</span>
+                                <div id="fin-kpi-metodos" style="font-size: 0.85rem; font-weight: 700; color: var(--text-primary); margin-top: 6px;">
+                                    💵 0€ | 📱 0€ | 🏦 0€
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Filtros Financeiros -->
+                        <div class="welcome-box" style="margin-bottom: 20px; padding: 15px; background: rgba(0,0,0,0.02); border: 1px solid var(--border-color);">
+                            <h4 style="margin-bottom: 10px; color: var(--text-secondary); font-size: 0.9rem;">Filtros de Pagamento</h4>
+                            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(170px, 1fr)); gap: 12px; align-items: flex-end;">
+                                <div>
+                                    <label style="display:block; margin-bottom:4px; font-size:0.8rem; color: var(--text-secondary);">Escalão</label>
+                                    <select id="fin-filter-escalao" class="admin-input" style="margin-bottom: 0;">
+                                        <option value="">Todos os Escalões</option>
+                                        <option value="BabyBasket">BabyBasket</option>
+                                        <option value="Mini 8">Mini 8</option>
+                                        <option value="Mini 10">Mini 10</option>
+                                        <option value="Mini 12">Mini 12</option>
+                                        <option value="Sub 14">Sub 14</option>
+                                        <option value="Sub 16">Sub 16</option>
+                                        <option value="Sub 18">Sub 18</option>
+                                        <option value="Sub 20">Sub 20</option>
+                                        <option value="Seniores">Seniores</option>
+                                        <option value="Veteranos">Veteranos</option>
+                                    </select>
+                                </div>
+                                <div>
+                                    <label style="display:block; margin-bottom:4px; font-size:0.8rem; color: var(--text-secondary);">Mês / Conceito</label>
+                                    <select id="fin-filter-mes" class="admin-input" style="margin-bottom: 0;">
+                                        <option value="">Todos os Meses / Quotas</option>
+                                        <option value="ANUAL">⭐ Apenas Quota Anual</option>
+                                        <option value="2026-09">Setembro 2026</option>
+                                        <option value="2026-10">Outubro 2026</option>
+                                        <option value="2026-11">Novembro 2026</option>
+                                        <option value="2026-12">Dezembro 2026</option>
+                                        <option value="2027-01">Janeiro 2027</option>
+                                        <option value="2027-02">Fevereiro 2027</option>
+                                        <option value="2027-03">Março 2027</option>
+                                        <option value="2027-04">Abril 2027</option>
+                                        <option value="2027-05">Maio 2027</option>
+                                        <option value="2027-06">Junho 2027</option>
+                                    </select>
+                                </div>
+                                <div>
+                                    <label style="display:block; margin-bottom:4px; font-size:0.8rem; color: var(--text-secondary);">Método</label>
+                                    <select id="fin-filter-metodo" class="admin-input" style="margin-bottom: 0;">
+                                        <option value="">Todos os Métodos</option>
+                                        <option value="Dinheiro">💵 Dinheiro</option>
+                                        <option value="MBWay">📱 MBWay</option>
+                                        <option value="Transferência">🏦 Transferência Bancária</option>
+                                        <option value="Outro">Outro</option>
+                                    </select>
+                                </div>
+                                <div>
+                                    <label style="display:block; margin-bottom:4px; font-size:0.8rem; color: var(--text-secondary);">Quem Recebeu</label>
+                                    <select id="fin-filter-recebedor" class="admin-input" style="margin-bottom: 0;">
+                                        <option value="">Todos os Recetores</option>
+                                    </select>
+                                </div>
+                                <div>
+                                    <label style="display:block; margin-bottom:4px; font-size:0.8rem; color: var(--text-secondary);">Pesquisar Atleta</label>
+                                    <input type="text" id="fin-filter-search" placeholder="Nome do atleta..." class="admin-input" style="margin-bottom: 0;">
+                                </div>
+                                <div>
+                                    <button type="button" id="btn-fin-clear-filters" class="btn-secondary" style="padding: 10px 16px; margin-bottom: 0; width: 100%;">Limpar</button>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Tabela Global de Pagamentos -->
+                        <div class="admin-table-container">
+                            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
+                                <h3 style="margin: 0;">Histórico Global de Recebimentos</h3>
+                                <span id="fin-count-info" style="font-size: 0.85rem; color: var(--text-secondary); font-weight: 600;">0 pagamentos</span>
+                            </div>
+                            <table class="admin-table" style="width: 100%; text-align: left; margin-top: 10px; border-collapse: collapse;">
+                                <thead>
+                                    <tr style="border-bottom: 1px solid rgba(255,255,255,0.1);">
+                                        <th style="padding: 10px; width: 95px;">Data</th>
+                                        <th style="padding: 10px;">Atleta</th>
+                                        <th style="padding: 10px; width: 100px;">Escalão</th>
+                                        <th style="padding: 10px; width: 150px;">Conceito / Mês</th>
+                                        <th style="padding: 10px; width: 85px; text-align: right;">Valor</th>
+                                        <th style="padding: 10px; width: 120px;">Método</th>
+                                        <th style="padding: 10px;">Quem Recebeu</th>
+                                        <th style="padding: 10px;">Notas</th>
+                                        <th style="padding: 10px; text-align: center; width: 80px;">Ações</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="financeira-table-body">
+                                    <tr><td colspan="9" style="padding: 15px; text-align: center; color: var(--text-secondary);">A carregar pagamentos...</td></tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+
+                    <!-- SECÇÃO 2: TABELA DE PREÇOS POR ESCALÃO -->
+                    <div id="subfin-tabela-precos" class="subfin-content hidden">
+                        <div class="welcome-box" style="margin-bottom: 20px;">
+                            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; flex-wrap: wrap; gap: 10px;">
+                                <div>
+                                    <h3 style="margin: 0; color: var(--text-primary);">Configuração de Mensalidades e Quotas por Escalão</h3>
+                                    <p style="color: var(--text-secondary); font-size: 0.85rem; margin-top: 4px;">Estes valores serão carregados como sugestão predefinida no telemóvel dos diretores ao registar cobranças.</p>
+                                </div>
+                                <button type="button" id="btn-save-tabela-precos" class="btn-primary" style="padding: 10px 20px; font-weight: 700;">
+                                    💾 Guardar Tabela de Preços
+                                </button>
+                            </div>
+
+                            <table class="admin-table" style="width: 100%; text-align: left; margin-top: 10px; border-collapse: collapse;">
+                                <thead>
+                                    <tr style="border-bottom: 1px solid rgba(255,255,255,0.1);">
+                                        <th style="padding: 10px;">Escalão</th>
+                                        <th style="padding: 10px; width: 220px;">Mensalidade (€ / mês)</th>
+                                        <th style="padding: 10px; width: 220px;">Quota Anual Completa (€ / época)</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="tabela-precos-tbody">
+                                    <!-- Gerado dinamicamente com inputs editáveis para cada escalão -->
+                                </tbody>
+                            </table>
+                            <p id="msg-tabela-precos" class="hidden" style="margin-top: 12px; font-weight: 600;"></p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- MODAL DE REGISTO DE PAGAMENTO NO ADMIN -->
+                <div id="modal-admin-pagamento" class="hidden" style="position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.5); display: flex; align-items: center; justify-content: center; z-index: 9999;">
+                    <div style="background: #ffffff; width: 92%; max-width: 520px; padding: 25px; border-radius: 12px; box-shadow: var(--shadow-lg); border: 1px solid var(--border-color); max-height: 90vh; overflow-y: auto;">
+                        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
+                            <h3 id="modal-admin-pagamento-title" style="margin: 0; color: var(--accent-primary);">Registar Pagamento</h3>
+                            <button type="button" onclick="window.closeAdminPagamentoModal()" style="background: none; border: none; font-size: 1.3rem; cursor: pointer; color: var(--text-secondary);">✕</button>
+                        </div>
+                        <form id="form-admin-pagamento">
+                            <input type="hidden" id="admin-pagamento-id">
+                            
+                            <div style="margin-bottom: 12px;">
+                                <label style="display:block; margin-bottom:4px; font-size:0.85rem; font-weight:600; color: var(--text-primary);">Atleta *</label>
+                                <select id="admin-pagamento-atleta" required class="admin-input">
+                                    <option value="" disabled selected>Selecionar Atleta</option>
+                                </select>
+                            </div>
+
+                            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 12px;">
+                                <div>
+                                    <label style="display:block; margin-bottom:4px; font-size:0.85rem; font-weight:600; color: var(--text-primary);">Tipo de Quota *</label>
+                                    <select id="admin-pagamento-tipo" required class="admin-input">
+                                        <option value="MENSAL">Mensalidade Regular</option>
+                                        <option value="ANUAL">⭐ Quota Anual Completa</option>
+                                    </select>
+                                </div>
+                                <div id="container-admin-pagamento-mes">
+                                    <label style="display:block; margin-bottom:4px; font-size:0.85rem; font-weight:600; color: var(--text-primary);">Mês de Referência *</label>
+                                    <select id="admin-pagamento-mes" class="admin-input">
+                                        <option value="2026-09">Setembro 2026</option>
+                                        <option value="2026-10">Outubro 2026</option>
+                                        <option value="2026-11">Novembro 2026</option>
+                                        <option value="2026-12">Dezembro 2026</option>
+                                        <option value="2027-01">Janeiro 2027</option>
+                                        <option value="2027-02">Fevereiro 2027</option>
+                                        <option value="2027-03">Março 2027</option>
+                                        <option value="2027-04">Abril 2027</option>
+                                        <option value="2027-05">Maio 2027</option>
+                                        <option value="2027-06">Junho 2027</option>
+                                    </select>
+                                </div>
+                            </div>
+
+                            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 12px;">
+                                <div>
+                                    <label style="display:block; margin-bottom:4px; font-size:0.85rem; font-weight:600; color: var(--text-primary);">Valor Recebido (€) *</label>
+                                    <input type="number" step="0.5" id="admin-pagamento-valor" required class="admin-input" value="25.00">
+                                </div>
+                                <div>
+                                    <label style="display:block; margin-bottom:4px; font-size:0.85rem; font-weight:600; color: var(--text-primary);">Método de Pagamento *</label>
+                                    <select id="admin-pagamento-metodo" required class="admin-input">
+                                        <option value="Dinheiro" selected>💵 Dinheiro</option>
+                                        <option value="MBWay">📱 MBWay</option>
+                                        <option value="Transferência">🏦 Transferência Bancária</option>
+                                        <option value="Outro">Outro</option>
+                                    </select>
+                                </div>
+                            </div>
+
+                            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 12px;">
+                                <div>
+                                    <label style="display:block; margin-bottom:4px; font-size:0.85rem; font-weight:600; color: var(--text-primary);">Data de Pagamento *</label>
+                                    <input type="date" id="admin-pagamento-data" required class="admin-input">
+                                </div>
+                                <div>
+                                    <label style="display:block; margin-bottom:4px; font-size:0.85rem; font-weight:600; color: var(--text-primary);">Quem Recebeu *</label>
+                                    <input type="text" id="admin-pagamento-recebedor" required class="admin-input" placeholder="Ex: Secretaria / Nome">
+                                </div>
+                            </div>
+
+                            <div style="margin-bottom: 15px;">
+                                <label style="display:block; margin-bottom:4px; font-size:0.85rem; font-weight:600; color: var(--text-primary);">Observações / Nº Recibo</label>
+                                <input type="text" id="admin-pagamento-notas" class="admin-input" placeholder="Opcional">
+                            </div>
+
+                            <div style="display: flex; gap: 10px;">
+                                <button type="submit" id="btn-save-admin-pagamento" class="btn-primary" style="flex: 1;">Guardar Pagamento</button>
+                                <button type="button" onclick="window.closeAdminPagamentoModal()" class="btn-secondary" style="flex: 1;">Cancelar</button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+
                 <!-- TAB: CONFIGURAÇÕES GERAIS E ÓRGÃOS SOCIAIS -->
                 <div id="tab-config" class="tab-pane hidden">
                     <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; flex-wrap: wrap; gap: 10px;">
@@ -1181,6 +1565,6 @@
 
     <!-- Scripts -->
     <script src="js/config.js"></script>
-    <script src="js/admin.js?v=20260827_7"></script>
+    <script src="js/admin.js?v=20260827_8"></script>
 </body>
 </html>

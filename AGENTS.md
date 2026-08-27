@@ -78,4 +78,5 @@
 - [2026-08-27] Gemini: Modernização da navegação do Portal do Diretor (diretor.html, css/diretor.css, js/diretor.js), substituindo os botões fixos inferiores por um Menu Hambúrguer lateral (Drawer) no cabeçalho, libertando espaço vertical no ecrã e preparando a estrutura para futuras funcionalidades.
 - [2026-08-27] Gemini: Implementação de suporte a múltiplos escalões por utilizador/diretor (checkboxes no Admin) e seletor dinâmico de equipa ativa no Portal Mobile com alternância com 1 toque no topo e no drawer.
 - [2026-08-27] Gemini: Resolução do corte de nomes longos de atletas com quebra de linha fluida, reformulação vertical do cartão de cobrança com botão de registo em largura total abaixo do número, e suporte integrado a Quota Anual Completa (250€) com deteção automática em todos os meses da época.
+- [2026-08-27] Gemini: Implementação completa dos novos módulos no Admin: Gestão Desportiva (KPIs de assiduidade, presenças/faltas/justificados/lesionados, filtros múltiplos e exportação CSV/PDF) e Gestão Financeira (Tabela de preços por escalão, registo global de pagamentos com rastreio de recetor, modal de lançamento no admin e exportação CSV/PDF).
 

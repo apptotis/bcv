@@ -109,6 +109,8 @@ document.addEventListener('DOMContentLoaded', async () => {
             { tab: 'tab-users', allow: isAdmin },
             { tab: 'tab-atletas', allow: isAdmin || userPerms.includes('atletas') || role === 'treinador' },
             { tab: 'tab-equipamentos', allow: isAdmin || userPerms.includes('equipamentos') || role === 'treinador' },
+            { tab: 'tab-desportiva', allow: isAdmin || userPerms.includes('desportiva') || role === 'treinador' },
+            { tab: 'tab-financeira', allow: isAdmin || userPerms.includes('financeira') },
             { tab: 'tab-noticias', allow: isAdmin || userPerms.includes('noticias') || role === 'editor' },
             { tab: 'tab-agenda', allow: isAdmin || userPerms.includes('agenda') || role === 'editor' },
             { tab: 'tab-resultados', allow: isAdmin || userPerms.includes('resultados') },
@@ -292,6 +294,8 @@ document.addEventListener('DOMContentLoaded', async () => {
         'equipas': 'Equipas',
         'atletas': 'Atletas',
         'equipamentos': 'Equipamentos',
+        'desportiva': 'Gestão Desportiva',
+        'financeira': 'Gestão Financeira',
         'config': 'Config'
     };
 
@@ -533,7 +537,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         const escalaoAfeto = getSelectedEscaloes().join(', ');
         
         const role = roleVal || 'personalizado';
-        const allModules = ['noticias', 'agenda', 'resultados', 'galeria', 'equipas', 'atletas', 'equipamentos', 'config'];
+        const allModules = ['noticias', 'agenda', 'resultados', 'galeria', 'equipas', 'atletas', 'equipamentos', 'desportiva', 'financeira', 'config'];
         
         let permissoes = [];
         if (role === 'admin') {
@@ -3194,6 +3198,867 @@ document.addEventListener('DOMContentLoaded', async () => {
         });
     }
 
+    // ====================================================================
+    // 15. GESTÃO DESPORTIVA (PRESENÇAS & FALTAS)
+    // ====================================================================
+    let currentDesportivaPresencas = [];
+
+    const despFilterEscalao = document.getElementById('desp-filter-escalao');
+    const despFilterEstado = document.getElementById('desp-filter-estado');
+    const despFilterTipo = document.getElementById('desp-filter-tipo');
+    const despFilterData = document.getElementById('desp-filter-data');
+    const despFilterSearch = document.getElementById('desp-filter-search');
+    const btnDespClearFilters = document.getElementById('btn-desp-clear-filters');
+    const desportivaTableBody = document.getElementById('desportiva-table-body');
+    const despCountInfo = document.getElementById('desp-count-info');
+
+    const despKpiTotal = document.getElementById('desp-kpi-total');
+    const despKpiPresentes = document.getElementById('desp-kpi-presentes');
+    const despKpiFaltas = document.getElementById('desp-kpi-faltas');
+    const despKpiJustificados = document.getElementById('desp-kpi-justificados');
+    const despKpiLesionados = document.getElementById('desp-kpi-lesionados');
+    const despKpiTaxa = document.getElementById('desp-kpi-taxa');
+
+    const btnExportDesportivaCsv = document.getElementById('btn-export-desportiva-csv');
+    const btnExportDesportivaPdf = document.getElementById('btn-export-desportiva-pdf');
+
+    async function loadDesportiva() {
+        if (!desportivaTableBody) return;
+        desportivaTableBody.innerHTML = '<tr><td colspan="7" style="padding: 15px; text-align: center; color: var(--text-secondary);">A carregar histórico desportivo...</td></tr>';
+
+        try {
+            // 1. Carregar atletas para cruzar nomes e fotos
+            if (currentAtletas.length === 0) {
+                const { data: atls } = await supabase.from('atletasbcv').select('*');
+                currentAtletas = atls || [];
+            }
+
+            // 2. Carregar presenças
+            const { data: presencas, error } = await supabase
+                .from('presencas')
+                .select('*')
+                .order('data', { ascending: false });
+
+            if (error && error.code !== '42P01') throw error;
+            currentDesportivaPresencas = presencas || [];
+
+            renderDesportivaTable();
+
+        } catch (error) {
+            console.error('Erro ao carregar dados desportivos:', error);
+            desportivaTableBody.innerHTML = `<tr><td colspan="7" style="padding: 15px; text-align: center; color: #ef4444;">Erro ao carregar dados: ${error.message}</td></tr>`;
+        }
+    }
+
+    function renderDesportivaTable() {
+        if (!desportivaTableBody) return;
+
+        const fEsc = (despFilterEscalao?.value || '').toLowerCase().trim();
+        const fEst = (despFilterEstado?.value || '').trim();
+        const fTipo = (despFilterTipo?.value || '').trim();
+        const fData = (despFilterData?.value || '').trim();
+        const fSearch = (despFilterSearch?.value || '').toLowerCase().trim();
+
+        // Mapa de atletas por ID
+        const atletaMap = {};
+        currentAtletas.forEach(a => { atletaMap[a.id] = a; });
+
+        let filtrados = currentDesportivaPresencas.filter(p => {
+            const atleta = atletaMap[p.atleta_id] || {};
+            const esc = (p.escalao || atleta.escalao || '').toLowerCase();
+            const atlNome = (atleta.nome || '').toLowerCase();
+            const atlNick = (atleta.nickname || '').toLowerCase();
+
+            if (fEsc && !esc.includes(fEsc.replace(/[-\s]/g, ''))) return false;
+            if (fEst && p.estado !== fEst) return false;
+            if (fTipo && p.tipo !== fTipo) return false;
+            if (fData && p.data !== fData) return false;
+            if (fSearch && !atlNome.includes(fSearch) && !atlNick.includes(fSearch)) return false;
+
+            return true;
+        });
+
+        // Contadores e KPIs
+        let total = filtrados.length;
+        let cPresentes = 0;
+        let cFaltas = 0;
+        let cJustificados = 0;
+        let cLesionados = 0;
+
+        filtrados.forEach(p => {
+            if (p.estado === 'Presente') cPresentes++;
+            else if (p.estado === 'Falta') cFaltas++;
+            else if (p.estado === 'Justificado') cJustificados++;
+            else if (p.estado === 'Lesionado') cLesionados++;
+        });
+
+        const taxa = total > 0 ? Math.round((cPresentes / total) * 100) : 0;
+
+        if (despKpiTotal) despKpiTotal.textContent = total;
+        if (despKpiPresentes) despKpiPresentes.textContent = cPresentes;
+        if (despKpiFaltas) despKpiFaltas.textContent = cFaltas;
+        if (despKpiJustificados) despKpiJustificados.textContent = cJustificados;
+        if (despKpiLesionados) despKpiLesionados.textContent = cLesionados;
+        if (despKpiTaxa) despKpiTaxa.textContent = `${taxa}%`;
+        if (despCountInfo) despCountInfo.textContent = `${total} registos encontrados`;
+
+        if (filtrados.length === 0) {
+            desportivaTableBody.innerHTML = '<tr><td colspan="7" style="padding: 20px; text-align: center; color: var(--text-secondary);">Nenhum registo desportivo corresponde aos filtros aplicados.</td></tr>';
+            return;
+        }
+
+        const badgeMap = {
+            'Presente': '<span style="background: rgba(16, 185, 129, 0.12); color: #047857; font-weight: 700; padding: 3px 10px; border-radius: 4px; font-size: 0.8rem; border: 1px solid rgba(16, 185, 129, 0.3);">🟢 Presente</span>',
+            'Falta': '<span style="background: rgba(239, 68, 68, 0.12); color: #dc2626; font-weight: 700; padding: 3px 10px; border-radius: 4px; font-size: 0.8rem; border: 1px solid rgba(239, 68, 68, 0.3);">🔴 Falta</span>',
+            'Justificado': '<span style="background: rgba(245, 158, 11, 0.12); color: #d97706; font-weight: 700; padding: 3px 10px; border-radius: 4px; font-size: 0.8rem; border: 1px solid rgba(245, 158, 11, 0.3);">🟡 Justificado</span>',
+            'Lesionado': '<span style="background: rgba(99, 102, 241, 0.12); color: #4f46e5; font-weight: 700; padding: 3px 10px; border-radius: 4px; font-size: 0.8rem; border: 1px solid rgba(99, 102, 241, 0.3);">🏥 Lesionado</span>'
+        };
+
+        desportivaTableBody.innerHTML = filtrados.map(p => {
+            const atl = atletaMap[p.atleta_id] || {};
+            const dorsal = atl.equipamento_numero_1 || atl.equipamento_numero_2 || atl.dorsal || '-';
+            const escFinal = p.escalao || atl.escalao || '-';
+            const badgeHtml = badgeMap[p.estado] || `<span class="badge">${p.estado}</span>`;
+            
+            return `
+                <tr style="border-bottom: 1px solid var(--border-color);">
+                    <td style="padding: 10px; font-weight: 600;">${p.data || '-'}</td>
+                    <td style="padding: 10px;"><span style="background: #f1f5f9; padding: 2px 6px; border-radius: 4px; font-size: 0.75rem; font-weight: 700;">${p.tipo || 'Treino'}</span></td>
+                    <td style="padding: 10px;"><span style="background: rgba(126, 34, 206, 0.08); color: #7e22ce; padding: 2px 6px; border-radius: 4px; font-size: 0.75rem; font-weight: 700;">🏀 ${escFinal}</span></td>
+                    <td style="padding: 10px; font-weight: 600;">${atl.nome || `Atleta #${p.atleta_id}`}</td>
+                    <td style="padding: 10px; text-align: center;"><span style="background: #0f172a; color: #fff; padding: 1px 6px; border-radius: 4px; font-size: 0.75rem; font-weight: 700;">Nº ${dorsal}</span></td>
+                    <td style="padding: 10px; text-align: center;">${badgeHtml}</td>
+                    <td style="padding: 10px; color: var(--text-secondary); font-size: 0.85rem;">👤 ${p.registado_por || 'Sistema'}</td>
+                </tr>
+            `;
+        }).join('');
+    }
+
+    // Eventos de filtro desportivo
+    if (despFilterEscalao) despFilterEscalao.addEventListener('change', renderDesportivaTable);
+    if (despFilterEstado) despFilterEstado.addEventListener('change', renderDesportivaTable);
+    if (despFilterTipo) despFilterTipo.addEventListener('change', renderDesportivaTable);
+    if (despFilterData) despFilterData.addEventListener('change', renderDesportivaTable);
+    if (despFilterSearch) despFilterSearch.addEventListener('input', renderDesportivaTable);
+    if (btnDespClearFilters) {
+        btnDespClearFilters.addEventListener('click', () => {
+            if (despFilterEscalao) despFilterEscalao.value = '';
+            if (despFilterEstado) despFilterEstado.value = '';
+            if (despFilterTipo) despFilterTipo.value = '';
+            if (despFilterData) despFilterData.value = '';
+            if (despFilterSearch) despFilterSearch.value = '';
+            renderDesportivaTable();
+        });
+    }
+
+    // Exportação CSV Desportiva
+    if (btnExportDesportivaCsv) {
+        btnExportDesportivaCsv.addEventListener('click', () => {
+            const atletaMap = {};
+            currentAtletas.forEach(a => { atletaMap[a.id] = a; });
+
+            const headers = ['Data', 'Tipo', 'Escalao', 'Atleta', 'Dorsal', 'Estado', 'Registado_Por'];
+            const rows = currentDesportivaPresencas.map(p => {
+                const atl = atletaMap[p.atleta_id] || {};
+                const dorsal = atl.equipamento_numero_1 || atl.equipamento_numero_2 || atl.dorsal || '';
+                return [
+                    `"${p.data || ''}"`,
+                    `"${p.tipo || 'Treino'}"`,
+                    `"${p.escalao || atl.escalao || ''}"`,
+                    `"${(atl.nome || '').replace(/"/g, '""')}"`,
+                    `"${dorsal}"`,
+                    `"${p.estado || ''}"`,
+                    `"${(p.registado_por || '').replace(/"/g, '""')}"`
+                ].join(',');
+            });
+
+            const csvContent = '\uFEFF' + [headers.join(','), ...rows].join('\r\n');
+            const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+            const url = URL.createObjectURL(blob);
+            const link = document.createElement('a');
+            link.href = url;
+            link.download = `Relatorio_Assiduidade_BCV_${new Date().toISOString().split('T')[0]}.csv`;
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+            URL.revokeObjectURL(url);
+        });
+    }
+
+    // Exportação PDF Desportiva (Impressão / PDF estruturado)
+    if (btnExportDesportivaPdf) {
+        btnExportDesportivaPdf.addEventListener('click', () => {
+            const atletaMap = {};
+            currentAtletas.forEach(a => { atletaMap[a.id] = a; });
+
+            const dataHoje = new Date().toLocaleDateString('pt-PT');
+            const printWin = window.open('', '_blank');
+            if (!printWin) {
+                alert('Por favor, permita popups para gerar o relatório PDF.');
+                return;
+            }
+
+            let rowsHtml = '';
+            currentDesportivaPresencas.forEach(p => {
+                const atl = atletaMap[p.atleta_id] || {};
+                const dorsal = atl.equipamento_numero_1 || atl.equipamento_numero_2 || atl.dorsal || '-';
+                rowsHtml += `
+                    <tr>
+                        <td style="padding:6px; border:1px solid #ddd;">${p.data || '-'}</td>
+                        <td style="padding:6px; border:1px solid #ddd;">${p.tipo || 'Treino'}</td>
+                        <td style="padding:6px; border:1px solid #ddd;">${p.escalao || atl.escalao || '-'}</td>
+                        <td style="padding:6px; border:1px solid #ddd; font-weight:600;">${atl.nome || `Atleta #${p.atleta_id}`}</td>
+                        <td style="padding:6px; border:1px solid #ddd; text-align:center;">${dorsal}</td>
+                        <td style="padding:6px; border:1px solid #ddd; text-align:center; font-weight:bold;">${p.estado}</td>
+                        <td style="padding:6px; border:1px solid #ddd;">${p.registado_por || '-'}</td>
+                    </tr>
+                `;
+            });
+
+            printWin.document.write(`
+                <!DOCTYPE html>
+                <html>
+                <head>
+                    <title>Relatório de Assiduidade e Presenças - BCV</title>
+                    <style>
+                        body { font-family: Arial, sans-serif; font-size: 11px; margin: 20px; color: #111; }
+                        h1 { font-size: 16px; margin: 0 0 4px; color: #7e22ce; }
+                        table { width: 100%; border-collapse: collapse; margin-top: 12px; }
+                        th { background: #f1f5f9; padding: 8px 6px; border: 1px solid #ccc; text-align: left; }
+                    </style>
+                </head>
+                <body>
+                    <div style="display:flex; justify-content:space-between; align-items:center; border-bottom: 2px solid #7e22ce; padding-bottom: 8px;">
+                        <div>
+                            <h1>BASKET CLUBE DE VALENÇA</h1>
+                            <div>Relatório Geral de Assiduidade, Presenças e Faltas</div>
+                        </div>
+                        <div style="text-align:right;">
+                            <div>Data de Emissão: <strong>${dataHoje}</strong></div>
+                            <div>Total Registos: <strong>${currentDesportivaPresencas.length}</strong></div>
+                        </div>
+                    </div>
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Data</th>
+                                <th>Tipo</th>
+                                <th>Escalão</th>
+                                <th>Atleta</th>
+                                <th>Nº</th>
+                                <th>Estado</th>
+                                <th>Registado Por</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            ${rowsHtml}
+                        </tbody>
+                    </table>
+                    <script>
+                        window.onload = function() { window.print(); };
+                    </script>
+                </body>
+                </html>
+            `);
+            printWin.document.close();
+        });
+    }
+
+    // ====================================================================
+    // 16. GESTÃO FINANCEIRA & TABELA DE PREÇOS
+    // ====================================================================
+    let currentFinanceiraPagamentos = [];
+    const ESCALOES_PADRAO = ['BabyBasket', 'Mini 8', 'Mini 10', 'Mini 12', 'Sub 14', 'Sub 16', 'Sub 18', 'Sub 20', 'Seniores', 'Veteranos'];
+    let tabelaPrecosQuotas = {};
+
+    const btnSubfins = document.querySelectorAll('.btn-subfin');
+    const subfinContents = document.querySelectorAll('.subfin-content');
+
+    const finFilterEscalao = document.getElementById('fin-filter-escalao');
+    const finFilterMes = document.getElementById('fin-filter-mes');
+    const finFilterMetodo = document.getElementById('fin-filter-metodo');
+    const finFilterRecebedor = document.getElementById('fin-filter-recebedor');
+    const finFilterSearch = document.getElementById('fin-filter-search');
+    const btnFinClearFilters = document.getElementById('btn-fin-clear-filters');
+    const financeiraTableBody = document.getElementById('financeira-table-body');
+    const finCountInfo = document.getElementById('fin-count-info');
+
+    const finKpiTotalArrecadado = document.getElementById('fin-kpi-total-arrecadado');
+    const finKpiTotalAnuais = document.getElementById('fin-kpi-total-anuais');
+    const finKpiTotalMensalidades = document.getElementById('fin-kpi-total-mensalidades');
+    const finKpiMetodos = document.getElementById('fin-kpi-metodos');
+
+    const btnOpenModalPagamentoAdmin = document.getElementById('btn-open-modal-pagamento-admin');
+    const modalAdminPagamento = document.getElementById('modal-admin-pagamento');
+    const formAdminPagamento = document.getElementById('form-admin-pagamento');
+    const modalAdminPagamentoTitle = document.getElementById('modal-admin-pagamento-title');
+    const adminPagamentoId = document.getElementById('admin-pagamento-id');
+    const adminPagamentoAtleta = document.getElementById('admin-pagamento-atleta');
+    const adminPagamentoTipo = document.getElementById('admin-pagamento-tipo');
+    const adminPagamentoMes = document.getElementById('admin-pagamento-mes');
+    const adminPagamentoValor = document.getElementById('admin-pagamento-valor');
+    const adminPagamentoMetodo = document.getElementById('admin-pagamento-metodo');
+    const adminPagamentoData = document.getElementById('admin-pagamento-data');
+    const adminPagamentoRecebedor = document.getElementById('admin-pagamento-recebedor');
+    const adminPagamentoNotas = document.getElementById('admin-pagamento-notas');
+    const containerAdminPagamentoMes = document.getElementById('container-admin-pagamento-mes');
+
+    const tabelaPrecosTbody = document.getElementById('tabela-precos-tbody');
+    const btnSaveTabelaPrecos = document.getElementById('btn-save-tabela-precos');
+    const msgTabelaPrecos = document.getElementById('msg-tabela-precos');
+
+    const btnExportFinanceiraCsv = document.getElementById('btn-export-financeira-csv');
+    const btnExportFinanceiraPdf = document.getElementById('btn-export-financeira-pdf');
+
+    // Alternância entre Sub-Secções Financeiras
+    btnSubfins.forEach(btn => {
+        btn.addEventListener('click', () => {
+            const targetSub = btn.getAttribute('data-sub');
+            btnSubfins.forEach(b => {
+                b.classList.remove('active');
+                b.style.background = '#f8fafc';
+                b.style.color = 'var(--text-primary)';
+                b.style.borderColor = 'var(--border-color)';
+            });
+            btn.classList.add('active');
+            btn.style.background = '#7e22ce';
+            btn.style.color = '#fff';
+            btn.style.borderColor = '#7e22ce';
+
+            subfinContents.forEach(c => c.classList.add('hidden'));
+            const content = document.getElementById(targetSub);
+            if (content) content.classList.remove('hidden');
+
+            if (targetSub === 'subfin-tabela-precos') {
+                renderTabelaPrecos();
+            }
+        });
+    });
+
+    async function loadFinanceira() {
+        if (!financeiraTableBody) return;
+        financeiraTableBody.innerHTML = '<tr><td colspan="9" style="padding: 15px; text-align: center; color: var(--text-secondary);">A carregar pagamentos globais...</td></tr>';
+
+        try {
+            // 1. Carregar atletas se necessário
+            if (currentAtletas.length === 0) {
+                const { data: atls } = await supabase.from('atletasbcv').select('*');
+                currentAtletas = atls || [];
+            }
+
+            // 2. Carregar Tabela de Preços configurada
+            await loadTabelaPrecos();
+
+            // 3. Carregar todos os pagamentos da época 2026/2027
+            const { data: pagamentos, error } = await supabase
+                .from('mensalidades')
+                .select('*')
+                .eq('epoca', '2026/2027')
+                .order('data_pagamento', { ascending: false });
+
+            if (error && error.code !== '42P01') throw error;
+            currentFinanceiraPagamentos = pagamentos || [];
+
+            // Povoar filtro de recebedores
+            if (finFilterRecebedor) {
+                const recebedores = [...new Set(currentFinanceiraPagamentos.map(p => p.registado_por).filter(Boolean))];
+                finFilterRecebedor.innerHTML = '<option value="">Todos os Recetores</option>' +
+                    recebedores.map(r => `<option value="${r}">${r}</option>`).join('');
+            }
+
+            renderFinanceiraTable();
+
+        } catch (error) {
+            console.error('Erro ao carregar pagamentos financeiros:', error);
+            financeiraTableBody.innerHTML = `<tr><td colspan="9" style="padding: 15px; text-align: center; color: #ef4444;">Erro ao carregar pagamentos: ${error.message}</td></tr>`;
+        }
+    }
+
+    function renderFinanceiraTable() {
+        if (!financeiraTableBody) return;
+
+        const fEsc = (finFilterEscalao?.value || '').toLowerCase().trim();
+        const fMes = (finFilterMes?.value || '').trim();
+        const fMet = (finFilterMetodo?.value || '').trim();
+        const fRec = (finFilterRecebedor?.value || '').trim();
+        const fSearch = (finFilterSearch?.value || '').toLowerCase().trim();
+
+        const atletaMap = {};
+        currentAtletas.forEach(a => { atletaMap[a.id] = a; });
+
+        let filtrados = currentFinanceiraPagamentos.filter(p => {
+            const atleta = atletaMap[p.atleta_id] || {};
+            const esc = (atleta.escalao || '').toLowerCase();
+            const atlNome = (atleta.nome || '').toLowerCase();
+
+            if (fEsc && !esc.includes(fEsc.replace(/[-\s]/g, ''))) return false;
+            if (fMes) {
+                if (fMes === 'ANUAL' && p.mes !== 'ANUAL') return false;
+                if (fMes !== 'ANUAL' && p.mes !== fMes) return false;
+            }
+            if (fMet && p.metodo_pagamento !== fMet) return false;
+            if (fRec && p.registado_por !== fRec) return false;
+            if (fSearch && !atlNome.includes(fSearch)) return false;
+
+            return true;
+        });
+
+        // Totais e KPIs
+        let totalArrecadado = 0;
+        let totalAnuais = 0;
+        let totalMensalidades = 0;
+        let totalDinheiro = 0;
+        let totalMbway = 0;
+        let totalTransf = 0;
+
+        filtrados.forEach(p => {
+            const val = Number(p.valor || 0);
+            totalArrecadado += val;
+            if (p.mes === 'ANUAL') {
+                totalAnuais += val;
+            } else {
+                totalMensalidades += val;
+            }
+
+            const met = (p.metodo_pagamento || '').toLowerCase();
+            if (met.includes('dinheiro')) totalDinheiro += val;
+            else if (met.includes('mbway')) totalMbway += val;
+            else if (met.includes('transf')) totalTransf += val;
+        });
+
+        if (finKpiTotalArrecadado) finKpiTotalArrecadado.textContent = `${totalArrecadado.toFixed(2)} €`;
+        if (finKpiTotalAnuais) finKpiTotalAnuais.textContent = `${totalAnuais.toFixed(2)} €`;
+        if (finKpiTotalMensalidades) finKpiTotalMensalidades.textContent = `${totalMensalidades.toFixed(2)} €`;
+        if (finKpiMetodos) {
+            finKpiMetodos.innerHTML = `💵 ${totalDinheiro.toFixed(0)}€ &nbsp;|&nbsp; 📱 ${totalMbway.toFixed(0)}€ &nbsp;|&nbsp; 🏦 ${totalTransf.toFixed(0)}€`;
+        }
+        if (finCountInfo) finCountInfo.textContent = `${filtrados.length} pagamentos registados`;
+
+        if (filtrados.length === 0) {
+            financeiraTableBody.innerHTML = '<tr><td colspan="9" style="padding: 20px; text-align: center; color: var(--text-secondary);">Nenhum pagamento corresponde aos filtros selecionados.</td></tr>';
+            return;
+        }
+
+        financeiraTableBody.innerHTML = filtrados.map(p => {
+            const atl = atletaMap[p.atleta_id] || {};
+            const escFinal = atl.escalao || '-';
+            const isAnual = p.mes === 'ANUAL';
+            const conceitoHtml = isAnual 
+                ? '<span style="background: rgba(126, 34, 206, 0.12); color: #7e22ce; font-weight: 700; padding: 2px 8px; border-radius: 4px; font-size: 0.75rem; border: 1px solid rgba(126, 34, 206, 0.3);">⭐ Quota Anual Completa</span>'
+                : `<span style="background: #f1f5f9; padding: 2px 8px; border-radius: 4px; font-size: 0.78rem; font-weight: 600;">📅 ${p.mes}</span>`;
+
+            const metHtml = p.metodo_pagamento === 'MBWay' ? '📱 MBWay' : (p.metodo_pagamento === 'Transferência' ? '🏦 Transf. Bancária' : '💵 Dinheiro');
+
+            return `
+                <tr style="border-bottom: 1px solid var(--border-color);">
+                    <td style="padding: 10px; font-weight: 600;">${p.data_pagamento || '-'}</td>
+                    <td style="padding: 10px; font-weight: 700;">${atl.nome || `Atleta #${p.atleta_id}`}</td>
+                    <td style="padding: 10px;"><span style="background: rgba(126, 34, 206, 0.08); color: #7e22ce; padding: 2px 6px; border-radius: 4px; font-size: 0.75rem; font-weight: 700;">🏀 ${escFinal}</span></td>
+                    <td style="padding: 10px;">${conceitoHtml}</td>
+                    <td style="padding: 10px; text-align: right; font-weight: 800; color: #059669;">${Number(p.valor || 0).toFixed(2)} €</td>
+                    <td style="padding: 10px; font-size: 0.85rem;">${metHtml}</td>
+                    <td style="padding: 10px; font-weight: 600; color: var(--text-primary);">👤 ${p.registado_por || '-'}</td>
+                    <td style="padding: 10px; color: var(--text-secondary); font-size: 0.8rem;">${p.notas || '-'}</td>
+                    <td style="padding: 10px; text-align: center; white-space: nowrap;">
+                        <button class="btn-action" title="Editar Pagamento" onclick="window.editAdminPagamento(${p.id})">✏️</button>
+                        <button class="btn-action delete" title="Anular Pagamento" onclick="window.deleteAdminPagamento(${p.id})">🗑️</button>
+                    </td>
+                </tr>
+            `;
+        }).join('');
+    }
+
+    // Filtros Financeiros
+    if (finFilterEscalao) finFilterEscalao.addEventListener('change', renderFinanceiraTable);
+    if (finFilterMes) finFilterMes.addEventListener('change', renderFinanceiraTable);
+    if (finFilterMetodo) finFilterMetodo.addEventListener('change', renderFinanceiraTable);
+    if (finFilterRecebedor) finFilterRecebedor.addEventListener('change', renderFinanceiraTable);
+    if (finFilterSearch) finFilterSearch.addEventListener('input', renderFinanceiraTable);
+    if (btnFinClearFilters) {
+        btnFinClearFilters.addEventListener('click', () => {
+            if (finFilterEscalao) finFilterEscalao.value = '';
+            if (finFilterMes) finFilterMes.value = '';
+            if (finFilterMetodo) finFilterMetodo.value = '';
+            if (finFilterRecebedor) finFilterRecebedor.value = '';
+            if (finFilterSearch) finFilterSearch.value = '';
+            renderFinanceiraTable();
+        });
+    }
+
+    // Gestão da Tabela de Preços de Quotas por Escalão
+    async function loadTabelaPrecos() {
+        try {
+            const { data: configRow } = await supabase
+                .from('configuracoes_clube')
+                .select('*')
+                .eq('chave', 'tabela_quotas')
+                .maybeSingle();
+
+            if (configRow && configRow.valor) {
+                tabelaPrecosQuotas = typeof configRow.valor === 'string' ? JSON.parse(configRow.valor) : configRow.valor;
+            } else {
+                // Valores padrão
+                tabelaPrecosQuotas = {};
+                ESCALOES_PADRAO.forEach(esc => {
+                    tabelaPrecosQuotas[esc] = { mensal: 25.00, anual: 250.00 };
+                });
+            }
+        } catch (e) {
+            console.warn('Tabela de quotas não encontrada na BD, usando padrão:', e);
+            tabelaPrecosQuotas = {};
+            ESCALOES_PADRAO.forEach(esc => {
+                tabelaPrecosQuotas[esc] = { mensal: 25.00, anual: 250.00 };
+            });
+        }
+    }
+
+    function renderTabelaPrecos() {
+        if (!tabelaPrecosTbody) return;
+        tabelaPrecosTbody.innerHTML = ESCALOES_PADRAO.map(esc => {
+            const cfg = tabelaPrecosQuotas[esc] || { mensal: 25.00, anual: 250.00 };
+            return `
+                <tr style="border-bottom: 1px solid var(--border-color);">
+                    <td style="padding: 10px; font-weight: 700;">🏀 ${esc}</td>
+                    <td style="padding: 10px;">
+                        <input type="number" step="0.5" class="admin-input input-preco-mensal" data-escalao="${esc}" value="${Number(cfg.mensal || 25).toFixed(2)}" style="margin: 0; width: 140px;">
+                    </td>
+                    <td style="padding: 10px;">
+                        <input type="number" step="0.5" class="admin-input input-preco-anual" data-escalao="${esc}" value="${Number(cfg.anual || 250).toFixed(2)}" style="margin: 0; width: 140px;">
+                    </td>
+                </tr>
+            `;
+        }).join('');
+    }
+
+    if (btnSaveTabelaPrecos) {
+        btnSaveTabelaPrecos.addEventListener('click', async () => {
+            btnSaveTabelaPrecos.textContent = 'A guardar...';
+            btnSaveTabelaPrecos.disabled = true;
+
+            const novaTabela = {};
+            document.querySelectorAll('.input-preco-mensal').forEach(inp => {
+                const esc = inp.getAttribute('data-escalao');
+                if (!novaTabela[esc]) novaTabela[esc] = {};
+                novaTabela[esc].mensal = Number(inp.value) || 25.00;
+            });
+
+            document.querySelectorAll('.input-preco-anual').forEach(inp => {
+                const esc = inp.getAttribute('data-escalao');
+                if (!novaTabela[esc]) novaTabela[esc] = {};
+                novaTabela[esc].anual = Number(inp.value) || 250.00;
+            });
+
+            tabelaPrecosQuotas = novaTabela;
+
+            try {
+                const { error } = await supabase
+                    .from('configuracoes_clube')
+                    .upsert({
+                        chave: 'tabela_quotas',
+                        valor: novaTabela,
+                        descricao: 'Valores padrão de mensalidades e anuidade por escalão'
+                    }, { onConflict: 'chave' });
+
+                if (error && error.code !== '42P01') throw error;
+
+                if (msgTabelaPrecos) {
+                    msgTabelaPrecos.textContent = '✅ Tabela de preços guardada com sucesso!';
+                    msgTabelaPrecos.style.color = '#10b981';
+                    msgTabelaPrecos.classList.remove('hidden');
+                    setTimeout(() => msgTabelaPrecos.classList.add('hidden'), 4000);
+                }
+            } catch (err) {
+                console.error('Erro ao guardar tabela de quotas:', err);
+                if (msgTabelaPrecos) {
+                    msgTabelaPrecos.textContent = '❌ Erro ao guardar: ' + err.message;
+                    msgTabelaPrecos.style.color = '#ef4444';
+                    msgTabelaPrecos.classList.remove('hidden');
+                }
+            } finally {
+                btnSaveTabelaPrecos.textContent = '💾 Guardar Tabela de Preços';
+                btnSaveTabelaPrecos.disabled = false;
+            }
+        });
+    }
+
+    // Modal de Pagamento no Admin
+    function populateAtletasSelectInAdminPagamento() {
+        if (!adminPagamentoAtleta) return;
+        const sorted = [...currentAtletas].sort((a, b) => (a.nome || '').localeCompare(b.nome || ''));
+        adminPagamentoAtleta.innerHTML = '<option value="" disabled selected>Selecionar Atleta</option>' +
+            sorted.map(a => `<option value="${a.id}">🏀 ${a.nome} (${a.escalao || 'Sem Escalão'})</option>`).join('');
+    }
+
+    window.openAdminPagamentoModal = function(pagamentoId = null) {
+        if (!modalAdminPagamento) return;
+        populateAtletasSelectInAdminPagamento();
+
+        if (pagamentoId) {
+            const p = currentFinanceiraPagamentos.find(x => x.id === pagamentoId);
+            if (!p) return;
+            modalAdminPagamentoTitle.textContent = 'Editar Pagamento';
+            adminPagamentoId.value = p.id;
+            adminPagamentoAtleta.value = p.atleta_id;
+            adminPagamentoTipo.value = p.mes === 'ANUAL' ? 'ANUAL' : 'MENSAL';
+            if (p.mes === 'ANUAL') {
+                if (containerAdminPagamentoMes) containerAdminPagamentoMes.style.display = 'none';
+            } else {
+                if (containerAdminPagamentoMes) containerAdminPagamentoMes.style.display = 'block';
+                adminPagamentoMes.value = p.mes || '2026-09';
+            }
+            adminPagamentoValor.value = Number(p.valor || 0).toFixed(2);
+            adminPagamentoMetodo.value = p.metodo_pagamento || 'Dinheiro';
+            adminPagamentoData.value = p.data_pagamento || new Date().toISOString().split('T')[0];
+            adminPagamentoRecebedor.value = p.registado_por || 'Secretaria';
+            adminPagamentoNotas.value = p.notas || '';
+        } else {
+            modalAdminPagamentoTitle.textContent = 'Registar Novo Pagamento';
+            adminPagamentoId.value = '';
+            adminPagamentoAtleta.value = '';
+            adminPagamentoTipo.value = 'MENSAL';
+            if (containerAdminPagamentoMes) containerAdminPagamentoMes.style.display = 'block';
+            adminPagamentoMes.value = '2026-09';
+            adminPagamentoValor.value = '25.00';
+            adminPagamentoMetodo.value = 'Dinheiro';
+            adminPagamentoData.value = new Date().toISOString().split('T')[0];
+            adminPagamentoRecebedor.value = 'Secretaria Admin';
+            adminPagamentoNotas.value = '';
+        }
+
+        modalAdminPagamento.classList.remove('hidden');
+    };
+
+    window.editAdminPagamento = function(id) {
+        window.openAdminPagamentoModal(id);
+    };
+
+    window.closeAdminPagamentoModal = function() {
+        if (modalAdminPagamento) modalAdminPagamento.classList.add('hidden');
+    };
+
+    if (btnOpenModalPagamentoAdmin) {
+        btnOpenModalPagamentoAdmin.addEventListener('click', () => {
+            window.openAdminPagamentoModal();
+        });
+    }
+
+    if (adminPagamentoTipo) {
+        adminPagamentoTipo.addEventListener('change', () => {
+            const isAnual = adminPagamentoTipo.value === 'ANUAL';
+            if (containerAdminPagamentoMes) containerAdminPagamentoMes.style.display = isAnual ? 'none' : 'block';
+            
+            // Sugerir preço do escalão do atleta selecionado
+            const atlId = Number(adminPagamentoAtleta.value);
+            const atl = currentAtletas.find(a => a.id === atlId);
+            const esc = atl ? atl.escalao : 'Sub 14';
+            const cfg = tabelaPrecosQuotas[esc] || { mensal: 25.00, anual: 250.00 };
+
+            adminPagamentoValor.value = isAnual ? Number(cfg.anual || 250).toFixed(2) : Number(cfg.mensal || 25).toFixed(2);
+        });
+    }
+
+    if (adminPagamentoAtleta) {
+        adminPagamentoAtleta.addEventListener('change', () => {
+            const atlId = Number(adminPagamentoAtleta.value);
+            const atl = currentAtletas.find(a => a.id === atlId);
+            if (!atl) return;
+            const esc = atl.escalao || 'Sub 14';
+            const cfg = tabelaPrecosQuotas[esc] || { mensal: 25.00, anual: 250.00 };
+            const isAnual = adminPagamentoTipo.value === 'ANUAL';
+            adminPagamentoValor.value = isAnual ? Number(cfg.anual || 250).toFixed(2) : Number(cfg.mensal || 25).toFixed(2);
+        });
+    }
+
+    if (formAdminPagamento) {
+        formAdminPagamento.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const id = adminPagamentoId.value;
+            const atletaId = Number(adminPagamentoAtleta.value);
+            const tipo = adminPagamentoTipo.value;
+            const mesFinal = tipo === 'ANUAL' ? 'ANUAL' : adminPagamentoMes.value;
+            const valor = Number(adminPagamentoValor.value) || 25.00;
+            const metodo = adminPagamentoMetodo.value;
+            const dataPag = adminPagamentoData.value || new Date().toISOString().split('T')[0];
+            const recebedor = adminPagamentoRecebedor.value || 'Secretaria';
+            const notas = adminPagamentoNotas.value || '';
+
+            const btnSave = document.getElementById('btn-save-admin-pagamento');
+            btnSave.textContent = 'A guardar...';
+            btnSave.disabled = true;
+
+            const payload = {
+                atleta_id: atletaId,
+                epoca: '2026/2027',
+                mes: mesFinal,
+                valor: valor,
+                estado: 'Pago',
+                metodo_pagamento: metodo,
+                data_pagamento: dataPag,
+                registado_por: recebedor,
+                notas: notas
+            };
+
+            try {
+                if (id) {
+                    // Atualizar
+                    const { error } = await supabase
+                        .from('mensalidades')
+                        .update(payload)
+                        .eq('id', id);
+                    if (error) throw error;
+                } else {
+                    // Inserir / Upsert
+                    const { error } = await supabase
+                        .from('mensalidades')
+                        .upsert(payload, { onConflict: 'atleta_id, epoca, mes' });
+                    if (error) throw error;
+                }
+
+                window.closeAdminPagamentoModal();
+                await loadFinanceira();
+
+            } catch (err) {
+                console.error('Erro ao guardar pagamento no admin:', err);
+                alert('Erro ao guardar pagamento: ' + err.message);
+            } finally {
+                btnSave.textContent = 'Guardar Pagamento';
+                btnSave.disabled = false;
+            }
+        });
+    }
+
+    window.deleteAdminPagamento = async function(id) {
+        if (!confirm('Tem a certeza de que deseja anular este registo de pagamento?')) return;
+        try {
+            const { error } = await supabase
+                .from('mensalidades')
+                .delete()
+                .eq('id', id);
+            if (error) throw error;
+            await loadFinanceira();
+        } catch (err) {
+            console.error('Erro ao anular pagamento:', err);
+            alert('Erro ao anular pagamento: ' + err.message);
+        }
+    };
+
+    // Exportação CSV Financeira
+    if (btnExportFinanceiraCsv) {
+        btnExportFinanceiraCsv.addEventListener('click', () => {
+            const atletaMap = {};
+            currentAtletas.forEach(a => { atletaMap[a.id] = a; });
+
+            const headers = ['Data_Pagamento', 'Atleta', 'Escalao', 'Conceito_Mes', 'Valor_EUR', 'Metodo', 'Quem_Recebeu', 'Notas'];
+            const rows = currentFinanceiraPagamentos.map(p => {
+                const atl = atletaMap[p.atleta_id] || {};
+                return [
+                    `"${p.data_pagamento || ''}"`,
+                    `"${(atl.nome || '').replace(/"/g, '""')}"`,
+                    `"${atl.escalao || ''}"`,
+                    `"${p.mes || ''}"`,
+                    `"${Number(p.valor || 0).toFixed(2)}"`,
+                    `"${p.metodo_pagamento || ''}"`,
+                    `"${(p.registado_por || '').replace(/"/g, '""')}"`,
+                    `"${(p.notas || '').replace(/"/g, '""')}"`
+                ].join(',');
+            });
+
+            const csvContent = '\uFEFF' + [headers.join(','), ...rows].join('\r\n');
+            const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+            const url = URL.createObjectURL(blob);
+            const link = document.createElement('a');
+            link.href = url;
+            link.download = `Extrato_Financeiro_BCV_${new Date().toISOString().split('T')[0]}.csv`;
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+            URL.revokeObjectURL(url);
+        });
+    }
+
+    // Exportação PDF Financeira
+    if (btnExportFinanceiraPdf) {
+        btnExportFinanceiraPdf.addEventListener('click', () => {
+            const atletaMap = {};
+            currentAtletas.forEach(a => { atletaMap[a.id] = a; });
+
+            const dataHoje = new Date().toLocaleDateString('pt-PT');
+            const printWin = window.open('', '_blank');
+            if (!printWin) {
+                alert('Por favor, permita popups para gerar o relatório PDF.');
+                return;
+            }
+
+            let totalArrecadado = 0;
+            let rowsHtml = '';
+            currentFinanceiraPagamentos.forEach(p => {
+                const atl = atletaMap[p.atleta_id] || {};
+                const val = Number(p.valor || 0);
+                totalArrecadado += val;
+                rowsHtml += `
+                    <tr>
+                        <td style="padding:6px; border:1px solid #ddd;">${p.data_pagamento || '-'}</td>
+                        <td style="padding:6px; border:1px solid #ddd; font-weight:600;">${atl.nome || `Atleta #${p.atleta_id}`}</td>
+                        <td style="padding:6px; border:1px solid #ddd;">${atl.escalao || '-'}</td>
+                        <td style="padding:6px; border:1px solid #ddd;">${p.mes === 'ANUAL' ? '⭐ Quota Anual' : p.mes}</td>
+                        <td style="padding:6px; border:1px solid #ddd; text-align:right; font-weight:bold;">${val.toFixed(2)} €</td>
+                        <td style="padding:6px; border:1px solid #ddd;">${p.metodo_pagamento || '-'}</td>
+                        <td style="padding:6px; border:1px solid #ddd; font-weight:600;">${p.registado_por || '-'}</td>
+                        <td style="padding:6px; border:1px solid #ddd;">${p.notas || '-'}</td>
+                    </tr>
+                `;
+            });
+
+            printWin.document.write(`
+                <!DOCTYPE html>
+                <html>
+                <head>
+                    <title>Extrato Financeiro e Registo de Pagamentos - BCV</title>
+                    <style>
+                        body { font-family: Arial, sans-serif; font-size: 11px; margin: 20px; color: #111; }
+                        h1 { font-size: 16px; margin: 0 0 4px; color: #059669; }
+                        table { width: 100%; border-collapse: collapse; margin-top: 12px; }
+                        th { background: #f1f5f9; padding: 8px 6px; border: 1px solid #ccc; text-align: left; }
+                    </style>
+                </head>
+                <body>
+                    <div style="display:flex; justify-content:space-between; align-items:center; border-bottom: 2px solid #059669; padding-bottom: 8px;">
+                        <div>
+                            <h1>BASKET CLUBE DE VALENÇA</h1>
+                            <div>Extrato Financeiro Global de Quotas e Mensalidades (Época 2026/2027)</div>
+                        </div>
+                        <div style="text-align:right;">
+                            <div>Data de Emissão: <strong>${dataHoje}</strong></div>
+                            <div>Total Arrecadado: <strong style="color:#059669; font-size:14px;">${totalArrecadado.toFixed(2)} €</strong></div>
+                        </div>
+                    </div>
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Data</th>
+                                <th>Atleta</th>
+                                <th>Escalão</th>
+                                <th>Conceito</th>
+                                <th style="text-align:right;">Valor</th>
+                                <th>Método</th>
+                                <th>Quem Recebeu</th>
+                                <th>Notas</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            ${rowsHtml}
+                        </tbody>
+                    </table>
+                    <script>
+                        window.onload = function() { window.print(); };
+                    </script>
+                </body>
+                </html>
+            `);
+            printWin.document.close();
+        });
+    }
+
     // Iniciar carregamento das tabs quando ativadas
     const tabButtons = document.querySelectorAll('.tab-btn');
     tabButtons.forEach(btn => {
@@ -3217,6 +4082,8 @@ document.addEventListener('DOMContentLoaded', async () => {
             if (target === 'tab-equipas') loadEquipas();
             if (target === 'tab-config') loadConfiguracoes();
             if (target === 'tab-equipamentos') loadEquipamentos();
+            if (target === 'tab-desportiva') loadDesportiva();
+            if (target === 'tab-financeira') loadFinanceira();
         });
     });
 
