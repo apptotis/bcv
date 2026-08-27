@@ -1372,8 +1372,9 @@ document.addEventListener('DOMContentLoaded', async () => {
                 ep1 = epParts[0].trim();
                 ep2 = epParts[1].trim();
             }
-            safeSetText('epoca1', ep1);
-            safeSetText('epoca2', ep2);
+            // No template oficial da FPB, 'epoca2' é o campo à esquerda (ano inicial) e 'epoca1' à direita (ano final)
+            safeSetText('epoca2', ep1);
+            safeSetText('epoca1', ep2);
 
             // 2. Tipo de Inscrição e Licença
             const isPrimeira = (atleta.tipo_inscricao === 'Primeira Inscrição');
