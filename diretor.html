@@ -17,7 +17,7 @@
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     
     <!-- CSS Diretor Mobile -->
-    <link rel="stylesheet" href="css/diretor.css?v=20260827_3">
+    <link rel="stylesheet" href="css/diretor.css?v=20260827_4">
 </head>
 <body>
 
@@ -83,6 +83,14 @@
                 </div>
                 
                 <div class="drawer-body">
+                    <!-- Secção de Troca de Equipa (se tiver múltiplos escalões) -->
+                    <div id="drawer-section-escaloes" style="display: none;">
+                        <div class="drawer-section-title">Trocar de Equipa</div>
+                        <div id="drawer-escaloes-list" style="display: flex; flex-direction: column; gap: 6px; margin-bottom: 12px;">
+                            <!-- Botões de escalão gerados dinamicamente -->
+                        </div>
+                    </div>
+
                     <div class="drawer-section-title">Funções Principais</div>
                     
                     <button type="button" class="drawer-item active" data-tab="tab-presencas">
@@ -121,6 +129,14 @@
 
         <!-- Container Principal -->
         <main class="app-container">
+
+            <!-- Seletor de Equipa Ativa no Topo (Visível quando o diretor tem 2 ou mais escalões) -->
+            <div id="multi-escalao-selector-bar" class="multi-escalao-bar" style="display: none;">
+                <span class="multi-escalao-label">🏀 Equipa Ativa no Momento:</span>
+                <div id="multi-escalao-pills" class="escalao-pills-container">
+                    <!-- Pills geradas dinamicamente -->
+                </div>
+            </div>
 
             <!-- ======================================================= -->
             <!-- ABA 1: PRESENÇAS (CHAMADA RÁPIDA)                       -->
@@ -285,6 +301,6 @@
 
     <!-- Scripts -->
     <script src="js/config.js"></script>
-    <script src="js/diretor.js?v=20260827_3"></script>
+    <script src="js/diretor.js?v=20260827_4"></script>
 </body>
 </html>

@@ -110,24 +110,44 @@
                                 <option value="personalizado">Personalizado (Definir Menus)</option>
                             </select>
 
-                            <!-- Bloco de Escalão Afeto -->
-                            <div id="container-user-escalao" style="display: none; background: #f8fafc; border: 1px solid var(--border-color); border-radius: 8px; padding: 12px;">
-                                <label style="font-weight: 600; font-size: 0.85rem; color: var(--text-primary); margin-bottom: 6px; display: block;">
-                                    🏀 Escalão / Equipa Atribuída (Acesso Direto Mobile):
+                            <!-- Bloco de Escalões Afetos (Suporte a 1 ou Múltiplos) -->
+                            <div id="container-user-escalao" style="display: none; background: #f8fafc; border: 1px solid var(--border-color); border-radius: 8px; padding: 14px;">
+                                <label style="font-weight: 600; font-size: 0.85rem; color: var(--text-primary); margin-bottom: 8px; display: block;">
+                                    🏀 Escalões / Equipas Atribuídas (Selecione 1 ou mais):
                                 </label>
-                                <select id="new-user-escalao" class="admin-input" style="margin-bottom: 0;">
-                                    <option value="">Todos os Escalões / Geral</option>
-                                    <option value="BabyBasket">BabyBasket</option>
-                                    <option value="Mini 8">Mini 8</option>
-                                    <option value="Mini 10">Mini 10</option>
-                                    <option value="Mini 12">Mini 12</option>
-                                    <option value="Sub 14">Sub 14</option>
-                                    <option value="Sub 16">Sub 16</option>
-                                    <option value="Sub 18">Sub 18</option>
-                                    <option value="Sub 20">Sub 20</option>
-                                    <option value="Seniores">Seniores</option>
-                                    <option value="Veteranos">Veteranos</option>
-                                </select>
+                                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(130px, 1fr)); gap: 8px;">
+                                    <label style="display: flex; align-items: center; gap: 6px; font-size: 0.85rem; cursor: pointer; color: var(--text-primary);">
+                                        <input type="checkbox" name="user_escaloes" value="BabyBasket"> BabyBasket
+                                    </label>
+                                    <label style="display: flex; align-items: center; gap: 6px; font-size: 0.85rem; cursor: pointer; color: var(--text-primary);">
+                                        <input type="checkbox" name="user_escaloes" value="Mini 8"> Mini 8
+                                    </label>
+                                    <label style="display: flex; align-items: center; gap: 6px; font-size: 0.85rem; cursor: pointer; color: var(--text-primary);">
+                                        <input type="checkbox" name="user_escaloes" value="Mini 10"> Mini 10
+                                    </label>
+                                    <label style="display: flex; align-items: center; gap: 6px; font-size: 0.85rem; cursor: pointer; color: var(--text-primary);">
+                                        <input type="checkbox" name="user_escaloes" value="Mini 12"> Mini 12
+                                    </label>
+                                    <label style="display: flex; align-items: center; gap: 6px; font-size: 0.85rem; cursor: pointer; color: var(--text-primary);">
+                                        <input type="checkbox" name="user_escaloes" value="Sub 14"> Sub 14
+                                    </label>
+                                    <label style="display: flex; align-items: center; gap: 6px; font-size: 0.85rem; cursor: pointer; color: var(--text-primary);">
+                                        <input type="checkbox" name="user_escaloes" value="Sub 16"> Sub 16
+                                    </label>
+                                    <label style="display: flex; align-items: center; gap: 6px; font-size: 0.85rem; cursor: pointer; color: var(--text-primary);">
+                                        <input type="checkbox" name="user_escaloes" value="Sub 18"> Sub 18
+                                    </label>
+                                    <label style="display: flex; align-items: center; gap: 6px; font-size: 0.85rem; cursor: pointer; color: var(--text-primary);">
+                                        <input type="checkbox" name="user_escaloes" value="Sub 20"> Sub 20
+                                    </label>
+                                    <label style="display: flex; align-items: center; gap: 6px; font-size: 0.85rem; cursor: pointer; color: var(--text-primary);">
+                                        <input type="checkbox" name="user_escaloes" value="Seniores"> Seniores
+                                    </label>
+                                    <label style="display: flex; align-items: center; gap: 6px; font-size: 0.85rem; cursor: pointer; color: var(--text-primary);">
+                                        <input type="checkbox" name="user_escaloes" value="Veteranos"> Veteranos
+                                    </label>
+                                </div>
+                                <small style="color: var(--text-secondary); font-size: 0.75rem; margin-top: 6px; display: block;">(Se nenhum for selecionado, o utilizador terá acesso a todos os escalões)</small>
                             </div>
 
                             <!-- Bloco de Permissões Granulares por Menus -->
@@ -1161,6 +1181,6 @@
 
     <!-- Scripts -->
     <script src="js/config.js"></script>
-    <script src="js/admin.js?v=20260827_6"></script>
+    <script src="js/admin.js?v=20260827_7"></script>
 </body>
 </html>

@@ -82,6 +82,15 @@ document.addEventListener('DOMContentLoaded', async () => {
     if (presencasDataInput) presencasDataInput.value = hojeIso;
     if (pagamentoData) pagamentoData.value = hojeIso;
 
+    let userEscaloes = []; // Array de escalões afetos (ex: ['Mini 12', 'Sub 14'])
+    let activeEscalao = ''; // Escalão ativo no momento
+
+    // Elementos de Múltiplos Escalões
+    const multiEscalaoBar = document.getElementById('multi-escalao-selector-bar');
+    const multiEscalaoPills = document.getElementById('multi-escalao-pills');
+    const drawerSectionEscaloes = document.getElementById('drawer-section-escaloes');
+    const drawerEscaloesList = document.getElementById('drawer-escaloes-list');
+
     // 2. Gestão de Sessão & Login
     async function checkSession() {
         try {
@@ -106,9 +115,24 @@ document.addEventListener('DOMContentLoaded', async () => {
                 escalao_afeto: ''
             };
 
-            userEscalao = (userProfile.escalao_afeto || '').trim();
+            // Extrair lista de escalões (ex: "Mini 12, Sub 14" -> ['Mini 12', 'Sub 14'])
+            userEscaloes = (userProfile.escalao_afeto || '')
+                .split(',')
+                .map(s => s.trim())
+                .filter(Boolean);
+
+            // Definir escalão ativo inicial
+            const savedEscalao = localStorage.getItem('bcv_diretor_active_escalao');
+            if (savedEscalao && userEscaloes.some(e => e.toLowerCase() === savedEscalao.toLowerCase())) {
+                activeEscalao = savedEscalao;
+            } else if (userEscaloes.length > 0) {
+                activeEscalao = userEscaloes[0];
+            } else {
+                activeEscalao = '';
+            }
 
             showApp();
+            renderEscalaoSelectors();
             await loadData();
 
         } catch (e) {
@@ -132,15 +156,78 @@ document.addEventListener('DOMContentLoaded', async () => {
         if (drawerUserName) {
             drawerUserName.textContent = userProfile.nome || 'Diretor';
         }
+        updateHeaderBadge();
+    }
+
+    function updateHeaderBadge() {
         if (headerEscalaoBadge) {
-            headerEscalaoBadge.innerHTML = userEscalao 
-                ? `🏀 ${userEscalao}` 
+            headerEscalaoBadge.innerHTML = activeEscalao 
+                ? `🏀 ${activeEscalao}` 
                 : `🏀 Geral (Todos)`;
         }
         if (drawerEscalaoName) {
-            drawerEscalaoName.textContent = userEscalao ? `Escalão: ${userEscalao}` : 'Todos os Escalões';
+            drawerEscalaoName.textContent = activeEscalao ? `Equipa: ${activeEscalao}` : 'Todas as Equipas';
         }
     }
+
+    // Renderizar seletores de equipa quando o diretor tem 2 ou mais escalões
+    function renderEscalaoSelectors() {
+        if (userEscaloes.length <= 1) {
+            if (multiEscalaoBar) multiEscalaoBar.style.display = 'none';
+            if (drawerSectionEscaloes) drawerSectionEscaloes.style.display = 'none';
+            return;
+        }
+
+        // 1. Renderizar Barra Horizontal no Topo
+        if (multiEscalaoBar && multiEscalaoPills) {
+            multiEscalaoBar.style.display = 'flex';
+            multiEscalaoPills.innerHTML = userEscaloes.map(esc => {
+                const isActive = esc.toLowerCase() === activeEscalao.toLowerCase();
+                return `
+                    <button type="button" class="pill-escalao ${isActive ? 'active' : ''}" onclick="window.switchEscalao('${esc}')">
+                        <span>🏀</span>
+                        <span>${esc}</span>
+                        ${isActive ? '<span>✓</span>' : ''}
+                    </button>
+                `;
+            }).join('');
+        }
+
+        // 2. Renderizar no Drawer Menu
+        if (drawerSectionEscaloes && drawerEscaloesList) {
+            drawerSectionEscaloes.style.display = 'block';
+            drawerEscaloesList.innerHTML = userEscaloes.map(esc => {
+                const isActive = esc.toLowerCase() === activeEscalao.toLowerCase();
+                return `
+                    <button type="button" class="drawer-escalao-btn ${isActive ? 'active' : ''}" onclick="window.switchEscalao('${esc}')">
+                        <span style="display: flex; align-items: center; gap: 8px;">
+                            <span>🏀</span>
+                            <span>${esc}</span>
+                        </span>
+                        ${isActive ? '<span style="color: var(--primary); font-weight: 800;">● Ativa</span>' : '<span style="color: var(--text-light); font-size: 0.75rem;">Alternar</span>'}
+                    </button>
+                `;
+            }).join('');
+        }
+    }
+
+    // Função Global para Alternar a Equipa em Gestão com 1 Toque
+    window.switchEscalao = async function(novoEscalao) {
+        if (activeEscalao.toLowerCase() === novoEscalao.toLowerCase()) {
+            closeDrawer();
+            return;
+        }
+
+        activeEscalao = novoEscalao;
+        localStorage.setItem('bcv_diretor_active_escalao', novoEscalao);
+        
+        updateHeaderBadge();
+        renderEscalaoSelectors();
+        closeDrawer();
+
+        // Recarregar os dados dos atletas imediatamente para a nova equipa selecionada
+        await loadData();
+    };
 
     // Controlo do Drawer Menu
     function openDrawer() {
@@ -224,7 +311,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         });
     });
 
-    // 4. Carregar Atletas Afetos ao Escalão
+    // 4. Carregar Atletas Afetos ao Escalão Ativo
     async function loadData() {
         try {
             let query = supabase
@@ -232,9 +319,9 @@ document.addEventListener('DOMContentLoaded', async () => {
                 .select('*')
                 .order('nome', { ascending: true });
 
-            // Se o utilizador tiver um escalão específico atribuído, filtrar na query
-            if (userEscalao && userEscalao.toLowerCase() !== 'todos') {
-                const escClean = userEscalao.replace(/[-\s]/g, '').toLowerCase();
+            // Se existir um escalão ativo selecionado, filtrar na query
+            if (activeEscalao && activeEscalao.toLowerCase() !== 'todos') {
+                const escClean = activeEscalao.replace(/[-\s]/g, '').toLowerCase();
                 const { data: todosAtletas, error } = await query;
                 if (error) throw error;
 
@@ -314,7 +401,7 @@ document.addEventListener('DOMContentLoaded', async () => {
                 <div style="background: white; border-radius: 12px; padding: 30px 20px; text-align: center; border: 1px dashed var(--border);">
                     <span style="font-size: 2rem;">🏀</span>
                     <h3 style="margin-top: 10px; font-size: 1rem; color: var(--text-main);">Nenhum atleta encontrado</h3>
-                    <p style="font-size: 0.82rem; color: var(--text-muted); margin-top: 4px;">Não há atletas associados ao escalão <strong>${userEscalao || 'selecionado'}</strong>.</p>
+                    <p style="font-size: 0.82rem; color: var(--text-muted); margin-top: 4px;">Não há atletas associados à equipa <strong>${activeEscalao || 'selecionada'}</strong>.</p>
                 </div>
             `;
             return;
@@ -336,7 +423,7 @@ document.addEventListener('DOMContentLoaded', async () => {
                             <div class="atleta-nome">${a.nome}</div>
                             <div class="atleta-meta">
                                 <span class="badge-numero">Nº ${dorsal}</span>
-                                <span>${a.nickname ? `"${a.nickname}"` : (a.escalao || userEscalao)}</span>
+                                <span>${a.nickname ? `"${a.nickname}"` : (a.escalao || activeEscalao)}</span>
                             </div>
                         </div>
                     </div>
@@ -415,7 +502,7 @@ document.addEventListener('DOMContentLoaded', async () => {
                 data: dataSel,
                 tipo: tipoSel,
                 estado: presencasState[a.id] || 'Presente',
-                escalao: a.escalao || userEscalao || 'Geral',
+                escalao: a.escalao || activeEscalao || 'Geral',
                 registado_por: userProfile.nome || currentUser.email
             }));
 
@@ -688,7 +775,7 @@ document.addEventListener('DOMContentLoaded', async () => {
                             <div class="atleta-nome">${a.nome}</div>
                             <div class="atleta-meta">
                                 <span class="badge-numero">Nº ${dorsal}</span>
-                                <span>${a.escalao || userEscalao}</span>
+                                <span>${a.escalao || activeEscalao}</span>
                             </div>
                         </div>
                     </div>

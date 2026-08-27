@@ -282,7 +282,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     const checkboxesPermissoes = document.querySelectorAll('input[name="user_permissoes"]');
 
     const containerUserEscalao = document.getElementById('container-user-escalao');
-    const newUserEscalaoSelect = document.getElementById('new-user-escalao');
+    const checkboxesEscaloes = document.querySelectorAll('input[name="user_escaloes"]');
 
     const MODULO_LABELS = {
         'noticias': 'Notícias',
@@ -309,6 +309,7 @@ document.addEventListener('DOMContentLoaded', async () => {
                 if (containerPermissoes) containerPermissoes.style.display = 'none';
                 if (containerUserEscalao) containerUserEscalao.style.display = 'none';
                 checkboxesPermissoes.forEach(cb => cb.checked = false);
+                checkboxesEscaloes.forEach(cb => cb.checked = false);
             }
         });
     }
@@ -328,6 +329,26 @@ document.addEventListener('DOMContentLoaded', async () => {
         });
     }
 
+    function getSelectedEscaloes() {
+        const selected = [];
+        checkboxesEscaloes.forEach(cb => {
+            if (cb.checked) selected.push(cb.value);
+        });
+        return selected;
+    }
+
+    function setSelectedEscaloes(val) {
+        let list = [];
+        if (Array.isArray(val)) {
+            list = val;
+        } else if (typeof val === 'string' && val.trim() !== '') {
+            list = val.split(',').map(s => s.trim().toLowerCase());
+        }
+        checkboxesEscaloes.forEach(cb => {
+            cb.checked = list.includes(cb.value.toLowerCase());
+        });
+    }
+
     function resetUserForm() {
         if(formCreateUser) formCreateUser.reset();
         editUserIdInput.value = '';
@@ -339,8 +360,8 @@ document.addEventListener('DOMContentLoaded', async () => {
         document.getElementById('new-user-email').disabled = false;
         if (containerPermissoes) containerPermissoes.style.display = 'none';
         if (containerUserEscalao) containerUserEscalao.style.display = 'none';
-        if (newUserEscalaoSelect) newUserEscalaoSelect.value = '';
         checkboxesPermissoes.forEach(cb => cb.checked = false);
+        checkboxesEscaloes.forEach(cb => cb.checked = false);
         if(createUserMsg) createUserMsg.classList.add('hidden');
     }
 
@@ -388,18 +409,26 @@ document.addEventListener('DOMContentLoaded', async () => {
                 if (isAdmin) {
                     permissoesBadgeHtml = '<span style="background: rgba(126, 34, 206, 0.12); color: #7e22ce; padding: 3px 8px; border-radius: 4px; font-weight: 600; font-size: 0.8rem; border: 1px solid rgba(126, 34, 206, 0.25);">⭐ Acesso a Tudo</span>';
                 } else if (isDiretor) {
-                    const esc = user.escalao_afeto ? `🏀 <strong>${user.escalao_afeto}</strong>` : 'Todos os Escalões';
-                    permissoesBadgeHtml = `<span style="background: rgba(16, 185, 129, 0.1); color: #047857; padding: 3px 8px; border-radius: 4px; font-size: 0.8rem; border: 1px solid rgba(16, 185, 129, 0.25);">Equipa: ${esc}</span>`;
+                    const escList = (user.escalao_afeto || '').split(',').map(s => s.trim()).filter(Boolean);
+                    if (escList.length > 0) {
+                        permissoesBadgeHtml = `<div style="display: flex; flex-wrap: wrap; gap: 4px;">` +
+                            escList.map(esc => `<span style="background: rgba(16, 185, 129, 0.12); color: #047857; font-weight: 700; padding: 2px 7px; border-radius: 4px; font-size: 0.75rem; border: 1px solid rgba(16, 185, 129, 0.3);">🏀 ${esc}</span>`).join('') +
+                            `</div>`;
+                    } else {
+                        permissoesBadgeHtml = `<span style="background: rgba(16, 185, 129, 0.08); color: #047857; padding: 3px 8px; border-radius: 4px; font-size: 0.8rem;">Todas as Equipas</span>`;
+                    }
                 } else {
                     const userPerms = Array.isArray(user.permissoes) ? user.permissoes : [];
-                    const escTag = user.escalao_afeto ? `<span style="background: rgba(126, 34, 206, 0.08); color: #7e22ce; padding: 2px 6px; border-radius: 4px; font-size: 0.75rem; font-weight: 600;">Escalão: ${user.escalao_afeto}</span>` : '';
+                    const escList = (user.escalao_afeto || '').split(',').map(s => s.trim()).filter(Boolean);
+                    const escTags = escList.map(esc => `<span style="background: rgba(126, 34, 206, 0.08); color: #7e22ce; padding: 2px 6px; border-radius: 4px; font-size: 0.75rem; font-weight: 600;">🏀 ${esc}</span>`).join('');
+                    
                     if (userPerms.length > 0) {
                         permissoesBadgeHtml = `<div style="display: flex; flex-wrap: wrap; gap: 4px; align-items: center;">` +
-                            escTag +
+                            escTags +
                             userPerms.map(p => `<span style="background: rgba(0, 0, 0, 0.05); color: var(--text-primary); padding: 2px 6px; border-radius: 4px; font-size: 0.75rem; border: 1px solid var(--border-color);">${MODULO_LABELS[p] || p}</span>`).join('') +
                             `</div>`;
                     } else {
-                        permissoesBadgeHtml = escTag || '<span style="color: var(--text-secondary); font-size: 0.8rem;">(Nenhum menu)</span>';
+                        permissoesBadgeHtml = escTags || '<span style="color: var(--text-secondary); font-size: 0.8rem;">(Nenhum menu)</span>';
                     }
                 }
 
@@ -435,9 +464,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         const role = (user.role || 'personalizado').toLowerCase();
         roleSelect.value = role;
         
-        if (newUserEscalaoSelect) {
-            newUserEscalaoSelect.value = user.escalao_afeto || '';
-        }
+        setSelectedEscaloes(user.escalao_afeto || '');
 
         if (role === 'personalizado') {
             if (containerPermissoes) containerPermissoes.style.display = 'block';
@@ -451,6 +478,7 @@ document.addEventListener('DOMContentLoaded', async () => {
             if (containerPermissoes) containerPermissoes.style.display = 'none';
             if (containerUserEscalao) containerUserEscalao.style.display = 'none';
             checkboxesPermissoes.forEach(cb => cb.checked = false);
+            checkboxesEscaloes.forEach(cb => cb.checked = false);
         }
         
         // Em modo edição, password não é obrigatória
@@ -502,7 +530,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         const nome = document.getElementById('new-user-name').value;
         const telemovel = document.getElementById('new-user-phone').value;
         const roleVal = document.getElementById('new-user-role').value;
-        const escalaoAfeto = (document.getElementById('new-user-escalao')?.value || '');
+        const escalaoAfeto = getSelectedEscaloes().join(', ');
         
         const role = roleVal || 'personalizado';
         const allModules = ['noticias', 'agenda', 'resultados', 'galeria', 'equipas', 'atletas', 'equipamentos', 'config'];
