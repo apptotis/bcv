@@ -1262,10 +1262,10 @@ document.addEventListener('DOMContentLoaded', async () => {
                 <td style="padding: 10px;">${atleta.nickname ? `<span style="color: var(--accent-primary); font-weight: 600;">"${atleta.nickname}"</span>` : '<span style="color: #a0a0ab;">-</span>'}</td>
                 <td style="padding: 10px; text-align: center;">${numCamisolaHtml}</td>
                 <td style="padding: 10px; text-align: center; white-space: nowrap;">
-                    <button class="btn-action" onclick="window.exportAtletaPDF('${atletaJson}')" title="Descarregar Ficha FPB (PDF)" style="background: rgba(126, 34, 206, 0.15); color: #7e22ce; border: 1px solid rgba(126, 34, 206, 0.3); font-weight: bold; margin-right: 4px; padding: 4px 8px;">📄 FPB</button>
-                    <button class="btn-action" onclick="window.exportAtletaEMDPDF('${atletaJson}')" title="Descarregar Exame Médico Desportivo (PDF)" style="background: rgba(16, 185, 129, 0.15); color: #10b981; border: 1px solid rgba(16, 185, 129, 0.3); font-weight: bold; margin-right: 4px; padding: 4px 8px;">🩺 EMD</button>
-                    <button class="btn-action" onclick="window.editAtleta('${atletaJson}')" title="Editar" style="padding: 4px 8px; margin-right: 4px;">✏️ Editar</button>
-                    <button class="btn-action delete" onclick="window.deleteAtleta('${atleta.id}')" title="Anular Atleta" style="padding: 4px 8px;">🗑️ Anular</button>
+                    <button class="btn-action" onclick="window.exportAtletaPDF(${atleta.id})" title="Descarregar Ficha FPB (PDF)" style="background: rgba(126, 34, 206, 0.15); color: #7e22ce; border: 1px solid rgba(126, 34, 206, 0.3); font-weight: bold; margin-right: 4px; padding: 4px 8px;">📄 FPB</button>
+                    <button class="btn-action" onclick="window.exportAtletaEMDPDF(${atleta.id})" title="Descarregar Exame Médico Desportivo (PDF)" style="background: rgba(16, 185, 129, 0.15); color: #10b981; border: 1px solid rgba(16, 185, 129, 0.3); font-weight: bold; margin-right: 4px; padding: 4px 8px;">🩺 EMD</button>
+                    <button class="btn-action" onclick="window.editAtleta(${atleta.id})" title="Editar" style="padding: 4px 8px; margin-right: 4px;">✏️ Editar</button>
+                    <button class="btn-action delete" onclick="window.deleteAtleta(${atleta.id})" title="Anular Atleta" style="padding: 4px 8px;">🗑️ Anular</button>
                 </td>
             `;
             atletasTableBody.appendChild(tr);
@@ -1273,9 +1273,18 @@ document.addEventListener('DOMContentLoaded', async () => {
     }
 
     // Função para exportar PDF Oficial do Modelo 1 da FPB usando pdf-lib
-    window.exportAtletaPDF = async function(atletaStr) {
+    window.exportAtletaPDF = async function(atletaArg) {
         try {
-            const atleta = typeof atletaStr === 'string' ? JSON.parse(atletaStr) : atletaStr;
+            let atleta = null;
+            if (typeof atletaArg === 'object' && atletaArg !== null) {
+                atleta = atletaArg;
+            } else if (typeof atletaArg === 'number' || typeof atletaArg === 'string') {
+                atleta = currentAtletas.find(a => String(a.id) === String(atletaArg));
+                if (!atleta) {
+                    try { atleta = JSON.parse(atletaArg); } catch(e) {}
+                }
+            }
+            if (!atleta) throw new Error('Atleta não encontrado.');
             
             if (!window.PDFLib) {
                 await new Promise((resolve, reject) => {
@@ -1724,12 +1733,25 @@ document.addEventListener('DOMContentLoaded', async () => {
         });
     }
 
-    window.editAtleta = function(atletaStr) {
-        const atleta = JSON.parse(atletaStr);
+    window.editAtleta = function(atletaArg) {
+        let atleta = null;
+        if (typeof atletaArg === 'object' && atletaArg !== null) {
+            atleta = atletaArg;
+        } else if (typeof atletaArg === 'number' || typeof atletaArg === 'string') {
+            atleta = currentAtletas.find(a => String(a.id) === String(atletaArg));
+            if (!atleta) {
+                try { atleta = JSON.parse(atletaArg); } catch(e) {}
+            }
+        }
+        if (!atleta) {
+            console.error("Atleta não encontrado para edição:", atletaArg);
+            return;
+        }
         
         editAtletaIdInput.value = atleta.id;
         document.getElementById('atleta-nome').value = atleta.nome || '';
         document.getElementById('atleta-nickname').value = atleta.nickname || '';
+        
         // Época
         const selectEpoca = document.getElementById('atleta-epoca');
         if (selectEpoca) {
@@ -1745,7 +1767,7 @@ document.addEventListener('DOMContentLoaded', async () => {
             }
         }
 
-        document.getElementById('atleta-funcao').value = atleta.funcao || '';
+        document.getElementById('atleta-funcao').value = atleta.funcao || 'Jogador';
 
         // Número de Camisola (#) com fallback para primeira opção de equipamento
         const numCamisola = (atleta.numero_camisola !== null && atleta.numero_camisola !== undefined && atleta.numero_camisola !== '')
@@ -1781,7 +1803,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         }
 
         document.getElementById('atleta-nascimento').value = atleta.data_nascimento || '';
-        document.getElementById('atleta-nacionalidade').value = atleta.nacionalidade || '';
+        document.getElementById('atleta-nacionalidade').value = atleta.nacionalidade || 'Portugal';
         document.getElementById('atleta-licenca').value = atleta.licenca || '';
 
         if (document.getElementById('atleta-nif')) document.getElementById('atleta-nif').value = atleta.nif || '';
@@ -1799,11 +1821,33 @@ document.addEventListener('DOMContentLoaded', async () => {
         // Encarregado de Educação
         if (document.getElementById('atleta-encarregado-nome')) document.getElementById('atleta-encarregado-nome').value = atleta.encarregado_nome || '';
         if (document.getElementById('atleta-encarregado-qualidade')) document.getElementById('atleta-encarregado-qualidade').value = atleta.encarregado_qualidade || '';
-        if (document.getElementById('atleta-encarregado-tipo-doc')) document.getElementById('atleta-encarregado-tipo-doc').value = atleta.encarregado_tipo_doc || 'Cartão Cidadão';
-        if (document.getElementById('atleta-encarregado-num-doc')) document.getElementById('atleta-encarregado-num-doc').value = atleta.encarregado_num_doc || '';
-        if (document.getElementById('atleta-encarregado-validade-doc')) document.getElementById('atleta-encarregado-validade-doc').value = atleta.encarregado_validade_doc || '';
-        if (document.getElementById('atleta-encarregado-email')) document.getElementById('atleta-encarregado-email').value = atleta.encarregado_email || '';
-        if (document.getElementById('atleta-encarregado-telefone')) document.getElementById('atleta-encarregado-telefone').value = atleta.encarregado_telefone || '';
+        
+        const encTipoDocSelect = document.getElementById('atleta-encarregado-tipo-doc');
+        if (encTipoDocSelect) {
+            encTipoDocSelect.value = atleta.encarregado_tipo_doc || 'Cartão Cidadão';
+            if (!encTipoDocSelect.value && atleta.encarregado_tipo_doc) {
+                const norm = normalizeEscalao(atleta.encarregado_tipo_doc);
+                for (let i = 0; i < encTipoDocSelect.options.length; i++) {
+                    if (normalizeEscalao(encTipoDocSelect.options[i].value) === norm) {
+                        encTipoDocSelect.selectedIndex = i;
+                        break;
+                    }
+                }
+            }
+        }
+
+        if (document.getElementById('atleta-encarregado-num-doc')) {
+            document.getElementById('atleta-encarregado-num-doc').value = atleta.encarregado_num_doc || atleta.encarregado_doc || '';
+        }
+        if (document.getElementById('atleta-encarregado-validade-doc')) {
+            document.getElementById('atleta-encarregado-validade-doc').value = atleta.encarregado_validade_doc || '';
+        }
+        if (document.getElementById('atleta-encarregado-email')) {
+            document.getElementById('atleta-encarregado-email').value = atleta.encarregado_email || '';
+        }
+        if (document.getElementById('atleta-encarregado-telefone')) {
+            document.getElementById('atleta-encarregado-telefone').value = atleta.encarregado_telefone || '';
+        }
 
         // Equipamento
         if (document.getElementById('atleta-equip-tam')) document.getElementById('atleta-equip-tam').value = atleta.equipamento_tamanho || '';
@@ -1824,11 +1868,6 @@ document.addEventListener('DOMContentLoaded', async () => {
         formAtletaTitle.textContent = 'Editar Atleta: ' + atleta.nome;
         btnSaveAtleta.textContent = 'Guardar Alterações';
         
-        if (formAtletaContainer) {
-            formAtletaContainer.classList.remove('hidden');
-            if (btnToggleFormAtleta) btnToggleFormAtleta.textContent = 'Esconder Formulário';
-            formAtletaContainer.scrollIntoView({ behavior: 'smooth' });
-        }
         
         if (btnCancelAtleta) btnCancelAtleta.classList.remove('hidden');
         if (atletaMsg) atletaMsg.classList.add('hidden');
