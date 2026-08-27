@@ -54,6 +54,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     const formPagamentoRapido = document.getElementById('form-pagamento-rapido');
     const modalAtletaNome = document.getElementById('modal-atleta-nome');
     const pagamentoAtletaId = document.getElementById('pagamento-atleta-id');
+    const pagamentoTipoCobranca = document.getElementById('pagamento-tipo-cobranca');
     const pagamentoValor = document.getElementById('pagamento-valor');
     const pagamentoMetodo = document.getElementById('pagamento-metodo');
     const pagamentoData = document.getElementById('pagamento-data');
@@ -534,6 +535,8 @@ document.addEventListener('DOMContentLoaded', async () => {
     // =======================================================
     // 6. MÓDULO DE MENSALIDADES
     // =======================================================
+    let currentTargetMes = '2026-09';
+
     async function loadMensalidades() {
         if (!listaMensalidadesContainer) return;
         const mesSel = mensalidadesMesSelect.value || '2026-09';
@@ -542,19 +545,23 @@ document.addEventListener('DOMContentLoaded', async () => {
         listaMensalidadesContainer.innerHTML = '<div style="text-align: center; padding: 20px; color: var(--text-muted);">A carregar estado das mensalidades...</div>';
 
         try {
+            // Carregamos todos os registos da época para cruzar pagamentos mensais e quotas anuais
             const { data: mensalidades, error } = await supabase
                 .from('mensalidades')
                 .select('*')
-                .eq('epoca', epoca)
-                .eq('mes', mesSel);
+                .eq('epoca', epoca);
 
             if (error && error.code !== '42P01') {
                 console.warn("Aviso ao carregar mensalidades:", error);
             }
 
+            // Mapa: atleta_id -> { '2026-09': m, 'ANUAL': m, ... }
             mensalidadesMap = {};
             (mensalidades || []).forEach(m => {
-                mensalidadesMap[m.atleta_id] = m;
+                if (!mensalidadesMap[m.atleta_id]) {
+                    mensalidadesMap[m.atleta_id] = {};
+                }
+                mensalidadesMap[m.atleta_id][m.mes] = m;
             });
 
             renderMensalidadesList();
@@ -568,16 +575,20 @@ document.addEventListener('DOMContentLoaded', async () => {
     function renderMensalidadesList() {
         if (!listaMensalidadesContainer) return;
 
+        const mesSel = mensalidadesMesSelect.value || '2026-09';
+        const isFiltroAnual = mesSel === 'ANUAL';
         let totalPago = 0;
         let qtdPago = 0;
         let qtdPendente = 0;
-        const VALOR_PADRAO = 25.00;
+        const VALOR_PADRAO_MENSAL = 25.00;
+        const VALOR_PADRAO_ANUAL = 250.00;
 
         if (currentAtletas.length === 0) {
             listaMensalidadesContainer.innerHTML = `
                 <div style="background: white; border-radius: 12px; padding: 30px 20px; text-align: center; border: 1px dashed var(--border);">
                     <span style="font-size: 2rem;">💶</span>
                     <h3 style="margin-top: 10px; font-size: 1rem; color: var(--text-main);">Nenhum atleta encontrado</h3>
+                    <p style="font-size: 0.82rem; color: var(--text-muted); margin-top: 4px;">Não há atletas associados à equipa ativa.</p>
                 </div>
             `;
             return;
@@ -585,42 +596,85 @@ document.addEventListener('DOMContentLoaded', async () => {
 
         let html = '';
         currentAtletas.forEach(a => {
-            const reg = mensalidadesMap[a.id];
-            const isPago = reg && reg.estado === 'Pago';
+            const atletaRegs = mensalidadesMap[a.id] || {};
+            const regAnual = atletaRegs['ANUAL'];
+            const isAnualPago = regAnual && regAnual.estado === 'Pago';
+            const regMes = atletaRegs[mesSel];
+            const isMesPago = regMes && regMes.estado === 'Pago';
             const dorsal = a.equipamento_numero_1 || a.equipamento_numero_2 || a.dorsal || '-';
 
-            if (isPago) {
-                totalPago += Number(reg.valor || VALOR_PADRAO);
-                qtdPago++;
+            let statusTexto = '';
+            let badgeBtn = '';
+
+            if (isFiltroAnual) {
+                // Modo: Visualização da Quota Anual
+                if (isAnualPago) {
+                    totalPago += Number(regAnual.valor || VALOR_PADRAO_ANUAL);
+                    qtdPago++;
+                    statusTexto = `⭐ Quota Anual Liquidada • ${regAnual.metodo_pagamento || 'Dinheiro'}`;
+                    badgeBtn = `
+                        <button type="button" class="badge-status pago-anual" onclick="window.openPagamentoModal(${a.id}, 'ANUAL')">
+                            ⭐ Quota Anual Paga (${Number(regAnual.valor || VALOR_PADRAO_ANUAL).toFixed(0)}€)
+                        </button>
+                    `;
+                } else {
+                    qtdPendente++;
+                    statusTexto = `Pendente (Quota Anual Completa)`;
+                    badgeBtn = `
+                        <button type="button" class="badge-status pendente" onclick="window.openPagamentoModal(${a.id}, 'ANUAL')">
+                            + Registar Quota Anual (${VALOR_PADRAO_ANUAL}€)
+                        </button>
+                    `;
+                }
             } else {
-                qtdPendente++;
+                // Modo: Mês Regular (ex: 2026-09)
+                if (isAnualPago) {
+                    // Se pagou anuidade, o mês está automaticamente coberto
+                    totalPago += VALOR_PADRAO_MENSAL;
+                    qtdPago++;
+                    statusTexto = `⭐ Coberto por Quota Anual (${regAnual.metodo_pagamento || 'Dinheiro'})`;
+                    badgeBtn = `
+                        <button type="button" class="badge-status pago-anual" onclick="window.openPagamentoModal(${a.id}, 'ANUAL')">
+                            ⭐ Quota Anual Paga (${Number(regAnual.valor || VALOR_PADRAO_ANUAL).toFixed(0)}€)
+                        </button>
+                    `;
+                } else if (isMesPago) {
+                    totalPago += Number(regMes.valor || VALOR_PADRAO_MENSAL);
+                    qtdPago++;
+                    statusTexto = `📅 Pago em ${regMes.data_pagamento || 'Hoje'} • ${regMes.metodo_pagamento || 'Dinheiro'}`;
+                    badgeBtn = `
+                        <button type="button" class="badge-status pago" onclick="window.openPagamentoModal(${a.id}, '${mesSel}')">
+                            ✓ Pago (${Number(regMes.valor || VALOR_PADRAO_MENSAL).toFixed(0)}€)
+                        </button>
+                    `;
+                } else {
+                    qtdPendente++;
+                    statusTexto = `Pendente`;
+                    badgeBtn = `
+                        <button type="button" class="badge-status pendente" onclick="window.openPagamentoModal(${a.id}, '${mesSel}')">
+                            + Registar Mensalidade (${VALOR_PADRAO_MENSAL}€)
+                        </button>
+                    `;
+                }
             }
 
             const fotoHtml = a.foto_url 
                 ? `<img src="${a.foto_url}" class="atleta-avatar" alt="${a.nome}">`
                 : `<div class="atleta-avatar">${(a.nome || 'A').charAt(0).toUpperCase()}</div>`;
 
-            const badgeBtn = isPago 
-                ? `<button type="button" class="badge-status pago" onclick="window.openPagamentoModal(${a.id})">
-                     ✓ Pago (${Number(reg.valor || VALOR_PADRAO).toFixed(0)}€)
-                   </button>`
-                : `<button type="button" class="badge-status pendente" onclick="window.openPagamentoModal(${a.id})">
-                     + Registar (${VALOR_PADRAO}€)
-                   </button>`;
-
             html += `
                 <div class="atleta-mensalidade-card">
-                    <div class="atleta-info-row" style="flex: 1;">
+                    <div class="atleta-info-row">
                         ${fotoHtml}
                         <div class="atleta-details">
                             <div class="atleta-nome">${a.nome}</div>
                             <div class="atleta-meta">
                                 <span class="badge-numero">Nº ${dorsal}</span>
-                                <span>${isPago ? `📅 ${reg.data_pagamento || 'Hoje'} • ${reg.metodo_pagamento || 'Dinheiro'}` : 'Pendente'}</span>
+                                <span>${statusTexto}</span>
                             </div>
                         </div>
                     </div>
-                    <div>
+                    <div class="mensalidade-action-row">
                         ${badgeBtn}
                     </div>
                 </div>
@@ -630,9 +684,10 @@ document.addEventListener('DOMContentLoaded', async () => {
         listaMensalidadesContainer.innerHTML = html;
 
         // Atualizar Resumo Estatístico
+        const valorRefPendente = isFiltroAnual ? VALOR_PADRAO_ANUAL : VALOR_PADRAO_MENSAL;
         if (statTotalPago) statTotalPago.textContent = `${totalPago.toFixed(0)} €`;
         if (statQtdPago) statQtdPago.textContent = `${qtdPago} Pagos`;
-        if (statTotalPendente) statTotalPendente.textContent = `${(qtdPendente * VALOR_PADRAO).toFixed(0)} €`;
+        if (statTotalPendente) statTotalPendente.textContent = `${(qtdPendente * valorRefPendente).toFixed(0)} €`;
         if (statQtdPendente) statQtdPendente.textContent = `${qtdPendente} Pendentes`;
     }
 
@@ -641,30 +696,55 @@ document.addEventListener('DOMContentLoaded', async () => {
     }
 
     // Modal de Pagamento Rápido
-    window.openPagamentoModal = function(atletaId) {
+    window.openPagamentoModal = function(atletaId, targetMes) {
         const atleta = currentAtletas.find(a => a.id === atletaId);
         if (!atleta) return;
 
-        const reg = mensalidadesMap[atletaId];
+        const mesSel = targetMes || mensalidadesMesSelect.value || '2026-09';
+        currentTargetMes = mesSel;
+
+        const atletaRegs = mensalidadesMap[atletaId] || {};
+        const isAnual = mesSel === 'ANUAL';
+        const reg = atletaRegs[mesSel];
         const isPago = reg && reg.estado === 'Pago';
 
         modalAtletaNome.textContent = atleta.nome;
         pagamentoAtletaId.value = atletaId;
-        pagamentoValor.value = isPago ? (reg.valor || 25.00) : 25.00;
+        
+        if (pagamentoTipoCobranca) {
+            pagamentoTipoCobranca.value = isAnual ? 'ANUAL' : 'MENSAL';
+        }
+
+        const valorPadrao = isAnual ? 250.00 : 25.00;
+        pagamentoValor.value = isPago ? (reg.valor || valorPadrao) : valorPadrao;
         pagamentoMetodo.value = isPago ? (reg.metodo_pagamento || 'Dinheiro') : 'Dinheiro';
         pagamentoData.value = isPago ? (reg.data_pagamento || hojeIso) : hojeIso;
         pagamentoNotas.value = isPago ? (reg.notas || '') : '';
 
         if (isPago) {
             btnAnularPagamento.style.display = 'block';
-            document.getElementById('btn-confirmar-pagamento').textContent = 'Atualizar Pagamento';
+            document.getElementById('btn-confirmar-pagamento').textContent = 'Atualizar Registo';
         } else {
             btnAnularPagamento.style.display = 'none';
-            document.getElementById('btn-confirmar-pagamento').textContent = 'Confirmar Recebimento';
+            document.getElementById('btn-confirmar-pagamento').textContent = 'Confirmar Pagamento';
         }
 
         modalPagamentoSheet.classList.add('active');
     };
+
+    if (pagamentoTipoCobranca) {
+        pagamentoTipoCobranca.addEventListener('change', () => {
+            if (pagamentoTipoCobranca.value === 'ANUAL') {
+                if (Number(pagamentoValor.value) === 25 || !pagamentoValor.value) {
+                    pagamentoValor.value = '250.00';
+                }
+            } else {
+                if (Number(pagamentoValor.value) === 250 || !pagamentoValor.value) {
+                    pagamentoValor.value = '25.00';
+                }
+            }
+        });
+    }
 
     window.closePagamentoModal = function() {
         modalPagamentoSheet.classList.remove('active');
@@ -674,14 +754,20 @@ document.addEventListener('DOMContentLoaded', async () => {
         formPagamentoRapido.addEventListener('submit', async (e) => {
             e.preventDefault();
             const atletaId = Number(pagamentoAtletaId.value);
-            const mesSel = mensalidadesMesSelect.value || '2026-09';
+            const tipoCobranca = pagamentoTipoCobranca?.value || 'MENSAL';
+            
+            let mesFinal = (tipoCobranca === 'ANUAL') ? 'ANUAL' : currentTargetMes;
+            if (mesFinal === 'ANUAL' && tipoCobranca !== 'ANUAL') {
+                mesFinal = mensalidadesMesSelect.value !== 'ANUAL' ? mensalidadesMesSelect.value : '2026-09';
+            }
+
             const epoca = '2026/2027';
 
             const payload = {
                 atleta_id: atletaId,
                 epoca: epoca,
-                mes: mesSel,
-                valor: Number(pagamentoValor.value) || 25.00,
+                mes: mesFinal,
+                valor: Number(pagamentoValor.value) || (tipoCobranca === 'ANUAL' ? 250.00 : 25.00),
                 estado: 'Pago',
                 metodo_pagamento: pagamentoMetodo.value,
                 data_pagamento: pagamentoData.value || hojeIso,
@@ -700,8 +786,8 @@ document.addEventListener('DOMContentLoaded', async () => {
                 await loadMensalidades();
 
             } catch (err) {
-                console.error("Erro ao registar mensalidade:", err);
-                alert("Erro ao registar mensalidade: " + err.message);
+                console.error("Erro ao registar pagamento:", err);
+                alert("Erro ao registar pagamento: " + err.message);
             }
         });
     }
@@ -710,7 +796,8 @@ document.addEventListener('DOMContentLoaded', async () => {
         btnAnularPagamento.addEventListener('click', async () => {
             if (!confirm("Tem a certeza de que deseja anular este registo de pagamento?")) return;
             const atletaId = Number(pagamentoAtletaId.value);
-            const mesSel = mensalidadesMesSelect.value || '2026-09';
+            const tipoCobranca = pagamentoTipoCobranca?.value || 'MENSAL';
+            const mesFinal = (tipoCobranca === 'ANUAL') ? 'ANUAL' : currentTargetMes;
             const epoca = '2026/2027';
 
             try {
@@ -719,7 +806,7 @@ document.addEventListener('DOMContentLoaded', async () => {
                     .delete()
                     .eq('atleta_id', atletaId)
                     .eq('epoca', epoca)
-                    .eq('mes', mesSel);
+                    .eq('mes', mesFinal);
 
                 if (error) throw error;
 

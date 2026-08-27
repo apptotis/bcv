@@ -17,7 +17,7 @@
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     
     <!-- CSS Diretor Mobile -->
-    <link rel="stylesheet" href="css/diretor.css?v=20260827_4">
+    <link rel="stylesheet" href="css/diretor.css?v=20260827_5">
 </head>
 <body>
 
@@ -192,7 +192,7 @@
                 <div class="control-card">
                     <div class="control-row">
                         <div class="control-group">
-                            <label class="control-label">Mês de Cobrança</label>
+                            <label class="control-label">Mês / Tipo de Cobrança</label>
                             <select id="mensalidades-mes" class="mobile-select">
                                 <option value="2026-09">Setembro 2026</option>
                                 <option value="2026-10">Outubro 2026</option>
@@ -204,6 +204,7 @@
                                 <option value="2027-04">Abril 2027</option>
                                 <option value="2027-05">Maio 2027</option>
                                 <option value="2027-06">Junho 2027</option>
+                                <option value="ANUAL">⭐ Quota Anual Completa (2026/2027)</option>
                             </select>
                         </div>
                     </div>
@@ -253,13 +254,21 @@
         <div id="modal-pagamento-sheet" class="modal-overlay">
             <div class="modal-sheet">
                 <div class="modal-sheet-header">
-                    <h3 id="modal-atleta-nome">Registar Mensalidade</h3>
+                    <h3 id="modal-atleta-nome">Registar Pagamento</h3>
                     <button type="button" class="btn-close-sheet" onclick="closePagamentoModal()">✕</button>
                 </div>
                 
                 <form id="form-pagamento-rapido" style="display: flex; flex-direction: column; gap: 12px;">
                     <input type="hidden" id="pagamento-atleta-id">
                     
+                    <div>
+                        <label class="control-label">Modalidade de Pagamento</label>
+                        <select id="pagamento-tipo-cobranca" class="mobile-select">
+                            <option value="MENSAL">Mensalidade Regular</option>
+                            <option value="ANUAL">⭐ Quota Anual Completa (2026/2027)</option>
+                        </select>
+                    </div>
+
                     <div>
                         <label class="control-label">Valor Recebido (€)</label>
                         <input type="number" step="0.5" id="pagamento-valor" class="mobile-input" value="25.00" required>
@@ -301,6 +310,6 @@
 
     <!-- Scripts -->
     <script src="js/config.js"></script>
-    <script src="js/diretor.js?v=20260827_4"></script>
+    <script src="js/diretor.js?v=20260827_5"></script>
 </body>
 </html>
