@@ -102,6 +102,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         const menuMap = [
             { tab: 'tab-users', allow: isAdmin },
             { tab: 'tab-atletas', allow: isAdmin || userPerms.includes('atletas') || role === 'treinador' },
+            { tab: 'tab-equipamentos', allow: isAdmin || userPerms.includes('equipamentos') || role === 'treinador' },
             { tab: 'tab-noticias', allow: isAdmin || userPerms.includes('noticias') || role === 'editor' },
             { tab: 'tab-agenda', allow: isAdmin || userPerms.includes('agenda') || role === 'editor' },
             { tab: 'tab-resultados', allow: isAdmin || userPerms.includes('resultados') },
@@ -231,6 +232,10 @@ document.addEventListener('DOMContentLoaded', async () => {
             if (targetId === 'tab-atletas') {
                 if (typeof loadAtletas === 'function') loadAtletas();
                 if (typeof resetAtletaForm === 'function') resetAtletaForm();
+            }
+
+            if (targetId === 'tab-equipamentos') {
+                if (typeof loadEquipamentos === 'function') loadEquipamentos();
             }
         });
     });
@@ -2517,6 +2522,576 @@ document.addEventListener('DOMContentLoaded', async () => {
         }
     };
 
+    // ==========================================
+    // 14. Gestão de Equipamentos
+    // ==========================================
+    let currentEquipamentos = [];
+    let filteredEquipamentos = [];
+
+    const equipTableBody = document.getElementById('equipamentos-table-body');
+    const equipStatTotal = document.getElementById('equip-stat-total');
+    const equipStatCamisolas = document.getElementById('equip-stat-camisolas');
+    const equipStatCalcoes = document.getElementById('equip-stat-calcoes');
+    const equipCountInfo = document.getElementById('equip-count-info');
+
+    const filterEquipBusca = document.getElementById('filter-equip-busca');
+    const filterEquipEscalao = document.getElementById('filter-equip-escalao');
+    const filterEquipGenero = document.getElementById('filter-equip-genero');
+    const filterEquipEpoca = document.getElementById('filter-equip-epoca');
+    const filterEquipTamCamisola = document.getElementById('filter-equip-tam-camisola');
+    const filterEquipTamCalcao = document.getElementById('filter-equip-tam-calcao');
+    const btnClearEquipFilters = document.getElementById('btn-clear-equip-filters');
+    const btnExportEquipPDF = document.getElementById('btn-export-equipamentos-pdf');
+    const btnExportEquipCSV = document.getElementById('btn-export-equipamentos-csv');
+
+    async function loadEquipamentos() {
+        if (!equipTableBody) return;
+        equipTableBody.innerHTML = '<tr><td colspan="11" style="padding: 20px; text-align: center; color: var(--text-secondary);">A carregar dados de equipamentos...</td></tr>';
+        
+        try {
+            const { data, error } = await supabase
+                .from('atletasbcv')
+                .select('*')
+                .order('nome', { ascending: true });
+
+            if (error) throw error;
+
+            currentEquipamentos = data || [];
+            applyEquipamentosFilters();
+        } catch (err) {
+            console.error('Erro ao carregar equipamentos:', err);
+            equipTableBody.innerHTML = `<tr><td colspan="11" style="padding: 20px; text-align: center; color: #ef4444;">Erro ao carregar equipamentos: ${err.message}</td></tr>`;
+        }
+    }
+
+    function applyEquipamentosFilters() {
+        if (!currentEquipamentos) return;
+
+        const busca = (filterEquipBusca?.value || '').toLowerCase().trim();
+        const escalao = filterEquipEscalao?.value || '';
+        const genero = filterEquipGenero?.value || '';
+        const epoca = filterEquipEpoca?.value || '';
+        const tamCamisola = filterEquipTamCamisola?.value || '';
+        const tamCalcao = filterEquipTamCalcao?.value || '';
+
+        filteredEquipamentos = currentEquipamentos.filter(atleta => {
+            // Filtro Busca por Texto
+            if (busca) {
+                const nomeMatch = (atleta.nome || '').toLowerCase().includes(busca);
+                const nickMatch = (atleta.nickname || '').toLowerCase().includes(busca);
+                const estampaMatch = (atleta.equipamento_nome_camisola || '').toLowerCase().includes(busca);
+                if (!nomeMatch && !nickMatch && !estampaMatch) return false;
+            }
+
+            // Filtro Escalão
+            if (escalao) {
+                if (normalizeEscalao(atleta.escalao) !== normalizeEscalao(escalao)) return false;
+            }
+
+            // Filtro Género
+            if (genero) {
+                const s = (atleta.sexo || '').toUpperCase();
+                if (genero === 'M' && !(s === 'M' || s.startsWith('MASC'))) return false;
+                if (genero === 'F' && !(s === 'F' || s.startsWith('FEM'))) return false;
+            }
+
+            // Filtro Época
+            if (epoca) {
+                const epNorm = (atleta.epoca || '').replace('-', '/');
+                if (epNorm !== epoca.replace('-', '/')) return false;
+            }
+
+            // Filtro Tamanho Camisola
+            if (tamCamisola) {
+                if ((atleta.equipamento_tamanho || '').toUpperCase() !== tamCamisola.toUpperCase()) return false;
+            }
+
+            // Filtro Tamanho Calção
+            if (tamCalcao) {
+                if ((atleta.equipamento_tamanho_calcao || '').toUpperCase() !== tamCalcao.toUpperCase()) return false;
+            }
+
+            return true;
+        });
+
+        updateEquipamentosStats(filteredEquipamentos);
+        renderEquipamentosTable(filteredEquipamentos);
+    }
+
+    function updateEquipamentosStats(list) {
+        if (equipStatTotal) equipStatTotal.textContent = list.length;
+        if (equipCountInfo) equipCountInfo.textContent = `${list.length} ${list.length === 1 ? 'atleta listado' : 'atletas listados'}`;
+
+        // Contagem de Camisolas
+        const camisolasCount = {};
+        const calcoesCount = {};
+
+        list.forEach(atleta => {
+            if (atleta.equipamento_tamanho) {
+                const t = atleta.equipamento_tamanho.toUpperCase().trim();
+                camisolasCount[t] = (camisolasCount[t] || 0) + 1;
+            }
+            if (atleta.equipamento_tamanho_calcao) {
+                const t = atleta.equipamento_tamanho_calcao.toUpperCase().trim();
+                calcoesCount[t] = (calcoesCount[t] || 0) + 1;
+            }
+        });
+
+        const sortSizes = (a, b) => {
+            const sizeOrder = ['6', '8', '10', '12', '14', 'XS', 'S', 'M', 'L', 'XL', 'XXL', '3XL'];
+            const idxA = sizeOrder.indexOf(a);
+            const idxB = sizeOrder.indexOf(b);
+            if (idxA !== -1 && idxB !== -1) return idxA - idxB;
+            if (idxA !== -1) return -1;
+            if (idxB !== -1) return 1;
+            return a.localeCompare(b);
+        };
+
+        // Renderizar Camisolas Stats
+        if (equipStatCamisolas) {
+            const keys = Object.keys(camisolasCount).sort(sortSizes);
+            if (keys.length === 0) {
+                equipStatCamisolas.innerHTML = '<span style="color: var(--text-secondary); font-size: 0.85rem;">Nenhum registado</span>';
+            } else {
+                equipStatCamisolas.innerHTML = keys.map(k => `
+                    <span style="background: rgba(59, 130, 246, 0.12); color: #2563eb; border: 1px solid rgba(59, 130, 246, 0.25); padding: 3px 8px; border-radius: 6px; font-weight: 600;">
+                        ${k}: <strong>${camisolasCount[k]}</strong>
+                    </span>
+                `).join('');
+            }
+        }
+
+        // Renderizar Calções Stats
+        if (equipStatCalcoes) {
+            const keys = Object.keys(calcoesCount).sort(sortSizes);
+            if (keys.length === 0) {
+                equipStatCalcoes.innerHTML = '<span style="color: var(--text-secondary); font-size: 0.85rem;">Nenhum registado</span>';
+            } else {
+                equipStatCalcoes.innerHTML = keys.map(k => `
+                    <span style="background: rgba(16, 185, 129, 0.12); color: #059669; border: 1px solid rgba(16, 185, 129, 0.25); padding: 3px 8px; border-radius: 6px; font-weight: 600;">
+                        ${k}: <strong>${calcoesCount[k]}</strong>
+                    </span>
+                `).join('');
+            }
+        }
+    }
+
+    function renderEquipamentosTable(list) {
+        if (!equipTableBody) return;
+
+        if (list.length === 0) {
+            equipTableBody.innerHTML = '<tr><td colspan="11" style="padding: 25px; text-align: center; color: var(--text-secondary);">Nenhum registo encontrado com os filtros selecionados.</td></tr>';
+            return;
+        }
+
+        equipTableBody.innerHTML = '';
+        list.forEach(atleta => {
+            const tr = document.createElement('tr');
+            tr.style.borderBottom = '1px solid var(--border-color)';
+
+            const fotoHtml = atleta.foto 
+                ? `<img src="${atleta.foto}" alt="" style="width: 32px; height: 32px; border-radius: 50%; object-fit: cover;">`
+                : `<div style="width: 32px; height: 32px; border-radius: 50%; background: rgba(0,0,0,0.06); display: flex; align-items: center; justify-content: center; font-size: 0.75rem; font-weight: bold; color: var(--text-secondary);">${(atleta.nome || 'A').charAt(0)}</div>`;
+
+            const sexoBadge = (atleta.sexo || '').toUpperCase().startsWith('F')
+                ? `<span style="background: rgba(236, 72, 153, 0.15); color: #db2777; padding: 2px 6px; border-radius: 4px; font-size: 0.75rem; font-weight: 700;">F</span>`
+                : `<span style="background: rgba(59, 130, 246, 0.15); color: #2563eb; padding: 2px 6px; border-radius: 4px; font-size: 0.75rem; font-weight: 700;">M</span>`;
+
+            const tamCamisolaBadge = atleta.equipamento_tamanho
+                ? `<span style="background: rgba(59, 130, 246, 0.12); color: #1d4ed8; font-weight: 700; padding: 3px 8px; border-radius: 6px; font-size: 0.85rem;">${atleta.equipamento_tamanho}</span>`
+                : `<span style="color: #a0a0ab;">-</span>`;
+
+            const tamCalcaoBadge = atleta.equipamento_tamanho_calcao
+                ? `<span style="background: rgba(16, 185, 129, 0.12); color: #047857; font-weight: 700; padding: 3px 8px; border-radius: 6px; font-size: 0.85rem;">${atleta.equipamento_tamanho_calcao}</span>`
+                : `<span style="color: #a0a0ab;">-</span>`;
+
+            const estampaNome = atleta.equipamento_nome_camisola || atleta.nickname
+                ? `<span style="color: var(--accent-primary); font-weight: 700;">"${atleta.equipamento_nome_camisola || atleta.nickname}"</span>`
+                : `<span style="color: #a0a0ab;">-</span>`;
+
+            const num1Html = atleta.equipamento_numero_1 
+                ? `<span style="background: rgba(0,0,0,0.05); font-weight: 600; padding: 2px 6px; border-radius: 4px;">#${atleta.equipamento_numero_1}</span>`
+                : '<span style="color: #a0a0ab;">-</span>';
+
+            const num2Html = atleta.equipamento_numero_2 
+                ? `<span style="background: rgba(0,0,0,0.05); font-weight: 600; padding: 2px 6px; border-radius: 4px;">#${atleta.equipamento_numero_2}</span>`
+                : '<span style="color: #a0a0ab;">-</span>';
+
+            const numOficialHtml = (atleta.numero_camisola !== null && atleta.numero_camisola !== undefined && atleta.numero_camisola !== '')
+                ? `<span style="background: #7e22ce; color: #fff; font-weight: 800; padding: 2px 8px; border-radius: 6px; font-size: 0.85rem;">#${atleta.numero_camisola}</span>`
+                : '<span style="color: #a0a0ab;">-</span>';
+
+            tr.innerHTML = `
+                <td style="padding: 10px;">${fotoHtml}</td>
+                <td style="padding: 10px;"><strong>${atleta.nome || '-'}</strong></td>
+                <td style="padding: 10px;">
+                    <div style="display: flex; align-items: center; gap: 6px;">
+                        <span>${atleta.escalao || '-'}</span>
+                        ${sexoBadge}
+                    </div>
+                </td>
+                <td style="padding: 10px;"><span style="font-size: 0.85rem; color: var(--text-secondary);">${atleta.epoca || '-'}</span></td>
+                <td style="padding: 10px; text-align: center;">${tamCamisolaBadge}</td>
+                <td style="padding: 10px; text-align: center;">${tamCalcaoBadge}</td>
+                <td style="padding: 10px;">${estampaNome}</td>
+                <td style="padding: 10px; text-align: center;">${num1Html}</td>
+                <td style="padding: 10px; text-align: center;">${num2Html}</td>
+                <td style="padding: 10px; text-align: center;">${numOficialHtml}</td>
+                <td style="padding: 10px; text-align: center;">
+                    <button class="btn-action" onclick="window.editAtleta(${atleta.id})" title="Editar Atleta" style="padding: 4px 8px;">✏️ Editar</button>
+                </td>
+            `;
+            equipTableBody.appendChild(tr);
+        });
+    }
+
+    // Listeners dos Filtros de Equipamentos
+    if (filterEquipBusca) filterEquipBusca.addEventListener('input', applyEquipamentosFilters);
+    if (filterEquipEscalao) filterEquipEscalao.addEventListener('change', applyEquipamentosFilters);
+    if (filterEquipGenero) filterEquipGenero.addEventListener('change', applyEquipamentosFilters);
+    if (filterEquipEpoca) filterEquipEpoca.addEventListener('change', applyEquipamentosFilters);
+    if (filterEquipTamCamisola) filterEquipTamCamisola.addEventListener('change', applyEquipamentosFilters);
+    if (filterEquipTamCalcao) filterEquipTamCalcao.addEventListener('change', applyEquipamentosFilters);
+
+    if (btnClearEquipFilters) {
+        btnClearEquipFilters.addEventListener('click', () => {
+            if (filterEquipBusca) filterEquipBusca.value = '';
+            if (filterEquipEscalao) filterEquipEscalao.value = '';
+            if (filterEquipGenero) filterEquipGenero.value = '';
+            if (filterEquipEpoca) filterEquipEpoca.value = '';
+            if (filterEquipTamCamisola) filterEquipTamCamisola.value = '';
+            if (filterEquipTamCalcao) filterEquipTamCalcao.value = '';
+            applyEquipamentosFilters();
+        });
+    }
+
+    // Exportação em CSV
+    if (btnExportEquipCSV) {
+        btnExportEquipCSV.addEventListener('click', () => {
+            if (!filteredEquipamentos || filteredEquipamentos.length === 0) {
+                alert('Não existem registos para exportar com os filtros atuais.');
+                return;
+            }
+
+            let csvContent = '\uFEFF'; // UTF-8 BOM
+            csvContent += 'Nº;Nome Atleta;Escalão;Género;Época;Tam. Camisola;Tam. Calção;Nome Estampa;1ª Opção Nº;2ª Opção Nº;Nº Oficial\n';
+
+            filteredEquipamentos.forEach((a, idx) => {
+                const row = [
+                    idx + 1,
+                    `"${(a.nome || '').replace(/"/g, '""')}"`,
+                    `"${(a.escalao || '').replace(/"/g, '""')}"`,
+                    `"${(a.sexo || '').replace(/"/g, '""')}"`,
+                    `"${(a.epoca || '').replace(/"/g, '""')}"`,
+                    `"${(a.equipamento_tamanho || '').replace(/"/g, '""')}"`,
+                    `"${(a.equipamento_tamanho_calcao || '').replace(/"/g, '""')}"`,
+                    `"${(a.equipamento_nome_camisola || a.nickname || '').replace(/"/g, '""')}"`,
+                    `"${(a.equipamento_numero_1 || '').replace(/"/g, '""')}"`,
+                    `"${(a.equipamento_numero_2 || '').replace(/"/g, '""')}"`,
+                    `"${(a.numero_camisola !== null && a.numero_camisola !== undefined ? a.numero_camisola : '').toString().replace(/"/g, '""')}"`
+                ];
+                csvContent += row.join(';') + '\n';
+            });
+
+            const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+            const url = URL.createObjectURL(blob);
+            const link = document.createElement('a');
+            link.href = url;
+            const dataHoje = new Date().toISOString().split('T')[0];
+            const escalaoStr = filterEquipEscalao?.value ? `_${filterEquipEscalao.value.replace(/\s+/g, '_')}` : '';
+            link.download = `Equipamentos_BCV${escalaoStr}_${dataHoje}.csv`;
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+            URL.revokeObjectURL(url);
+        });
+    }
+
+    // Exportação em PDF Oficial (pdf-lib)
+    if (btnExportEquipPDF) {
+        btnExportEquipPDF.addEventListener('click', async () => {
+            if (!filteredEquipamentos || filteredEquipamentos.length === 0) {
+                alert('Não existem registos para exportar com os filtros atuais.');
+                return;
+            }
+
+            try {
+                if (!window.PDFLib) {
+                    await new Promise((resolve, reject) => {
+                        const s = document.createElement('script');
+                        s.src = 'js/pdf-lib.min.js';
+                        s.onload = resolve;
+                        s.onerror = () => {
+                            const s2 = document.createElement('script');
+                            s2.src = 'https://cdn.jsdelivr.net/npm/pdf-lib@1.17.1/dist/pdf-lib.min.js';
+                            s2.onload = resolve;
+                            s2.onerror = () => reject(new Error('Falha ao carregar biblioteca PDF'));
+                            document.head.appendChild(s2);
+                        };
+                        document.head.appendChild(s);
+                    });
+                }
+
+                const { PDFDocument, rgb, StandardFonts } = window.PDFLib;
+                const pdfDoc = await PDFDocument.create();
+                const fontBold = await pdfDoc.embedFont(StandardFonts.HelveticaBold);
+                const fontRegular = await pdfDoc.embedFont(StandardFonts.Helvetica);
+
+                // Configurações A4 Paisagem (Landscape): 841.89 x 595.28 pt
+                const pageWidth = 841.89;
+                const pageHeight = 595.28;
+                const margin = 35;
+                const rowsPerPage = 14;
+
+                const totalPages = Math.ceil(filteredEquipamentos.length / rowsPerPage) || 1;
+
+                // Contagens por tamanho para o resumo
+                const camisolasCount = {};
+                const calcoesCount = {};
+                filteredEquipamentos.forEach(a => {
+                    if (a.equipamento_tamanho) {
+                        const t = a.equipamento_tamanho.toUpperCase().trim();
+                        camisolasCount[t] = (camisolasCount[t] || 0) + 1;
+                    }
+                    if (a.equipamento_tamanho_calcao) {
+                        const t = a.equipamento_tamanho_calcao.toUpperCase().trim();
+                        calcoesCount[t] = (calcoesCount[t] || 0) + 1;
+                    }
+                });
+
+                const sortSizes = (a, b) => {
+                    const sizeOrder = ['6', '8', '10', '12', '14', 'XS', 'S', 'M', 'L', 'XL', 'XXL', '3XL'];
+                    const idxA = sizeOrder.indexOf(a);
+                    const idxB = sizeOrder.indexOf(b);
+                    if (idxA !== -1 && idxB !== -1) return idxA - idxB;
+                    if (idxA !== -1) return -1;
+                    if (idxB !== -1) return 1;
+                    return a.localeCompare(b);
+                };
+
+                const dataEmissao = new Date().toLocaleDateString('pt-PT', { day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit' });
+                const escalaoFiltro = filterEquipEscalao?.value || 'Todos os Escalões';
+                const generoFiltro = filterEquipGenero?.value === 'M' ? 'Masculino' : (filterEquipGenero?.value === 'F' ? 'Feminino' : 'Todos');
+                const epocaFiltro = filterEquipEpoca?.value || 'Todas as Épocas';
+
+                for (let pageIdx = 0; pageIdx < totalPages; pageIdx++) {
+                    const page = pdfDoc.addPage([pageWidth, pageHeight]);
+                    let y = pageHeight - margin;
+
+                    // 1. Cabeçalho Institucional
+                    // Faixa roxa superior
+                    page.drawRectangle({
+                        x: margin,
+                        y: y - 50,
+                        width: pageWidth - (margin * 2),
+                        height: 50,
+                        color: rgb(0.494, 0.133, 0.808) // #7e22ce
+                    });
+
+                    page.drawText('BASKET CLUBE DE VALENÇA', {
+                        x: margin + 15,
+                        y: y - 24,
+                        size: 16,
+                        font: fontBold,
+                        color: rgb(1, 1, 1)
+                    });
+
+                    page.drawText('MAPA OFICIAL DE PRODUÇÃO DE EQUIPAMENTOS', {
+                        x: margin + 15,
+                        y: y - 42,
+                        size: 10,
+                        font: fontBold,
+                        color: rgb(0.9, 0.85, 1)
+                    });
+
+                    page.drawText(`Emitido em: ${dataEmissao}`, {
+                        x: pageWidth - margin - 180,
+                        y: y - 32,
+                        size: 9,
+                        font: fontRegular,
+                        color: rgb(1, 1, 1)
+                    });
+
+                    y -= 65;
+
+                    // 2. Linha de Metadados / Filtros
+                    const filterInfoText = `Filtros Aplicados: Escalão: ${escalaoFiltro} | Género: ${generoFiltro} | Época: ${epocaFiltro} | Total: ${filteredEquipamentos.length} Atleta(s)`;
+                    page.drawText(filterInfoText, {
+                        x: margin,
+                        y: y,
+                        size: 9,
+                        font: fontBold,
+                        color: rgb(0.2, 0.2, 0.2)
+                    });
+
+                    y -= 15;
+
+                    // 3. Tabela de Atletas
+                    // Cabeçalho da tabela
+                    const colWidths = [30, 200, 75, 45, 60, 60, 130, 55, 55, 60];
+                    const colHeaders = ['Nº', 'Nome do Atleta', 'Escalão', 'Sexo', 'Camisola', 'Calção', 'Nome Estampa', '1ª Opção', '2ª Opção', 'Nº Oficial'];
+
+                    page.drawRectangle({
+                        x: margin,
+                        y: y - 18,
+                        width: pageWidth - (margin * 2),
+                        height: 20,
+                        color: rgb(0.94, 0.95, 0.96)
+                    });
+
+                    let curX = margin + 5;
+                    colHeaders.forEach((header, i) => {
+                        page.drawText(header, {
+                            x: curX,
+                            y: y - 13,
+                            size: 8.5,
+                            font: fontBold,
+                            color: rgb(0.1, 0.1, 0.1)
+                        });
+                        curX += colWidths[i];
+                    });
+
+                    y -= 20;
+
+                    // Linhas da página atual
+                    const startIdx = pageIdx * rowsPerPage;
+                    const endIdx = Math.min(startIdx + rowsPerPage, filteredEquipamentos.length);
+                    const pageRows = filteredEquipamentos.slice(startIdx, endIdx);
+
+                    pageRows.forEach((atleta, rowIdx) => {
+                        const isEven = rowIdx % 2 === 0;
+                        const rowHeight = 20;
+
+                        if (isEven) {
+                            page.drawRectangle({
+                                x: margin,
+                                y: y - 15,
+                                width: pageWidth - (margin * 2),
+                                height: rowHeight,
+                                color: rgb(0.98, 0.98, 0.99)
+                            });
+                        }
+
+                        // Linha separadora inferior
+                        page.drawLine({
+                            start: { x: margin, y: y - 15 },
+                            end: { x: pageWidth - margin, y: y - 15 },
+                            thickness: 0.5,
+                            color: rgb(0.85, 0.85, 0.85)
+                        });
+
+                        const rowValues = [
+                            String(startIdx + rowIdx + 1),
+                            (atleta.nome || '-').slice(0, 32),
+                            (atleta.escalao || '-').slice(0, 12),
+                            (atleta.sexo || '').toUpperCase().startsWith('F') ? 'F' : 'M',
+                            atleta.equipamento_tamanho || '-',
+                            atleta.equipamento_tamanho_calcao || '-',
+                            (atleta.equipamento_nome_camisola || atleta.nickname || '-').slice(0, 20),
+                            atleta.equipamento_numero_1 ? `#${atleta.equipamento_numero_1}` : '-',
+                            atleta.equipamento_numero_2 ? `#${atleta.equipamento_numero_2}` : '-',
+                            (atleta.numero_camisola !== null && atleta.numero_camisola !== undefined && atleta.numero_camisola !== '') ? `#${atleta.numero_camisola}` : '-'
+                        ];
+
+                        let cellX = margin + 5;
+                        rowValues.forEach((val, i) => {
+                            const isBold = (i === 1 || i === 4 || i === 5 || i === 6 || i === 9);
+                            page.drawText(val, {
+                                x: cellX,
+                                y: y - 10,
+                                size: 8,
+                                font: isBold ? fontBold : fontRegular,
+                                color: (i === 6 && val !== '-') ? rgb(0.49, 0.13, 0.81) : rgb(0.15, 0.15, 0.15)
+                            });
+                            cellX += colWidths[i];
+                        });
+
+                        y -= rowHeight;
+                    });
+
+                    // Se for a última página, desenhar caixa de resumo de totais
+                    if (pageIdx === totalPages - 1) {
+                        y -= 15;
+                        page.drawRectangle({
+                            x: margin,
+                            y: y - 40,
+                            width: pageWidth - (margin * 2),
+                            height: 45,
+                            color: rgb(0.96, 0.94, 1),
+                            borderColor: rgb(0.79, 0.65, 0.95),
+                            borderWidth: 1
+                        });
+
+                        page.drawText('RESUMO DE QUANTIDADES PARA ENCOMENDA / CONFEÇÃO:', {
+                            x: margin + 10,
+                            y: y - 14,
+                            size: 8.5,
+                            font: fontBold,
+                            color: rgb(0.4, 0.1, 0.65)
+                        });
+
+                        const camisolasKeys = Object.keys(camisolasCount).sort(sortSizes);
+                        const calcoesKeys = Object.keys(calcoesCount).sort(sortSizes);
+
+                        const camisolasSummary = camisolasKeys.map(k => `${k}: ${camisolasCount[k]}`).join('  |  ') || 'Nenhum';
+                        const calcoesSummary = calcoesKeys.map(k => `${k}: ${calcoesCount[k]}`).join('  |  ') || 'Nenhum';
+
+                        page.drawText(`Camisolas:  ${camisolasSummary}`, {
+                            x: margin + 10,
+                            y: y - 27,
+                            size: 8,
+                            font: fontRegular,
+                            color: rgb(0.1, 0.1, 0.1)
+                        });
+
+                        page.drawText(`Calções:     ${calcoesSummary}`, {
+                            x: margin + 10,
+                            y: y - 38,
+                            size: 8,
+                            font: fontRegular,
+                            color: rgb(0.1, 0.1, 0.1)
+                        });
+                    }
+
+                    // Rodapé com Paginação
+                    page.drawText(`Página ${pageIdx + 1} de ${totalPages}`, {
+                        x: pageWidth - margin - 80,
+                        y: margin - 15,
+                        size: 8,
+                        font: fontRegular,
+                        color: rgb(0.5, 0.5, 0.5)
+                    });
+
+                    page.drawText('Basket Clube de Valença • Documento Interno de Gestão', {
+                        x: margin,
+                        y: margin - 15,
+                        size: 8,
+                        font: fontRegular,
+                        color: rgb(0.5, 0.5, 0.5)
+                    });
+                }
+
+                // Guardar PDF
+                const pdfBytes = await pdfDoc.save();
+                const blob = new Blob([pdfBytes], { type: 'application/pdf' });
+                const url = URL.createObjectURL(blob);
+                const link = document.createElement('a');
+                link.href = url;
+                const dataHoje = new Date().toISOString().split('T')[0];
+                const escalaoStr = filterEquipEscalao?.value ? `_${filterEquipEscalao.value.replace(/\s+/g, '_')}` : '';
+                link.download = `Mapa_Equipamentos_BCV${escalaoStr}_${dataHoje}.pdf`;
+                document.body.appendChild(link);
+                link.click();
+                document.body.removeChild(link);
+                URL.revokeObjectURL(url);
+
+            } catch (err) {
+                console.error('Erro ao gerar PDF de Equipamentos:', err);
+                alert('Erro ao gerar relatório PDF de equipamentos: ' + err.message);
+            }
+        });
+    }
+
     // Iniciar carregamento das tabs quando ativadas
     const tabButtons = document.querySelectorAll('.tab-btn');
     tabButtons.forEach(btn => {
@@ -2539,6 +3114,7 @@ document.addEventListener('DOMContentLoaded', async () => {
             if (target === 'tab-resultados') loadResultados();
             if (target === 'tab-equipas') loadEquipas();
             if (target === 'tab-config') loadConfiguracoes();
+            if (target === 'tab-equipamentos') loadEquipamentos();
         });
     });
 

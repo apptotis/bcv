@@ -60,6 +60,7 @@
                     <li><a href="#" class="tab-btn active" data-tab="tab-dashboard"><span class="icon">📊</span> Dashboard</a></li>
                     <li><a href="#" class="tab-btn" data-tab="tab-users"><span class="icon">🛡️</span> Gestão de Users</a></li>
                     <li><a href="#" class="tab-btn" data-tab="tab-atletas"><span class="icon">👥</span> Atletas</a></li>
+                    <li><a href="#" class="tab-btn" data-tab="tab-equipamentos"><span class="icon">🎽</span> Equipamentos</a></li>
                     <li><a href="#" class="tab-btn" data-tab="tab-noticias"><span class="icon">📰</span> Notícias</a></li>
                     <li><a href="#" class="tab-btn" data-tab="tab-agenda"><span class="icon">📅</span> Agenda</a></li>
                     <li><a href="#" class="tab-btn" data-tab="tab-resultados"><span class="icon">🏆</span> Resultados</a></li>
@@ -115,6 +116,9 @@
                                 <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)); gap: 10px;">
                                     <label style="display: flex; align-items: center; gap: 8px; cursor: pointer; font-size: 0.9rem; color: var(--text-primary);">
                                         <input type="checkbox" name="user_permissoes" value="atletas"> 👥 Atletas
+                                    </label>
+                                    <label style="display: flex; align-items: center; gap: 8px; cursor: pointer; font-size: 0.9rem; color: var(--text-primary);">
+                                        <input type="checkbox" name="user_permissoes" value="equipamentos"> 🎽 Equipamentos
                                     </label>
                                     <label style="display: flex; align-items: center; gap: 8px; cursor: pointer; font-size: 0.9rem; color: var(--text-primary);">
                                         <input type="checkbox" name="user_permissoes" value="noticias"> 📰 Notícias
@@ -786,6 +790,166 @@
                     </div>
                 </div>
 
+                <!-- TAB: GESTÃO DE EQUIPAMENTOS -->
+                <div id="tab-equipamentos" class="tab-pane hidden">
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; flex-wrap: wrap; gap: 15px;">
+                        <div>
+                            <h2>🎽 Gestão de Equipamentos</h2>
+                            <p style="color: var(--text-secondary); font-size: 0.9rem;">Consulte e filtre os dados de equipamentos, tamanhos e preferências de camisola dos atletas para produção.</p>
+                        </div>
+                        <div style="display: flex; gap: 10px; flex-wrap: wrap;">
+                            <button type="button" id="btn-export-equipamentos-csv" class="btn-secondary" style="display: flex; align-items: center; gap: 6px; font-weight: 600; padding: 10px 16px;">
+                                📥 Exportar CSV
+                            </button>
+                            <button type="button" id="btn-export-equipamentos-pdf" class="btn-primary" style="display: flex; align-items: center; gap: 6px; font-weight: 600; padding: 10px 18px; background: linear-gradient(135deg, #7e22ce, #9333ea);">
+                                📄 Exportar PDF (Mapa de Produção)
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Resumo Rápido e Métricas de Tamanhos -->
+                    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 15px; margin-bottom: 25px;">
+                        <!-- Card Total -->
+                        <div class="welcome-box" style="margin: 0; padding: 16px; border-left: 4px solid var(--accent-primary); display: flex; align-items: center; gap: 15px;">
+                            <div style="font-size: 2.2rem; background: rgba(126, 34, 206, 0.1); width: 55px; height: 55px; border-radius: 12px; display: flex; align-items: center; justify-content: center;">
+                                🎽
+                            </div>
+                            <div>
+                                <span style="font-size: 0.85rem; color: var(--text-secondary); font-weight: 600; text-transform: uppercase;">Atletas Listados</span>
+                                <h3 id="equip-stat-total" style="font-size: 1.8rem; margin: 0; color: var(--accent-primary);">0</h3>
+                            </div>
+                        </div>
+
+                        <!-- Card Camisolas -->
+                        <div class="welcome-box" style="margin: 0; padding: 16px; border-left: 4px solid #3b82f6;">
+                            <span style="font-size: 0.85rem; color: var(--text-secondary); font-weight: 600; text-transform: uppercase; display: block; margin-bottom: 8px;">👕 Tamanhos de Camisola</span>
+                            <div id="equip-stat-camisolas" style="display: flex; flex-wrap: wrap; gap: 6px; font-size: 0.85rem;">
+                                <span style="color: var(--text-secondary);">-</span>
+                            </div>
+                        </div>
+
+                        <!-- Card Calções -->
+                        <div class="welcome-box" style="margin: 0; padding: 16px; border-left: 4px solid #10b981;">
+                            <span style="font-size: 0.85rem; color: var(--text-secondary); font-weight: 600; text-transform: uppercase; display: block; margin-bottom: 8px;">🩳 Tamanhos de Calção</span>
+                            <div id="equip-stat-calcoes" style="display: flex; flex-wrap: wrap; gap: 6px; font-size: 0.85rem;">
+                                <span style="color: var(--text-secondary);">-</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Barra de Filtros de Equipamentos -->
+                    <div class="welcome-box" style="margin-bottom: 25px; padding: 18px;">
+                        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; flex-wrap: wrap; gap: 10px;">
+                            <h4 style="margin: 0; color: var(--text-primary); font-size: 1rem; font-weight: 600;">🔍 Filtros de Seleção</h4>
+                            <button type="button" id="btn-clear-equip-filters" class="btn-secondary" style="padding: 4px 10px; font-size: 0.85rem;">
+                                ✖ Limpar Filtros
+                            </button>
+                        </div>
+                        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 12px;">
+                            <div>
+                                <label style="font-size: 0.8rem; font-weight: 600; color: var(--text-secondary); display: block; margin-bottom: 4px;">Pesquisar Atleta / Estampa</label>
+                                <input type="text" id="filter-equip-busca" placeholder="Nome ou estampa..." class="admin-input" style="width: 100%;">
+                            </div>
+                            <div>
+                                <label style="font-size: 0.8rem; font-weight: 600; color: var(--text-secondary); display: block; margin-bottom: 4px;">Escalão</label>
+                                <select id="filter-equip-escalao" class="admin-input" style="width: 100%;">
+                                    <option value="">Todos os Escalões</option>
+                                    <option value="BabyBasket">BabyBasket</option>
+                                    <option value="Mini 8">Mini 8</option>
+                                    <option value="Mini 10">Mini 10</option>
+                                    <option value="Mini 12">Mini 12</option>
+                                    <option value="Sub 14">Sub 14</option>
+                                    <option value="Sub 16">Sub 16</option>
+                                    <option value="Sub 18">Sub 18</option>
+                                    <option value="Sub 20">Sub 20</option>
+                                    <option value="Seniores">Seniores</option>
+                                    <option value="Veteranos">Veteranos</option>
+                                </select>
+                            </div>
+                            <div>
+                                <label style="font-size: 0.8rem; font-weight: 600; color: var(--text-secondary); display: block; margin-bottom: 4px;">Género</label>
+                                <select id="filter-equip-genero" class="admin-input" style="width: 100%;">
+                                    <option value="">Todos</option>
+                                    <option value="M">Masculino</option>
+                                    <option value="F">Feminino</option>
+                                </select>
+                            </div>
+                            <div>
+                                <label style="font-size: 0.8rem; font-weight: 600; color: var(--text-secondary); display: block; margin-bottom: 4px;">Época</label>
+                                <select id="filter-equip-epoca" class="admin-input" style="width: 100%;">
+                                    <option value="">Todas as Épocas</option>
+                                    <option value="2026/2027">2026/2027</option>
+                                    <option value="2025/2026">2025/2026</option>
+                                </select>
+                            </div>
+                            <div>
+                                <label style="font-size: 0.8rem; font-weight: 600; color: var(--text-secondary); display: block; margin-bottom: 4px;">Tam. Camisola</label>
+                                <select id="filter-equip-tam-camisola" class="admin-input" style="width: 100%;">
+                                    <option value="">Todos</option>
+                                    <option value="6">6</option>
+                                    <option value="8">8</option>
+                                    <option value="10">10</option>
+                                    <option value="12">12</option>
+                                    <option value="14">14</option>
+                                    <option value="XS">XS</option>
+                                    <option value="S">S</option>
+                                    <option value="M">M</option>
+                                    <option value="L">L</option>
+                                    <option value="XL">XL</option>
+                                    <option value="XXL">XXL</option>
+                                    <option value="3XL">3XL</option>
+                                </select>
+                            </div>
+                            <div>
+                                <label style="font-size: 0.8rem; font-weight: 600; color: var(--text-secondary); display: block; margin-bottom: 4px;">Tam. Calção</label>
+                                <select id="filter-equip-tam-calcao" class="admin-input" style="width: 100%;">
+                                    <option value="">Todos</option>
+                                    <option value="6">6</option>
+                                    <option value="8">8</option>
+                                    <option value="10">10</option>
+                                    <option value="12">12</option>
+                                    <option value="14">14</option>
+                                    <option value="XS">XS</option>
+                                    <option value="S">S</option>
+                                    <option value="M">M</option>
+                                    <option value="L">L</option>
+                                    <option value="XL">XL</option>
+                                    <option value="XXL">XXL</option>
+                                    <option value="3XL">3XL</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Tabela de Equipamentos -->
+                    <div class="admin-table-container">
+                        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
+                            <h3 style="margin: 0;">Lista de Equipamentos por Atleta</h3>
+                            <span id="equip-count-info" style="font-size: 0.85rem; color: var(--text-secondary); font-weight: 600;">0 atletas</span>
+                        </div>
+                        <table class="admin-table" style="width: 100%; text-align: left; margin-top: 10px; border-collapse: collapse;">
+                            <thead>
+                                <tr style="border-bottom: 1px solid rgba(255,255,255,0.1);">
+                                    <th style="padding: 10px; width: 45px;">Foto</th>
+                                    <th style="padding: 10px;">Atleta</th>
+                                    <th style="padding: 10px;">Escalão & Sexo</th>
+                                    <th style="padding: 10px;">Época</th>
+                                    <th style="padding: 10px; text-align: center;">👕 Camisola</th>
+                                    <th style="padding: 10px; text-align: center;">🩳 Calção</th>
+                                    <th style="padding: 10px;">Estampa (Nome)</th>
+                                    <th style="padding: 10px; text-align: center;">1ª Opção #</th>
+                                    <th style="padding: 10px; text-align: center;">2ª Opção #</th>
+                                    <th style="padding: 10px; text-align: center;"># Oficial</th>
+                                    <th style="padding: 10px; text-align: center; width: 80px;">Ações</th>
+                                </tr>
+                            </thead>
+                            <tbody id="equipamentos-table-body">
+                                <tr><td colspan="11" style="padding: 15px; text-align: center; color: var(--text-secondary);">A carregar dados de equipamentos...</td></tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
                 <!-- TAB: CONFIGURAÇÕES GERAIS E ÓRGÃOS SOCIAIS -->
                 <div id="tab-config" class="tab-pane hidden">
                     <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; flex-wrap: wrap; gap: 10px;">
@@ -970,6 +1134,6 @@
 
     <!-- Scripts -->
     <script src="js/config.js"></script>
-    <script src="js/admin.js?v=20260827_3"></script>
+    <script src="js/admin.js?v=20260827_4"></script>
 </body>
 </html>
