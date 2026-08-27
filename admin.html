@@ -105,8 +105,30 @@
                             <select id="new-user-role" required class="admin-input">
                                 <option value="" disabled selected>Selecionar Tipo de Acesso</option>
                                 <option value="admin">Administrador Total (Acesso a Tudo)</option>
+                                <option value="diretor">Diretor de Campo / Seccionista (App Mobile)</option>
+                                <option value="treinador">Treinador (Atletas, Equipas, Presenças)</option>
                                 <option value="personalizado">Personalizado (Definir Menus)</option>
                             </select>
+
+                            <!-- Bloco de Escalão Afeto -->
+                            <div id="container-user-escalao" style="display: none; background: #f8fafc; border: 1px solid var(--border-color); border-radius: 8px; padding: 12px;">
+                                <label style="font-weight: 600; font-size: 0.85rem; color: var(--text-primary); margin-bottom: 6px; display: block;">
+                                    🏀 Escalão / Equipa Atribuída (Acesso Direto Mobile):
+                                </label>
+                                <select id="new-user-escalao" class="admin-input" style="margin-bottom: 0;">
+                                    <option value="">Todos os Escalões / Geral</option>
+                                    <option value="BabyBasket">BabyBasket</option>
+                                    <option value="Mini 8">Mini 8</option>
+                                    <option value="Mini 10">Mini 10</option>
+                                    <option value="Mini 12">Mini 12</option>
+                                    <option value="Sub 14">Sub 14</option>
+                                    <option value="Sub 16">Sub 16</option>
+                                    <option value="Sub 18">Sub 18</option>
+                                    <option value="Sub 20">Sub 20</option>
+                                    <option value="Seniores">Seniores</option>
+                                    <option value="Veteranos">Veteranos</option>
+                                </select>
+                            </div>
 
                             <!-- Bloco de Permissões Granulares por Menus -->
                             <div id="container-permissoes-custom" style="display: none; background: #f8fafc; border: 1px solid var(--border-color); border-radius: 8px; padding: 15px;">
@@ -1139,6 +1161,6 @@
 
     <!-- Scripts -->
     <script src="js/config.js"></script>
-    <script src="js/admin.js?v=20260827_5"></script>
+    <script src="js/admin.js?v=20260827_6"></script>
 </body>
 </html>

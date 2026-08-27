@@ -1,0 +1,257 @@
+<!DOCTYPE html>
+<html lang="pt">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <title>BCV Diretor | Gestão de Campo</title>
+    
+    <!-- Favicon -->
+    <link rel="icon" type="image/png" href="assets/emblema_png.png">
+    
+    <!-- Google Fonts: Inter -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    
+    <!-- Supabase JS -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    
+    <!-- CSS Diretor Mobile -->
+    <link rel="stylesheet" href="css/diretor.css?v=20260827_1">
+</head>
+<body>
+
+    <!-- ======================================================= -->
+    <!-- ECRÃ DE LOGIN (Visível apenas se deslogado)             -->
+    <!-- ======================================================= -->
+    <div id="login-container" class="app-container" style="display: none;">
+        <div class="login-screen">
+            <img src="assets/emblema_png.png" alt="Emblema BCV" class="login-logo">
+            <h2>Portal do Diretor</h2>
+            <p>Acesso exclusivo para registo de presenças e mensalidades de campo</p>
+            
+            <form id="form-login-diretor" style="display: flex; flex-direction: column; gap: 12px; text-align: left;">
+                <div>
+                    <label class="control-label">Email de Acesso</label>
+                    <input type="email" id="login-email" class="mobile-input" placeholder="exemplo@bcv.pt" required>
+                </div>
+                <div>
+                    <label class="control-label">Palavra-passe</label>
+                    <input type="password" id="login-password" class="mobile-input" placeholder="••••••••" required>
+                </div>
+                <div id="login-error-msg" style="color: #ef4444; font-size: 0.85rem; display: none; font-weight: 600;"></div>
+                <button type="submit" id="btn-login" class="btn-save-floating" style="position: static; margin-top: 10px;">
+                    Entrar no Portal
+                </button>
+            </form>
+        </div>
+    </div>
+
+    <!-- ======================================================= -->
+    <!-- APLICAÇÃO PRINCIPAL DO DIRETOR (Pós-Login)              -->
+    <!-- ======================================================= -->
+    <div id="app-main" style="display: none;">
+        
+        <!-- Cabeçalho Fixo -->
+        <header class="app-header">
+            <div class="header-brand">
+                <img src="assets/emblema_png.png" alt="BCV" class="header-logo">
+                <div class="header-info">
+                    <h1 id="header-user-name">Diretor BCV</h1>
+                    <div class="badge-escalao" id="header-escalao-badge">🏀 Carregando...</div>
+                </div>
+            </div>
+            <div class="header-actions">
+                <button type="button" id="btn-logout" class="btn-logout" title="Terminar Sessão">
+                    🚪
+                </button>
+            </div>
+        </header>
+
+        <!-- Container Principal -->
+        <main class="app-container">
+
+            <!-- ======================================================= -->
+            <!-- ABA 1: PRESENÇAS (CHAMADA RÁPIDA)                       -->
+            <!-- ======================================================= -->
+            <section id="tab-presencas" class="tab-content active">
+                
+                <!-- Controlo de Chamada -->
+                <div class="control-card">
+                    <div class="control-row" style="margin-bottom: 10px;">
+                        <div class="control-group">
+                            <label class="control-label">Data do Evento</label>
+                            <input type="date" id="presencas-data" class="mobile-input">
+                        </div>
+                        <div class="control-group">
+                            <label class="control-label">Tipo de Evento</label>
+                            <select id="presencas-tipo" class="mobile-select">
+                                <option value="Treino">Treino</option>
+                                <option value="Jogo">Jogo</option>
+                                <option value="Torneio">Torneio</option>
+                                <option value="Estágio">Estágio</option>
+                            </select>
+                        </div>
+                    </div>
+                    
+                    <div style="display: flex; gap: 8px;">
+                        <button type="button" id="btn-marcar-todos-presentes" class="btn-call" style="flex: 1; background: var(--success-bg); color: #047857; border-color: rgba(16,185,129,0.3);">
+                            ✅ Marcar Todos Presentes
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Lista de Atletas para Chamada -->
+                <div id="lista-presencas-container">
+                    <div style="text-align: center; padding: 20px; color: var(--text-muted);">
+                        A carregar atletas do escalão...
+                    </div>
+                </div>
+
+                <!-- Barra Flutuante de Gravação -->
+                <div class="sticky-save-bar">
+                    <button type="button" id="btn-guardar-presencas" class="btn-save-floating">
+                        💾 Guardar Presenças
+                    </button>
+                </div>
+            </section>
+
+            <!-- ======================================================= -->
+            <!-- ABA 2: MENSALIDADES (QUOTAS & COBRANÇA)                 -->
+            <!-- ======================================================= -->
+            <section id="tab-mensalidades" class="tab-content">
+                
+                <!-- Seletor do Mês -->
+                <div class="control-card">
+                    <div class="control-row">
+                        <div class="control-group">
+                            <label class="control-label">Mês de Cobrança</label>
+                            <select id="mensalidades-mes" class="mobile-select">
+                                <option value="2026-09">Setembro 2026</option>
+                                <option value="2026-10">Outubro 2026</option>
+                                <option value="2026-11">Novembro 2026</option>
+                                <option value="2026-12">Dezembro 2026</option>
+                                <option value="2027-01">Janeiro 2027</option>
+                                <option value="2027-02">Fevereiro 2027</option>
+                                <option value="2027-03">Março 2027</option>
+                                <option value="2027-04">Abril 2027</option>
+                                <option value="2027-05">Maio 2027</option>
+                                <option value="2027-06">Junho 2027</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Resumo Estatístico -->
+                <div class="mensalidades-stats-grid">
+                    <div class="stat-card-mini">
+                        <div class="stat-val" id="stat-total-pago" style="color: #059669;">0 €</div>
+                        <div class="stat-lbl" id="stat-qtd-pago">0 Pagos</div>
+                    </div>
+                    <div class="stat-card-mini">
+                        <div class="stat-val" id="stat-total-pendente" style="color: #dc2626;">0 €</div>
+                        <div class="stat-lbl" id="stat-qtd-pendente">0 Pendentes</div>
+                    </div>
+                </div>
+
+                <!-- Lista de Atletas com Estado de Mensalidade -->
+                <div id="lista-mensalidades-container">
+                    <div style="text-align: center; padding: 20px; color: var(--text-muted);">
+                        A carregar estado das mensalidades...
+                    </div>
+                </div>
+            </section>
+
+            <!-- ======================================================= -->
+            <!-- ABA 3: PLANTEL & SOS (CONTACTOS DE EMERGÊNCIA)          -->
+            <!-- ======================================================= -->
+            <section id="tab-plantel" class="tab-content">
+                <div class="control-card">
+                    <input type="text" id="filtro-plantel" class="mobile-input" placeholder="🔍 Pesquisar atleta no plantel...">
+                </div>
+
+                <!-- Lista de Contactos de Emergência -->
+                <div id="lista-plantel-container">
+                    <div style="text-align: center; padding: 20px; color: var(--text-muted);">
+                        A carregar plantel...
+                    </div>
+                </div>
+            </section>
+
+        </main>
+
+        <!-- ======================================================= -->
+        <!-- BOTTOM NAVIGATION BAR                                   -->
+        <!-- ======================================================= -->
+        <nav class="bottom-nav">
+            <button type="button" class="nav-item active" data-tab="tab-presencas">
+                <span class="nav-icon">📋</span>
+                <span>Presenças</span>
+            </button>
+            <button type="button" class="nav-item" data-tab="tab-mensalidades">
+                <span class="nav-icon">💶</span>
+                <span>Mensalidades</span>
+            </button>
+            <button type="button" class="nav-item" data-tab="tab-plantel">
+                <span class="nav-icon">👥</span>
+                <span>Plantel / SOS</span>
+            </button>
+        </nav>
+
+        <!-- ======================================================= -->
+        <!-- MODAL BOTTOM SHEET: REGISTAR RECEBIMENTO DE MENSALIDADE -->
+        <!-- ======================================================= -->
+        <div id="modal-pagamento-sheet" class="modal-overlay">
+            <div class="modal-sheet">
+                <div class="modal-sheet-header">
+                    <h3 id="modal-atleta-nome">Registar Mensalidade</h3>
+                    <button type="button" class="btn-close-sheet" onclick="closePagamentoModal()">✕</button>
+                </div>
+                
+                <form id="form-pagamento-rapido" style="display: flex; flex-direction: column; gap: 12px;">
+                    <input type="hidden" id="pagamento-atleta-id">
+                    
+                    <div>
+                        <label class="control-label">Valor Recebido (€)</label>
+                        <input type="number" step="0.5" id="pagamento-valor" class="mobile-input" value="25.00" required>
+                    </div>
+
+                    <div>
+                        <label class="control-label">Método de Pagamento</label>
+                        <select id="pagamento-metodo" class="mobile-select">
+                            <option value="Dinheiro" selected>💵 Dinheiro</option>
+                            <option value="MBWay">📱 MBWay</option>
+                            <option value="Transferência">🏦 Transferência Bancária</option>
+                            <option value="Outro">Outro</option>
+                        </select>
+                    </div>
+
+                    <div>
+                        <label class="control-label">Data de Pagamento</label>
+                        <input type="date" id="pagamento-data" class="mobile-input">
+                    </div>
+
+                    <div>
+                        <label class="control-label">Notas Opcionais (ex: Nº Recibo / Observações)</label>
+                        <input type="text" id="pagamento-notas" class="mobile-input" placeholder="Ex: Entregue pela mãe no pavilhão">
+                    </div>
+
+                    <div style="display: flex; gap: 10px; margin-top: 10px;">
+                        <button type="button" id="btn-anular-pagamento" class="btn-call" style="background: var(--danger-bg); color: #dc2626; border-color: rgba(239,68,68,0.3); display: none;">
+                            Anular Pagamento
+                        </button>
+                        <button type="submit" id="btn-confirmar-pagamento" class="btn-save-floating" style="position: static; flex: 1;">
+                            Confirmar Recebimento
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+    </div>
+
+    <!-- Scripts -->
+    <script src="js/config.js"></script>
+    <script src="js/diretor.js?v=20260827_1"></script>
+</body>
+</html>

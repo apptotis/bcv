@@ -68,12 +68,18 @@ document.addEventListener('DOMContentLoaded', async () => {
             }
 
             const role = (profile.role || 'admin').toLowerCase();
-            const allowedRoles = ['admin', 'editor', 'treinador', 'personalizado', 'user'];
+            const allowedRoles = ['admin', 'editor', 'treinador', 'diretor', 'seccionista', 'personalizado', 'user'];
             const userPerms = Array.isArray(profile.permissoes) ? profile.permissoes : [];
             const isAllowed = allowedRoles.includes(role) || userPerms.length > 0 || role === 'admin';
 
             if (isAllowed) {
-                // Acesso permitido
+                // Redirecionamento automático para diretores de campo / seccionistas
+                if (role === 'diretor' || role === 'seccionista') {
+                    window.location.href = 'diretor.html';
+                    return;
+                }
+
+                // Acesso permitido ao painel geral
                 if (adminNameSpan) {
                     adminNameSpan.textContent = profile.nome || user.email || 'Utilizador';
                 }
@@ -275,6 +281,9 @@ document.addEventListener('DOMContentLoaded', async () => {
     const containerPermissoes = document.getElementById('container-permissoes-custom');
     const checkboxesPermissoes = document.querySelectorAll('input[name="user_permissoes"]');
 
+    const containerUserEscalao = document.getElementById('container-user-escalao');
+    const newUserEscalaoSelect = document.getElementById('new-user-escalao');
+
     const MODULO_LABELS = {
         'noticias': 'Notícias',
         'agenda': 'Agenda',
@@ -282,15 +291,23 @@ document.addEventListener('DOMContentLoaded', async () => {
         'galeria': 'Galeria',
         'equipas': 'Equipas',
         'atletas': 'Atletas',
+        'equipamentos': 'Equipamentos',
         'config': 'Config'
     };
 
-    if (roleSelect && containerPermissoes) {
+    if (roleSelect) {
         roleSelect.addEventListener('change', () => {
-            if (roleSelect.value === 'personalizado') {
-                containerPermissoes.style.display = 'block';
+            const val = roleSelect.value;
+            if (val === 'personalizado') {
+                if (containerPermissoes) containerPermissoes.style.display = 'block';
+                if (containerUserEscalao) containerUserEscalao.style.display = 'block';
+            } else if (val === 'diretor' || val === 'treinador') {
+                if (containerPermissoes) containerPermissoes.style.display = 'none';
+                if (containerUserEscalao) containerUserEscalao.style.display = 'block';
+                checkboxesPermissoes.forEach(cb => cb.checked = false);
             } else {
-                containerPermissoes.style.display = 'none';
+                if (containerPermissoes) containerPermissoes.style.display = 'none';
+                if (containerUserEscalao) containerUserEscalao.style.display = 'none';
                 checkboxesPermissoes.forEach(cb => cb.checked = false);
             }
         });
@@ -321,6 +338,8 @@ document.addEventListener('DOMContentLoaded', async () => {
         passwordInput.required = true;
         document.getElementById('new-user-email').disabled = false;
         if (containerPermissoes) containerPermissoes.style.display = 'none';
+        if (containerUserEscalao) containerUserEscalao.style.display = 'none';
+        if (newUserEscalaoSelect) newUserEscalaoSelect.value = '';
         checkboxesPermissoes.forEach(cb => cb.checked = false);
         if(createUserMsg) createUserMsg.classList.add('hidden');
     }
@@ -349,26 +368,45 @@ document.addEventListener('DOMContentLoaded', async () => {
             users.forEach(user => {
                 const tr = document.createElement('tr');
                 const userJson = JSON.stringify(user).replace(/'/g, "&apos;").replace(/"/g, "&quot;");
-                const isAdmin = user.role === 'admin';
+                const uRole = (user.role || 'personalizado').toLowerCase();
+                const isAdmin = uRole === 'admin';
+                const isDiretor = uRole === 'diretor' || uRole === 'seccionista';
+                const isTreinador = uRole === 'treinador';
+
+                let roleBadgeHtml = '';
+                if (isAdmin) {
+                    roleBadgeHtml = '<strong style="color: #7e22ce;">Admin Total</strong>';
+                } else if (isDiretor) {
+                    roleBadgeHtml = '<span style="background: rgba(16, 185, 129, 0.15); color: #059669; font-weight: 700; padding: 2px 8px; border-radius: 6px; font-size: 0.8rem;">📱 Diretor de Campo</span>';
+                } else if (isTreinador) {
+                    roleBadgeHtml = '<span style="background: rgba(59, 130, 246, 0.15); color: #2563eb; font-weight: 700; padding: 2px 8px; border-radius: 6px; font-size: 0.8rem;">🏀 Treinador</span>';
+                } else {
+                    roleBadgeHtml = '<span style="color: var(--text-secondary); font-size: 0.85rem;">Personalizado</span>';
+                }
                 
                 let permissoesBadgeHtml = '';
                 if (isAdmin) {
-                    permissoesBadgeHtml = '<span style="background: rgba(106, 27, 154, 0.12); color: #6a1b9a; padding: 3px 8px; border-radius: 4px; font-weight: 600; font-size: 0.8rem; border: 1px solid rgba(106, 27, 154, 0.25);">⭐ Total (Todos)</span>';
+                    permissoesBadgeHtml = '<span style="background: rgba(126, 34, 206, 0.12); color: #7e22ce; padding: 3px 8px; border-radius: 4px; font-weight: 600; font-size: 0.8rem; border: 1px solid rgba(126, 34, 206, 0.25);">⭐ Acesso a Tudo</span>';
+                } else if (isDiretor) {
+                    const esc = user.escalao_afeto ? `🏀 <strong>${user.escalao_afeto}</strong>` : 'Todos os Escalões';
+                    permissoesBadgeHtml = `<span style="background: rgba(16, 185, 129, 0.1); color: #047857; padding: 3px 8px; border-radius: 4px; font-size: 0.8rem; border: 1px solid rgba(16, 185, 129, 0.25);">Equipa: ${esc}</span>`;
                 } else {
                     const userPerms = Array.isArray(user.permissoes) ? user.permissoes : [];
+                    const escTag = user.escalao_afeto ? `<span style="background: rgba(126, 34, 206, 0.08); color: #7e22ce; padding: 2px 6px; border-radius: 4px; font-size: 0.75rem; font-weight: 600;">Escalão: ${user.escalao_afeto}</span>` : '';
                     if (userPerms.length > 0) {
-                        permissoesBadgeHtml = `<div style="display: flex; flex-wrap: wrap; gap: 4px;">` +
+                        permissoesBadgeHtml = `<div style="display: flex; flex-wrap: wrap; gap: 4px; align-items: center;">` +
+                            escTag +
                             userPerms.map(p => `<span style="background: rgba(0, 0, 0, 0.05); color: var(--text-primary); padding: 2px 6px; border-radius: 4px; font-size: 0.75rem; border: 1px solid var(--border-color);">${MODULO_LABELS[p] || p}</span>`).join('') +
                             `</div>`;
                     } else {
-                        permissoesBadgeHtml = '<span style="color: var(--text-secondary); font-size: 0.8rem;">(Nenhum menu)</span>';
+                        permissoesBadgeHtml = escTag || '<span style="color: var(--text-secondary); font-size: 0.8rem;">(Nenhum menu)</span>';
                     }
                 }
 
                 tr.innerHTML = `
                     <td style="padding: 10px; font-weight: 600;">${user.nome || '-'}</td>
                     <td style="padding: 10px;">${user.email || '-'}</td>
-                    <td style="padding: 10px; font-size: 0.85rem;">${isAdmin ? '<strong>Admin</strong>' : 'Personalizado'}</td>
+                    <td style="padding: 10px;">${roleBadgeHtml}</td>
                     <td style="padding: 10px;">${permissoesBadgeHtml}</td>
                     <td style="padding: 10px;">${user.telemovel || '-'}</td>
                     <td style="padding: 10px; text-align: center; white-space: nowrap;">
@@ -394,14 +432,24 @@ document.addEventListener('DOMContentLoaded', async () => {
         document.getElementById('new-user-email').disabled = true; // Não deixamos editar o email
         document.getElementById('new-user-phone').value = user.telemovel || '';
         
-        const isAdmin = user.role === 'admin';
-        document.getElementById('new-user-role').value = isAdmin ? 'admin' : 'personalizado';
+        const role = (user.role || 'personalizado').toLowerCase();
+        roleSelect.value = role;
         
-        if (!isAdmin) {
-            containerPermissoes.style.display = 'block';
+        if (newUserEscalaoSelect) {
+            newUserEscalaoSelect.value = user.escalao_afeto || '';
+        }
+
+        if (role === 'personalizado') {
+            if (containerPermissoes) containerPermissoes.style.display = 'block';
+            if (containerUserEscalao) containerUserEscalao.style.display = 'block';
             setSelectedPermissions(user.permissoes || []);
+        } else if (role === 'diretor' || role === 'treinador') {
+            if (containerPermissoes) containerPermissoes.style.display = 'none';
+            if (containerUserEscalao) containerUserEscalao.style.display = 'block';
+            checkboxesPermissoes.forEach(cb => cb.checked = false);
         } else {
-            containerPermissoes.style.display = 'none';
+            if (containerPermissoes) containerPermissoes.style.display = 'none';
+            if (containerUserEscalao) containerUserEscalao.style.display = 'none';
             checkboxesPermissoes.forEach(cb => cb.checked = false);
         }
         
@@ -454,12 +502,23 @@ document.addEventListener('DOMContentLoaded', async () => {
         const nome = document.getElementById('new-user-name').value;
         const telemovel = document.getElementById('new-user-phone').value;
         const roleVal = document.getElementById('new-user-role').value;
+        const escalaoAfeto = (document.getElementById('new-user-escalao')?.value || '');
         
-        const role = (roleVal === 'admin') ? 'admin' : 'personalizado';
-        const allModules = ['noticias', 'agenda', 'resultados', 'galeria', 'equipas', 'atletas', 'config'];
-        const permissoes = (role === 'admin') ? allModules : getSelectedPermissions();
+        const role = roleVal || 'personalizado';
+        const allModules = ['noticias', 'agenda', 'resultados', 'galeria', 'equipas', 'atletas', 'equipamentos', 'config'];
+        
+        let permissoes = [];
+        if (role === 'admin') {
+            permissoes = allModules;
+        } else if (role === 'diretor') {
+            permissoes = ['diretor_presencas', 'diretor_mensalidades'];
+        } else if (role === 'treinador') {
+            permissoes = ['atletas', 'equipas'];
+        } else {
+            permissoes = getSelectedPermissions();
+        }
 
-        if (role !== 'admin' && permissoes.length === 0) {
+        if (role === 'personalizado' && permissoes.length === 0) {
             alert('Por favor, selecione pelo menos um menu autorizado para este utilizador.');
             btnCreateUser.textContent = isEditMode ? "Guardar Alterações" : "Criar Utilizador";
             btnCreateUser.disabled = false;
@@ -475,9 +534,17 @@ document.addEventListener('DOMContentLoaded', async () => {
                     p_telemovel: telemovel,
                     p_role: role,
                     p_password: password || null,
-                    p_permissoes: permissoes
+                    p_permissoes: permissoes,
+                    p_escalao_afeto: escalaoAfeto
                 });
-                if (error) throw error;
+                if (error) {
+                    // Fallback caso a RPC ainda não tenha o parâmetro p_escalao_afeto atualizado no Supabase
+                    const { error: fallbackErr } = await supabase
+                        .from('users')
+                        .update({ nome, telemovel, role, permissoes, escalao_afeto: escalaoAfeto })
+                        .eq('id', userId);
+                    if (fallbackErr) throw error;
+                }
                 createUserMsg.textContent = "✅ Utilizador atualizado com sucesso!";
             } else {
                 // Criar
@@ -487,7 +554,8 @@ document.addEventListener('DOMContentLoaded', async () => {
                     p_nome: nome,
                     p_telemovel: telemovel,
                     p_role: role,
-                    p_permissoes: permissoes
+                    p_permissoes: permissoes,
+                    p_escalao_afeto: escalaoAfeto
                 });
                 if (error) throw error;
                 createUserMsg.textContent = "✅ Utilizador criado com sucesso!";
