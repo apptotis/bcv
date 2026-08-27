@@ -1868,11 +1868,14 @@ document.addEventListener('DOMContentLoaded', async () => {
         formAtletaTitle.textContent = 'Editar Atleta: ' + atleta.nome;
         btnSaveAtleta.textContent = 'Guardar Alterações';
         
-        
+        openAtletaModal();
         if (btnCancelAtleta) btnCancelAtleta.classList.remove('hidden');
         if (atletaMsg) atletaMsg.classList.add('hidden');
         
-        formAtletaTitle.scrollIntoView({ behavior: 'smooth' });
+        if (formAtletaContainer) {
+            formAtletaContainer.classList.remove('hidden');
+            formAtletaContainer.scrollIntoView({ behavior: 'smooth' });
+        }
     };
 
     window.deleteAtleta = async function(id) {

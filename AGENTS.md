@@ -71,4 +71,5 @@
 - [2026-08-27] Gemini: Correção global dos seletores e filtros de escalão no Admin (admin.html, js/admin.js, js/equipas.js), adicionando BabyBasket e Sub 20 e implementando correspondência normalizada e resiliente a variações de grafia (ex: "Sub 14" vs "Sub-14").
 - [2026-08-27] Gemini: Correção do preenchimento de Sexo (M/F) e Época no formulário de edição de Atletas, e exibição/carregamento do Número de Camisola com fallback para a 1ª opção de equipamento (equipamento_numero_1) na lista e no formulário do Admin.
 - [2026-08-27] Gemini: Resolução segura de atletas por ID nos botões de ação da tabela do Admin (evitando corrupção de JSON inline) e garantia de preenchimento de todos os dados do Encarregado de Educação (nome, qualidade, tipo de doc, número de doc, validade, email, telefone).
+- [2026-08-27] Gemini: Correção da abertura do popup/modal de edição de atletas garantindo a chamada a openAtletaModal() e remoção da classe hidden ao clicar no botão Editar.
 
