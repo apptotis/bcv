@@ -2864,7 +2864,7 @@ document.addEventListener('DOMContentLoaded', async () => {
             if (filterEquipBusca) filterEquipBusca.value = '';
             if (filterEquipEscalao) filterEquipEscalao.value = '';
             if (filterEquipGenero) filterEquipGenero.value = '';
-            if (filterEquipEpoca) filterEquipEpoca.value = '';
+            if (filterEquipEpoca) filterEquipEpoca.value = '2026/2027';
             if (filterEquipTamCamisola) filterEquipTamCamisola.value = '';
             if (filterEquipTamCalcao) filterEquipTamCalcao.value = '';
             applyEquipamentosFilters();
