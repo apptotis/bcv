@@ -1183,7 +1183,10 @@ document.addEventListener('DOMContentLoaded', async () => {
         btnCancelAtleta.addEventListener('click', closeAtletaModal);
     }
 
-    let currentAtletas = [];
+    function normalizeEscalao(val) {
+        if (!val) return '';
+        return String(val).toLowerCase().replace(/[\s\-_]/g, '');
+    }
 
     // Função de filtragem combinada em tempo real (Pesquisa + Estado/Época + Escalão)
     function applyAtletasFilters() {
@@ -1203,7 +1206,16 @@ document.addEventListener('DOMContentLoaded', async () => {
                 matchesEpoca = atleta.epoca !== '2026/2027';
             }
 
-            const matchesEscalao = !escalaoVal || atleta.escalao === escalaoVal;
+            let matchesEscalao = true;
+            if (escalaoVal) {
+                const normFiltro = normalizeEscalao(escalaoVal);
+                const normAtleta = normalizeEscalao(atleta.escalao);
+                matchesEscalao = normAtleta === normFiltro || 
+                                 normAtleta.startsWith(normFiltro) ||
+                                 (normFiltro === 'seniores' && normAtleta.startsWith('senior')) ||
+                                 (normFiltro.includes('veterano') && (normAtleta.includes('veterano') || normAtleta.includes('master'))) ||
+                                 (normFiltro.includes('master') && (normAtleta.includes('veterano') || normAtleta.includes('master')));
+            }
 
             return matchesSearch && matchesEpoca && matchesEscalao;
         });
@@ -1762,7 +1774,21 @@ document.addEventListener('DOMContentLoaded', async () => {
         document.getElementById('atleta-funcao').value = atleta.funcao || '';
 
         document.getElementById('atleta-numero').value = atleta.numero_camisola || '';
-        document.getElementById('atleta-escalao').value = atleta.escalao || '';
+        
+        const atletaEscalaoSelect = document.getElementById('atleta-escalao');
+        if (atletaEscalaoSelect) {
+            atletaEscalaoSelect.value = atleta.escalao || '';
+            if (!atletaEscalaoSelect.value && atleta.escalao) {
+                const norm = normalizeEscalao(atleta.escalao);
+                for (let i = 0; i < atletaEscalaoSelect.options.length; i++) {
+                    if (normalizeEscalao(atletaEscalaoSelect.options[i].value) === norm) {
+                        atletaEscalaoSelect.selectedIndex = i;
+                        break;
+                    }
+                }
+            }
+        }
+
         document.getElementById('atleta-sexo').value = atleta.sexo || '';
         document.getElementById('atleta-nascimento').value = atleta.data_nascimento || '';
         document.getElementById('atleta-nacionalidade').value = atleta.nacionalidade || '';

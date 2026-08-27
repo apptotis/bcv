@@ -24,7 +24,12 @@ document.addEventListener('DOMContentLoaded', async () => {
         if (errEquipas) throw errEquipas;
 
         const ordemEscalao = [
-            "Mini 8", "Mini 10", "Mini 12", "Sub-14", "Sub-16", "Sub-18", "Seniores", "Veteranos"
+            "BabyBasket", "Mini 8", "Mini 10", "Mini 12", 
+            "Sub 14", "Sub-14", 
+            "Sub 16", "Sub-16", 
+            "Sub 18", "Sub-18", 
+            "Sub 20", "Sub-20", 
+            "Seniores", "Veteranos"
         ];
 
         if (equipas) {
