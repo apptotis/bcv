@@ -955,6 +955,7 @@
                         <select name="encarregado_tipo_doc" id="encarregado_tipo_doc" class="form-control" required>
                             <option value="Cartão Cidadão">Cartão Cidadão</option>
                             <option value="Passaporte">Passaporte</option>
+                            <option value="Outro">Outro</option>
                         </select>
                     </div>
                 </div>
@@ -1447,6 +1448,13 @@
             if (form.elements['localidade']) form.elements['localidade'].value = atleta.localidade || '';
             if (form.elements['telefone']) form.elements['telefone'].value = atleta.telefone || '';
             if (form.elements['email']) form.elements['email'].value = atleta.email || '';
+            if (form.elements['encarregado_nome']) form.elements['encarregado_nome'].value = atleta.encarregado_nome || '';
+            if (form.elements['encarregado_qualidade']) form.elements['encarregado_qualidade'].value = atleta.encarregado_qualidade || '';
+            if (form.elements['encarregado_tipo_doc']) form.elements['encarregado_tipo_doc'].value = atleta.encarregado_tipo_doc || 'Cartão Cidadão';
+            if (form.elements['encarregado_num_doc']) form.elements['encarregado_num_doc'].value = atleta.encarregado_num_doc || '';
+            if (form.elements['encarregado_validade_doc']) form.elements['encarregado_validade_doc'].value = atleta.encarregado_validade_doc || '';
+            if (form.elements['encarregado_email']) form.elements['encarregado_email'].value = atleta.encarregado_email || '';
+            if (form.elements['encarregado_telefone']) form.elements['encarregado_telefone'].value = atleta.encarregado_telefone || '';
             if (form.elements['equipamento_nome_camisola']) form.elements['equipamento_nome_camisola'].value = atleta.nickname || atleta.equipamento_nome_camisola || '';
         }
 
