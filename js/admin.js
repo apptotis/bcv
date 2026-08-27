@@ -1345,15 +1345,21 @@ document.addEventListener('DOMContentLoaded', async () => {
                 }
             };
 
-            const safeCheck = (fieldName, condition = true) => {
+            const safeSetCheckbox = (fieldName, isChecked = true) => {
                 try {
-                    if (condition) {
-                        const cb = form.getCheckBox(fieldName);
+                    const cb = form.getCheckBox(fieldName);
+                    if (isChecked) {
                         cb.check();
+                    } else {
+                        cb.uncheck();
                     }
                 } catch (err) {
                     console.warn(`Checkbox não encontrada no PDF: ${fieldName}`, err);
                 }
+            };
+
+            const safeCheck = (fieldName, condition = true) => {
+                safeSetCheckbox(fieldName, Boolean(condition));
             };
 
             // 1. Dados do Clube e Época
@@ -1370,31 +1376,30 @@ document.addEventListener('DOMContentLoaded', async () => {
             safeSetText('epoca2', ep2);
 
             // 2. Tipo de Inscrição e Licença
-            if (atleta.tipo_inscricao === 'Primeira Inscrição') {
-                safeCheck('primeira');
-            } else {
-                safeCheck('revalidacao');
-            }
+            const isPrimeira = (atleta.tipo_inscricao === 'Primeira Inscrição');
+            safeSetCheckbox('primeira', isPrimeira);
+            safeSetCheckbox('revalidacao', !isPrimeira);
             safeSetText('nr_licenca', atleta.licenca || '');
 
-            // 3. Sexo e Escalão
-            if (atleta.sexo === 'F') {
-                safeCheck('Feminino');
-            } else {
-                safeCheck('Masculino');
-            }
+            // 3. Sexo e Escalão (Garante desmarcação mútua explícita)
+            const isFeminino = (atleta.sexo === 'F' || atleta.sexo === 'Feminino');
+            safeSetCheckbox('Feminino', isFeminino);
+            safeSetCheckbox('Masculino', !isFeminino);
+
+            const escaloes = ['BabyBasket', 'Mini8', 'Mini10', 'Mini12', 'Sub14', 'Sub16', 'Sub18', 'Sénior', 'Master', 'BCR'];
+            escaloes.forEach(e => safeSetCheckbox(e, false));
 
             const esc = (atleta.escalao || '').toLowerCase().replace(/[\s\-_]/g, '');
-            if (esc.includes('baby')) safeCheck('BabyBasket');
-            else if (esc.includes('mini8') || esc === 'sub8') safeCheck('Mini8');
-            else if (esc.includes('mini10') || esc === 'sub10') safeCheck('Mini10');
-            else if (esc.includes('mini12') || esc === 'sub12') safeCheck('Mini12');
-            else if (esc.includes('sub14')) safeCheck('Sub14');
-            else if (esc.includes('sub16')) safeCheck('Sub16');
-            else if (esc.includes('sub18')) safeCheck('Sub18');
-            else if (esc.includes('senior') || esc.includes('sénior')) safeCheck('Sénior');
-            else if (esc.includes('master')) safeCheck('Master');
-            else if (esc.includes('bcr')) safeCheck('BCR');
+            if (esc.includes('baby')) safeSetCheckbox('BabyBasket', true);
+            else if (esc.includes('mini8') || esc === 'sub8') safeSetCheckbox('Mini8', true);
+            else if (esc.includes('mini10') || esc === 'sub10') safeSetCheckbox('Mini10', true);
+            else if (esc.includes('mini12') || esc === 'sub12') safeSetCheckbox('Mini12', true);
+            else if (esc.includes('sub14')) safeSetCheckbox('Sub14', true);
+            else if (esc.includes('sub16')) safeSetCheckbox('Sub16', true);
+            else if (esc.includes('sub18')) safeSetCheckbox('Sub18', true);
+            else if (esc.includes('senior') || esc.includes('sénior')) safeSetCheckbox('Sénior', true);
+            else if (esc.includes('master')) safeSetCheckbox('Master', true);
+            else if (esc.includes('bcr')) safeSetCheckbox('BCR', true);
 
             // 4. Identificação do Jogador
             safeSetText('Nome Completo', atleta.nome || '');
@@ -1420,13 +1425,15 @@ document.addEventListener('DOMContentLoaded', async () => {
 
             // 5. Documento de Identificação
             const tipoDoc = (atleta.tipo_doc_id || '').toLowerCase();
-            if (tipoDoc.includes('passaporte')) {
-                safeCheck('Passaporte');
-            } else if (tipoDoc.includes('outro') || (tipoDoc && !tipoDoc.includes('cidad'))) {
-                safeCheck('Outro');
+            const isPassaporte = tipoDoc.includes('passaporte');
+            const isOutro = tipoDoc.includes('outro') || (tipoDoc && !tipoDoc.includes('cidad'));
+            const isCC = !isPassaporte && !isOutro;
+
+            safeSetCheckbox('Passaporte', isPassaporte);
+            safeSetCheckbox('Outro', isOutro);
+            safeSetCheckbox('Cartão Cidadão', isCC);
+            if (isOutro) {
                 safeSetText('outro_descricao', atleta.tipo_doc_id);
-            } else {
-                safeCheck('Cartão Cidadão');
             }
 
             safeSetText('nr_identificacao', atleta.num_doc_id || '');
@@ -1475,12 +1482,12 @@ document.addEventListener('DOMContentLoaded', async () => {
             safeSetText('Email', atleta.email || '');
 
             // 7. Seguro Desportivo
-            if (atleta.tipo_seguro === 'Seguro Clube') {
-                safeCheck('Seguro Clube');
+            const isSeguroClube = (atleta.tipo_seguro === 'Seguro Clube');
+            safeSetCheckbox('Seguro Clube', isSeguroClube);
+            safeSetCheckbox('Seguro FPB', !isSeguroClube);
+            if (isSeguroClube) {
                 safeSetText('N Apólice', atleta.seguro_apolice || '');
                 safeSetText('Companhia', atleta.seguro_companhia || '');
-            } else {
-                safeCheck('Seguro FPB');
             }
 
             // 8. Autorizações / RGPD
@@ -1490,18 +1497,25 @@ document.addEventListener('DOMContentLoaded', async () => {
             safeCheck('fpb');
 
             // 9. Poder Paternal (Menores de Idade)
+            safeSetCheckbox('mae', false);
+            safeSetCheckbox('pai', false);
+            safeSetCheckbox('Tutor', false);
+            safeSetCheckbox('passaporte_2', false);
+            safeSetCheckbox('Outro_2', false);
+            safeSetCheckbox('titular do Cartão Cidadão', false);
+
             if (atleta.encarregado_nome) {
                 safeSetText('nome_paternal', atleta.encarregado_nome);
                 
                 const qual = (atleta.encarregado_qualidade || '').toLowerCase();
-                if (qual.includes('mãe') || qual.includes('mae')) safeCheck('mae');
-                else if (qual.includes('pai')) safeCheck('pai');
-                else if (qual.includes('tutor')) safeCheck('Tutor');
+                if (qual.includes('mãe') || qual.includes('mae')) safeSetCheckbox('mae', true);
+                else if (qual.includes('pai')) safeSetCheckbox('pai', true);
+                else if (qual.includes('tutor')) safeSetCheckbox('Tutor', true);
 
                 const encTipoDoc = (atleta.encarregado_tipo_doc || '').toLowerCase();
-                if (encTipoDoc.includes('passaporte')) safeCheck('passaporte_2');
-                else if (encTipoDoc.includes('outro')) safeCheck('Outro_2');
-                else if (atleta.encarregado_num_doc) safeCheck('titular do Cartão Cidadão');
+                if (encTipoDoc.includes('passaporte')) safeSetCheckbox('passaporte_2', true);
+                else if (encTipoDoc.includes('outro')) safeSetCheckbox('Outro_2', true);
+                else if (atleta.encarregado_num_doc) safeSetCheckbox('titular do Cartão Cidadão', true);
 
                 safeSetText('paternal_id', atleta.encarregado_num_doc || '');
 
