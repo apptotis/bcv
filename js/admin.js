@@ -1743,7 +1743,9 @@ document.addEventListener('DOMContentLoaded', async () => {
         if (typeof atletaArg === 'object' && atletaArg !== null) {
             atleta = atletaArg;
         } else if (typeof atletaArg === 'number' || typeof atletaArg === 'string') {
-            atleta = currentAtletas.find(a => String(a.id) === String(atletaArg));
+            atleta = (typeof currentAtletas !== 'undefined' ? currentAtletas.find(a => String(a.id) === String(atletaArg)) : null)
+                  || (typeof currentEquipamentos !== 'undefined' ? currentEquipamentos.find(a => String(a.id) === String(atletaArg)) : null)
+                  || (typeof filteredEquipamentos !== 'undefined' ? filteredEquipamentos.find(a => String(a.id) === String(atletaArg)) : null);
             if (!atleta) {
                 try { atleta = JSON.parse(atletaArg); } catch(e) {}
             }
@@ -1984,7 +1986,11 @@ document.addEventListener('DOMContentLoaded', async () => {
                 atletaMsg.classList.remove('hidden');
                 
                 resetAtletaForm();
-                loadAtletas();
+                if (typeof loadAtletas === 'function') loadAtletas();
+                if (typeof loadEquipamentos === 'function') loadEquipamentos();
+                setTimeout(() => {
+                    closeAtletaModal();
+                }, 700);
 
             } catch (error) {
                 console.error("Erro ao guardar atleta:", error);

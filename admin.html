@@ -465,270 +465,6 @@
                         <button id="btn-toggle-form-atleta" class="btn-primary" style="width: auto; padding: 10px 20px;">+ Adicionar Atleta</button>
                     </div>
 
-                    <!-- Modal Popup de Criação / Edição de Atleta -->
-                    <div id="form-atleta-container" class="admin-modal-overlay hidden">
-                        <div class="admin-modal-content">
-                            <div class="admin-modal-header">
-                                <h3 id="form-atleta-title">Adicionar Novo Atleta</h3>
-                                <button type="button" id="btn-close-modal-atleta" class="admin-modal-close" title="Fechar">&times;</button>
-                            </div>
-                            <form id="form-atleta" style="display: grid; gap: 15px;">
-                                <input type="hidden" id="edit-atleta-id">
-                            
-                            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px;">
-                                <div>
-                                    <label style="display:block; margin-bottom:5px; font-size:0.8rem; color:#a0a0ab;">Nome Completo</label>
-                                    <input type="text" id="atleta-nome" placeholder="Nome Completo do Atleta" required class="admin-input">
-                                </div>
-                                <div>
-                                    <label style="display:block; margin-bottom:5px; font-size:0.8rem; color:#a0a0ab;">Alcunha / Nickname</label>
-                                    <input type="text" id="atleta-nickname" placeholder="Alcunha (Opcional)" class="admin-input">
-                                </div>
-                            </div>
-                            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px;">
-                                <div>
-                                    <label style="display:block; margin-bottom:5px; font-size:0.8rem; color:#a0a0ab;">Época</label>
-                                    <select id="atleta-epoca" required class="admin-input">
-                                        <option value="" disabled selected>Selecionar</option>
-                                        <option value="2025/2026">2025/2026</option>
-                                        <option value="2026/2027">2026/2027</option>
-                                    </select>
-                                </div>
-                                <div>
-                                    <label style="display:block; margin-bottom:5px; font-size:0.8rem; color:#a0a0ab;">Função</label>
-                                    <select id="atleta-funcao" required class="admin-input">
-                                        <option value="" disabled selected>Selecionar</option>
-                                        <option value="Jogador">Jogador</option>
-                                        <option value="Treinador">Treinador</option>
-                                        <option value="Treinadora">Treinadora</option>
-                                        <option value="Seccionista">Seccionista</option>
-                                    </select>
-                                </div>
-                            </div>
-
-
-                            
-                            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px;">
-                                <div>
-                                    <label style="display:block; margin-bottom:5px; font-size:0.8rem; color:#a0a0ab;">Número de Camisola (#)</label>
-                                    <input type="number" id="atleta-numero" placeholder="Ex: 7" min="0" max="99" class="admin-input">
-                                </div>
-                                <div>
-                                    <label style="display:block; margin-bottom:5px; font-size:0.8rem; color:#a0a0ab;">Escalão</label>
-                                    <select id="atleta-escalao" required class="admin-input">
-                                        <option value="" disabled selected>Selecionar Escalão</option>
-                                        <option value="BabyBasket">BabyBasket</option>
-                                        <option value="Mini 8">Mini 8</option>
-                                        <option value="Mini 10">Mini 10</option>
-                                        <option value="Mini 12">Mini 12</option>
-                                        <option value="Sub 14">Sub 14</option>
-                                        <option value="Sub 16">Sub 16</option>
-                                        <option value="Sub 18">Sub 18</option>
-                                        <option value="Sub 20">Sub 20</option>
-                                        <option value="Seniores">Seniores</option>
-                                        <option value="Veteranos">Veteranos</option>
-                                    </select>
-                                </div>
-                            </div>
-
-                            <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 15px;">
-                                <div>
-                                    <label style="display:block; margin-bottom:5px; font-size:0.8rem; color:#a0a0ab;">Sexo</label>
-                                    <select id="atleta-sexo" required class="admin-input">
-                                        <option value="" disabled selected>Selecionar</option>
-                                        <option value="M">Masculino</option>
-                                        <option value="F">Feminino</option>
-                                    </select>
-                                </div>
-                                <div>
-                                    <label style="display:block; margin-bottom:5px; font-size:0.8rem; color:#a0a0ab;">Data de Nascimento</label>
-                                    <input type="date" id="atleta-nascimento" class="admin-input">
-                                </div>
-                                <div>
-                                    <label style="display:block; margin-bottom:5px; font-size:0.8rem; color:#a0a0ab;">NIF</label>
-                                    <input type="text" id="atleta-nif" placeholder="NIF" class="admin-input">
-                                </div>
-                            </div>
-
-                            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px;">
-                                <div>
-                                    <label style="display:block; margin-bottom:5px; font-size:0.8rem; color:#a0a0ab;">Email de Contacto</label>
-                                    <input type="email" id="atleta-email" placeholder="Email" class="admin-input">
-                                </div>
-                                <div>
-                                    <label style="display:block; margin-bottom:5px; font-size:0.8rem; color:#a0a0ab;">Telefone / Telemóvel</label>
-                                    <input type="tel" id="atleta-telefone" placeholder="Contacto Telefónico" class="admin-input">
-                                </div>
-                            </div>
-
-                            <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 15px;">
-                                <div>
-                                    <label style="display:block; margin-bottom:5px; font-size:0.8rem; color:#a0a0ab;">Tipo Doc. Identificação</label>
-                                    <select id="atleta-tipo-doc" class="admin-input">
-                                        <option value="Cartão Cidadão">Cartão Cidadão</option>
-                                        <option value="Passaporte">Passaporte</option>
-                                        <option value="Outro">Outro</option>
-                                    </select>
-                                </div>
-                                <div>
-                                    <label style="display:block; margin-bottom:5px; font-size:0.8rem; color:#a0a0ab;">Nº Doc. Identificação</label>
-                                    <input type="text" id="atleta-num-doc" placeholder="Número do Doc" class="admin-input">
-                                </div>
-                                <div>
-                                    <label style="display:block; margin-bottom:5px; font-size:0.8rem; color:#a0a0ab;">Validade do Doc.</label>
-                                    <input type="date" id="atleta-validade-doc" class="admin-input">
-                                </div>
-                            </div>
-
-                            <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 15px;">
-                                <div>
-                                    <label style="display:block; margin-bottom:5px; font-size:0.8rem; color:#a0a0ab;">Morada</label>
-                                    <input type="text" id="atleta-morada" placeholder="Rua, Nº, Andar" class="admin-input">
-                                </div>
-                                <div>
-                                    <label style="display:block; margin-bottom:5px; font-size:0.8rem; color:#a0a0ab;">Código Postal</label>
-                                    <input type="text" id="atleta-cp" placeholder="4900-000" class="admin-input">
-                                </div>
-                                <div>
-                                    <label style="display:block; margin-bottom:5px; font-size:0.8rem; color:#a0a0ab;">Localidade</label>
-                                    <input type="text" id="atleta-localidade" placeholder="Valença" class="admin-input">
-                                </div>
-                            </div>
-
-                            <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 15px;">
-                                <div>
-                                    <label style="display:block; margin-bottom:5px; font-size:0.8rem; color:#a0a0ab;">Naturalidade (País)</label>
-                                    <input type="text" id="atleta-pais-nasc" placeholder="Ex: Portugal" class="admin-input">
-                                </div>
-                                <div>
-                                    <label style="display:block; margin-bottom:5px; font-size:0.8rem; color:#a0a0ab;">Nacionalidade</label>
-                                    <input type="text" id="atleta-nacionalidade" placeholder="Ex: Portuguesa" class="admin-input">
-                                </div>
-                                <div>
-                                    <label style="display:block; margin-bottom:5px; font-size:0.8rem; color:#a0a0ab;">Nº Licença FPB</label>
-                                    <input type="text" id="atleta-licenca" placeholder="Licença" class="admin-input">
-                                </div>
-                            </div>
-
-                            <!-- Secção de Encarregado de Educação (Menores) -->
-                            <div style="background: rgba(16, 185, 129, 0.08); padding: 12px 15px; border-radius: 8px; border: 1px dashed rgba(16, 185, 129, 0.3); margin-bottom: 15px;">
-                                <h4 style="margin-bottom: 10px; color: #10b981; font-size: 0.85rem; text-transform: uppercase;">👨‍👩‍👦 Encarregado de Educação (Menores)</h4>
-                                <div style="margin-bottom: 10px;">
-                                    <label style="display:block; margin-bottom:5px; font-size:0.75rem; color:#a0a0ab;">Nome do Encarregado</label>
-                                    <input type="text" id="atleta-encarregado-nome" placeholder="Nome Completo" class="admin-input" style="padding: 8px;">
-                                </div>
-                                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 10px;">
-                                    <div>
-                                        <label style="display:block; margin-bottom:5px; font-size:0.75rem; color:#a0a0ab;">Grau Parentesco</label>
-                                        <select id="atleta-encarregado-qualidade" class="admin-input" style="padding: 8px;">
-                                            <option value="">-</option>
-                                            <option value="Pai">Pai</option>
-                                            <option value="Mãe">Mãe</option>
-                                            <option value="Tutor Legal">Tutor Legal</option>
-                                            <option value="Outro">Outro</option>
-                                        </select>
-                                    </div>
-                                    <div>
-                                        <label style="display:block; margin-bottom:5px; font-size:0.75rem; color:#a0a0ab;">Tipo Documento</label>
-                                        <select id="atleta-encarregado-tipo-doc" class="admin-input" style="padding: 8px;">
-                                            <option value="Cartão Cidadão">Cartão Cidadão</option>
-                                            <option value="Passaporte">Passaporte</option>
-                                            <option value="Outro">Outro</option>
-                                        </select>
-                                    </div>
-                                </div>
-                                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 10px;">
-                                    <div>
-                                        <label style="display:block; margin-bottom:5px; font-size:0.75rem; color:#a0a0ab;">Nº Documento</label>
-                                        <input type="text" id="atleta-encarregado-num-doc" placeholder="Número Identificação" class="admin-input" style="padding: 8px;">
-                                    </div>
-                                    <div>
-                                        <label style="display:block; margin-bottom:5px; font-size:0.75rem; color:#a0a0ab;">Validade Doc.</label>
-                                        <input type="date" id="atleta-encarregado-validade-doc" class="admin-input" style="padding: 8px;">
-                                    </div>
-                                </div>
-                                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
-                                    <div>
-                                        <label style="display:block; margin-bottom:5px; font-size:0.75rem; color:#a0a0ab;">Email Encarregado</label>
-                                        <input type="email" id="atleta-encarregado-email" placeholder="Email" class="admin-input" style="padding: 8px;">
-                                    </div>
-                                    <div>
-                                        <label style="display:block; margin-bottom:5px; font-size:0.75rem; color:#a0a0ab;">Telefone Encarregado</label>
-                                        <input type="tel" id="atleta-encarregado-telefone" placeholder="Telemóvel" class="admin-input" style="padding: 8px;">
-                                    </div>
-                                </div>
-                            </div>
-
-                            <!-- Secção de Equipamento Oficial -->
-                            <div style="background: rgba(126, 34, 206, 0.08); padding: 12px 15px; border-radius: 8px; border: 1px dashed rgba(126, 34, 206, 0.3); margin-bottom: 15px;">
-                                <h4 style="margin-bottom: 10px; color: #a855f7; font-size: 0.85rem; text-transform: uppercase;">🎽 Dados para Equipamento</h4>
-                                <div style="display: grid; grid-template-columns: 1fr 1fr 1fr 1fr; gap: 10px;">
-                                    <div>
-                                        <label style="display:block; margin-bottom:5px; font-size:0.75rem; color:#a0a0ab;">Tam. Camisola</label>
-                                        <select id="atleta-equip-tam" class="admin-input" style="padding: 8px;">
-                                            <option value="">-</option>
-                                            <option value="6">6</option>
-                                            <option value="8">8</option>
-                                            <option value="10">10</option>
-                                            <option value="12">12</option>
-                                            <option value="14">14</option>
-                                            <option value="S">S</option>
-                                            <option value="M">M</option>
-                                            <option value="L">L</option>
-                                            <option value="XL">XL</option>
-                                            <option value="XXL">XXL</option>
-                                        </select>
-                                    </div>
-                                    <div>
-                                        <label style="display:block; margin-bottom:5px; font-size:0.75rem; color:#a0a0ab;">Tam. Calção</label>
-                                        <select id="atleta-equip-calcao" class="admin-input" style="padding: 8px;">
-                                            <option value="">-</option>
-                                            <option value="6">6</option>
-                                            <option value="8">8</option>
-                                            <option value="10">10</option>
-                                            <option value="12">12</option>
-                                            <option value="14">14</option>
-                                            <option value="S">S</option>
-                                            <option value="M">M</option>
-                                            <option value="L">L</option>
-                                            <option value="XL">XL</option>
-                                            <option value="XXL">XXL</option>
-                                        </select>
-                                    </div>
-                                    <div>
-                                        <label style="display:block; margin-bottom:5px; font-size:0.75rem; color:#a0a0ab;">1ª Opção Nº</label>
-                                        <input type="text" id="atleta-equip-num1" placeholder="Ex: 7" class="admin-input" style="padding: 8px;">
-                                    </div>
-                                    <div>
-                                        <label style="display:block; margin-bottom:5px; font-size:0.75rem; color:#a0a0ab;">2ª Opção Nº</label>
-                                        <input type="text" id="atleta-equip-num2" placeholder="Ex: 14" class="admin-input" style="padding: 8px;">
-                                    </div>
-                                </div>
-                                <div style="margin-top: 8px;">
-                                    <label style="display:block; margin-bottom:5px; font-size:0.75rem; color:#a0a0ab;">Nome a estampar na camisola</label>
-                                    <input type="text" id="atleta-equip-nome" placeholder="Ex: SILVA" class="admin-input" style="padding: 8px;">
-                                </div>
-                            </div>
-
-                            <div>
-                                <label style="display:block; margin-bottom:5px; font-size:0.9rem; color:#a0a0ab;">Foto do Atleta (Opcional):</label>
-                                <input type="file" id="atleta-foto-file" accept="image/*" class="admin-input" style="padding: 10px;">
-                                <div id="atleta-foto-preview" style="margin-top: 10px; max-width: 100px; display: none;">
-                                    <img src="" id="atleta-foto-img" style="width: 100px; height: 100px; object-fit: cover; border-radius: 8px; border: 1px solid rgba(255,255,255,0.2);">
-                                    <button type="button" id="btn-remove-foto" class="btn-secondary" style="padding: 5px; font-size: 0.8rem; width: 100px; margin-top: 5px;">Remover Foto</button>
-                                    <input type="hidden" id="atleta-foto-url">
-                                </div>
-                            </div>
-                            
-                            <div style="display: flex; gap: 10px;">
-                                <button type="submit" id="btn-save-atleta" class="btn-primary" style="flex: 1;">Adicionar Atleta</button>
-                                <button type="button" id="btn-cancel-atleta" class="btn-secondary hidden" style="flex: 1;">Cancelar Edição</button>
-                            </div>
-                            
-                            <p id="atleta-msg" class="hidden"></p>
-                        </form>
-                    </div>
-                </div>
 
                     <!-- Barra de Filtros -->
                     <div class="welcome-box" style="margin-bottom: 20px; padding: 15px; background: rgba(0,0,0,0.02); border: 1px solid var(--border-color);">
@@ -1128,12 +864,281 @@
                         </div>
                     </div>
                 </div>
+
+                <!-- Modal Popup Global de Criação / Edição de Atleta -->
+                <div id="form-atleta-container" class="admin-modal-overlay hidden">
+                    <div class="admin-modal-content">
+                        <div class="admin-modal-header">
+                            <h3 id="form-atleta-title">Adicionar Novo Atleta</h3>
+                            <button type="button" id="btn-close-modal-atleta" class="admin-modal-close" title="Fechar">&times;</button>
+                        </div>
+                        <form id="form-atleta" style="display: grid; gap: 15px;">
+                            <input type="hidden" id="edit-atleta-id">
+                        
+                            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px;">
+                                <div>
+                                    <label style="display:block; margin-bottom:5px; font-size:0.8rem; color:#a0a0ab;">Nome Completo</label>
+                                    <input type="text" id="atleta-nome" placeholder="Nome Completo do Atleta" required class="admin-input">
+                                </div>
+                                <div>
+                                    <label style="display:block; margin-bottom:5px; font-size:0.8rem; color:#a0a0ab;">Alcunha / Nickname</label>
+                                    <input type="text" id="atleta-nickname" placeholder="Alcunha (Opcional)" class="admin-input">
+                                </div>
+                            </div>
+                            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px;">
+                                <div>
+                                    <label style="display:block; margin-bottom:5px; font-size:0.8rem; color:#a0a0ab;">Época</label>
+                                    <select id="atleta-epoca" required class="admin-input">
+                                        <option value="" disabled selected>Selecionar</option>
+                                        <option value="2025/2026">2025/2026</option>
+                                        <option value="2026/2027">2026/2027</option>
+                                    </select>
+                                </div>
+                                <div>
+                                    <label style="display:block; margin-bottom:5px; font-size:0.8rem; color:#a0a0ab;">Função</label>
+                                    <select id="atleta-funcao" required class="admin-input">
+                                        <option value="" disabled selected>Selecionar</option>
+                                        <option value="Jogador">Jogador</option>
+                                        <option value="Treinador">Treinador</option>
+                                        <option value="Treinadora">Treinadora</option>
+                                        <option value="Seccionista">Seccionista</option>
+                                    </select>
+                                </div>
+                            </div>
+
+                            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px;">
+                                <div>
+                                    <label style="display:block; margin-bottom:5px; font-size:0.8rem; color:#a0a0ab;">Número de Camisola (#)</label>
+                                    <input type="number" id="atleta-numero" placeholder="Ex: 7" min="0" max="99" class="admin-input">
+                                </div>
+                                <div>
+                                    <label style="display:block; margin-bottom:5px; font-size:0.8rem; color:#a0a0ab;">Escalão</label>
+                                    <select id="atleta-escalao" required class="admin-input">
+                                        <option value="" disabled selected>Selecionar Escalão</option>
+                                        <option value="BabyBasket">BabyBasket</option>
+                                        <option value="Mini 8">Mini 8</option>
+                                        <option value="Mini 10">Mini 10</option>
+                                        <option value="Mini 12">Mini 12</option>
+                                        <option value="Sub 14">Sub 14</option>
+                                        <option value="Sub 16">Sub 16</option>
+                                        <option value="Sub 18">Sub 18</option>
+                                        <option value="Sub 20">Sub 20</option>
+                                        <option value="Seniores">Seniores</option>
+                                        <option value="Veteranos">Veteranos</option>
+                                    </select>
+                                </div>
+                            </div>
+
+                            <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 15px;">
+                                <div>
+                                    <label style="display:block; margin-bottom:5px; font-size:0.8rem; color:#a0a0ab;">Sexo</label>
+                                    <select id="atleta-sexo" required class="admin-input">
+                                        <option value="" disabled selected>Selecionar</option>
+                                        <option value="M">Masculino</option>
+                                        <option value="F">Feminino</option>
+                                    </select>
+                                </div>
+                                <div>
+                                    <label style="display:block; margin-bottom:5px; font-size:0.8rem; color:#a0a0ab;">Data de Nascimento</label>
+                                    <input type="date" id="atleta-nascimento" class="admin-input">
+                                </div>
+                                <div>
+                                    <label style="display:block; margin-bottom:5px; font-size:0.8rem; color:#a0a0ab;">NIF</label>
+                                    <input type="text" id="atleta-nif" placeholder="NIF" class="admin-input">
+                                </div>
+                            </div>
+
+                            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px;">
+                                <div>
+                                    <label style="display:block; margin-bottom:5px; font-size:0.8rem; color:#a0a0ab;">Email de Contacto</label>
+                                    <input type="email" id="atleta-email" placeholder="email@exemplo.com" class="admin-input">
+                                </div>
+                                <div>
+                                    <label style="display:block; margin-bottom:5px; font-size:0.8rem; color:#a0a0ab;">Telemóvel</label>
+                                    <input type="tel" id="atleta-telefone" placeholder="9xxxxxxxx" class="admin-input">
+                                </div>
+                            </div>
+
+                            <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 15px;">
+                                <div>
+                                    <label style="display:block; margin-bottom:5px; font-size:0.8rem; color:#a0a0ab;">Tipo de Documento</label>
+                                    <select id="atleta-tipo-doc" class="admin-input">
+                                        <option value="Cartão Cidadão">Cartão Cidadão</option>
+                                        <option value="Passaporte">Passaporte</option>
+                                        <option value="BI">Bilhete de Identidade</option>
+                                        <option value="Outro">Outro</option>
+                                    </select>
+                                </div>
+                                <div>
+                                    <label style="display:block; margin-bottom:5px; font-size:0.8rem; color:#a0a0ab;">Nº Documento</label>
+                                    <input type="text" id="atleta-num-doc" placeholder="Número do Doc" class="admin-input">
+                                </div>
+                                <div>
+                                    <label style="display:block; margin-bottom:5px; font-size:0.8rem; color:#a0a0ab;">Validade do Doc</label>
+                                    <input type="date" id="atleta-validade-doc" class="admin-input">
+                                </div>
+                            </div>
+
+                            <div style="display: grid; grid-template-columns: 2fr 1fr 1fr; gap: 15px;">
+                                <div>
+                                    <label style="display:block; margin-bottom:5px; font-size:0.8rem; color:#a0a0ab;">Morada</label>
+                                    <input type="text" id="atleta-morada" placeholder="Rua, Número, Andar" class="admin-input">
+                                </div>
+                                <div>
+                                    <label style="display:block; margin-bottom:5px; font-size:0.8rem; color:#a0a0ab;">Código Postal</label>
+                                    <input type="text" id="atleta-cp" placeholder="4900-000" class="admin-input">
+                                </div>
+                                <div>
+                                    <label style="display:block; margin-bottom:5px; font-size:0.8rem; color:#a0a0ab;">Localidade</label>
+                                    <input type="text" id="atleta-localidade" placeholder="Valença" class="admin-input">
+                                </div>
+                            </div>
+
+                            <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 15px;">
+                                <div>
+                                    <label style="display:block; margin-bottom:5px; font-size:0.8rem; color:#a0a0ab;">Naturalidade (País)</label>
+                                    <input type="text" id="atleta-pais-nasc" placeholder="Ex: Portugal" class="admin-input">
+                                </div>
+                                <div>
+                                    <label style="display:block; margin-bottom:5px; font-size:0.8rem; color:#a0a0ab;">Nacionalidade</label>
+                                    <input type="text" id="atleta-nacionalidade" placeholder="Ex: Portuguesa" class="admin-input">
+                                </div>
+                                <div>
+                                    <label style="display:block; margin-bottom:5px; font-size:0.8rem; color:#a0a0ab;">Nº Licença FPB</label>
+                                    <input type="text" id="atleta-licenca" placeholder="Licença" class="admin-input">
+                                </div>
+                            </div>
+
+                            <!-- Secção de Encarregado de Educação (Menores) -->
+                            <div style="background: rgba(16, 185, 129, 0.08); padding: 12px 15px; border-radius: 8px; border: 1px dashed rgba(16, 185, 129, 0.3); margin-bottom: 15px;">
+                                <h4 style="margin-bottom: 10px; color: #10b981; font-size: 0.85rem; text-transform: uppercase;">👨‍👩‍👦 Encarregado de Educação (Menores)</h4>
+                                <div style="margin-bottom: 10px;">
+                                    <label style="display:block; margin-bottom:5px; font-size:0.75rem; color:#a0a0ab;">Nome do Encarregado</label>
+                                    <input type="text" id="atleta-encarregado-nome" placeholder="Nome Completo" class="admin-input" style="padding: 8px;">
+                                </div>
+                                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 10px;">
+                                    <div>
+                                        <label style="display:block; margin-bottom:5px; font-size:0.75rem; color:#a0a0ab;">Grau de Parentesco / Qualidade</label>
+                                        <select id="atleta-encarregado-qualidade" class="admin-input" style="padding: 8px;">
+                                            <option value="Pai">Pai</option>
+                                            <option value="Mãe">Mãe</option>
+                                            <option value="Tutor Legal">Tutor Legal</option>
+                                            <option value="Outro">Outro</option>
+                                        </select>
+                                    </div>
+                                    <div>
+                                        <label style="display:block; margin-bottom:5px; font-size:0.75rem; color:#a0a0ab;">Tipo de Documento</label>
+                                        <select id="atleta-encarregado-tipo-doc" class="admin-input" style="padding: 8px;">
+                                            <option value="Cartão Cidadão">Cartão de Cidadão</option>
+                                            <option value="Passaporte">Passaporte</option>
+                                            <option value="Outro">Outro</option>
+                                        </select>
+                                    </div>
+                                </div>
+                                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 10px;">
+                                    <div>
+                                        <label style="display:block; margin-bottom:5px; font-size:0.75rem; color:#a0a0ab;">Nº Documento de Identificação</label>
+                                        <input type="text" id="atleta-encarregado-num-doc" placeholder="Nº Documento" class="admin-input" style="padding: 8px;">
+                                    </div>
+                                    <div>
+                                        <label style="display:block; margin-bottom:5px; font-size:0.75rem; color:#a0a0ab;">Validade do Documento</label>
+                                        <input type="date" id="atleta-encarregado-validade-doc" class="admin-input" style="padding: 8px;">
+                                    </div>
+                                </div>
+                                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
+                                    <div>
+                                        <label style="display:block; margin-bottom:5px; font-size:0.75rem; color:#a0a0ab;">Email do Encarregado</label>
+                                        <input type="email" id="atleta-encarregado-email" placeholder="email@exemplo.com" class="admin-input" style="padding: 8px;">
+                                    </div>
+                                    <div>
+                                        <label style="display:block; margin-bottom:5px; font-size:0.75rem; color:#a0a0ab;">Telemóvel do Encarregado</label>
+                                        <input type="tel" id="atleta-encarregado-telefone" placeholder="9xxxxxxxx" class="admin-input" style="padding: 8px;">
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Secção de Equipamento Oficial -->
+                            <div style="background: rgba(126, 34, 206, 0.08); padding: 12px 15px; border-radius: 8px; border: 1px dashed rgba(126, 34, 206, 0.3); margin-bottom: 15px;">
+                                <h4 style="margin-bottom: 10px; color: var(--accent-primary); font-size: 0.85rem; text-transform: uppercase;">🎽 Equipamento Oficial BCV</h4>
+                                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 10px;">
+                                    <div>
+                                        <label style="display:block; margin-bottom:5px; font-size:0.75rem; color:#a0a0ab;">Tamanho Camisola</label>
+                                        <select id="atleta-equip-tam" class="admin-input" style="padding: 8px;">
+                                            <option value="">Sem seleção</option>
+                                            <option value="6">6</option>
+                                            <option value="8">8</option>
+                                            <option value="10">10</option>
+                                            <option value="12">12</option>
+                                            <option value="14">14</option>
+                                            <option value="XS">XS</option>
+                                            <option value="S">S</option>
+                                            <option value="M">M</option>
+                                            <option value="L">L</option>
+                                            <option value="XL">XL</option>
+                                            <option value="XXL">XXL</option>
+                                            <option value="3XL">3XL</option>
+                                        </select>
+                                    </div>
+                                    <div>
+                                        <label style="display:block; margin-bottom:5px; font-size:0.75rem; color:#a0a0ab;">Tamanho Calção</label>
+                                        <select id="atleta-equip-calcao" class="admin-input" style="padding: 8px;">
+                                            <option value="">Sem seleção</option>
+                                            <option value="6">6</option>
+                                            <option value="8">8</option>
+                                            <option value="10">10</option>
+                                            <option value="12">12</option>
+                                            <option value="14">14</option>
+                                            <option value="XS">XS</option>
+                                            <option value="S">S</option>
+                                            <option value="M">M</option>
+                                            <option value="L">L</option>
+                                            <option value="XL">XL</option>
+                                            <option value="XXL">XXL</option>
+                                            <option value="3XL">3XL</option>
+                                        </select>
+                                    </div>
+                                </div>
+                                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
+                                    <div>
+                                        <label style="display:block; margin-bottom:5px; font-size:0.75rem; color:#a0a0ab;">1ª Opção Nº</label>
+                                        <input type="text" id="atleta-equip-num1" placeholder="Ex: 7" class="admin-input" style="padding: 8px;">
+                                    </div>
+                                    <div>
+                                        <label style="display:block; margin-bottom:5px; font-size:0.75rem; color:#a0a0ab;">2ª Opção Nº</label>
+                                        <input type="text" id="atleta-equip-num2" placeholder="Ex: 14" class="admin-input" style="padding: 8px;">
+                                    </div>
+                                </div>
+                                <div style="margin-top: 8px;">
+                                    <label style="display:block; margin-bottom:5px; font-size:0.75rem; color:#a0a0ab;">Nome a estampar na camisola</label>
+                                    <input type="text" id="atleta-equip-nome" placeholder="Ex: SILVA" class="admin-input" style="padding: 8px;">
+                                </div>
+                            </div>
+
+                            <div>
+                                <label style="display:block; margin-bottom:5px; font-size:0.9rem; color:#a0a0ab;">Foto do Atleta (Opcional):</label>
+                                <input type="file" id="atleta-foto-file" accept="image/*" class="admin-input" style="padding: 10px;">
+                                <div id="atleta-foto-preview" style="margin-top: 10px; max-width: 100px; display: none;">
+                                    <img src="" id="atleta-foto-img" style="width: 100px; height: 100px; object-fit: cover; border-radius: 8px; border: 1px solid rgba(255,255,255,0.2);">
+                                    <button type="button" id="btn-remove-foto" class="btn-secondary" style="padding: 5px; font-size: 0.8rem; width: 100px; margin-top: 5px;">Remover Foto</button>
+                                    <input type="hidden" id="atleta-foto-url">
+                                </div>
+                            </div>
+                            
+                            <div style="display: flex; gap: 10px;">
+                                <button type="submit" id="btn-save-atleta" class="btn-primary" style="flex: 1;">Adicionar Atleta</button>
+                                <button type="button" id="btn-cancel-atleta" class="btn-secondary hidden" style="flex: 1;">Cancelar Edição</button>
+                            </div>
+                            
+                            <p id="atleta-msg" class="hidden"></p>
+                        </form>
+                    </div>
+                </div>
             </main>
         </div>
     </div>
 
     <!-- Scripts -->
     <script src="js/config.js"></script>
-    <script src="js/admin.js?v=20260827_4"></script>
+    <script src="js/admin.js?v=20260827_5"></script>
 </body>
 </html>
