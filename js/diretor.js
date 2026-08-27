@@ -58,15 +58,16 @@ document.addEventListener('DOMContentLoaded', async () => {
     const filtroPlantel = document.getElementById('filtro-plantel');
     const listaPlantelContainer = document.getElementById('lista-plantel-container');
 
-    // 1. Inicializar Supabase
-    if (typeof window.supabaseClient !== 'undefined') {
+    // 1. Inicializar Supabase a partir do config.js
+    if (typeof window.supabase !== 'undefined' && typeof SUPABASE_URL !== 'undefined' && typeof SUPABASE_ANON_KEY !== 'undefined') {
+        supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+    } else if (typeof window.supabaseClient !== 'undefined') {
         supabase = window.supabaseClient;
-    } else if (typeof window.supabase !== 'undefined' && window.SUPABASE_CONFIG) {
-        supabase = window.supabase.createClient(window.SUPABASE_CONFIG.url, window.SUPABASE_CONFIG.anonKey);
     }
 
     if (!supabase) {
-        console.error("Cliente Supabase não configurado.");
+        console.error("Cliente Supabase não configurado. Verifique js/config.js.");
+        showLogin();
         return;
     }
 
