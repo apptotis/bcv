@@ -52,7 +52,7 @@ body {
     background-color: var(--bg-page);
     color: var(--text-main);
     min-height: 100vh;
-    padding-bottom: 80px; /* Espaço para o bottom nav */
+    padding-bottom: 24px; /* Otimizado sem a barra inferior */
     user-select: none;
 }
 
@@ -115,73 +115,213 @@ body {
     gap: 4px;
 }
 
-.btn-logout {
+.btn-menu-hamburguer {
     background: #f1f5f9;
     border: 1px solid var(--border);
-    color: var(--text-muted);
-    width: 36px;
-    height: 36px;
+    color: var(--primary-dark);
+    width: 40px;
+    height: 40px;
     border-radius: var(--radius-md);
     display: flex;
     align-items: center;
     justify-content: center;
     cursor: pointer;
-    font-size: 1rem;
+    font-size: 1.25rem;
     transition: all 0.2s;
 }
 
-.btn-logout:active {
-    background: #e2e8f0;
+.btn-menu-hamburguer:active {
+    background: var(--primary-subtle);
     transform: scale(0.95);
 }
 
 /* ====================================================================
-   2. BOTTOM NAVIGATION BAR
+   2. MENU LATERAL (DRAWER MOBILE DO DIRETOR)
    ==================================================================== */
-.bottom-nav {
+.drawer-overlay {
     position: fixed;
-    bottom: 0;
+    top: 0;
     left: 0;
     right: 0;
-    height: 64px;
-    background: #ffffff;
-    border-top: 1px solid var(--border);
-    display: flex;
-    align-items: center;
-    justify-content: space-around;
-    z-index: 100;
-    box-shadow: 0 -4px 15px rgba(0,0,0,0.04);
+    bottom: 0;
+    background: rgba(15, 23, 42, 0.6);
+    backdrop-filter: blur(4px);
+    z-index: 300;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.25s ease;
 }
 
-.nav-item {
+.drawer-overlay.active {
+    opacity: 1;
+    pointer-events: auto;
+}
+
+.drawer-menu {
+    position: fixed;
+    top: 0;
+    right: 0;
+    bottom: 0;
+    width: 85%;
+    max-width: 320px;
+    background: #ffffff;
+    z-index: 301;
+    display: flex;
+    flex-direction: column;
+    box-shadow: -5px 0 25px rgba(0,0,0,0.15);
+    transform: translateX(100%);
+    transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.drawer-overlay.active .drawer-menu {
+    transform: translateX(0);
+}
+
+.drawer-header {
+    padding: 16px;
+    border-bottom: 1px solid var(--border);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    background: #f8fafc;
+}
+
+.drawer-profile {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.drawer-logo {
+    width: 36px;
+    height: 36px;
+    object-fit: contain;
+}
+
+.drawer-title {
+    font-size: 0.95rem;
+    font-weight: 800;
+    color: var(--primary-dark);
+    line-height: 1.1;
+}
+
+.drawer-subtitle {
+    font-size: 0.75rem;
+    color: var(--text-muted);
+}
+
+.btn-close-drawer {
+    background: #ffffff;
+    border: 1px solid var(--border);
+    color: var(--text-muted);
+    width: 32px;
+    height: 32px;
+    border-radius: var(--radius-full);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1rem;
+    cursor: pointer;
+}
+
+.drawer-body {
+    flex: 1;
+    padding: 14px;
+    overflow-y: auto;
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
+
+.drawer-section-title {
+    font-size: 0.7rem;
+    font-weight: 700;
+    color: var(--text-light);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    margin: 10px 0 4px 6px;
+}
+
+.drawer-item {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 12px 14px;
+    border-radius: var(--radius-md);
+    background: transparent;
+    border: 1px solid transparent;
+    color: var(--text-main);
+    text-decoration: none;
+    font-size: 0.9rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.15s ease;
+    text-align: left;
+    width: 100%;
+}
+
+.drawer-item .item-icon {
+    font-size: 1.25rem;
+    width: 24px;
+    text-align: center;
+}
+
+.drawer-item .item-text {
     flex: 1;
     display: flex;
     flex-direction: column;
+}
+
+.drawer-item .item-text .item-label {
+    font-size: 0.9rem;
+    font-weight: 700;
+}
+
+.drawer-item .item-text .item-desc {
+    font-size: 0.72rem;
+    color: var(--text-muted);
+    font-weight: 400;
+}
+
+.drawer-item:hover, .drawer-item:active {
+    background: #f1f5f9;
+}
+
+.drawer-item.active {
+    background: var(--primary-subtle);
+    color: var(--primary);
+    border-color: rgba(126, 34, 206, 0.2);
+}
+
+.drawer-item.active .item-desc {
+    color: var(--primary-light);
+}
+
+.drawer-footer {
+    padding: 14px;
+    border-top: 1px solid var(--border);
+    background: #f8fafc;
+}
+
+.btn-drawer-logout {
+    width: 100%;
+    display: flex;
     align-items: center;
     justify-content: center;
-    height: 100%;
-    color: var(--text-muted);
-    text-decoration: none;
+    gap: 8px;
+    padding: 10px;
+    background: #ffffff;
+    border: 1px solid rgba(239, 68, 68, 0.3);
+    color: #dc2626;
+    border-radius: var(--radius-md);
+    font-size: 0.85rem;
+    font-weight: 700;
     cursor: pointer;
-    font-size: 0.72rem;
-    font-weight: 600;
-    gap: 4px;
-    border: none;
-    background: transparent;
-    transition: color 0.15s ease;
+    transition: all 0.15s ease;
 }
 
-.nav-item .nav-icon {
-    font-size: 1.3rem;
-    transition: transform 0.15s ease;
-}
-
-.nav-item.active {
-    color: var(--primary);
-}
-
-.nav-item.active .nav-icon {
-    transform: scale(1.15);
+.btn-drawer-logout:active {
+    background: var(--danger-bg);
 }
 
 /* ====================================================================
@@ -387,7 +527,7 @@ body {
 /* Barra Flutuante de Gravação */
 .sticky-save-bar {
     position: fixed;
-    bottom: 74px;
+    bottom: 18px;
     left: 14px;
     right: 14px;
     max-width: 512px;

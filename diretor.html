@@ -17,7 +17,7 @@
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     
     <!-- CSS Diretor Mobile -->
-    <link rel="stylesheet" href="css/diretor.css?v=20260827_2">
+    <link rel="stylesheet" href="css/diretor.css?v=20260827_3">
 </head>
 <body>
 
@@ -62,11 +62,62 @@
                 </div>
             </div>
             <div class="header-actions">
-                <button type="button" id="btn-logout" class="btn-logout" title="Terminar Sessão">
-                    🚪
+                <button type="button" id="btn-open-drawer" class="btn-menu-hamburguer" title="Menu Principal">
+                    ☰
                 </button>
             </div>
         </header>
+
+        <!-- Menu Lateral (Drawer Mobile) -->
+        <div id="drawer-overlay" class="drawer-overlay">
+            <div class="drawer-menu">
+                <div class="drawer-header">
+                    <div class="drawer-profile">
+                        <img src="assets/emblema_png.png" alt="BCV" class="drawer-logo">
+                        <div>
+                            <div class="drawer-title" id="drawer-user-name">Diretor BCV</div>
+                            <div class="drawer-subtitle" id="drawer-escalao-name">Sub 14</div>
+                        </div>
+                    </div>
+                    <button type="button" id="btn-close-drawer" class="btn-close-drawer" title="Fechar Menu">✕</button>
+                </div>
+                
+                <div class="drawer-body">
+                    <div class="drawer-section-title">Funções Principais</div>
+                    
+                    <button type="button" class="drawer-item active" data-tab="tab-presencas">
+                        <span class="item-icon">📋</span>
+                        <div class="item-text">
+                            <span class="item-label">Presenças</span>
+                            <span class="item-desc">Chamada rápida de treinos e jogos</span>
+                        </div>
+                    </button>
+                    
+                    <button type="button" class="drawer-item" data-tab="tab-mensalidades">
+                        <span class="item-icon">💶</span>
+                        <div class="item-text">
+                            <span class="item-label">Mensalidades</span>
+                            <span class="item-desc">Registo de pagamentos e quotas</span>
+                        </div>
+                    </button>
+                    
+                    <button type="button" class="drawer-item" data-tab="tab-plantel">
+                        <span class="item-icon">👥</span>
+                        <div class="item-text">
+                            <span class="item-label">Plantel & SOS</span>
+                            <span class="item-desc">Contactos rápidos dos encarregados</span>
+                        </div>
+                    </button>
+                </div>
+                
+                <div class="drawer-footer">
+                    <button type="button" id="btn-drawer-logout" class="btn-drawer-logout">
+                        <span>🚪</span>
+                        <span>Terminar Sessão</span>
+                    </button>
+                </div>
+            </div>
+        </div>
 
         <!-- Container Principal -->
         <main class="app-container">
@@ -181,24 +232,6 @@
         </main>
 
         <!-- ======================================================= -->
-        <!-- BOTTOM NAVIGATION BAR                                   -->
-        <!-- ======================================================= -->
-        <nav class="bottom-nav">
-            <button type="button" class="nav-item active" data-tab="tab-presencas">
-                <span class="nav-icon">📋</span>
-                <span>Presenças</span>
-            </button>
-            <button type="button" class="nav-item" data-tab="tab-mensalidades">
-                <span class="nav-icon">💶</span>
-                <span>Mensalidades</span>
-            </button>
-            <button type="button" class="nav-item" data-tab="tab-plantel">
-                <span class="nav-icon">👥</span>
-                <span>Plantel / SOS</span>
-            </button>
-        </nav>
-
-        <!-- ======================================================= -->
         <!-- MODAL BOTTOM SHEET: REGISTAR RECEBIMENTO DE MENSALIDADE -->
         <!-- ======================================================= -->
         <div id="modal-pagamento-sheet" class="modal-overlay">
@@ -252,6 +285,6 @@
 
     <!-- Scripts -->
     <script src="js/config.js"></script>
-    <script src="js/diretor.js?v=20260827_2"></script>
+    <script src="js/diretor.js?v=20260827_3"></script>
 </body>
 </html>

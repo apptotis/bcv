@@ -24,8 +24,14 @@ document.addEventListener('DOMContentLoaded', async () => {
     const headerUserName = document.getElementById('header-user-name');
     const headerEscalaoBadge = document.getElementById('header-escalao-badge');
 
-    // Abas e Navegação
-    const navItems = document.querySelectorAll('.nav-item');
+    // Abas e Drawer
+    const btnOpenDrawer = document.getElementById('btn-open-drawer');
+    const btnCloseDrawer = document.getElementById('btn-close-drawer');
+    const drawerOverlay = document.getElementById('drawer-overlay');
+    const drawerItems = document.querySelectorAll('.drawer-item');
+    const btnDrawerLogout = document.getElementById('btn-drawer-logout');
+    const drawerUserName = document.getElementById('drawer-user-name');
+    const drawerEscalaoName = document.getElementById('drawer-escalao-name');
     const tabContents = document.querySelectorAll('.tab-content');
 
     // Presenças
@@ -123,11 +129,34 @@ document.addEventListener('DOMContentLoaded', async () => {
         if (headerUserName) {
             headerUserName.textContent = userProfile.nome || 'Diretor';
         }
+        if (drawerUserName) {
+            drawerUserName.textContent = userProfile.nome || 'Diretor';
+        }
         if (headerEscalaoBadge) {
             headerEscalaoBadge.innerHTML = userEscalao 
                 ? `🏀 ${userEscalao}` 
                 : `🏀 Geral (Todos)`;
         }
+        if (drawerEscalaoName) {
+            drawerEscalaoName.textContent = userEscalao ? `Escalão: ${userEscalao}` : 'Todos os Escalões';
+        }
+    }
+
+    // Controlo do Drawer Menu
+    function openDrawer() {
+        if (drawerOverlay) drawerOverlay.classList.add('active');
+    }
+
+    function closeDrawer() {
+        if (drawerOverlay) drawerOverlay.classList.remove('active');
+    }
+
+    if (btnOpenDrawer) btnOpenDrawer.addEventListener('click', openDrawer);
+    if (btnCloseDrawer) btnCloseDrawer.addEventListener('click', closeDrawer);
+    if (drawerOverlay) {
+        drawerOverlay.addEventListener('click', (e) => {
+            if (e.target === drawerOverlay) closeDrawer();
+        });
     }
 
     // Evento Login
@@ -160,26 +189,29 @@ document.addEventListener('DOMContentLoaded', async () => {
     }
 
     // Evento Logout
-    if (btnLogout) {
-        btnLogout.addEventListener('click', async () => {
+    if (btnDrawerLogout) {
+        btnDrawerLogout.addEventListener('click', async () => {
             if (confirm("Deseja terminar a sessão?")) {
+                closeDrawer();
                 await supabase.auth.signOut();
                 showLogin();
             }
         });
     }
 
-    // 3. Navegação entre Abas
-    navItems.forEach(item => {
+    // 3. Navegação entre Abas através do Drawer
+    drawerItems.forEach(item => {
         item.addEventListener('click', () => {
             const targetTabId = item.getAttribute('data-tab');
 
-            navItems.forEach(nav => nav.classList.remove('active'));
+            drawerItems.forEach(nav => nav.classList.remove('active'));
             tabContents.forEach(tab => tab.classList.remove('active'));
 
             item.classList.add('active');
             const targetTab = document.getElementById(targetTabId);
             if (targetTab) targetTab.classList.add('active');
+
+            closeDrawer();
 
             // Recarregar dados da respetiva aba
             if (targetTabId === 'tab-presencas') {
