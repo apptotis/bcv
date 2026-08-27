@@ -623,6 +623,75 @@
             color: #991b1b;
             border: 1px solid #fecaca;
         }
+
+        /* Banner de Atleta Já Existente / Prevenção de Duplicados */
+        .duplicate-match-box {
+            background: linear-gradient(135deg, #fffbeb, #fef3c7);
+            border: 2px solid #f59e0b;
+            border-radius: 12px;
+            padding: 14px 16px;
+            margin-bottom: 18px;
+            display: flex;
+            gap: 14px;
+            align-items: flex-start;
+            box-shadow: 0 4px 12px rgba(245, 158, 11, 0.15);
+            animation: fadeIn 0.3s ease;
+        }
+        .duplicate-match-icon {
+            font-size: 1.6rem;
+            line-height: 1;
+            flex-shrink: 0;
+            margin-top: 2px;
+        }
+        .duplicate-match-content {
+            flex: 1;
+        }
+        .duplicate-match-title {
+            font-weight: 800;
+            color: #92400e;
+            font-size: 0.95rem;
+            margin-bottom: 4px;
+        }
+        .duplicate-match-desc {
+            font-size: 0.84rem;
+            color: #78350f;
+            line-height: 1.45;
+            margin-bottom: 8px;
+        }
+        .duplicate-match-actions {
+            display: flex;
+            gap: 8px;
+            flex-wrap: wrap;
+        }
+        .btn-duplicate-assoc {
+            background: #d97706;
+            color: #ffffff;
+            border: none;
+            border-radius: 8px;
+            padding: 8px 14px;
+            font-size: 0.84rem;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            box-shadow: 0 2px 6px rgba(217, 119, 6, 0.3);
+        }
+        .btn-duplicate-assoc:hover {
+            background: #b45309;
+            transform: translateY(-1px);
+        }
+        .btn-duplicate-dismiss {
+            background: transparent;
+            color: #92400e;
+            border: 1px solid #d97706;
+            border-radius: 8px;
+            padding: 8px 12px;
+            font-size: 0.84rem;
+            font-weight: 600;
+            cursor: pointer;
+        }
+        .btn-duplicate-dismiss:hover {
+            background: rgba(217, 119, 6, 0.1);
+        }
     </style>
 </head>
 <body class="inscricao-body">
@@ -773,6 +842,9 @@
                     <span class="step-title-icon">2</span>
                     Identificação do(a) Atleta
                 </div>
+
+                <!-- Contentor dinâmico para aviso de atleta já existente -->
+                <div id="duplicate-match-container"></div>
 
                 <div class="form-group">
                     <label>Nome Completo (conforme documento) <span class="req">*</span></label>
@@ -1305,12 +1377,8 @@
                     }, 300);
                 });
 
-                document.addEventListener('click', (e) => {
-                    if (!e.target.closest('#box-pesquisa-atleta')) {
-                        searchResultsList.style.display = 'none';
-                    }
-                });
-            }
+            // Inicializar verificação preventiva de duplicados no Passo 2
+            configVerificacaoDuplicadosPasso2();
         });
 
         // Função de Cálculo do Escalão FPB (Época 2026/2027)
@@ -1485,6 +1553,121 @@
                 msgBox.textContent = 'Erro ao pesquisar. Pode preencher manualmente.';
             }
         }
+
+        // Configuração de Deteção Preventiva de Atletas Já Existentes no Passo 2
+        let debounceCheckDuplicate = null;
+
+        function configVerificacaoDuplicadosPasso2() {
+            const form = document.getElementById('form-inscricao');
+            if (!form) return;
+
+            const camposAlvo = ['nome', 'nif', 'num_doc_id', 'licenca', 'data_nascimento'];
+            camposAlvo.forEach(campoNome => {
+                const input = form.elements[campoNome];
+                if (input) {
+                    input.addEventListener('change', () => dispararVerificacaoDuplicado());
+                    input.addEventListener('blur', () => dispararVerificacaoDuplicado());
+                }
+            });
+        }
+
+        function dispararVerificacaoDuplicado() {
+            if (selectedAtletaId) return; // Já está associado a um atleta
+            clearTimeout(debounceCheckDuplicate);
+            debounceCheckDuplicate = setTimeout(async () => {
+                const form = document.getElementById('form-inscricao');
+                if (!form || selectedAtletaId) return;
+
+                const nome = form.elements['nome'] ? form.elements['nome'].value.trim() : '';
+                const nif = form.elements['nif'] ? form.elements['nif'].value.trim() : '';
+                const numDoc = form.elements['num_doc_id'] ? form.elements['num_doc_id'].value.trim() : '';
+                const licenca = form.elements['licenca'] ? form.elements['licenca'].value.trim() : '';
+                const dataNasc = form.elements['data_nascimento'] ? form.elements['data_nascimento'].value.trim() : '';
+
+                const hasNif = nif.length >= 9;
+                const hasLicenca = licenca.length >= 3;
+                const hasDoc = numDoc.length >= 5;
+                const hasNomeData = nome.length >= 6 && dataNasc;
+
+                if (!hasNif && !hasLicenca && !hasDoc && !hasNomeData) return;
+
+                try {
+                    const client = getSupabaseClient();
+                    if (!client) return;
+
+                    let atletaAchado = null;
+
+                    // 1. Pesquisa por NIF
+                    if (hasNif) {
+                        const { data } = await client.from('atletasbcv').select('*').eq('nif', nif).limit(1);
+                        if (data && data.length > 0) atletaAchado = data[0];
+                    }
+                    // 2. Pesquisa por Licença FPB
+                    if (!atletaAchado && hasLicenca) {
+                        const { data } = await client.from('atletasbcv').select('*').eq('licenca', licenca).limit(1);
+                        if (data && data.length > 0) atletaAchado = data[0];
+                    }
+                    // 3. Pesquisa por Nº Documento
+                    if (!atletaAchado && hasDoc) {
+                        const { data } = await client.from('atletasbcv').select('*').eq('num_doc_id', numDoc).limit(1);
+                        if (data && data.length > 0) atletaAchado = data[0];
+                    }
+                    // 4. Pesquisa por Nome e Data Nascimento
+                    if (!atletaAchado && hasNomeData) {
+                        const { data } = await client.from('atletasbcv').select('*').ilike('nome', nome).eq('data_nascimento', dataNasc).limit(1);
+                        if (data && data.length > 0) atletaAchado = data[0];
+                    }
+
+                    if (atletaAchado && (!selectedAtletaId || selectedAtletaId !== atletaAchado.id)) {
+                        exibirBannerAtletaExistente(atletaAchado);
+                    }
+                } catch (err) {
+                    console.warn("Verificação preventiva:", err);
+                }
+            }, 400);
+        }
+
+        function exibirBannerAtletaExistente(atleta) {
+            const container = document.getElementById('duplicate-match-container');
+            if (!container) return;
+
+            window.atletaDetectadoTemp = atleta;
+
+            container.innerHTML = `
+                <div class="duplicate-match-box">
+                    <div class="duplicate-match-icon">⚡</div>
+                    <div class="duplicate-match-content">
+                        <div class="duplicate-match-title">Atleta já registado no BCV detetado!</div>
+                        <div class="duplicate-match-desc">
+                            Identificámos a ficha de <strong>${atleta.nome}</strong> (Licença FPB: <strong>${atleta.licenca || 'Sem nº'}</strong> • Nasc: ${atleta.data_nascimento || 'N/D'}). Deseja associar esta inscrição para renovar a ficha existente e evitar registos duplicados?
+                        </div>
+                        <div class="duplicate-match-actions">
+                            <button type="button" class="btn-duplicate-assoc" onclick="confirmarAssociacaoAtletaDetectado()">Sim, Associar e Renovar Ficha ✓</button>
+                            <button type="button" class="btn-duplicate-dismiss" onclick="dispensarBannerAtleta()">Dispensar (Novo Atleta)</button>
+                        </div>
+                    </div>
+                </div>
+            `;
+        }
+
+        window.confirmarAssociacaoAtletaDetectado = function() {
+            if (window.atletaDetectadoTemp) {
+                preencherDadosAtleta(window.atletaDetectadoTemp);
+                const radioReval = document.getElementById('card-revalidacao');
+                const radioPrimeira = document.getElementById('card-primeira');
+                if (radioReval && radioPrimeira) {
+                    radioReval.classList.add('selected');
+                    radioPrimeira.classList.remove('selected');
+                    radioReval.querySelector('input').checked = true;
+                }
+                dispensarBannerAtleta();
+            }
+        };
+
+        window.dispensarBannerAtleta = function() {
+            const container = document.getElementById('duplicate-match-container');
+            if (container) container.innerHTML = '';
+        };
 
         function startWizard() {
             currentStep = 1;
@@ -1695,6 +1878,53 @@
                 const client = getSupabaseClient();
                 if (!client) {
                     throw new Error("Não foi possível estabelecer ligação ao Supabase. Verifique a sua ligação.");
+                }
+
+                // =========================================================================
+                // INTERCEÇÃO AUTOMÁTICA PRÉ-SUBMISSÃO: PREVENÇÃO DE DUPLICADOS
+                // Se o utilizador não selecionou revalidação, mas o atleta já existe
+                // na base de dados por NIF, Licença, Nº Documento ou Nome + Data Nasc:
+                // =========================================================================
+                if (!selectedAtletaId) {
+                    try {
+                        let existingAthlete = null;
+
+                        // 1. Por NIF
+                        if (payload.nif && payload.nif.trim().length >= 9) {
+                            const { data } = await client.from('atletasbcv').select('id, nome, licenca').eq('nif', payload.nif.trim()).limit(1);
+                            if (data && data.length > 0) existingAthlete = data[0];
+                        }
+                        // 2. Por Licença FPB
+                        if (!existingAthlete && payload.licenca && payload.licenca.trim().length >= 3) {
+                            const { data } = await client.from('atletasbcv').select('id, nome, licenca').eq('licenca', payload.licenca.trim()).limit(1);
+                            if (data && data.length > 0) existingAthlete = data[0];
+                        }
+                        // 3. Por Nº Documento de Identificação
+                        if (!existingAthlete && payload.num_doc_id && payload.num_doc_id.trim().length >= 5) {
+                            const { data } = await client.from('atletasbcv').select('id, nome, licenca').eq('num_doc_id', payload.num_doc_id.trim()).limit(1);
+                            if (data && data.length > 0) existingAthlete = data[0];
+                        }
+                        // 4. Por Nome e Data de Nascimento idênticos
+                        if (!existingAthlete && payload.nome && payload.data_nascimento) {
+                            const { data } = await client.from('atletasbcv').select('id, nome, licenca')
+                                .ilike('nome', payload.nome.trim())
+                                .eq('data_nascimento', payload.data_nascimento)
+                                .limit(1);
+                            if (data && data.length > 0) existingAthlete = data[0];
+                        }
+
+                        if (existingAthlete) {
+                            console.log("⚡ Atleta duplicado intercetado automaticamente. Atualizando ID:", existingAthlete.id);
+                            selectedAtletaId = existingAthlete.id;
+                            // Preserva a licença existente se o formulário não preencheu
+                            if (!payload.licenca && existingAthlete.licenca) {
+                                payload.licenca = existingAthlete.licenca;
+                            }
+                            payload.tipo_inscricao = 'Revalidação';
+                        }
+                    } catch (checkErr) {
+                        console.warn("Aviso na verificação preventiva pré-insert:", checkErr);
+                    }
                 }
 
                 let dbError = null;
