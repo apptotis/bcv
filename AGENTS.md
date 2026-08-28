@@ -82,4 +82,5 @@
 - [2026-08-27] Gemini: Prevenção proativa e inteligente de atletas duplicados no formulário de inscrição (inscricao.html) com alerta em tempo real no Passo 2 e interceção automática pré-insert na submissão, além do script SQL resolver_duplicados_atletas.sql para auditoria e fusão automática no Supabase.
 - [2026-08-27] Gemini: Atualização da Gestão de Equipamentos no Admin para apresentar por defeito apenas os atletas inscritos na época atual (2026/2027), mantendo a opção de consulta de outras épocas no filtro.
 - [2026-08-28] Gemini: Correção de erro de sintaxe JavaScript em inscricao.html (chaveta de fecho no autocomplete) que bloqueava a execução do script e impedia o botão 'Iniciar Inscrição' de avançar de passo.
+- [2026-08-28] Gemini: Correção da exportação em PDF do Exame Médico Desportivo (exportAtletaEMDPDF em js/admin.js) para resolver corretamente o atleta a partir do seu ID, preenchendo todos os campos de identificação (nome, CC, data de nascimento, morada, contacto, clube, escalão) e parseando as respostas EMD.
 

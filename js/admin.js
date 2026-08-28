@@ -1652,9 +1652,20 @@ document.addEventListener('DOMContentLoaded', async () => {
     };
 
     // Função para exportar PDF Oficial do Exame Médico Desportivo (IPDJ) usando pdf-lib
-    window.exportAtletaEMDPDF = async function(atletaStr) {
+    window.exportAtletaEMDPDF = async function(atletaArg) {
         try {
-            const atleta = typeof atletaStr === 'string' ? JSON.parse(atletaStr) : atletaStr;
+            let atleta = null;
+            if (typeof atletaArg === 'object' && atletaArg !== null) {
+                atleta = atletaArg;
+            } else if (typeof atletaArg === 'number' || typeof atletaArg === 'string') {
+                atleta = (typeof currentAtletas !== 'undefined' ? currentAtletas.find(a => String(a.id) === String(atletaArg)) : null)
+                      || (typeof currentEquipamentos !== 'undefined' ? currentEquipamentos.find(a => String(a.id) === String(atletaArg)) : null)
+                      || (typeof filteredEquipamentos !== 'undefined' ? filteredEquipamentos.find(a => String(a.id) === String(atletaArg)) : null);
+                if (!atleta) {
+                    try { atleta = JSON.parse(atletaArg); } catch(e) {}
+                }
+            }
+            if (!atleta) throw new Error('Atleta não encontrado.');
             
             if (!window.PDFLib) {
                 await new Promise((resolve, reject) => {
@@ -1710,8 +1721,8 @@ document.addEventListener('DOMContentLoaded', async () => {
             safeSetText('nacionalidade', atleta.nacionalidade || 'Portuguesa');
             safeSetText('morada', atleta.morada || '');
             safeSetText('cpostal', atleta.codigo_postal || '');
-            safeSetText('localidade', atleta.localidade || '');
-            safeSetText('telemovel', atleta.telefone || '');
+            safeSetText('localidade', atleta.localidade || 'Valença');
+            safeSetText('telemovel', atleta.telefone || atleta.encarregado_telefone || '');
             safeSetText('clube', 'BASKET CLUBE DE VALENÇA');
             safeSetText('modalidade', 'BASQUETEBOL');
             safeSetText('escalao', atleta.escalao || '');
@@ -1737,7 +1748,13 @@ document.addEventListener('DOMContentLoaded', async () => {
             safeSetText('data', dataHojeFormatada);
 
             // 2. Mapeamento das 19 Perguntas EMD
-            const emdResp = atleta.emd_respostas || {};
+            let emdResp = atleta.emd_respostas || {};
+            if (typeof emdResp === 'string') {
+                try { emdResp = JSON.parse(emdResp); } catch(e) { emdResp = {}; }
+            }
+            if (!emdResp || typeof emdResp !== 'object') {
+                emdResp = {};
+            }
             const anoFieldNames = {
                 1: 'ANO1Esteve internado no Hospital ou Clínica',
                 2: 'ANO2Foi operado',
