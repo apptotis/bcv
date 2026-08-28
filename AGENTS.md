@@ -81,4 +81,5 @@
 - [2026-08-27] Gemini: Implementação completa dos novos módulos no Admin: Gestão Desportiva (KPIs de assiduidade, presenças/faltas/justificados/lesionados, filtros múltiplos e exportação CSV/PDF) e Gestão Financeira (Tabela de preços por escalão, registo global de pagamentos com rastreio de recetor, modal de lançamento no admin e exportação CSV/PDF).
 - [2026-08-27] Gemini: Prevenção proativa e inteligente de atletas duplicados no formulário de inscrição (inscricao.html) com alerta em tempo real no Passo 2 e interceção automática pré-insert na submissão, além do script SQL resolver_duplicados_atletas.sql para auditoria e fusão automática no Supabase.
 - [2026-08-27] Gemini: Atualização da Gestão de Equipamentos no Admin para apresentar por defeito apenas os atletas inscritos na época atual (2026/2027), mantendo a opção de consulta de outras épocas no filtro.
+- [2026-08-28] Gemini: Correção de erro de sintaxe JavaScript em inscricao.html (chaveta de fecho no autocomplete) que bloqueava a execução do script e impedia o botão 'Iniciar Inscrição' de avançar de passo.
 
