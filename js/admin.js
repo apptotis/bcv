@@ -1633,6 +1633,40 @@ document.addEventListener('DOMContentLoaded', async () => {
             safeSetText('ass_mes', String(hoje.getMonth() + 1).padStart(2, '0'));
             safeSetText('ass_ano', String(hoje.getFullYear()));
 
+            // 11. Carimbo Oficial e Assinatura do Clube (Diretor e Carimbo)
+            try {
+                let carimboBytes = null;
+                let isPng = true;
+                const carimboResp = await fetch('assets/carimbo_assinatura_bcv.png');
+                if (carimboResp.ok) {
+                    carimboBytes = await carimboResp.arrayBuffer();
+                } else {
+                    const fallbackResp = await fetch('assets/assinatura_bcv.jpeg');
+                    if (fallbackResp.ok) {
+                        carimboBytes = await fallbackResp.arrayBuffer();
+                        isPng = false;
+                    }
+                }
+
+                if (carimboBytes) {
+                    const carimboImg = isPng ? await pdfDoc.embedPng(carimboBytes) : await pdfDoc.embedJpg(carimboBytes);
+                    const pages = pdfDoc.getPages();
+                    if (pages.length > 0) {
+                        const firstPage = pages[0];
+                        const imgW = 165;
+                        const imgH = imgW * (carimboImg.height / carimboImg.width);
+                        firstPage.drawImage(carimboImg, {
+                            x: 365,
+                            y: 173,
+                            width: imgW,
+                            height: imgH
+                        });
+                    }
+                }
+            } catch (errCarimbo) {
+                console.warn('Aviso: Não foi possível anexar carimbo/assinatura do clube no PDF:', errCarimbo);
+            }
+
             // Gerar bytes e efetuar download
             const pdfBytes = await pdfDoc.save();
             const blob = new Blob([pdfBytes], { type: 'application/pdf' });
