@@ -1,0 +1,202 @@
+<!DOCTYPE html>
+<html lang="pt">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <title>BCV Treinador | Gestão Desportiva & Presenças</title>
+    
+    <!-- Favicon -->
+    <link rel="icon" type="image/png" href="assets/emblema_png.png">
+    
+    <!-- Google Fonts: Inter -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    
+    <!-- Supabase JS -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    
+    <!-- CSS Partilhado Mobile BCV -->
+    <link rel="stylesheet" href="css/diretor.css?v=20260901_1">
+</head>
+<body>
+
+    <!-- ======================================================= -->
+    <!-- ECRÃ DE LOGIN (Visível apenas se deslogado)             -->
+    <!-- ======================================================= -->
+    <div id="login-container" class="app-container">
+        <div class="login-screen">
+            <img src="assets/emblema_png.png" alt="Emblema BCV" class="login-logo">
+            <h2>Portal do Treinador</h2>
+            <p>Acesso exclusivo para registo de presenças e consulta do plantel desportivo</p>
+            
+            <form id="form-login-treinador" style="display: flex; flex-direction: column; gap: 12px; text-align: left;">
+                <div>
+                    <label class="control-label">Email de Acesso</label>
+                    <input type="email" id="login-email" class="mobile-input" placeholder="treinador@bcv.pt" required>
+                </div>
+                <div>
+                    <label class="control-label">Palavra-passe</label>
+                    <input type="password" id="login-password" class="mobile-input" placeholder="••••••••" required>
+                </div>
+                <div id="login-error-msg" style="color: #ef4444; font-size: 0.85rem; display: none; font-weight: 600;"></div>
+                <button type="submit" id="btn-login" class="btn-save-floating" style="position: static; margin-top: 10px;">
+                    Entrar no Portal
+                </button>
+            </form>
+        </div>
+    </div>
+
+    <!-- ======================================================= -->
+    <!-- APLICAÇÃO PRINCIPAL DO TREINADOR (Pós-Login)            -->
+    <!-- ======================================================= -->
+    <div id="app-main" style="display: none;">
+        
+        <!-- Cabeçalho Fixo -->
+        <header class="app-header">
+            <div class="header-brand">
+                <img src="assets/emblema_png.png" alt="BCV" class="header-logo">
+                <div class="header-info">
+                    <h1 id="header-user-name">Treinador BCV</h1>
+                    <div class="badge-escalao" id="header-escalao-badge">🏀 Carregando...</div>
+                </div>
+            </div>
+            <div class="header-actions">
+                <button type="button" id="btn-open-drawer" class="btn-menu-hamburguer" title="Menu Principal">
+                    ☰
+                </button>
+            </div>
+        </header>
+
+        <!-- Menu Lateral (Drawer Mobile) -->
+        <div id="drawer-overlay" class="drawer-overlay">
+            <div class="drawer-menu">
+                <div class="drawer-header">
+                    <div class="drawer-profile">
+                        <img src="assets/emblema_png.png" alt="BCV" class="drawer-logo">
+                        <div>
+                            <div class="drawer-title" id="drawer-user-name">Treinador BCV</div>
+                            <div class="drawer-subtitle" id="drawer-escalao-name">Equipas Atribuídas</div>
+                        </div>
+                    </div>
+                    <button type="button" id="btn-close-drawer" class="btn-close-drawer" title="Fechar Menu">✕</button>
+                </div>
+                
+                <div class="drawer-body">
+                    <!-- Secção de Troca de Equipa (se tiver múltiplos escalões) -->
+                    <div id="drawer-section-escaloes" style="display: none;">
+                        <div class="drawer-section-title">Trocar de Equipa</div>
+                        <div id="drawer-escaloes-list" style="display: flex; flex-direction: column; gap: 6px; margin-bottom: 12px;">
+                            <!-- Botões de escalão gerados dinamicamente -->
+                        </div>
+                    </div>
+
+                    <div class="drawer-section-title">Funções do Treinador</div>
+                    
+                    <button type="button" class="drawer-item active" data-tab="tab-presencas">
+                        <span class="item-icon">📋</span>
+                        <div class="item-text">
+                            <span class="item-label">Presenças</span>
+                            <span class="item-desc">Chamada rápida de treinos e jogos</span>
+                        </div>
+                    </button>
+                    
+                    <button type="button" class="drawer-item" data-tab="tab-plantel">
+                        <span class="item-icon">👥</span>
+                        <div class="item-text">
+                            <span class="item-label">Plantel & SOS</span>
+                            <span class="item-desc">Contactos rápidos dos encarregados</span>
+                        </div>
+                    </button>
+                </div>
+                
+                <div class="drawer-footer">
+                    <button type="button" id="btn-drawer-logout" class="btn-drawer-logout">
+                        <span>🚪</span>
+                        <span>Terminar Sessão</span>
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Container Principal -->
+        <main class="app-container">
+
+            <!-- Seletor de Equipa Ativa no Topo (Visível quando o treinador tem 2 ou mais escalões) -->
+            <div id="multi-escalao-selector-bar" class="multi-escalao-bar" style="display: none;">
+                <span class="multi-escalao-label">🏀 Equipa Ativa no Momento:</span>
+                <div id="multi-escalao-pills" class="escalao-pills-container">
+                    <!-- Pills geradas dinamicamente -->
+                </div>
+            </div>
+
+            <!-- ======================================================= -->
+            <!-- ABA 1: PRESENÇAS (CHAMADA RÁPIDA)                       -->
+            <!-- ======================================================= -->
+            <section id="tab-presencas" class="tab-content active">
+                
+                <!-- Controlo de Chamada -->
+                <div class="control-card">
+                    <div class="control-row" style="margin-bottom: 10px;">
+                        <div class="control-group">
+                            <label class="control-label">Data do Evento</label>
+                            <input type="date" id="presencas-data" class="mobile-input">
+                        </div>
+                        <div class="control-group">
+                            <label class="control-label">Tipo de Evento</label>
+                            <select id="presencas-tipo" class="mobile-select">
+                                <option value="Treino">Treino</option>
+                                <option value="Jogo">Jogo</option>
+                                <option value="Torneio">Torneio</option>
+                                <option value="Estágio">Estágio</option>
+                            </select>
+                        </div>
+                    </div>
+                    
+                    <div style="display: flex; gap: 8px;">
+                        <button type="button" id="btn-marcar-todos-presentes" class="btn-call" style="flex: 1; background: var(--success-bg); color: #047857; border-color: rgba(16,185,129,0.3);">
+                            ✅ Marcar Todos Presentes
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Lista de Atletas para Chamada -->
+                <div id="lista-presencas-container">
+                    <div style="text-align: center; padding: 20px; color: var(--text-muted);">
+                        A carregar atletas do escalão...
+                    </div>
+                </div>
+
+                <!-- Barra Flutuante de Gravação -->
+                <div class="sticky-save-bar">
+                    <button type="button" id="btn-guardar-presencas" class="btn-save-floating">
+                        💾 Guardar Presenças
+                    </button>
+                </div>
+            </section>
+
+            <!-- ======================================================= -->
+            <!-- ABA 2: PLANTEL & SOS (CONTACTOS DE EMERGÊNCIA)          -->
+            <!-- ======================================================= -->
+            <section id="tab-plantel" class="tab-content">
+                <div class="control-card">
+                    <input type="text" id="filtro-plantel" class="mobile-input" placeholder="🔍 Pesquisar atleta no plantel...">
+                </div>
+
+                <!-- Lista de Contactos de Emergência -->
+                <div id="lista-plantel-container">
+                    <div style="text-align: center; padding: 20px; color: var(--text-muted);">
+                        A carregar plantel...
+                    </div>
+                </div>
+            </section>
+
+        </main>
+
+    </div>
+
+    <!-- Scripts -->
+    <script src="js/config.js"></script>
+    <script src="js/treinador.js?v=20260901_1"></script>
+</body>
+</html>

@@ -73,9 +73,13 @@ document.addEventListener('DOMContentLoaded', async () => {
             const isAllowed = allowedRoles.includes(role) || userPerms.length > 0 || role === 'admin';
 
             if (isAllowed) {
-                // Redirecionamento automático para diretores de campo / seccionistas
+                // Redirecionamento automático para diretores de campo / seccionistas e treinadores
                 if (role === 'diretor' || role === 'seccionista') {
                     window.location.href = 'diretor.html';
+                    return;
+                }
+                if (role === 'treinador') {
+                    window.location.href = 'treinador.html';
                     return;
                 }
 
@@ -420,6 +424,15 @@ document.addEventListener('DOMContentLoaded', async () => {
                             `</div>`;
                     } else {
                         permissoesBadgeHtml = `<span style="background: rgba(16, 185, 129, 0.08); color: #047857; padding: 3px 8px; border-radius: 4px; font-size: 0.8rem;">Todas as Equipas</span>`;
+                    }
+                } else if (isTreinador) {
+                    const escList = (user.escalao_afeto || '').split(',').map(s => s.trim()).filter(Boolean);
+                    if (escList.length > 0) {
+                        permissoesBadgeHtml = `<div style="display: flex; flex-wrap: wrap; gap: 4px;">` +
+                            escList.map(esc => `<span style="background: rgba(59, 130, 246, 0.12); color: #1d4ed8; font-weight: 700; padding: 2px 7px; border-radius: 4px; font-size: 0.75rem; border: 1px solid rgba(59, 130, 246, 0.3);">🏀 ${esc}</span>`).join('') +
+                            `</div>`;
+                    } else {
+                        permissoesBadgeHtml = `<span style="background: rgba(59, 130, 246, 0.08); color: #1d4ed8; padding: 3px 8px; border-radius: 4px; font-size: 0.8rem;">Todas as Equipas</span>`;
                     }
                 } else {
                     const userPerms = Array.isArray(user.permissoes) ? user.permissoes : [];
