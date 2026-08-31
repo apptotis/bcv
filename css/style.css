@@ -769,6 +769,204 @@ img {
 }
 
 /* ==========================================================================
+   Contactos Cards & Mapa Interativo
+   ========================================================================== */
+.contactos-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 20px;
+    margin-top: 15px;
+}
+
+@media (max-width: 768px) {
+    .contactos-grid {
+        grid-template-columns: 1fr;
+    }
+}
+
+.contact-card {
+    background: #ffffff;
+    border: 1px solid var(--border-color);
+    border-radius: var(--border-radius-md);
+    padding: 24px;
+    box-shadow: var(--shadow-sm);
+    transition: transform 0.25s ease, box-shadow 0.25s ease, border-color 0.25s ease;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    position: relative;
+    overflow: hidden;
+}
+
+.contact-card:hover {
+    transform: translateY(-4px);
+    box-shadow: var(--shadow-md);
+    border-color: var(--accent-primary);
+}
+
+.contact-card-header {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    margin-bottom: 16px;
+}
+
+.contact-card-icon {
+    width: 44px;
+    height: 44px;
+    border-radius: 12px;
+    background: rgba(126, 34, 206, 0.08);
+    color: var(--accent-primary);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.3rem;
+    flex-shrink: 0;
+}
+
+.contact-card-title {
+    font-size: 1.15rem;
+    font-weight: 700;
+    color: var(--text-primary);
+    margin: 0;
+}
+
+.contact-card-subtitle {
+    font-size: 0.82rem;
+    color: var(--text-secondary);
+    margin-top: 2px;
+}
+
+/* Card Especial de Localização com Fundo de Mapa */
+.contact-card-map {
+    grid-column: 1 / -1;
+    background: linear-gradient(135deg, rgba(255, 255, 255, 0.93) 0%, rgba(255, 255, 255, 0.88) 55%, rgba(255, 255, 255, 0.65) 100%), url('../assets/mapa_valenca.jpg');
+    background-size: cover;
+    background-position: center;
+    border: 1px solid rgba(126, 34, 206, 0.25);
+    min-height: 200px;
+}
+
+.contact-card-map:hover {
+    border-color: var(--accent-primary);
+    box-shadow: 0 10px 25px -5px rgba(126, 34, 206, 0.15);
+}
+
+.map-card-content {
+    position: relative;
+    z-index: 2;
+    max-width: 600px;
+}
+
+.btn-map-interactive {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    background: var(--accent-primary);
+    color: #ffffff !important;
+    padding: 10px 20px;
+    border-radius: 8px;
+    font-weight: 600;
+    font-size: 0.9rem;
+    text-decoration: none;
+    transition: background 0.2s ease, transform 0.2s ease, box-shadow 0.2s ease;
+    margin-top: 14px;
+    box-shadow: 0 4px 12px rgba(126, 34, 206, 0.25);
+    width: fit-content;
+}
+
+.btn-map-interactive:hover {
+    background: var(--accent-hover);
+    transform: translateY(-2px);
+    box-shadow: 0 6px 18px rgba(126, 34, 206, 0.35);
+}
+
+/* Linhas de Contacto Interativas */
+.contact-item-row {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 10px 14px;
+    background: #f8fafc;
+    border-radius: 8px;
+    margin-bottom: 10px;
+    text-decoration: none;
+    color: var(--text-primary);
+    border: 1px solid var(--border-color);
+    transition: all 0.2s ease;
+}
+
+.contact-item-row:last-child {
+    margin-bottom: 0;
+}
+
+.contact-item-row:hover {
+    background: #ffffff;
+    border-color: var(--accent-primary);
+    transform: translateX(4px);
+    color: var(--accent-primary);
+}
+
+.contact-item-row .item-icon {
+    font-size: 1.2rem;
+    color: var(--accent-primary);
+}
+
+.contact-item-row .item-text {
+    display: flex;
+    flex-direction: column;
+}
+
+.contact-item-row .item-label {
+    font-size: 0.75rem;
+    color: var(--text-secondary);
+    text-transform: uppercase;
+    font-weight: 600;
+    letter-spacing: 0.5px;
+}
+
+.contact-item-row .item-value {
+    font-size: 0.95rem;
+    font-weight: 600;
+    color: var(--text-primary);
+}
+
+/* Botões de Redes Sociais no Card */
+.social-buttons-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(105px, 1fr));
+    gap: 10px;
+    margin-top: 10px;
+}
+
+.social-pill-btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    padding: 10px 14px;
+    border-radius: 8px;
+    color: #ffffff !important;
+    font-weight: 600;
+    font-size: 0.85rem;
+    text-decoration: none;
+    transition: transform 0.2s ease, filter 0.2s ease, box-shadow 0.2s ease;
+}
+
+.social-pill-btn:hover {
+    transform: translateY(-2px);
+    filter: brightness(1.1);
+    box-shadow: var(--shadow-sm);
+}
+
+.social-pill-btn.fb { background: #1877f2; }
+.social-pill-btn.ig { background: linear-gradient(45deg, #f09433 0%, #e6683c 25%, #dc2743 50%, #cc2366 75%, #bc1888 100%); }
+.social-pill-btn.yt { background: #ff0000; }
+.social-pill-btn.tt { background: #000000; }
+.social-pill-btn.wa { background: #25d366; }
+
+
+/* ==========================================================================
    Footer
    ========================================================================== */
 .footer {

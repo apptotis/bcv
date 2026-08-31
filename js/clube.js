@@ -1,4 +1,13 @@
 document.addEventListener('DOMContentLoaded', () => {
+    let supabase = null;
+
+    // 1. Inicializar Supabase Client
+    if (typeof window.supabase !== 'undefined' && typeof SUPABASE_URL !== 'undefined' && typeof SUPABASE_ANON_KEY !== 'undefined') {
+        supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+    } else if (typeof window.supabaseClient !== 'undefined') {
+        supabase = window.supabaseClient;
+    }
+
     const sections = {
         'historia': document.getElementById('historia'),
         'orgaos-sociais': document.getElementById('orgaos-sociais'),
@@ -7,7 +16,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     function showSection(hash) {
         // Obter ID alvo a partir do hash, ou usar 'historia' como default
-        let targetId = hash.replace('#', '');
+        let targetId = (hash || '').replace('#', '');
         if (!sections[targetId]) {
             targetId = 'historia';
         }
@@ -61,7 +70,10 @@ document.addEventListener('DOMContentLoaded', () => {
     // =========================================================================
     
     async function loadDynamicClubData() {
-        if (typeof supabase === 'undefined') return;
+        if (!supabase) {
+            console.warn("Cliente Supabase não inicializado no clube.js");
+            return;
+        }
 
         try {
             await Promise.all([
@@ -76,46 +88,79 @@ document.addEventListener('DOMContentLoaded', () => {
     async function loadConfiguracoesFront() {
         try {
             const { data, error } = await supabase.from('clube_config').select('*');
-            if (error || !data) return;
+            if (error || !data) {
+                console.warn("Aviso ao consultar clube_config:", error);
+                return;
+            }
 
             data.forEach(item => {
                 const dados = item.dados || {};
                 
-                // Contactos
+                // 1. CONTACTOS
                 if (item.chave === 'contactos') {
                     const elPavilhao = document.getElementById('contacto-pavilhao-title');
                     const elMorada = document.getElementById('contacto-morada');
                     const elEmail = document.getElementById('contacto-email');
+                    const linkEmail = document.getElementById('link-email');
                     const elTel = document.getElementById('contacto-telefone');
+                    const linkTel = document.getElementById('link-telefone');
+                    const elHorario = document.getElementById('contacto-horario');
+                    const linkMap = document.getElementById('link-google-maps');
 
                     if (elPavilhao && dados.pavilhao) elPavilhao.textContent = dados.pavilhao;
                     if (elMorada && dados.morada) elMorada.textContent = dados.morada;
+                    
                     if (elEmail && dados.email) {
                         elEmail.textContent = dados.email;
-                        if (elEmail.tagName === 'A') elEmail.href = `mailto:${dados.email}`;
+                        if (linkEmail) linkEmail.href = `mailto:${dados.email}`;
                     }
+
                     if (elTel && dados.telefone) {
                         elTel.textContent = dados.telefone;
-                        if (elTel.tagName === 'A') elTel.href = `tel:${dados.telefone.replace(/\s+/g, '')}`;
+                        if (linkTel) linkTel.href = `tel:${dados.telefone.replace(/\s+/g, '')}`;
+                    }
+
+                    if (elHorario && dados.horario) {
+                        elHorario.textContent = dados.horario;
+                    }
+
+                    if (linkMap) {
+                        const termoPesquisa = (dados.pavilhao || '') + ' ' + (dados.morada || 'Valença');
+                        linkMap.href = `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(termoPesquisa.trim())}`;
                     }
                 }
 
-                // Redes Sociais
+                // 2. REDES SOCIAIS
                 if (item.chave === 'redes_sociais') {
                     const linksFb = document.querySelectorAll('.btn-social-fb, .social-link-fb, a[aria-label="Facebook"]');
                     const linksIg = document.querySelectorAll('.btn-social-ig, .social-link-ig, a[aria-label="Instagram"]');
                     const linksYt = document.querySelectorAll('.btn-social-yt, .social-link-yt, a[aria-label="YouTube"]');
                     const linksTt = document.querySelectorAll('.social-link-tt, a[aria-label="TikTok"]');
+                    const linkWa = document.getElementById('link-whatsapp');
 
                     if (dados.facebook) linksFb.forEach(a => a.href = dados.facebook);
                     if (dados.instagram) linksIg.forEach(a => a.href = dados.instagram);
                     if (dados.youtube) linksYt.forEach(a => a.href = dados.youtube);
                     if (dados.tiktok) linksTt.forEach(a => a.href = dados.tiktok);
+
+                    if (linkWa && dados.whatsapp && dados.whatsapp.trim() !== '') {
+                        const cleanWa = dados.whatsapp.replace(/[^0-9]/g, '');
+                        linkWa.href = `https://wa.me/${cleanWa}`;
+                        linkWa.style.display = 'flex';
+                    }
                 }
 
-                // Geral / Banner
+                // 3. GERAL & INSTITUCIONAL
                 if (item.chave === 'geral') {
+                    const elNomeClube = document.getElementById('contacto-nome-clube');
+                    const elFundacao = document.getElementById('contacto-fundacao');
+                    const elNif = document.getElementById('contacto-nif');
                     const bannerEl = document.querySelector('.anniversary-banner');
+
+                    if (elNomeClube && dados.nome_clube) elNomeClube.textContent = dados.nome_clube;
+                    if (elFundacao && dados.ano_fundacao) elFundacao.textContent = dados.ano_fundacao;
+                    if (elNif && dados.nif) elNif.textContent = dados.nif;
+
                     if (bannerEl && dados.banner_aniversario) {
                         bannerEl.innerHTML = dados.banner_aniversario;
                     }

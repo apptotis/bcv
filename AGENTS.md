@@ -84,4 +84,5 @@
 - [2026-08-28] Gemini: Correção de erro de sintaxe JavaScript em inscricao.html (chaveta de fecho no autocomplete) que bloqueava a execução do script e impedia o botão 'Iniciar Inscrição' de avançar de passo.
 - [2026-08-28] Gemini: Integração automática do carimbo oficial e assinatura do clube (assets/carimbo_assinatura_bcv.png / assinatura_bcv.jpeg) no campo 'Diretor(a) e Carimbo do Clube' na geração do PDF do Modelo 1 da FPB (js/admin.js).
 - [2026-09-01] Gemini: Criação do Portal Mobile do Treinador (treinador.html, js/treinador.js) com chamada rápida de presenças em treinos/jogos (1 toque), consulta do Plantel & SOS (contactos rápidos dos encarregados), suporte a múltiplos escalões com alternância dinâmica, e sincronização no Admin (redirecionamento de login e afetação de equipas).
+- [2026-09-01] Gemini: Correção da inicialização do Supabase em js/clube.js para carregamento dinâmico automático das configurações do Admin (contactos, redes sociais, órgãos sociais, dados gerais) e reformulação visual da secção Contactos (clube.html, style.css) em cartões separados com mapa interativo do Google Maps.
 
