@@ -2800,6 +2800,9 @@ document.addEventListener('DOMContentLoaded', async () => {
                     if (document.getElementById('cfg-youtube')) document.getElementById('cfg-youtube').value = dados.youtube || '';
                     if (document.getElementById('cfg-tiktok')) document.getElementById('cfg-tiktok').value = dados.tiktok || '';
                     if (document.getElementById('cfg-whatsapp')) document.getElementById('cfg-whatsapp').value = dados.whatsapp || '';
+                } else if (item.chave === 'historia') {
+                    if (document.getElementById('cfg-historia-titulo')) document.getElementById('cfg-historia-titulo').value = dados.titulo || '';
+                    if (document.getElementById('cfg-historia-texto')) document.getElementById('cfg-historia-texto').value = dados.texto || '';
                 } else if (item.chave === 'geral') {
                     if (document.getElementById('cfg-nome-clube')) document.getElementById('cfg-nome-clube').value = dados.nome_clube || '';
                     if (document.getElementById('cfg-sigla')) document.getElementById('cfg-sigla').value = dados.sigla || '';
@@ -2811,6 +2814,42 @@ document.addEventListener('DOMContentLoaded', async () => {
         } catch (err) {
             console.error("Erro ao carregar clube_config:", err);
         }
+    }
+
+    // Salvar Configurações (História do Clube)
+    const formConfigHistoria = document.getElementById('form-config-historia');
+    if (formConfigHistoria) {
+        formConfigHistoria.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const btn = document.getElementById('btn-save-historia');
+            const msg = document.getElementById('msg-historia-status');
+            btn.disabled = true;
+            btn.textContent = "A guardar...";
+
+            const dados = {
+                titulo: document.getElementById('cfg-historia-titulo').value.trim() || 'A Nossa História',
+                texto: document.getElementById('cfg-historia-texto').value.trim()
+            };
+
+            try {
+                const { error } = await supabase.from('clube_config').upsert({
+                    chave: 'historia',
+                    dados: dados,
+                    updated_at: new Date()
+                });
+                if (error) throw error;
+                msg.textContent = "✅ Guardado com sucesso!";
+                msg.style.color = "#16a34a";
+            } catch (err) {
+                console.error("Erro ao guardar história do clube:", err);
+                msg.textContent = "❌ Erro ao guardar: " + err.message;
+                msg.style.color = "#dc2626";
+            } finally {
+                btn.disabled = false;
+                btn.textContent = "💾 Guardar História do Clube";
+                setTimeout(() => { msg.textContent = ''; }, 4000);
+            }
+        });
     }
 
     // Salvar Configurações (Contactos)

@@ -165,6 +165,36 @@ document.addEventListener('DOMContentLoaded', () => {
                         bannerEl.innerHTML = dados.banner_aniversario;
                     }
                 }
+
+                // 4. HISTÓRIA DO CLUBE
+                if (item.chave === 'historia') {
+                    const elTitulo = document.getElementById('historia-titulo');
+                    const elTextoContainer = document.getElementById('historia-texto-container');
+
+                    if (elTitulo && dados.titulo) {
+                        elTitulo.textContent = dados.titulo;
+                    }
+
+                    if (elTextoContainer) {
+                        if (dados.texto && dados.texto.trim() !== '') {
+                            const paragrafos = dados.texto.split(/\n\s*\n/).filter(p => p.trim() !== '');
+                            elTextoContainer.innerHTML = paragrafos.map(p => 
+                                `<p style="font-size: 1.05rem; line-height: 1.8; color: var(--text-secondary); margin-bottom: 18px;">${p.replace(/\n/g, '<br>')}</p>`
+                            ).join('');
+                        } else {
+                            elTextoContainer.innerHTML = `
+                                <div style="background: rgba(126, 34, 206, 0.04); border-left: 4px solid var(--accent-primary); padding: 24px; border-radius: 0 12px 12px 0;">
+                                    <p style="font-size: 1.2rem; font-weight: 600; color: var(--accent-primary); margin-bottom: 8px;">
+                                        🏀 Brevemente conheça a história do Clube...
+                                    </p>
+                                    <p style="font-size: 0.95rem; color: var(--text-secondary); line-height: 1.6; margin: 0;">
+                                        O texto oficial da história do Basket Clube de Valença está a ser preparado pela Direção.
+                                    </p>
+                                </div>
+                            `;
+                        }
+                    }
+                }
             });
         } catch (err) {
             console.warn("Erro ao ler clube_config:", err);

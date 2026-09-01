@@ -1277,6 +1277,7 @@
                     <!-- Sub-menu de Navegação de Configurações -->
                     <div style="display: flex; gap: 10px; margin-bottom: 25px; border-bottom: 1px solid var(--border-color); padding-bottom: 12px; flex-wrap: wrap;">
                         <button type="button" class="btn-subconfig active" data-sub="sub-orgaos" style="padding: 8px 16px; border-radius: 8px; border: 1px solid #7e22ce; background: #7e22ce; color: #fff; font-weight: 600; cursor: pointer;">👥 Órgãos Sociais</button>
+                        <button type="button" class="btn-subconfig" data-sub="sub-historia" style="padding: 8px 16px; border-radius: 8px; border: 1px solid var(--border-color); background: #f8fafc; color: var(--text-primary); font-weight: 600; cursor: pointer;">📜 História do Clube</button>
                         <button type="button" class="btn-subconfig" data-sub="sub-contactos" style="padding: 8px 16px; border-radius: 8px; border: 1px solid var(--border-color); background: #f8fafc; color: var(--text-primary); font-weight: 600; cursor: pointer;">📍 Contactos & Pavilhão</button>
                         <button type="button" class="btn-subconfig" data-sub="sub-redes" style="padding: 8px 16px; border-radius: 8px; border: 1px solid var(--border-color); background: #f8fafc; color: var(--text-primary); font-weight: 600; cursor: pointer;">🌐 Redes Sociais</button>
                         <button type="button" class="btn-subconfig" data-sub="sub-geral" style="padding: 8px 16px; border-radius: 8px; border: 1px solid var(--border-color); background: #f8fafc; color: var(--text-primary); font-weight: 600; cursor: pointer;">🏢 Dados Gerais & Banner</button>
@@ -1344,7 +1345,35 @@
                         </div>
                     </div>
 
-                    <!-- SUB-SECÇÃO 2: CONTACTOS & PAVILHÃO -->
+                    <!-- SUB-SECÇÃO 2: HISTÓRIA DO CLUBE -->
+                    <div id="sub-historia" class="subconfig-content hidden">
+                        <div class="welcome-box" style="padding: 20px; background: #ffffff; border: 1px solid var(--border-color); border-radius: 12px; max-width: 800px;">
+                            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; flex-wrap: wrap; gap: 8px;">
+                                <h3 style="color: var(--accent-primary); margin: 0;">📜 História Oficial do Clube</h3>
+                                <span style="font-size: 0.78rem; background: #f3e8ff; color: #6b21a8; padding: 4px 10px; border-radius: 6px; font-weight: 700;">Aprovação da Direção</span>
+                            </div>
+                            <p style="font-size: 0.85rem; color: var(--text-secondary); margin-bottom: 18px; line-height: 1.5;">
+                                Redija ou atualize o texto oficial da história do Basket Clube de Valença. Quando aprovado pela Direção, basta guardar e o texto será apresentado automaticamente na página <a href="clube.html#historia" target="_blank" style="color: #7e22ce; font-weight: 600;">O Clube (clube.html)</a>.
+                            </p>
+                            <form id="form-config-historia">
+                                <div style="margin-bottom: 15px;">
+                                    <label style="display:block; margin-bottom: 5px; font-weight: 600; font-size: 0.85rem;">Título da Secção</label>
+                                    <input type="text" id="cfg-historia-titulo" class="admin-input" placeholder="A Nossa História" style="width: 100%;">
+                                </div>
+                                <div style="margin-bottom: 18px;">
+                                    <label style="display:block; margin-bottom: 5px; font-weight: 600; font-size: 0.85rem;">Texto da História (Parágrafos)</label>
+                                    <textarea id="cfg-historia-texto" class="admin-input" rows="12" placeholder="Escreva aqui a história oficial do clube... (Separe os parágrafos com uma linha em branco)" style="width: 100%; font-family: inherit; line-height: 1.6; resize: vertical;"></textarea>
+                                    <small style="color: #64748b; font-size: 0.78rem; display: block; margin-top: 5px;">
+                                        ℹ️ Se este campo ficar em branco, a página pública apresentará a mensagem: <em>"Brevemente conheça a história do Clube..."</em>.
+                                    </small>
+                                </div>
+                                <button type="submit" id="btn-save-historia" class="btn-primary" style="padding: 10px 24px;">💾 Guardar História do Clube</button>
+                                <span id="msg-historia-status" style="margin-left: 15px; font-size: 0.9rem; font-weight: 600;"></span>
+                            </form>
+                        </div>
+                    </div>
+
+                    <!-- SUB-SECÇÃO 3: CONTACTOS & PAVILHÃO -->
                     <div id="sub-contactos" class="subconfig-content hidden">
                         <div class="welcome-box" style="padding: 20px; background: #ffffff; border: 1px solid var(--border-color); border-radius: 12px; max-width: 700px;">
                             <h3 style="color: var(--accent-primary); margin-bottom: 15px;">📍 Informações de Contacto</h3>
