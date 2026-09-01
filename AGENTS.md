@@ -89,5 +89,6 @@
 - [2026-09-01] Gemini: Homogeneização visual completa da Homepage (index.html, css/style.css, js/main.js, js/galeria-publica.js) com títulos de secção padronizados (.portal-section-header), novos cartões modernos para Agenda e Resultados (.portal-card, .game-schedule-item, .game-result-item) e ocultação inteligente automática de secções que não tenham conteúdo na BD.
 - [2026-09-01] Gemini: Ajuste da notícia em destaque no mobile (css/style.css) posicionando a imagem no topo como banner retangular antes do conteúdo e botão de leitura.
 - [2026-09-01] Gemini: Integração de Call-to-Action (CTA) direto para inscricao.html no final do modal de notícias e adição de banner panorâmico de destaque de Inscrições (#cta-inscricoes) na coluna principal visível em mobile e desktop (index.html).
+- [2026-09-01] Gemini: Implementação do pré-preenchimento integral e recuperação automática de fichas de atletas (inscricao.html) para todos os 7 passos (FPB, Morada, Encarregado, Seguro, Exame Médico EMD e Equipamentos), permitindo correções/atualizações rápidas sem necessidade de preencher tudo do zero.
 
 

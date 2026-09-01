@@ -1346,20 +1346,28 @@
 
                             const { data, error } = await client
                                 .from('atletasbcv')
-                                .select('id, nome, licenca, data_nascimento')
-                                .or(`nome.ilike.%${query}%,licenca.ilike.%${query}%`)
-                                .limit(5);
+                                .select('*')
+                                .or(`nome.ilike.%${query}%,licenca.ilike.%${query}%,nif.ilike.%${query}%,num_doc_id.ilike.%${query}%`)
+                                .limit(6);
 
                             if (error) throw error;
 
                             if (data && data.length > 0) {
                                 searchResultsList.innerHTML = '';
                                 data.forEach(atleta => {
+                                    const is2627 = (atleta.epoca === '2026/2027');
+                                    const badgeEpoca = is2627 
+                                        ? `<span style="background:#dcfce7; color:#15803d; font-size:0.7rem; font-weight:800; padding:2px 6px; border-radius:4px; margin-left:6px;">Inscrito 2026/2027</span>`
+                                        : `<span style="background:#f1f5f9; color:#475569; font-size:0.7rem; font-weight:700; padding:2px 6px; border-radius:4px; margin-left:6px;">Época Anterior</span>`;
+
                                     const item = document.createElement('div');
                                     item.className = 'search-result-item';
                                     item.innerHTML = `
-                                        <strong>${atleta.nome}</strong>
-                                        <div class="search-result-meta">Licença: ${atleta.licenca || 'S/N'} • Nasc: ${atleta.data_nascimento || 'N/D'}</div>
+                                        <div style="display:flex; justify-content:space-between; align-items:center;">
+                                            <strong>${atleta.nome}</strong>
+                                            ${badgeEpoca}
+                                        </div>
+                                        <div class="search-result-meta">Licença: ${atleta.licenca || 'S/N'} • NIF: ${atleta.nif || 'N/D'} • Nasc: ${atleta.data_nascimento || 'N/D'}</div>
                                     `;
                                     item.addEventListener('click', () => {
                                         preencherDadosAtleta(atleta);
@@ -1478,53 +1486,150 @@
             const anoInput = document.getElementById(`ano-input-${qId}`);
             const hiddenResp = document.getElementById(`hidden-resp-${qId}`);
 
-            hiddenResp.value = resp;
+            if (hiddenResp) hiddenResp.value = resp;
 
             if (resp === 'SIM') {
-                btnSim.className = 'btn-toggle-option active-sim';
-                btnNao.className = 'btn-toggle-option';
-                boxAno.className = 'emd-ano-box active';
-                anoInput.required = true;
-                anoInput.focus();
+                if (btnSim) btnSim.className = 'btn-toggle-option active-sim';
+                if (btnNao) btnNao.className = 'btn-toggle-option';
+                if (boxAno) boxAno.className = 'emd-ano-box active';
+                if (anoInput) {
+                    anoInput.required = true;
+                }
             } else {
-                btnNao.className = 'btn-toggle-option active-nao';
-                btnSim.className = 'btn-toggle-option';
-                boxAno.className = 'emd-ano-box';
-                anoInput.required = false;
-                anoInput.value = '';
+                if (btnNao) btnNao.className = 'btn-toggle-option active-nao';
+                if (btnSim) btnSim.className = 'btn-toggle-option';
+                if (boxAno) boxAno.className = 'emd-ano-box';
+                if (anoInput) {
+                    anoInput.required = false;
+                    anoInput.value = '';
+                }
             }
         };
 
-        function preencherDadosAtleta(atleta) {
-            selectedAtletaId = atleta.id || null;
-            const msgBox = document.getElementById('msg-pesquisa');
-            msgBox.style.display = 'block';
-            msgBox.textContent = `Atleta selecionado: ${atleta.nome}! Dados pré-preenchidos.`;
+        async function preencherDadosAtleta(atleta) {
+            if (!atleta) return;
 
-            const form = document.getElementById('form-inscricao');
-            if (form.elements['nome']) form.elements['nome'].value = atleta.nome || '';
-            if (form.elements['data_nascimento']) {
-                form.elements['data_nascimento'].value = atleta.data_nascimento || '';
-                atualizarIdadeEEscalao(atleta.data_nascimento);
+            let atletaFull = atleta;
+            // Se o registo vier parcial, procura a ficha completa pelo ID no Supabase
+            if (atleta.id && (!atleta.morada && !atleta.emd_respostas && !atleta.equipamento_tamanho)) {
+                try {
+                    const client = getSupabaseClient();
+                    if (client) {
+                        const { data } = await client.from('atletasbcv').select('*').eq('id', atleta.id).single();
+                        if (data) atletaFull = data;
+                    }
+                } catch (e) {
+                    console.warn("Aviso ao obter dados completos do atleta:", e);
+                }
             }
-            if (form.elements['sexo']) form.elements['sexo'].value = atleta.sexo || 'M';
-            if (form.elements['nacionalidade']) form.elements['nacionalidade'].value = atleta.nacionalidade || 'Portugal';
-            if (form.elements['licenca']) form.elements['licenca'].value = atleta.licenca || '';
-            if (form.elements['nif']) form.elements['nif'].value = atleta.nif || '';
-            if (form.elements['num_doc_id']) form.elements['num_doc_id'].value = atleta.num_doc_id || '';
-            if (form.elements['morada']) form.elements['morada'].value = atleta.morada || '';
-            if (form.elements['codigo_postal']) form.elements['codigo_postal'].value = atleta.codigo_postal || '';
-            if (form.elements['localidade']) form.elements['localidade'].value = atleta.localidade || '';
-            if (form.elements['telefone']) form.elements['telefone'].value = atleta.telefone || '';
-            if (form.elements['email']) form.elements['email'].value = atleta.email || '';
-            if (form.elements['encarregado_nome']) form.elements['encarregado_nome'].value = atleta.encarregado_nome || '';
-            if (form.elements['encarregado_qualidade']) form.elements['encarregado_qualidade'].value = atleta.encarregado_qualidade || '';
-            if (form.elements['encarregado_tipo_doc']) form.elements['encarregado_tipo_doc'].value = atleta.encarregado_tipo_doc || 'Cartão Cidadão';
-            if (form.elements['encarregado_num_doc']) form.elements['encarregado_num_doc'].value = atleta.encarregado_num_doc || '';
-            if (form.elements['encarregado_validade_doc']) form.elements['encarregado_validade_doc'].value = atleta.encarregado_validade_doc || '';
-            if (form.elements['encarregado_email']) form.elements['encarregado_email'].value = atleta.encarregado_email || '';
-            if (form.elements['encarregado_telefone']) form.elements['encarregado_telefone'].value = atleta.encarregado_telefone || '';
-            if (form.elements['equipamento_nome_camisola']) form.elements['equipamento_nome_camisola'].value = atleta.nickname || atleta.equipamento_nome_camisola || '';
+
+            selectedAtletaId = atletaFull.id || null;
+            const form = document.getElementById('form-inscricao');
+            if (!form) return;
+
+            const isCurrentEpoca = (atletaFull.epoca === '2026/2027');
+
+            // 1. Tipo de Inscrição e Estatuto
+            const radioReval = document.getElementById('card-revalidacao');
+            const radioPrimeira = document.getElementById('card-primeira');
+            if (radioReval && radioPrimeira) {
+                radioReval.classList.add('selected');
+                radioPrimeira.classList.remove('selected');
+                radioReval.querySelector('input').checked = true;
+            }
+            if (form.elements['estatuto_fpb'] && atletaFull.estatuto_fpb) {
+                form.elements['estatuto_fpb'].value = atletaFull.estatuto_fpb;
+            }
+
+            // 2. Passo 2: Identificação do Atleta (FPB)
+            if (form.elements['nome']) form.elements['nome'].value = atletaFull.nome || '';
+            if (form.elements['data_nascimento']) {
+                form.elements['data_nascimento'].value = atletaFull.data_nascimento || '';
+                atualizarIdadeEEscalao(atletaFull.data_nascimento);
+            }
+            if (form.elements['sexo']) form.elements['sexo'].value = atletaFull.sexo || 'M';
+            if (form.elements['nacionalidade']) form.elements['nacionalidade'].value = atletaFull.nacionalidade || 'Portugal';
+            if (form.elements['pais_nascimento']) form.elements['pais_nascimento'].value = atletaFull.pais_nascimento || 'Portugal';
+            if (form.elements['tipo_doc_id']) form.elements['tipo_doc_id'].value = atletaFull.tipo_doc_id || 'Cartão Cidadão';
+            if (form.elements['num_doc_id']) form.elements['num_doc_id'].value = atletaFull.num_doc_id || '';
+            if (form.elements['validade_doc_id']) form.elements['validade_doc_id'].value = atletaFull.validade_doc_id || '';
+            if (form.elements['nif']) form.elements['nif'].value = atletaFull.nif || '';
+            if (form.elements['licenca']) form.elements['licenca'].value = atletaFull.licenca || '';
+
+            // 3. Passo 3: Morada e Contactos
+            if (form.elements['morada']) form.elements['morada'].value = atletaFull.morada || '';
+            if (form.elements['codigo_postal']) form.elements['codigo_postal'].value = atletaFull.codigo_postal || '';
+            if (form.elements['localidade']) form.elements['localidade'].value = atletaFull.localidade || '';
+            if (form.elements['concelho']) form.elements['concelho'].value = atletaFull.concelho || '';
+            if (form.elements['distrito']) form.elements['distrito'].value = atletaFull.distrito || '';
+            if (form.elements['telefone']) form.elements['telefone'].value = atletaFull.telefone || '';
+            if (form.elements['email']) form.elements['email'].value = atletaFull.email || '';
+
+            // 4. Passo 4: Encarregado de Educação
+            if (form.elements['encarregado_nome']) form.elements['encarregado_nome'].value = atletaFull.encarregado_nome || '';
+            if (form.elements['encarregado_qualidade']) form.elements['encarregado_qualidade'].value = atletaFull.encarregado_qualidade || 'Pai';
+            if (form.elements['encarregado_tipo_doc']) form.elements['encarregado_tipo_doc'].value = atletaFull.encarregado_tipo_doc || 'Cartão Cidadão';
+            if (form.elements['encarregado_num_doc']) form.elements['encarregado_num_doc'].value = atletaFull.encarregado_num_doc || '';
+            if (form.elements['encarregado_validade_doc']) form.elements['encarregado_validade_doc'].value = atletaFull.encarregado_validade_doc || '';
+            if (form.elements['encarregado_email']) form.elements['encarregado_email'].value = atletaFull.encarregado_email || '';
+            if (form.elements['encarregado_telefone']) form.elements['encarregado_telefone'].value = atletaFull.encarregado_telefone || '';
+
+            // 5. Passo 5: Seguro
+            if (form.elements['tipo_seguro'] && atletaFull.tipo_seguro) form.elements['tipo_seguro'].value = atletaFull.tipo_seguro;
+            if (form.elements['seguro_apolice'] && atletaFull.seguro_apolice) form.elements['seguro_apolice'].value = atletaFull.seguro_apolice;
+            if (form.elements['seguro_companhia'] && atletaFull.seguro_companhia) form.elements['seguro_companhia'].value = atletaFull.seguro_companhia;
+
+            // 6. Passo 6: Exame Médico Desportivo IPDJ
+            if (form.elements['emd_resultado_anterior'] && atletaFull.emd_resultado_anterior) {
+                form.elements['emd_resultado_anterior'].value = atletaFull.emd_resultado_anterior;
+            }
+            if (atletaFull.emd_respostas && typeof atletaFull.emd_respostas === 'object') {
+                Object.keys(atletaFull.emd_respostas).forEach(key => {
+                    const qNum = key.replace('q', '');
+                    const itemResp = atletaFull.emd_respostas[key];
+                    const respStr = (typeof itemResp === 'string') ? itemResp : (itemResp.resposta || 'NÃO');
+                    const anoStr = (typeof itemResp === 'object' && itemResp.ano) ? itemResp.ano : '';
+
+                    if (typeof window.setEmdResponse === 'function') {
+                        window.setEmdResponse(qNum, respStr);
+                        if (respStr === 'SIM' && anoStr) {
+                            const anoInput = document.getElementById(`ano-input-${qNum}`);
+                            if (anoInput) anoInput.value = anoStr;
+                        }
+                    }
+                });
+            }
+
+            // 7. Passo 7: Equipamentos Oficiais BCV
+            if (form.elements['equipamento_tamanho'] && atletaFull.equipamento_tamanho) {
+                form.elements['equipamento_tamanho'].value = atletaFull.equipamento_tamanho;
+            }
+            if (form.elements['equipamento_tamanho_calcao'] && atletaFull.equipamento_tamanho_calcao) {
+                form.elements['equipamento_tamanho_calcao'].value = atletaFull.equipamento_tamanho_calcao;
+            }
+            if (form.elements['equipamento_nome_camisola']) {
+                form.elements['equipamento_nome_camisola'].value = atletaFull.equipamento_nome_camisola || atletaFull.nickname || '';
+            }
+            if (form.elements['equipamento_numero_1'] && atletaFull.equipamento_numero_1) {
+                form.elements['equipamento_numero_1'].value = atletaFull.equipamento_numero_1;
+            }
+            if (form.elements['equipamento_numero_2'] && atletaFull.equipamento_numero_2) {
+                form.elements['equipamento_numero_2'].value = atletaFull.equipamento_numero_2;
+            }
+
+            // Mensagem amigável de feedback
+            const msgBox = document.getElementById('msg-pesquisa');
+            if (msgBox) {
+                msgBox.style.display = 'block';
+                if (isCurrentEpoca) {
+                    msgBox.innerHTML = `✅ <strong>Inscrição 2026/2027 Carregada!</strong> Encontrámos a inscrição de <strong>${atletaFull.nome}</strong>. Todos os dados foram pré-preenchidos nos 7 passos. Altere apenas o que desejar e submeta para atualizar.`;
+                } else {
+                    msgBox.innerHTML = `✅ <strong>Atleta Encontrado: ${atletaFull.nome}</strong>! Dados pré-preenchidos para a época 2026/2027. Pode rever e alterar qualquer campo nos passos seguintes.`;
+                }
+            }
+
+            const searchResultsList = document.getElementById('search-results-list');
+            if (searchResultsList) searchResultsList.style.display = 'none';
         }
 
         async function pesquisarAtletaQuery(query) {
@@ -1539,7 +1644,7 @@
                 const { data, error } = await client
                     .from('atletasbcv')
                     .select('*')
-                    .or(`nome.ilike.%${query}%,licenca.eq.${query}`)
+                    .or(`nome.ilike.%${query}%,licenca.ilike.%${query}%,nif.ilike.%${query}%,num_doc_id.ilike.%${query}%`)
                     .limit(1);
 
                 if (error) throw error;
@@ -1633,17 +1738,23 @@
             if (!container) return;
 
             window.atletaDetectadoTemp = atleta;
+            const is2627 = (atleta.epoca === '2026/2027');
+
+            const titulo = is2627 ? 'Inscrição 2026/2027 já existente detetada!' : 'Atleta já registado no BCV detetado!';
+            const desc = is2627 
+                ? `Identificámos a inscrição de <strong>${atleta.nome}</strong> (Licença: ${atleta.licenca || 'S/N'} • NIF: ${atleta.nif || 'N/D'}). Deseja carregar todos os dados já submetidos para rever ou alterar a sua ficha?`
+                : `Identificámos a ficha de <strong>${atleta.nome}</strong> (Licença FPB: <strong>${atleta.licenca || 'Sem nº'}</strong> • Nasc: ${atleta.data_nascimento || 'N/D'}). Deseja carregar os dados para renovar e evitar registos duplicados?`;
+
+            const btnText = is2627 ? 'Sim, Carregar Dados e Atualizar Ficha ✓' : 'Sim, Associar e Renovar Ficha ✓';
 
             container.innerHTML = `
                 <div class="duplicate-match-box">
                     <div class="duplicate-match-icon">⚡</div>
                     <div class="duplicate-match-content">
-                        <div class="duplicate-match-title">Atleta já registado no BCV detetado!</div>
-                        <div class="duplicate-match-desc">
-                            Identificámos a ficha de <strong>${atleta.nome}</strong> (Licença FPB: <strong>${atleta.licenca || 'Sem nº'}</strong> • Nasc: ${atleta.data_nascimento || 'N/D'}). Deseja associar esta inscrição para renovar a ficha existente e evitar registos duplicados?
-                        </div>
+                        <div class="duplicate-match-title">${titulo}</div>
+                        <div class="duplicate-match-desc">${desc}</div>
                         <div class="duplicate-match-actions">
-                            <button type="button" class="btn-duplicate-assoc" onclick="confirmarAssociacaoAtletaDetectado()">Sim, Associar e Renovar Ficha ✓</button>
+                            <button type="button" class="btn-duplicate-assoc" onclick="confirmarAssociacaoAtletaDetectado()">${btnText}</button>
                             <button type="button" class="btn-duplicate-dismiss" onclick="dispensarBannerAtleta()">Dispensar (Novo Atleta)</button>
                         </div>
                     </div>
@@ -1654,13 +1765,6 @@
         window.confirmarAssociacaoAtletaDetectado = function() {
             if (window.atletaDetectadoTemp) {
                 preencherDadosAtleta(window.atletaDetectadoTemp);
-                const radioReval = document.getElementById('card-revalidacao');
-                const radioPrimeira = document.getElementById('card-primeira');
-                if (radioReval && radioPrimeira) {
-                    radioReval.classList.add('selected');
-                    radioPrimeira.classList.remove('selected');
-                    radioReval.querySelector('input').checked = true;
-                }
                 dispensarBannerAtleta();
             }
         };
@@ -1948,11 +2052,12 @@
                 if (dbError) throw dbError;
 
                 msgSucesso.style.display = 'block';
+                const isUpdate = !!selectedAtletaId;
                 msgSucesso.innerHTML = `
-                    <div style="font-size: 1.1rem; font-weight: 800; margin-bottom: 6px;">🎉 INSCRIÇÃO CONCLUÍDA COM SUCESSO!</div>
-                    <p style="margin: 0;">Todos os dados da <strong>Federação (FPB)</strong>, <strong>Exame Médico (IPDJ)</strong> e <strong>Equipamento BCV</strong> foram registados com sucesso para a Época 2026/2027.</p>
+                    <div style="font-size: 1.15rem; font-weight: 800; margin-bottom: 6px;">🎉 ${isUpdate ? 'INSCRIÇÃO ATUALIZADA COM SUCESSO!' : 'INSCRIÇÃO CONCLUÍDA COM SUCESSO!'}</div>
+                    <p style="margin: 0;">A ficha de <strong>${payload.nome}</strong> foi ${isUpdate ? 'atualizada' : 'registada'} com sucesso para a <strong>Época 2026/2027</strong> (Federação FPB, Exame Médico e Equipamentos).</p>
                 `;
-                btn.textContent = 'INSCRIÇÃO SUBMETIDA COM SUCESSO ✓';
+                btn.textContent = isUpdate ? 'DADOS ATUALIZADOS COM SUCESSO ✓' : 'INSCRIÇÃO SUBMETIDA COM SUCESSO ✓';
                 btn.style.background = '#15803d';
 
                 // Scroll até à mensagem de sucesso
