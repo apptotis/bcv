@@ -514,6 +514,22 @@ window.openPublicNoticiaModal = function(id) {
     const dataFmt = n.data_publicacao ? new Date(n.data_publicacao).toLocaleDateString('pt-PT', { day: 'numeric', month: 'long', year: 'numeric' }) : '';
     const imgHtml = n.imagem_url ? `<img src="${n.imagem_url}" style="width: 100%; max-height: 340px; object-fit: cover;" alt="${n.titulo}">` : '';
 
+    const isInscricoesTopic = (n.titulo && n.titulo.toLowerCase().includes('inscriç')) || 
+                              (n.subtitulo && n.subtitulo.toLowerCase().includes('inscriç')) || 
+                              (n.conteudo && n.conteudo.toLowerCase().includes('inscriç')) ||
+                              (n.categoria && n.categoria.toLowerCase() === 'formação');
+
+    const ctaInscricaoHtml = isInscricoesTopic ? `
+        <div style="margin-top: 25px; padding: 22px; background: linear-gradient(135deg, rgba(126, 34, 206, 0.08) 0%, rgba(217, 70, 239, 0.08) 100%); border: 1px solid rgba(126, 34, 206, 0.2); border-radius: 12px; text-align: center;">
+            <div style="font-size: 2rem; margin-bottom: 6px;">🏀</div>
+            <h3 style="font-size: 1.2rem; font-weight: 800; color: var(--accent-primary); margin-bottom: 6px;">Queres fazer parte da nossa equipa?</h3>
+            <p style="font-size: 0.9rem; color: var(--text-secondary); margin-bottom: 16px;">Inscrições abertas para a época 2026/2027! Processo 100% online, simples e rápido.</p>
+            <a href="inscricao.html" class="btn btn-primary" style="display: inline-block; padding: 12px 28px; font-weight: 800; border-radius: 8px; text-decoration: none; box-shadow: 0 4px 12px rgba(126,34,206,0.3);">
+                📝 Iniciar Inscrição Online →
+            </a>
+        </div>
+    ` : ``;
+
     content.innerHTML = `
         ${imgHtml}
         <div style="padding: 24px;">
@@ -526,6 +542,7 @@ window.openPublicNoticiaModal = function(id) {
             ${n.subtitulo ? `<p style="font-size: 1rem; color: var(--text-secondary); font-weight: 500; margin-bottom: 16px; line-height: 1.4;">${n.subtitulo}</p>` : ''}
             <hr style="border: 0; border-top: 1px solid var(--border-color); margin: 16px 0;">
             <div style="font-size: 0.95rem; line-height: 1.7; color: var(--text-primary); white-space: pre-wrap;">${n.conteudo}</div>
+            ${ctaInscricaoHtml}
         </div>
     `;
 

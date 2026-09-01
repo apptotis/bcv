@@ -88,5 +88,6 @@
 - [2026-09-01] Gemini: Implementação completa do Sistema de Notícias: Portal Mobile do Redator (redator.html, js/redator.js) com criação/edição/upload e publicação, módulo de Gestão de Notícias no Admin (admin.html, js/admin.js), script SQL setup_noticias.sql e renderização dinâmica na Home (index.html, js/main.js, style.css) com modal de leitura completa.
 - [2026-09-01] Gemini: Homogeneização visual completa da Homepage (index.html, css/style.css, js/main.js, js/galeria-publica.js) com títulos de secção padronizados (.portal-section-header), novos cartões modernos para Agenda e Resultados (.portal-card, .game-schedule-item, .game-result-item) e ocultação inteligente automática de secções que não tenham conteúdo na BD.
 - [2026-09-01] Gemini: Ajuste da notícia em destaque no mobile (css/style.css) posicionando a imagem no topo como banner retangular antes do conteúdo e botão de leitura.
+- [2026-09-01] Gemini: Integração de Call-to-Action (CTA) direto para inscricao.html no final do modal de leitura de notícias de formação/inscrições (js/main.js) e criação do card de destaque de inscrições na sidebar da Homepage (index.html).
 
 
