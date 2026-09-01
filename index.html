@@ -167,11 +167,30 @@
                     <!-- Notícias do Clube Highlight Section -->
                     <section id="noticias" style="padding-top: var(--spacing-md); padding-bottom: var(--spacing-xl); border-top: 1px solid var(--border-color);">
                         <div class="reveal">
-                            <div class="card-featured">
-                                <div class="card-content">
-                                    <h2 style="display: flex; align-items: center; gap: 15px;">Notícias do Clube</h2>
-                                    <p>As inscrições para a nova época já se encontram abertas para todos os escalões de formação! Junta-te à família BCV e vem aprender basquetebol com os melhores treinadores.</p>
-                                    <a href="clube.html" class="btn btn-primary mt-4">Saber mais sobre o Clube →</a>
+                            <div class="section-header" style="text-align: left; margin-left: 0; margin-bottom: 20px;">
+                                <h2 style="font-size: 1.6rem; color: var(--accent-primary); text-transform: uppercase;">Notícias do Clube</h2>
+                                <p>Fica a par dos acontecimentos mais recentes, vitórias e novidades do BCV.</p>
+                            </div>
+
+                            <div id="noticias-section-content">
+                                <!-- Notícia Principal em Destaque -->
+                                <div class="card-featured" id="noticia-featured-card">
+                                    <div class="card-content">
+                                        <div style="display: flex; gap: 8px; align-items: center; margin-bottom: 10px;">
+                                            <span class="badge-category" id="noticia-feat-cat" style="background: rgba(126, 34, 206, 0.1); color: #7e22ce; font-weight: 700; padding: 3px 8px; border-radius: 4px; font-size: 0.75rem;">Formação</span>
+                                            <span id="noticia-feat-data" style="font-size: 0.8rem; color: var(--text-secondary);">Época 2026/2027</span>
+                                        </div>
+                                        <h2 id="noticia-feat-title">Inscrições Abertas para a Nova Época</h2>
+                                        <p id="noticia-feat-desc">As inscrições já se encontram abertas para todos os escalões de formação! Junta-te à família BCV e vem aprender basquetebol com os melhores treinadores.</p>
+                                        <a href="inscricao.html" id="noticia-feat-btn" class="btn btn-primary mt-4">Iniciar Inscrição Online →</a>
+                                    </div>
+                                    <div class="news-featured-img-col" id="noticia-feat-img" style="background-image: url('https://images.unsplash.com/photo-1546519638-68e109498ffc?auto=format&fit=crop&w=1200&q=80');">
+                                    </div>
+                                </div>
+
+                                <!-- Grelha de Outras Notícias Recentes -->
+                                <div id="noticias-grid-secondary" class="noticias-secondary-grid" style="display: none;">
+                                    <!-- Preenchido via JS -->
                                 </div>
                             </div>
                         </div>
@@ -250,6 +269,16 @@
             <button class="birthday-close" id="close-birthday">&times;</button>
             <div id="birthday-modal-list" style="display: flex; flex-direction: column; gap: 15px;">
                 <!-- Preenchido via JS -->
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal Leitura de Notícia Completa -->
+    <div id="modal-noticia-publica" class="modal-overlay" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.7); z-index: 9999; justify-content: center; align-items: center; padding: 20px; backdrop-filter: blur(4px);">
+        <div style="background: #ffffff; width: 100%; max-width: 720px; max-height: 90vh; border-radius: 16px; overflow-y: auto; position: relative; box-shadow: 0 20px 40px rgba(0,0,0,0.25); animation: modalFadeIn 0.3s ease;">
+            <button type="button" id="btn-close-noticia-publica" style="position: absolute; right: 15px; top: 15px; background: rgba(0,0,0,0.5); color: #fff; border: none; width: 34px; height: 34px; border-radius: 50%; cursor: pointer; font-size: 1.1rem; display: flex; align-items: center; justify-content: center; z-index: 10;">✕</button>
+            <div id="modal-noticia-publica-content">
+                <!-- Preenchido dinamicamente via JS -->
             </div>
         </div>
     </div>

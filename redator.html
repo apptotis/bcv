@@ -1,0 +1,404 @@
+<!DOCTYPE html>
+<html lang="pt">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <title>BCV Redator | Publicação de Notícias</title>
+    
+    <!-- Favicon -->
+    <link rel="icon" type="image/png" href="assets/emblema_png.png">
+    
+    <!-- Google Fonts: Inter -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    
+    <!-- Supabase JS -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    
+    <!-- CSS Base Mobile BCV -->
+    <link rel="stylesheet" href="css/diretor.css?v=20260901_2">
+
+    <style>
+        .news-preview-img-container {
+            width: 100%;
+            height: 180px;
+            border-radius: 10px;
+            background: #f1f5f9;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            overflow: hidden;
+            border: 2px dashed #cbd5e1;
+            margin-top: 8px;
+            position: relative;
+        }
+        .news-preview-img-container img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+        .badge-status-published {
+            background: rgba(16, 185, 129, 0.15);
+            color: #059669;
+            font-weight: 700;
+            padding: 3px 8px;
+            border-radius: 6px;
+            font-size: 0.75rem;
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+        }
+        .badge-status-draft {
+            background: rgba(245, 158, 11, 0.15);
+            color: #d97706;
+            font-weight: 700;
+            padding: 3px 8px;
+            border-radius: 6px;
+            font-size: 0.75rem;
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+        }
+        .badge-category {
+            background: rgba(126, 34, 206, 0.1);
+            color: #7e22ce;
+            font-weight: 600;
+            padding: 2px 7px;
+            border-radius: 4px;
+            font-size: 0.72rem;
+            text-transform: uppercase;
+        }
+        .news-card-mobile {
+            background: #ffffff;
+            border: 1px solid var(--border);
+            border-radius: var(--radius-md);
+            overflow: hidden;
+            margin-bottom: 14px;
+            box-shadow: var(--shadow-sm);
+            transition: transform 0.2s ease;
+        }
+        .news-card-img {
+            width: 100%;
+            height: 140px;
+            object-fit: cover;
+            background: #f1f5f9;
+        }
+        .news-card-body {
+            padding: 14px;
+        }
+        .news-card-title {
+            font-size: 1rem;
+            font-weight: 700;
+            color: var(--text-main);
+            margin: 6px 0;
+            line-height: 1.3;
+        }
+        .news-card-desc {
+            font-size: 0.82rem;
+            color: var(--text-muted);
+            line-height: 1.4;
+            display: -webkit-box;
+            -webkit-line-clamp: 2;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
+        }
+        .news-actions-row {
+            display: flex;
+            gap: 8px;
+            margin-top: 12px;
+            padding-top: 10px;
+            border-top: 1px solid var(--border);
+        }
+        .news-actions-row button {
+            flex: 1;
+            padding: 8px 10px;
+            font-size: 0.8rem;
+            font-weight: 600;
+            border-radius: 6px;
+            cursor: pointer;
+            border: 1px solid var(--border);
+            background: #ffffff;
+            color: var(--text-main);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 5px;
+        }
+        .filter-pills-row {
+            display: flex;
+            gap: 8px;
+            overflow-x: auto;
+            padding-bottom: 6px;
+            margin-bottom: 12px;
+        }
+        .filter-pill {
+            padding: 6px 14px;
+            border-radius: 9999px;
+            background: #ffffff;
+            border: 1px solid var(--border);
+            font-size: 0.8rem;
+            font-weight: 600;
+            color: var(--text-muted);
+            white-space: nowrap;
+            cursor: pointer;
+        }
+        .filter-pill.active {
+            background: var(--primary);
+            color: #ffffff;
+            border-color: var(--primary);
+        }
+    </style>
+</head>
+<body>
+
+    <!-- ======================================================= -->
+    <!-- ECRÃ DE LOGIN (Visível apenas se deslogado)             -->
+    <!-- ======================================================= -->
+    <div id="login-container" class="app-container">
+        <div class="login-screen">
+            <img src="assets/emblema_png.png" alt="Emblema BCV" class="login-logo">
+            <h2>Portal do Redator</h2>
+            <p>Acesso para criação e publicação de notícias oficiais do BCV</p>
+            
+            <form id="form-login-redator" style="display: flex; flex-direction: column; gap: 12px; text-align: left;">
+                <div>
+                    <label class="control-label">Email de Acesso</label>
+                    <input type="email" id="login-email" class="mobile-input" placeholder="redacao@bcv.pt" required>
+                </div>
+                <div>
+                    <label class="control-label">Palavra-passe</label>
+                    <input type="password" id="login-password" class="mobile-input" placeholder="••••••••" required>
+                </div>
+                <div id="login-error-msg" style="color: #ef4444; font-size: 0.85rem; display: none; font-weight: 600;"></div>
+                <button type="submit" id="btn-login" class="btn-save-floating" style="position: static; margin-top: 10px;">
+                    Entrar no Portal
+                </button>
+            </form>
+        </div>
+    </div>
+
+    <!-- ======================================================= -->
+    <!-- APLICAÇÃO PRINCIPAL DO REDATOR (Pós-Login)              -->
+    <!-- ======================================================= -->
+    <div id="app-main" style="display: none;">
+        
+        <!-- Cabeçalho Fixo -->
+        <header class="app-header">
+            <div class="header-brand">
+                <img src="assets/emblema_png.png" alt="BCV" class="header-logo">
+                <div class="header-info">
+                    <h1 id="header-user-name">Redator BCV</h1>
+                    <div class="badge-escalao" id="header-role-badge">📰 Notícias & Comunicação</div>
+                </div>
+            </div>
+            <div class="header-actions">
+                <button type="button" id="btn-open-drawer" class="btn-menu-hamburguer" title="Menu Principal">
+                    ☰
+                </button>
+            </div>
+        </header>
+
+        <!-- Menu Lateral (Drawer Mobile) -->
+        <div id="drawer-overlay" class="drawer-overlay">
+            <div class="drawer-menu">
+                <div class="drawer-header">
+                    <div class="drawer-profile">
+                        <img src="assets/emblema_png.png" alt="BCV" class="drawer-logo">
+                        <div>
+                            <div class="drawer-title" id="drawer-user-name">Redator BCV</div>
+                            <div class="drawer-subtitle">Comunicação e Imprensa</div>
+                        </div>
+                    </div>
+                    <button type="button" id="btn-close-drawer" class="btn-close-drawer" title="Fechar Menu">✕</button>
+                </div>
+                
+                <div class="drawer-body">
+                    <div class="drawer-section-title">Funções do Redator</div>
+                    
+                    <button type="button" class="drawer-item active" data-tab="tab-lista-noticias">
+                        <span class="item-icon">📰</span>
+                        <div class="item-text">
+                            <span class="item-label">Minhas Notícias</span>
+                            <span class="item-desc">Ver todas as notícias e rascunhos</span>
+                        </div>
+                    </button>
+                    
+                    <button type="button" class="drawer-item" data-tab="tab-criar-noticia" id="drawer-btn-nova-noticia">
+                        <span class="item-icon">📝</span>
+                        <div class="item-text">
+                            <span class="item-label">Criar Nova Notícia</span>
+                            <span class="item-desc">Escrever e publicar para o site</span>
+                        </div>
+                    </button>
+                </div>
+                
+                <div class="drawer-footer">
+                    <button type="button" id="btn-drawer-logout" class="btn-drawer-logout">
+                        <span>🚪</span>
+                        <span>Terminar Sessão</span>
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Container Principal -->
+        <main class="app-container">
+
+            <!-- ======================================================= -->
+            <!-- ABA 1: LISTA DE NOTÍCIAS                                -->
+            <!-- ======================================================= -->
+            <section id="tab-lista-noticias" class="tab-content active">
+                
+                <!-- Botão de Ação Rápida no Topo -->
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 14px;">
+                    <button type="button" id="btn-ir-criar-noticia" class="btn-save-floating" style="position: static; padding: 10px 16px; font-size: 0.88rem; width: 100%;">
+                        ➕ Escrever Nova Notícia
+                    </button>
+                </div>
+
+                <!-- Pesquisa e Filtros -->
+                <div class="control-card" style="margin-bottom: 12px;">
+                    <input type="text" id="filtro-noticias" class="mobile-input" placeholder="🔍 Pesquisar por título ou categoria...">
+                </div>
+
+                <div class="filter-pills-row">
+                    <button type="button" class="filter-pill active" data-status="todos">Todas (<span id="count-total">0</span>)</button>
+                    <button type="button" class="filter-pill" data-status="publicadas">🟢 Publicadas (<span id="count-pub">0</span>)</button>
+                    <button type="button" class="filter-pill" data-status="rascunhos">🟡 Rascunhos (<span id="count-draft">0</span>)</button>
+                </div>
+
+                <!-- Lista de Notícias Cards -->
+                <div id="lista-noticias-container">
+                    <div style="text-align: center; padding: 30px; color: var(--text-muted);">
+                        A carregar notícias...
+                    </div>
+                </div>
+            </section>
+
+            <!-- ======================================================= -->
+            <!-- ABA 2: CRIAR / EDITAR NOTÍCIA                           -->
+            <!-- ======================================================= -->
+            <section id="tab-criar-noticia" class="tab-content">
+                
+                <div class="control-card">
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
+                        <h3 id="form-noticia-titulo-cabecalho" style="font-size: 1.1rem; color: var(--text-main); font-weight: 700;">Nova Notícia</h3>
+                        <button type="button" id="btn-cancelar-edicao" style="background: none; border: none; color: var(--danger); font-size: 0.85rem; font-weight: 600; cursor: pointer; display: none;">
+                            ✕ Cancelar
+                        </button>
+                    </div>
+
+                    <form id="form-noticia" style="display: flex; flex-direction: column; gap: 14px;">
+                        <input type="hidden" id="noticia-id">
+
+                        <!-- Título da Notícia -->
+                        <div>
+                            <label class="control-label">Título da Notícia *</label>
+                            <input type="text" id="noticia-titulo" class="mobile-input" placeholder="Ex: Grande Vitória dos Sub-14 em Viana" required>
+                        </div>
+
+                        <!-- Subtítulo / Resumo -->
+                        <div>
+                            <label class="control-label">Subtítulo / Resumo Breve</label>
+                            <input type="text" id="noticia-subtitulo" class="mobile-input" placeholder="Breve introdução para os cartões no site...">
+                        </div>
+
+                        <div class="control-row">
+                            <!-- Categoria -->
+                            <div class="control-group">
+                                <label class="control-label">Categoria</label>
+                                <select id="noticia-categoria" class="mobile-select">
+                                    <option value="Clube" selected>Clube</option>
+                                    <option value="Jogos">Jogos & Resultados</option>
+                                    <option value="Formação">Formação</option>
+                                    <option value="Eventos">Eventos</option>
+                                    <option value="Torneio">Torneio Eurocidade</option>
+                                </select>
+                            </div>
+
+                            <!-- Data de Publicação -->
+                            <div class="control-group">
+                                <label class="control-label">Data</label>
+                                <input type="date" id="noticia-data" class="mobile-input">
+                            </div>
+                        </div>
+
+                        <!-- Imagem de Capa -->
+                        <div>
+                            <label class="control-label">Imagem de Capa (Upload ou URL)</label>
+                            <div style="display: flex; gap: 8px; margin-bottom: 8px;">
+                                <input type="file" id="noticia-file-img" accept="image/*" class="mobile-input" style="padding: 8px; font-size: 0.8rem; flex: 1;">
+                            </div>
+                            <input type="url" id="noticia-url-img" class="mobile-input" placeholder="Ou cola o link direto da imagem (https://...)">
+                            
+                            <div class="news-preview-img-container" id="container-preview-img">
+                                <span id="preview-placeholder-text" style="font-size: 0.82rem; color: #94a3b8;">📷 Nenhuma imagem selecionada</span>
+                                <img id="preview-img-element" src="" alt="Preview" style="display: none;">
+                            </div>
+                        </div>
+
+                        <!-- Destaque Principal -->
+                        <div style="display: flex; align-items: center; gap: 8px; padding: 10px 12px; background: rgba(126, 34, 206, 0.05); border-radius: 8px; border: 1px solid rgba(126, 34, 206, 0.15);">
+                            <input type="checkbox" id="noticia-destaque" style="width: 18px; height: 18px; cursor: pointer; accent-color: var(--primary);">
+                            <label for="noticia-destaque" style="font-size: 0.85rem; font-weight: 600; color: var(--text-main); cursor: pointer;">
+                                ⭐ Marcar como Destaque Principal na Página Inicial
+                            </label>
+                        </div>
+
+                        <!-- Conteúdo Completo -->
+                        <div>
+                            <label class="control-label">Texto da Notícia (Conteúdo Completo) *</label>
+                            <textarea id="noticia-conteudo" class="mobile-input" rows="8" placeholder="Escreve o artigo completo aqui..." required style="resize: vertical; line-height: 1.5; font-size: 0.95rem;"></textarea>
+                        </div>
+
+                        <!-- Autor / Assinatura -->
+                        <div>
+                            <label class="control-label">Autor / Assinatura</label>
+                            <input type="text" id="noticia-autor" class="mobile-input" placeholder="Ex: Comunicação BCV">
+                        </div>
+
+                        <!-- Mensagem de Feedback -->
+                        <div id="form-feedback-msg" style="display: none; font-size: 0.85rem; font-weight: 600; text-align: center; padding: 8px; border-radius: 6px;"></div>
+
+                        <!-- Botões de Ação -->
+                        <div style="display: flex; flex-direction: column; gap: 10px; margin-top: 10px;">
+                            <button type="submit" id="btn-publicar-noticia" class="btn-save-floating" style="position: static; background: #059669;">
+                                🚀 Publicar Notícia no Site
+                            </button>
+                            <button type="button" id="btn-salvar-rascunho" class="btn-call" style="background: #f8fafc; border-color: #cbd5e1; color: #475569;">
+                                💾 Guardar como Rascunho (Não Publicada)
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </section>
+
+        </main>
+
+        <!-- ======================================================= -->
+        <!-- MODAL DE LEITURA / PREVIEW DA NOTÍCIA                   -->
+        <!-- ======================================================= -->
+        <div id="modal-noticia-preview" class="modal-overlay">
+            <div class="modal-sheet" style="max-height: 85vh; overflow-y: auto;">
+                <div class="modal-sheet-header">
+                    <span class="badge-category" id="modal-prev-cat">Categoria</span>
+                    <button type="button" class="btn-close-sheet" onclick="closeNewsPreviewModal()">✕</button>
+                </div>
+                <div style="padding-top: 10px;">
+                    <img id="modal-prev-img" src="" alt="Capa" style="width: 100%; max-height: 220px; object-fit: cover; border-radius: 10px; margin-bottom: 12px; display: none;">
+                    <h2 id="modal-prev-title" style="font-size: 1.2rem; font-weight: 800; color: var(--text-main); margin-bottom: 6px; line-height: 1.3;"></h2>
+                    <div style="font-size: 0.8rem; color: var(--text-muted); margin-bottom: 14px;" id="modal-prev-meta"></div>
+                    <div id="modal-prev-body" style="font-size: 0.95rem; line-height: 1.6; color: var(--text-main); white-space: pre-wrap;"></div>
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+    <!-- Scripts -->
+    <script src="js/config.js"></script>
+    <script src="js/redator.js?v=20260901_1"></script>
+</body>
+</html>

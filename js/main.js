@@ -105,10 +105,11 @@ document.addEventListener('DOMContentLoaded', () => {
     // Run on scroll
     window.addEventListener('scroll', revealFunction);
     
-    // 4. Carregar Destaques do Portal (Agenda e Aniversariantes), Menu Equipas e Configurações
+    // 4. Carregar Destaques do Portal (Agenda e Aniversariantes), Notícias, Menu Equipas e Configurações
     if (typeof window.supabase !== 'undefined' && typeof SUPABASE_URL !== 'undefined') {
         const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
         loadPortalHighlights(supabase);
+        loadNoticiasIndex(supabase);
         loadEquipasMenu(supabase);
         loadGlobalClubConfig(supabase);
     }
@@ -384,4 +385,152 @@ async function loadGlobalClubConfig(supabase) {
         console.warn("Aviso ao carregar clube_config global:", e);
     }
 }
+
+// =========================================================================
+// CARREGAMENTO DINÂMICO DE NOTÍCIAS NO INDEX (HOMEPAGE)
+// =========================================================================
+let publicNoticiasCache = [];
+
+async function loadNoticiasIndex(supabase) {
+    const featuredCard = document.getElementById('noticia-featured-card');
+    if (!featuredCard) return;
+
+    try {
+        const { data: noticias, error } = await supabase
+            .from('noticias')
+            .select('*')
+            .eq('publicada', true)
+            .order('destaque', { ascending: false })
+            .order('data_publicacao', { ascending: false })
+            .limit(6);
+
+        if (error || !noticias || noticias.length === 0) return;
+
+        publicNoticiasCache = noticias;
+
+        // 1. Notícia Principal em Destaque
+        const principal = noticias[0];
+        const elCat = document.getElementById('noticia-feat-cat');
+        const elData = document.getElementById('noticia-feat-data');
+        const elTitle = document.getElementById('noticia-feat-title');
+        const elDesc = document.getElementById('noticia-feat-desc');
+        const elBtn = document.getElementById('noticia-feat-btn');
+        const elImg = document.getElementById('noticia-feat-img');
+
+        if (elCat) elCat.textContent = principal.categoria || 'Clube';
+        if (elData && principal.data_publicacao) {
+            elData.textContent = new Date(principal.data_publicacao).toLocaleDateString('pt-PT', { day: 'numeric', month: 'long', year: 'numeric' });
+        }
+        if (elTitle) elTitle.textContent = principal.titulo;
+        if (elDesc) elDesc.textContent = principal.subtitulo || (principal.conteudo ? principal.conteudo.substring(0, 160) + '...' : '');
+
+        if (elImg) {
+            if (principal.imagem_url) {
+                elImg.style.backgroundImage = `url('${principal.imagem_url}')`;
+                elImg.style.display = 'block';
+            } else {
+                elImg.style.display = 'none';
+            }
+        }
+
+        if (elBtn) {
+            elBtn.textContent = 'Ler Artigo Completo →';
+            elBtn.removeAttribute('href');
+            elBtn.style.cursor = 'pointer';
+            elBtn.onclick = (e) => {
+                e.preventDefault();
+                openPublicNoticiaModal(principal.id);
+            };
+        }
+
+        // 2. Notícias Secundárias (Grelha)
+        const gridSecondary = document.getElementById('noticias-grid-secondary');
+        if (gridSecondary && noticias.length > 1) {
+            gridSecondary.innerHTML = '';
+            gridSecondary.style.display = 'grid';
+
+            for (let i = 1; i < noticias.length; i++) {
+                const n = noticias[i];
+                const dataFmt = n.data_publicacao ? new Date(n.data_publicacao).toLocaleDateString('pt-PT', { day: 'numeric', month: 'short', year: 'numeric' }) : '';
+                const imgHtml = n.imagem_url 
+                    ? `<img src="${n.imagem_url}" class="noticia-mini-img" alt="${n.titulo}">`
+                    : `<div class="noticia-mini-img" style="display: flex; align-items: center; justify-content: center; font-size: 2rem; color: #94a3b8;">🏀</div>`;
+
+                const card = document.createElement('div');
+                card.className = 'noticia-mini-card';
+                card.innerHTML = `
+                    ${imgHtml}
+                    <div class="noticia-mini-body">
+                        <div>
+                            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px;">
+                                <span class="badge-category" style="background: rgba(126, 34, 206, 0.08); color: #7e22ce; font-weight: 700; padding: 2px 7px; border-radius: 4px; font-size: 0.72rem;">${n.categoria || 'Clube'}</span>
+                                <span style="font-size: 0.75rem; color: var(--text-secondary);">${dataFmt}</span>
+                            </div>
+                            <h3 class="noticia-mini-title">${n.titulo}</h3>
+                            <p class="noticia-mini-desc">${n.subtitulo || (n.conteudo ? n.conteudo.substring(0, 120) + '...' : '')}</p>
+                        </div>
+                        <button type="button" class="btn btn-secondary" style="width: 100%; padding: 8px 14px; font-size: 0.85rem; cursor: pointer;" onclick="openPublicNoticiaModal(${n.id})">
+                            Ler Notícia →
+                        </button>
+                    </div>
+                `;
+                gridSecondary.appendChild(card);
+            }
+        }
+
+    } catch (err) {
+        console.warn("Aviso ao carregar notícias no index:", err);
+    }
+}
+
+window.openPublicNoticiaModal = function(id) {
+    const n = publicNoticiasCache.find(item => item.id === id);
+    if (!n) return;
+
+    const modal = document.getElementById('modal-noticia-publica');
+    const content = document.getElementById('modal-noticia-publica-content');
+    if (!modal || !content) return;
+
+    const dataFmt = n.data_publicacao ? new Date(n.data_publicacao).toLocaleDateString('pt-PT', { day: 'numeric', month: 'long', year: 'numeric' }) : '';
+    const imgHtml = n.imagem_url ? `<img src="${n.imagem_url}" style="width: 100%; max-height: 340px; object-fit: cover;" alt="${n.titulo}">` : '';
+
+    content.innerHTML = `
+        ${imgHtml}
+        <div style="padding: 24px;">
+            <div style="display: flex; gap: 8px; align-items: center; margin-bottom: 8px; flex-wrap: wrap;">
+                <span class="badge-category" style="background: rgba(126, 34, 206, 0.1); color: #7e22ce; font-weight: 700; padding: 3px 8px; border-radius: 4px; font-size: 0.78rem;">${n.categoria || 'Clube'}</span>
+                <span style="font-size: 0.82rem; color: var(--text-secondary);">📅 ${dataFmt}</span>
+                <span style="font-size: 0.82rem; color: var(--text-secondary);">✍️ ${n.autor || 'BCV Comunicação'}</span>
+            </div>
+            <h1 style="font-size: 1.4rem; font-weight: 800; color: var(--text-primary); margin-bottom: 8px; line-height: 1.3;">${n.titulo}</h1>
+            ${n.subtitulo ? `<p style="font-size: 1rem; color: var(--text-secondary); font-weight: 500; margin-bottom: 16px; line-height: 1.4;">${n.subtitulo}</p>` : ''}
+            <hr style="border: 0; border-top: 1px solid var(--border-color); margin: 16px 0;">
+            <div style="font-size: 0.95rem; line-height: 1.7; color: var(--text-primary); white-space: pre-wrap;">${n.conteudo}</div>
+        </div>
+    `;
+
+    modal.style.display = 'flex';
+    document.body.style.overflow = 'hidden';
+};
+
+window.closePublicNoticiaModal = function() {
+    const modal = document.getElementById('modal-noticia-publica');
+    if (modal) {
+        modal.style.display = 'none';
+        document.body.style.overflow = '';
+    }
+};
+
+const btnClosePublicNoticia = document.getElementById('btn-close-noticia-publica');
+if (btnClosePublicNoticia) {
+    btnClosePublicNoticia.addEventListener('click', closePublicNoticiaModal);
+}
+
+const modalNoticiaPublica = document.getElementById('modal-noticia-publica');
+if (modalNoticiaPublica) {
+    modalNoticiaPublica.addEventListener('click', (e) => {
+        if (e.target === modalNoticiaPublica) closePublicNoticiaModal();
+    });
+}
+
 

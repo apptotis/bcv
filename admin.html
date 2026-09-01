@@ -109,6 +109,7 @@
                                 <option value="admin">Administrador Total (Acesso a Tudo)</option>
                                 <option value="diretor">Diretor de Campo / Seccionista (App Mobile)</option>
                                 <option value="treinador">Treinador (App Mobile Presenças / Plantel)</option>
+                                <option value="redator">Redator de Notícias (App Mobile Notícias)</option>
                                 <option value="personalizado">Personalizado (Definir Menus)</option>
                             </select>
 
@@ -221,8 +222,160 @@
                     </div>
                 </div>
                 
-                <!-- Outras Tabs (Em Desenvolvimento) -->
-                <div id="tab-noticias" class="tab-pane hidden"><h2>Notícias (Em Breve)</h2></div>
+                <!-- Tab: Notícias -->
+                <div id="tab-noticias" class="tab-pane hidden">
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; flex-wrap: wrap; gap: 10px;">
+                        <div>
+                            <h2>Gestão de Notícias do Clube</h2>
+                            <p style="color: var(--text-secondary); font-size: 0.9rem; margin-top: 4px;">Crie, edite e publique artigos que surgirão automaticamente na página inicial do site do BCV.</p>
+                        </div>
+                        <div style="display: flex; gap: 10px;">
+                            <button id="btn-toggle-form-noticia" class="btn-primary" style="width: auto; padding: 8px 18px;">➕ Nova Notícia</button>
+                            <button id="btn-refresh-noticias" class="btn-secondary" style="width: auto; padding: 8px 16px;">🔄 Atualizar</button>
+                        </div>
+                    </div>
+
+                    <!-- Resumo Estatístico de Notícias -->
+                    <div class="metrics-grid" style="grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); margin-bottom: 25px;">
+                        <div class="metric-card">
+                            <h3>Total Notícias</h3>
+                            <p class="metric-number" id="metric-noticias-total">0</p>
+                        </div>
+                        <div class="metric-card">
+                            <h3>Publicadas no Site</h3>
+                            <p class="metric-number" id="metric-noticias-pub" style="color: #16a34a;">0</p>
+                        </div>
+                        <div class="metric-card">
+                            <h3>Rascunhos</h3>
+                            <p class="metric-number" id="metric-noticias-draft" style="color: #d97706;">0</p>
+                        </div>
+                    </div>
+
+                    <!-- Formulário de Criação / Edição de Notícia (Recolhível) -->
+                    <div id="container-form-noticia" class="welcome-box" style="margin-bottom: 30px; display: none;">
+                        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
+                            <h3 id="form-noticia-admin-title" style="margin: 0; color: var(--text-primary);">Criar Nova Notícia</h3>
+                            <button type="button" id="btn-fechar-form-noticia" style="background: none; border: none; font-size: 1.2rem; cursor: pointer; color: var(--text-secondary);">✕</button>
+                        </div>
+
+                        <form id="form-noticia-admin" style="display: flex; flex-direction: column; gap: 16px;">
+                            <input type="hidden" id="admin-noticia-id">
+
+                            <div style="display: grid; grid-template-columns: 2fr 1fr; gap: 16px;">
+                                <div>
+                                    <label class="control-label" style="font-weight: 600; font-size: 0.85rem; margin-bottom: 6px; display: block;">Título da Notícia *</label>
+                                    <input type="text" id="admin-noticia-titulo" placeholder="Ex: Grande Vitória dos Sub 14 no Torneio" required class="admin-input">
+                                </div>
+                                <div>
+                                    <label class="control-label" style="font-weight: 600; font-size: 0.85rem; margin-bottom: 6px; display: block;">Categoria</label>
+                                    <select id="admin-noticia-categoria" class="admin-input">
+                                        <option value="Clube">Clube</option>
+                                        <option value="Jogos">Jogos & Resultados</option>
+                                        <option value="Formação">Formação</option>
+                                        <option value="Eventos">Eventos</option>
+                                        <option value="Torneio">Torneio Eurocidade</option>
+                                    </select>
+                                </div>
+                            </div>
+
+                            <div>
+                                <label class="control-label" style="font-weight: 600; font-size: 0.85rem; margin-bottom: 6px; display: block;">Subtítulo / Resumo Breve</label>
+                                <input type="text" id="admin-noticia-subtitulo" placeholder="Breve introdução que surge nos cartões da página inicial..." class="admin-input">
+                            </div>
+
+                            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px;">
+                                <div>
+                                    <label class="control-label" style="font-weight: 600; font-size: 0.85rem; margin-bottom: 6px; display: block;">Data de Publicação</label>
+                                    <input type="date" id="admin-noticia-data" required class="admin-input">
+                                </div>
+                                <div>
+                                    <label class="control-label" style="font-weight: 600; font-size: 0.85rem; margin-bottom: 6px; display: block;">Autor / Assinatura</label>
+                                    <input type="text" id="admin-noticia-autor" placeholder="Ex: Comunicação BCV" class="admin-input">
+                                </div>
+                            </div>
+
+                            <!-- Imagem de Capa -->
+                            <div style="background: #f8fafc; border: 1px solid var(--border-color); border-radius: 8px; padding: 16px;">
+                                <label class="control-label" style="font-weight: 600; font-size: 0.85rem; margin-bottom: 6px; display: block;">Imagem de Capa (Upload ou URL Direto)</label>
+                                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 10px;">
+                                    <input type="file" id="admin-noticia-file" accept="image/*" class="admin-input" style="padding: 7px;">
+                                    <input type="url" id="admin-noticia-url" placeholder="Ou cole URL da imagem (https://...)" class="admin-input">
+                                </div>
+                                <div id="admin-noticia-preview-box" style="max-width: 320px; height: 160px; border-radius: 8px; overflow: hidden; background: #e2e8f0; display: none; align-items: center; justify-content: center;">
+                                    <img id="admin-noticia-preview-img" src="" alt="Preview" style="width: 100%; height: 100%; object-fit: cover;">
+                                </div>
+                            </div>
+
+                            <!-- Destaque Principal -->
+                            <div style="display: flex; align-items: center; gap: 10px; padding: 12px; background: rgba(126, 34, 206, 0.04); border-radius: 8px; border: 1px solid rgba(126, 34, 206, 0.15);">
+                                <input type="checkbox" id="admin-noticia-destaque" style="width: 18px; height: 18px; cursor: pointer; accent-color: #7e22ce;">
+                                <label for="admin-noticia-destaque" style="font-weight: 600; font-size: 0.9rem; color: var(--text-primary); cursor: pointer;">
+                                    ⭐ Marcar como Notícia de Destaque Principal (topo da página inicial)
+                                </label>
+                            </div>
+
+                            <!-- Conteúdo Completo -->
+                            <div>
+                                <label class="control-label" style="font-weight: 600; font-size: 0.85rem; margin-bottom: 6px; display: block;">Conteúdo Completo do Artigo *</label>
+                                <textarea id="admin-noticia-conteudo" rows="10" placeholder="Escreva o texto completo da notícia..." required class="admin-input" style="resize: vertical; line-height: 1.6;"></textarea>
+                            </div>
+
+                            <div id="admin-noticia-msg" style="display: none; font-weight: 600; padding: 10px; border-radius: 6px;"></div>
+
+                            <!-- Botões de Ação -->
+                            <div style="display: flex; gap: 12px; margin-top: 10px;">
+                                <button type="submit" id="btn-admin-publicar-noticia" class="btn-primary" style="width: auto; padding: 10px 24px; background: #059669;">
+                                    🚀 Publicar Notícia no Site
+                                </button>
+                                <button type="button" id="btn-admin-rascunho-noticia" class="btn-secondary" style="width: auto; padding: 10px 20px;">
+                                    💾 Guardar como Rascunho
+                                </button>
+                                <button type="button" id="btn-admin-cancelar-noticia" class="btn-secondary" style="width: auto; padding: 10px 18px; margin-left: auto;">
+                                    Cancelar
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+
+                    <!-- Filtros e Barra de Pesquisa -->
+                    <div style="display: flex; gap: 15px; margin-bottom: 15px; flex-wrap: wrap; align-items: center;">
+                        <input type="text" id="admin-filtro-noticias" placeholder="🔍 Pesquisar por título, autor ou categoria..." class="admin-input" style="flex: 1; min-width: 250px;">
+                        <select id="admin-filtro-status-noticias" class="admin-input" style="width: auto; min-width: 160px;">
+                            <option value="todos">Todos os Estados</option>
+                            <option value="publicadas">🟢 Publicadas</option>
+                            <option value="rascunhos">🟡 Rascunhos</option>
+                        </select>
+                        <select id="admin-filtro-cat-noticias" class="admin-input" style="width: auto; min-width: 160px;">
+                            <option value="todas">Todas as Categorias</option>
+                            <option value="Clube">Clube</option>
+                            <option value="Jogos">Jogos & Resultados</option>
+                            <option value="Formação">Formação</option>
+                            <option value="Eventos">Eventos</option>
+                            <option value="Torneio">Torneio Eurocidade</option>
+                        </select>
+                    </div>
+
+                    <!-- Tabela de Notícias -->
+                    <div class="table-responsive">
+                        <table class="admin-table">
+                            <thead>
+                                <tr>
+                                    <th style="width: 70px;">Capa</th>
+                                    <th>Título & Resumo</th>
+                                    <th>Categoria</th>
+                                    <th>Autor</th>
+                                    <th>Data</th>
+                                    <th>Estado</th>
+                                    <th style="text-align: center;">Destaque</th>
+                                    <th style="text-align: center; width: 120px;">Ações</th>
+                                </tr>
+                            </thead>
+                            <tbody id="noticias-table-body">
+                                <tr><td colspan="8" style="padding: 15px; text-align: center;">A carregar notícias...</td></tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
                 <!-- Tab: Agenda -->
                 <div id="tab-agenda" class="tab-pane hidden">
                     <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">

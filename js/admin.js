@@ -68,18 +68,22 @@ document.addEventListener('DOMContentLoaded', async () => {
             }
 
             const role = (profile.role || 'admin').toLowerCase();
-            const allowedRoles = ['admin', 'editor', 'treinador', 'diretor', 'seccionista', 'personalizado', 'user'];
+            const allowedRoles = ['admin', 'editor', 'redator', 'treinador', 'diretor', 'seccionista', 'personalizado', 'user'];
             const userPerms = Array.isArray(profile.permissoes) ? profile.permissoes : [];
             const isAllowed = allowedRoles.includes(role) || userPerms.length > 0 || role === 'admin';
 
             if (isAllowed) {
-                // Redirecionamento automático para diretores de campo / seccionistas e treinadores
+                // Redirecionamento automático para portais dedicados mobile
                 if (role === 'diretor' || role === 'seccionista') {
                     window.location.href = 'diretor.html';
                     return;
                 }
                 if (role === 'treinador') {
                     window.location.href = 'treinador.html';
+                    return;
+                }
+                if (role === 'redator') {
+                    window.location.href = 'redator.html';
                     return;
                 }
 
@@ -401,6 +405,7 @@ document.addEventListener('DOMContentLoaded', async () => {
                 const isAdmin = uRole === 'admin';
                 const isDiretor = uRole === 'diretor' || uRole === 'seccionista';
                 const isTreinador = uRole === 'treinador';
+                const isRedator = uRole === 'redator' || uRole === 'editor';
 
                 let roleBadgeHtml = '';
                 if (isAdmin) {
@@ -409,6 +414,8 @@ document.addEventListener('DOMContentLoaded', async () => {
                     roleBadgeHtml = '<span style="background: rgba(16, 185, 129, 0.15); color: #059669; font-weight: 700; padding: 2px 8px; border-radius: 6px; font-size: 0.8rem;">📱 Diretor de Campo</span>';
                 } else if (isTreinador) {
                     roleBadgeHtml = '<span style="background: rgba(59, 130, 246, 0.15); color: #2563eb; font-weight: 700; padding: 2px 8px; border-radius: 6px; font-size: 0.8rem;">🏀 Treinador</span>';
+                } else if (isRedator) {
+                    roleBadgeHtml = '<span style="background: rgba(234, 88, 12, 0.15); color: #c2410c; font-weight: 700; padding: 2px 8px; border-radius: 6px; font-size: 0.8rem;">📰 Redator</span>';
                 } else {
                     roleBadgeHtml = '<span style="color: var(--text-secondary); font-size: 0.85rem;">Personalizado</span>';
                 }
@@ -434,6 +441,8 @@ document.addEventListener('DOMContentLoaded', async () => {
                     } else {
                         permissoesBadgeHtml = `<span style="background: rgba(59, 130, 246, 0.08); color: #1d4ed8; padding: 3px 8px; border-radius: 4px; font-size: 0.8rem;">Todas as Equipas</span>`;
                     }
+                } else if (isRedator) {
+                    permissoesBadgeHtml = '<span style="background: rgba(234, 88, 12, 0.1); color: #c2410c; padding: 3px 8px; border-radius: 4px; font-weight: 600; font-size: 0.8rem; border: 1px solid rgba(234, 88, 12, 0.25);">📰 Notícias & Artigos</span>';
                 } else {
                     const userPerms = Array.isArray(user.permissoes) ? user.permissoes : [];
                     const escList = (user.escalao_afeto || '').split(',').map(s => s.trim()).filter(Boolean);
@@ -2173,6 +2182,374 @@ document.addEventListener('DOMContentLoaded', async () => {
         });
     }
 
+
+    // =========================================================================
+    // GESTÃO DE NOTÍCIAS DO CLUBE (CRUD COMPLETO NO ADMIN)
+    // =========================================================================
+    let currentAdminNoticias = [];
+
+    const btnToggleFormNoticia = document.getElementById('btn-toggle-form-noticia');
+    const btnRefreshNoticias = document.getElementById('btn-refresh-noticias');
+    const containerFormNoticia = document.getElementById('container-form-noticia');
+    const btnFecharFormNoticia = document.getElementById('btn-fechar-form-noticia');
+    const formNoticiaAdmin = document.getElementById('form-noticia-admin');
+    const formNoticiaAdminTitle = document.getElementById('form-noticia-admin-title');
+    const adminNoticiaId = document.getElementById('admin-noticia-id');
+    const adminNoticiaTitulo = document.getElementById('admin-noticia-titulo');
+    const adminNoticiaCategoria = document.getElementById('admin-noticia-categoria');
+    const adminNoticiaSubtitulo = document.getElementById('admin-noticia-subtitulo');
+    const adminNoticiaData = document.getElementById('admin-noticia-data');
+    const adminNoticiaAutor = document.getElementById('admin-noticia-autor');
+    const adminNoticiaFile = document.getElementById('admin-noticia-file');
+    const adminNoticiaUrl = document.getElementById('admin-noticia-url');
+    const adminNoticiaPreviewBox = document.getElementById('admin-noticia-preview-box');
+    const adminNoticiaPreviewImg = document.getElementById('admin-noticia-preview-img');
+    const adminNoticiaDestaque = document.getElementById('admin-noticia-destaque');
+    const adminNoticiaConteudo = document.getElementById('admin-noticia-conteudo');
+    const adminNoticiaMsg = document.getElementById('admin-noticia-msg');
+    const btnAdminPublicar = document.getElementById('btn-admin-publicar-noticia');
+    const btnAdminRascunho = document.getElementById('btn-admin-rascunho-noticia');
+    const btnAdminCancelar = document.getElementById('btn-admin-cancelar-noticia');
+
+    const metricNoticiasTotal = document.getElementById('metric-noticias-total');
+    const metricNoticiasPub = document.getElementById('metric-noticias-pub');
+    const metricNoticiasDraft = document.getElementById('metric-noticias-draft');
+    const noticiasTableBody = document.getElementById('noticias-table-body');
+    const adminFiltroNoticias = document.getElementById('admin-filtro-noticias');
+    const adminFiltroStatusNoticias = document.getElementById('admin-filtro-status-noticias');
+    const adminFiltroCatNoticias = document.getElementById('admin-filtro-cat-noticias');
+
+    // Toggle formulário
+    if (btnToggleFormNoticia) {
+        btnToggleFormNoticia.addEventListener('click', () => {
+            resetAdminNoticiaForm();
+            if (containerFormNoticia) {
+                containerFormNoticia.style.display = 'block';
+                containerFormNoticia.scrollIntoView({ behavior: 'smooth' });
+            }
+        });
+    }
+
+    if (btnFecharFormNoticia) {
+        btnFecharFormNoticia.addEventListener('click', () => {
+            if (containerFormNoticia) containerFormNoticia.style.display = 'none';
+        });
+    }
+
+    if (btnAdminCancelar) {
+        btnAdminCancelar.addEventListener('click', () => {
+            if (containerFormNoticia) containerFormNoticia.style.display = 'none';
+            resetAdminNoticiaForm();
+        });
+    }
+
+    if (btnRefreshNoticias) {
+        btnRefreshNoticias.addEventListener('click', loadNoticiasAdmin);
+    }
+
+    function updateAdminImagePreview(src) {
+        if (src && src.trim() !== '') {
+            if (adminNoticiaPreviewImg) adminNoticiaPreviewImg.src = src;
+            if (adminNoticiaPreviewBox) adminNoticiaPreviewBox.style.display = 'flex';
+        } else {
+            if (adminNoticiaPreviewImg) adminNoticiaPreviewImg.src = '';
+            if (adminNoticiaPreviewBox) adminNoticiaPreviewBox.style.display = 'none';
+        }
+    }
+
+    if (adminNoticiaUrl) {
+        adminNoticiaUrl.addEventListener('input', () => {
+            updateAdminImagePreview(adminNoticiaUrl.value);
+        });
+    }
+
+    if (adminNoticiaFile) {
+        adminNoticiaFile.addEventListener('change', (e) => {
+            const file = e.target.files[0];
+            if (!file) return;
+            const reader = new FileReader();
+            reader.onload = (ev) => {
+                updateAdminImagePreview(ev.target.result);
+            };
+            reader.readAsDataURL(file);
+        });
+    }
+
+    async function resolveAdminImageUrl() {
+        if (adminNoticiaFile && adminNoticiaFile.files && adminNoticiaFile.files.length > 0) {
+            const file = adminNoticiaFile.files[0];
+            const fileExt = file.name.split('.').pop();
+            const fileName = `noticia_${Date.now()}_${Math.random().toString(36).substring(7)}.${fileExt}`;
+            const filePath = `noticias/${fileName}`;
+
+            try {
+                let { error: uploadError } = await supabase.storage.from('noticias').upload(filePath, file);
+                if (uploadError) {
+                    const { error: galeriaErr } = await supabase.storage.from('galeria').upload(filePath, file);
+                    if (galeriaErr) {
+                        return adminNoticiaPreviewImg?.src || '';
+                    } else {
+                        const { data: urlData } = supabase.storage.from('galeria').getPublicUrl(filePath);
+                        return urlData.publicUrl;
+                    }
+                } else {
+                    const { data: urlData } = supabase.storage.from('noticias').getPublicUrl(filePath);
+                    return urlData.publicUrl;
+                }
+            } catch (err) {
+                return adminNoticiaPreviewImg?.src || '';
+            }
+        }
+        return adminNoticiaUrl?.value.trim() || adminNoticiaPreviewImg?.src || '';
+    }
+
+    function resetAdminNoticiaForm() {
+        if (formNoticiaAdmin) formNoticiaAdmin.reset();
+        if (adminNoticiaId) adminNoticiaId.value = '';
+        if (formNoticiaAdminTitle) formNoticiaAdminTitle.textContent = 'Criar Nova Notícia';
+        if (adminNoticiaData) adminNoticiaData.value = new Date().toISOString().split('T')[0];
+        if (adminNoticiaAutor) adminNoticiaAutor.value = adminNameSpan?.textContent || 'Comunicação BCV';
+        if (adminNoticiaMsg) adminNoticiaMsg.style.display = 'none';
+        updateAdminImagePreview('');
+    }
+
+    async function loadNoticiasAdmin() {
+        if (!noticiasTableBody) return;
+        noticiasTableBody.innerHTML = '<tr><td colspan="8" style="padding: 15px; text-align: center;">A carregar notícias...</td></tr>';
+
+        try {
+            const { data, error } = await supabase
+                .from('noticias')
+                .select('*')
+                .order('data_publicacao', { ascending: false })
+                .order('created_at', { ascending: false });
+
+            if (error) {
+                if (error.code === '42P01') {
+                    noticiasTableBody.innerHTML = '<tr><td colspan="8" style="padding: 20px; text-align: center; color: #dc2626;">A tabela "noticias" ainda não foi criada no Supabase. Execute o script setup_noticias.sql.</td></tr>';
+                    return;
+                }
+                throw error;
+            }
+
+            currentAdminNoticias = data || [];
+            updateNoticiasMetrics();
+            renderNoticiasAdminTable();
+
+        } catch (err) {
+            console.error("Erro ao carregar notícias no admin:", err);
+            noticiasTableBody.innerHTML = `<tr><td colspan="8" style="padding: 15px; text-align: center; color: red;">Erro: ${err.message}</td></tr>`;
+        }
+    }
+
+    function updateNoticiasMetrics() {
+        const total = currentAdminNoticias.length;
+        const pub = currentAdminNoticias.filter(n => n.publicada).length;
+        const draft = total - pub;
+
+        if (metricNoticiasTotal) metricNoticiasTotal.textContent = total;
+        if (metricNoticiasPub) metricNoticiasPub.textContent = pub;
+        if (metricNoticiasDraft) metricNoticiasDraft.textContent = draft;
+    }
+
+    function renderNoticiasAdminTable() {
+        if (!noticiasTableBody) return;
+
+        const search = (adminFiltroNoticias?.value || '').toLowerCase().trim();
+        const statusFiltro = adminFiltroStatusNoticias?.value || 'todos';
+        const catFiltro = adminFiltroCatNoticias?.value || 'todas';
+
+        const filtradas = currentAdminNoticias.filter(n => {
+            if (statusFiltro === 'publicadas' && !n.publicada) return false;
+            if (statusFiltro === 'rascunhos' && n.publicada) return false;
+            if (catFiltro !== 'todas' && (n.categoria || '').toLowerCase() !== catFiltro.toLowerCase()) return false;
+
+            if (search) {
+                const tit = (n.titulo || '').toLowerCase();
+                const aut = (n.autor || '').toLowerCase();
+                const cat = (n.categoria || '').toLowerCase();
+                return tit.includes(search) || aut.includes(search) || cat.includes(search);
+            }
+            return true;
+        });
+
+        if (filtradas.length === 0) {
+            noticiasTableBody.innerHTML = '<tr><td colspan="8" style="padding: 20px; text-align: center; color: var(--text-secondary);">Nenhuma notícia encontrada.</td></tr>';
+            return;
+        }
+
+        noticiasTableBody.innerHTML = '';
+        filtradas.forEach(n => {
+            const tr = document.createElement('tr');
+            const dataFmt = n.data_publicacao ? new Date(n.data_publicacao).toLocaleDateString('pt-PT') : '-';
+            const imgThumb = n.imagem_url 
+                ? `<img src="${n.imagem_url}" style="width: 50px; height: 35px; object-fit: cover; border-radius: 4px;" alt="Thumb">` 
+                : `<div style="width: 50px; height: 35px; background: #e2e8f0; border-radius: 4px; display: flex; align-items: center; justify-content: center; font-size: 0.9rem;">🏀</div>`;
+
+            const statusHtml = n.publicada 
+                ? `<span style="background: rgba(16, 185, 129, 0.12); color: #059669; padding: 3px 8px; border-radius: 4px; font-weight: 700; font-size: 0.75rem;">🟢 Publicada</span>` 
+                : `<span style="background: rgba(245, 158, 11, 0.12); color: #d97706; padding: 3px 8px; border-radius: 4px; font-weight: 700; font-size: 0.75rem;">🟡 Rascunho</span>`;
+
+            const destaqueHtml = n.destaque 
+                ? `<button class="btn-action" title="Remover Destaque" onclick="window.toggleDestaqueAdmin(${n.id}, false)" style="color: #f59e0b; font-size: 1.1rem;">⭐</button>` 
+                : `<button class="btn-action" title="Marcar Destaque" onclick="window.toggleDestaqueAdmin(${n.id}, true)" style="color: #cbd5e1; font-size: 1.1rem;">☆</button>`;
+
+            tr.innerHTML = `
+                <td style="padding: 10px; text-align: center;">${imgThumb}</td>
+                <td style="padding: 10px;">
+                    <strong style="color: var(--text-primary); font-size: 0.92rem;">${n.titulo}</strong>
+                    ${n.subtitulo ? `<br><small style="color: var(--text-secondary);">${n.subtitulo}</small>` : ''}
+                </td>
+                <td style="padding: 10px;"><span style="background: rgba(126, 34, 206, 0.08); color: #7e22ce; font-weight: 600; padding: 2px 7px; border-radius: 4px; font-size: 0.75rem;">${n.categoria || 'Clube'}</span></td>
+                <td style="padding: 10px; font-size: 0.85rem;">${n.autor || 'BCV'}</td>
+                <td style="padding: 10px; font-size: 0.85rem; white-space: nowrap;">${dataFmt}</td>
+                <td style="padding: 10px;">${statusHtml}</td>
+                <td style="padding: 10px; text-align: center;">${destaqueHtml}</td>
+                <td style="padding: 10px; text-align: center; white-space: nowrap;">
+                    <button class="btn-action" title="Editar Notícia" onclick="window.editNoticiaAdmin(${n.id})">✏️</button>
+                    <button class="btn-action" title="${n.publicada ? 'Despublicar' : 'Publicar'}" onclick="window.togglePublishAdmin(${n.id}, ${!n.publicada})">${n.publicada ? '⏸️' : '🚀'}</button>
+                    <button class="btn-action delete" title="Eliminar Notícia" onclick="window.deleteNoticiaAdmin(${n.id})">🗑️</button>
+                </td>
+            `;
+            noticiasTableBody.appendChild(tr);
+        });
+    }
+
+    if (adminFiltroNoticias) adminFiltroNoticias.addEventListener('input', renderNoticiasAdminTable);
+    if (adminFiltroStatusNoticias) adminFiltroStatusNoticias.addEventListener('change', renderNoticiasAdminTable);
+    if (adminFiltroCatNoticias) adminFiltroCatNoticias.addEventListener('change', renderNoticiasAdminTable);
+
+    async function saveNoticiaAdmin(isPublicar) {
+        const titulo = adminNoticiaTitulo.value.trim();
+        const conteudo = adminNoticiaConteudo.value.trim();
+
+        if (!titulo || !conteudo) {
+            alert('Por favor, preencha o Título e o Conteúdo do artigo.');
+            return;
+        }
+
+        btnAdminPublicar.disabled = true;
+        btnAdminRascunho.disabled = true;
+        adminNoticiaMsg.style.display = 'block';
+        adminNoticiaMsg.style.background = '#f1f5f9';
+        adminNoticiaMsg.style.color = '#475569';
+        adminNoticiaMsg.textContent = 'A guardar notícia...';
+
+        try {
+            const finalImgUrl = await resolveAdminImageUrl();
+            const id = adminNoticiaId.value ? Number(adminNoticiaId.value) : null;
+
+            const payload = {
+                titulo: titulo,
+                subtitulo: adminNoticiaSubtitulo.value.trim() || null,
+                categoria: adminNoticiaCategoria.value || 'Clube',
+                data_publicacao: adminNoticiaData.value || new Date().toISOString().split('T')[0],
+                conteudo: conteudo,
+                imagem_url: finalImgUrl || null,
+                destaque: adminNoticiaDestaque.checked,
+                publicada: isPublicar,
+                autor: adminNoticiaAutor.value.trim() || adminNameSpan?.textContent || 'Comunicação BCV',
+                updated_at: new Date()
+            };
+
+            let err = null;
+            if (id) {
+                const { error } = await supabase.from('noticias').update(payload).eq('id', id);
+                err = error;
+            } else {
+                const { error } = await supabase.from('noticias').insert([payload]);
+                err = error;
+            }
+
+            if (err) throw err;
+
+            adminNoticiaMsg.style.background = 'rgba(16, 185, 129, 0.15)';
+            adminNoticiaMsg.style.color = '#059669';
+            adminNoticiaMsg.textContent = isPublicar ? '✅ Notícia publicada com sucesso no site!' : '✅ Rascunho guardado com sucesso!';
+
+            setTimeout(() => {
+                resetAdminNoticiaForm();
+                if (containerFormNoticia) containerFormNoticia.style.display = 'none';
+                loadNoticiasAdmin();
+            }, 1000);
+
+        } catch (error) {
+            console.error("Erro ao guardar notícia:", error);
+            adminNoticiaMsg.style.background = 'rgba(239, 68, 68, 0.15)';
+            adminNoticiaMsg.style.color = '#dc2626';
+            adminNoticiaMsg.textContent = '❌ Erro: ' + error.message;
+        } finally {
+            btnAdminPublicar.disabled = false;
+            btnAdminRascunho.disabled = false;
+        }
+    }
+
+    if (formNoticiaAdmin) {
+        formNoticiaAdmin.addEventListener('submit', (e) => {
+            e.preventDefault();
+            saveNoticiaAdmin(true);
+        });
+    }
+
+    if (btnAdminRascunho) {
+        btnAdminRascunho.addEventListener('click', () => {
+            saveNoticiaAdmin(false);
+        });
+    }
+
+    window.editNoticiaAdmin = function(id) {
+        const n = currentAdminNoticias.find(item => item.id === id);
+        if (!n) return;
+
+        adminNoticiaId.value = n.id;
+        adminNoticiaTitulo.value = n.titulo || '';
+        adminNoticiaSubtitulo.value = n.subtitulo || '';
+        adminNoticiaCategoria.value = n.categoria || 'Clube';
+        adminNoticiaData.value = n.data_publicacao || new Date().toISOString().split('T')[0];
+        adminNoticiaUrl.value = n.imagem_url || '';
+        adminNoticiaDestaque.checked = !!n.destaque;
+        adminNoticiaConteudo.value = n.conteudo || '';
+        adminNoticiaAutor.value = n.autor || '';
+
+        updateAdminImagePreview(n.imagem_url || '');
+
+        formNoticiaAdminTitle.textContent = `Editar Notícia #${n.id}`;
+        if (containerFormNoticia) {
+            containerFormNoticia.style.display = 'block';
+            containerFormNoticia.scrollIntoView({ behavior: 'smooth' });
+        }
+    };
+
+    window.togglePublishAdmin = async function(id, novoEstado) {
+        try {
+            const { error } = await supabase.from('noticias').update({ publicada: novoEstado, updated_at: new Date() }).eq('id', id);
+            if (error) throw error;
+            loadNoticiasAdmin();
+        } catch (err) {
+            alert('Erro ao alterar publicação: ' + err.message);
+        }
+    };
+
+    window.toggleDestaqueAdmin = async function(id, novoEstado) {
+        try {
+            const { error } = await supabase.from('noticias').update({ destaque: novoEstado, updated_at: new Date() }).eq('id', id);
+            if (error) throw error;
+            loadNoticiasAdmin();
+        } catch (err) {
+            alert('Erro ao alterar destaque: ' + err.message);
+        }
+    };
+
+    window.deleteNoticiaAdmin = async function(id) {
+        if (!confirm('Tem a certeza absoluta de que deseja eliminar esta notícia?')) return;
+        try {
+            const { error } = await supabase.from('noticias').delete().eq('id', id);
+            if (error) throw error;
+            loadNoticiasAdmin();
+        } catch (err) {
+            alert('Erro ao eliminar notícia: ' + err.message);
+        }
+    };
 
     // ==========================================
     // 12. Gestão Manual de Agenda (CRUD)
@@ -4141,6 +4518,7 @@ document.addEventListener('DOMContentLoaded', async () => {
                 btn.classList.add('active');
             }
 
+            if (target === 'tab-noticias') loadNoticiasAdmin();
             if (target === 'tab-agenda') loadAgenda();
             if (target === 'tab-resultados') loadResultados();
             if (target === 'tab-equipas') loadEquipas();
