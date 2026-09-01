@@ -658,6 +658,205 @@ img {
 }
 
 /* ==========================================================================
+   Portal Homepage Design System (Homogeneidade Visual)
+   ========================================================================== */
+.portal-section-header {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    margin-bottom: 22px;
+}
+
+.portal-section-header .header-badge-icon {
+    width: 44px;
+    height: 44px;
+    border-radius: 12px;
+    background: rgba(126, 34, 206, 0.08);
+    color: var(--accent-primary);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.35rem;
+    flex-shrink: 0;
+}
+
+.portal-section-header .portal-section-title {
+    font-family: var(--font-heading);
+    font-size: 1.4rem;
+    font-weight: 800;
+    color: var(--accent-primary);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    margin: 0;
+    line-height: 1.2;
+}
+
+.portal-section-header .portal-section-desc {
+    font-size: 0.88rem;
+    color: var(--text-secondary);
+    margin-top: 3px;
+    margin-bottom: 0;
+}
+
+/* Grelha de Destaques (Agenda e Resultados) */
+.portal-highlights-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 20px;
+}
+
+@media (max-width: 768px) {
+    .portal-highlights-grid {
+        grid-template-columns: 1fr;
+    }
+}
+
+/* Card Padrão do Portal */
+.portal-card {
+    background: #ffffff;
+    border: 1px solid var(--border-color);
+    border-radius: var(--border-radius-md);
+    padding: 22px;
+    box-shadow: var(--shadow-sm);
+    transition: transform 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease;
+    display: flex;
+    flex-direction: column;
+    position: relative;
+}
+
+.portal-card:hover {
+    box-shadow: var(--shadow-md);
+    border-color: var(--accent-primary);
+}
+
+.portal-card-header {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 16px;
+    padding-bottom: 12px;
+    border-bottom: 1px solid var(--border-color);
+}
+
+.portal-card-header .card-icon-badge {
+    width: 36px;
+    height: 36px;
+    border-radius: 10px;
+    background: rgba(126, 34, 206, 0.08);
+    color: var(--accent-primary);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.15rem;
+}
+
+.portal-card-header .card-title {
+    font-family: var(--font-heading);
+    font-size: 1.15rem;
+    font-weight: 700;
+    color: var(--text-primary);
+    margin: 0;
+}
+
+.portal-card-header .card-subtitle {
+    font-size: 0.78rem;
+    color: var(--text-secondary);
+    margin-top: 1px;
+}
+
+/* Itens de Agenda */
+.game-schedule-item {
+    padding: 12px 14px;
+    background: #f8fafc;
+    border: 1px solid var(--border-color);
+    border-radius: 8px;
+    margin-bottom: 10px;
+    transition: all 0.2s ease;
+}
+
+.game-schedule-item:last-child {
+    margin-bottom: 0;
+}
+
+.game-schedule-item:hover {
+    background: #ffffff;
+    border-color: var(--accent-primary);
+    transform: translateX(3px);
+}
+
+.game-schedule-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 6px;
+    flex-wrap: wrap;
+    gap: 6px;
+}
+
+.game-teams {
+    font-size: 0.95rem;
+    font-weight: 700;
+    color: var(--text-primary);
+}
+
+.game-date-badge {
+    font-size: 0.78rem;
+    font-weight: 700;
+    color: var(--accent-primary);
+    background: rgba(126, 34, 206, 0.08);
+    padding: 3px 8px;
+    border-radius: 4px;
+}
+
+.game-meta {
+    font-size: 0.78rem;
+    color: var(--text-secondary);
+    display: flex;
+    gap: 10px;
+}
+
+/* Itens de Resultados */
+.game-result-item {
+    padding: 12px 14px;
+    background: #f8fafc;
+    border: 1px solid var(--border-color);
+    border-radius: 8px;
+    margin-bottom: 10px;
+    transition: all 0.2s ease;
+}
+
+.game-result-item:last-child {
+    margin-bottom: 0;
+}
+
+.game-result-item:hover {
+    background: #ffffff;
+    border-color: var(--accent-primary);
+    transform: translateX(3px);
+}
+
+.game-result-teams {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-size: 0.95rem;
+    font-weight: 700;
+    color: var(--text-primary);
+    margin-bottom: 4px;
+}
+
+.game-result-score {
+    font-family: var(--font-heading);
+    font-size: 1rem;
+    font-weight: 800;
+    color: var(--accent-primary);
+    background: rgba(126, 34, 206, 0.08);
+    padding: 2px 8px;
+    border-radius: 6px;
+}
+
+
+/* ==========================================================================
    Featured Card (Noticias Central)
    ========================================================================== */
 .card-featured {

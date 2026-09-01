@@ -149,40 +149,43 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // Função para carregar os álbuns no início
     async function loadPublicAlbuns() {
-        const { data, error } = await supabaseClient
-            .from('albuns')
-            .select('*')
-            .order('created_at', { ascending: false });
+        const secGaleria = document.getElementById('galeria');
 
-        if (error) {
-            gridAlbuns.innerHTML = `<p style="grid-column: 1/-1; text-align: center; color: red;">Erro ao carregar álbuns: ${error.message}</p>`;
-            return;
+        try {
+            const { data, error } = await supabaseClient
+                .from('albuns')
+                .select('*')
+                .order('created_at', { ascending: false });
+
+            if (error || !data || data.length === 0) {
+                if (secGaleria) secGaleria.style.display = 'none';
+                return;
+            }
+
+            if (secGaleria) secGaleria.style.display = 'block';
+            gridAlbuns.innerHTML = '';
+
+            data.forEach(album => {
+                const card = document.createElement('div');
+                card.className = 'album-card';
+                card.onclick = () => openPublicAlbum(album.id, album.titulo);
+
+                const capaHtml = album.capa_url 
+                    ? `<div class="album-cover"><img src="${album.capa_url}" alt="${album.titulo}"></div>` 
+                    : `<div class="album-cover" style="background: rgba(138,43,226,0.1); display:flex; align-items:center; justify-content:center; font-size:3rem; color:rgba(138,43,226,0.5);">📸</div>`;
+
+                card.innerHTML = `
+                    ${capaHtml}
+                    <div class="album-info">
+                        <h3 class="album-title" title="${album.titulo}">${album.titulo}</h3>
+                    </div>
+                `;
+                gridAlbuns.appendChild(card);
+            });
+        } catch (err) {
+            console.warn("Aviso ao carregar galeria:", err);
+            if (secGaleria) secGaleria.style.display = 'none';
         }
-
-        gridAlbuns.innerHTML = '';
-
-        if (data.length === 0) {
-            gridAlbuns.innerHTML = '<p style="grid-column: 1/-1; text-align: center; color: #a0a0ab;">A galeria está vazia neste momento.</p>';
-            return;
-        }
-
-        data.forEach(album => {
-            const card = document.createElement('div');
-            card.className = 'album-card';
-            card.onclick = () => openPublicAlbum(album.id, album.titulo);
-
-            const capaHtml = album.capa_url 
-                ? `<div class="album-cover"><img src="${album.capa_url}" alt="${album.titulo}"></div>` 
-                : `<div class="album-cover" style="background: rgba(138,43,226,0.1); display:flex; align-items:center; justify-content:center; font-size:3rem; color:rgba(138,43,226,0.5);">📸</div>`;
-
-            card.innerHTML = `
-                ${capaHtml}
-                <div class="album-info">
-                    <h3 class="album-title" title="${album.titulo}">${album.titulo}</h3>
-                </div>
-            `;
-            gridAlbuns.appendChild(card);
-        });
     }
 
     // Iniciar o carregamento

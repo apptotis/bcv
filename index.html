@@ -137,39 +137,52 @@
                 <!-- Coluna Principal (70%) -->
                 <div class="portal-main">
                     
-                    <!-- Top Cards (Agenda, Resultados & Notícias) -->
-                    <section id="portal-highlights" style="padding-top: 0; padding-bottom: var(--spacing-md);">
-                        <div class="reveal" style="display: flex; flex-direction: column; gap: 20px;">
-                            
-                            <!-- Agenda e Resultados empilhados verticalmente -->
-                            <!-- Card Agenda Desportiva -->
-                            <div class="ad-widget club-announcement" style="text-align: left;">
-                                <h3 style="margin-bottom: 5px; display: flex; align-items: center; gap: 10px; font-size: 1.2rem;">Agenda Desportiva</h3>
-                                <p style="font-size: 0.85rem; color: var(--text-secondary); margin-bottom: 15px;">Próximos 7 dias</p>
-                                <div id="agenda-list" style="display: flex; flex-direction: column; gap: 10px;">
-                                    <div style="color: var(--text-secondary); font-size: 0.9rem;">A carregar agenda...</div>
+                    <!-- Top Cards (Agenda & Resultados) -->
+                    <section id="portal-highlights" style="padding-top: 0; padding-bottom: var(--spacing-lg);">
+                        <div class="reveal">
+                            <div class="portal-highlights-grid">
+                                
+                                <!-- Card Agenda Desportiva -->
+                                <div class="portal-card" id="card-agenda-desportiva">
+                                    <div class="portal-card-header">
+                                        <div class="card-icon-badge">📅</div>
+                                        <div>
+                                            <h3 class="card-title">Agenda Desportiva</h3>
+                                            <div class="card-subtitle">Próximos Jogos das Equipas BCV</div>
+                                        </div>
+                                    </div>
+                                    <div id="agenda-list" style="display: flex; flex-direction: column; gap: 8px;">
+                                        <!-- Preenchido via JS -->
+                                    </div>
                                 </div>
-                            </div>
 
-                            <!-- Card Resultados Desportivos -->
-                            <div class="ad-widget club-announcement" style="text-align: left;">
-                                <h3 style="margin-bottom: 5px; display: flex; align-items: center; gap: 10px; font-size: 1.2rem;">Resultados Desportivos</h3>
-                                <p style="font-size: 0.85rem; color: var(--text-secondary); margin-bottom: 15px;">Últimos Resultados</p>
-                                <div id="resultados-list" style="display: flex; flex-direction: column; gap: 10px;">
-                                    <div style="color: var(--text-secondary); font-size: 0.9rem;">A carregar resultados...</div>
+                                <!-- Card Resultados Desportivos -->
+                                <div class="portal-card" id="card-resultados-desportivos">
+                                    <div class="portal-card-header">
+                                        <div class="card-icon-badge">🏆</div>
+                                        <div>
+                                            <h3 class="card-title">Resultados Recentes</h3>
+                                            <div class="card-subtitle">Últimos Placares e Competições</div>
+                                        </div>
+                                    </div>
+                                    <div id="resultados-list" style="display: flex; flex-direction: column; gap: 8px;">
+                                        <!-- Preenchido via JS -->
+                                    </div>
                                 </div>
-                            </div>
 
-                            
+                            </div>
                         </div>
                     </section>
 
                     <!-- Notícias do Clube Highlight Section -->
                     <section id="noticias" style="padding-top: var(--spacing-md); padding-bottom: var(--spacing-xl); border-top: 1px solid var(--border-color);">
                         <div class="reveal">
-                            <div class="section-header" style="text-align: left; margin-left: 0; margin-bottom: 20px;">
-                                <h2 style="font-size: 1.6rem; color: var(--accent-primary); text-transform: uppercase;">Notícias do Clube</h2>
-                                <p>Fica a par dos acontecimentos mais recentes, vitórias e novidades do BCV.</p>
+                            <div class="portal-section-header">
+                                <div class="header-badge-icon">📰</div>
+                                <div>
+                                    <h2 class="portal-section-title">Notícias do Clube</h2>
+                                    <p class="portal-section-desc">Fica a par dos acontecimentos mais recentes, vitórias e novidades do BCV.</p>
+                                </div>
                             </div>
 
                             <div id="noticias-section-content">
@@ -197,17 +210,19 @@
                     </section>
 
                     <!-- Galeria Section -->
-                    <section id="galeria" style="padding-top: 0; border-top: 1px solid var(--border-color); padding-bottom: var(--spacing-xl); padding-top: var(--spacing-xl);">
+                    <section id="galeria" style="padding-top: var(--spacing-md); border-top: 1px solid var(--border-color); padding-bottom: var(--spacing-xl);">
                         <div class="reveal">
-                            <div class="section-header" style="text-align: left; margin-left: 0;">
-                                <h2>Galeria de Fotos</h2>
-                                <p>Revive os melhores momentos das nossas equipas, jogos e eventos.</p>
+                            <div class="portal-section-header">
+                                <div class="header-badge-icon">📸</div>
+                                <div>
+                                    <h2 class="portal-section-title">Galeria de Fotos</h2>
+                                    <p class="portal-section-desc">Revive os melhores momentos das nossas equipas, jogos e eventos.</p>
+                                </div>
                             </div>
                             
                             <!-- Grelha de Álbuns -->
                             <div id="public-albuns-grid" class="grid-4" style="gap: 20px;">
                                 <!-- Preenchido via JS -->
-                                <p style="grid-column: 1/-1; text-align: center; color: #a0a0ab;">A carregar álbuns...</p>
                             </div>
                         </div>
                     </section>
