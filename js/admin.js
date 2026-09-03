@@ -124,6 +124,7 @@ document.addEventListener('DOMContentLoaded', async () => {
             { tab: 'tab-resultados', allow: isAdmin || userPerms.includes('resultados') },
             { tab: 'tab-galeria', allow: isAdmin || userPerms.includes('galeria') || role === 'editor' },
             { tab: 'tab-equipas', allow: isAdmin || userPerms.includes('equipas') || role === 'treinador' },
+            { tab: 'tab-patrocinadores', allow: isAdmin || userPerms.includes('patrocinadores') },
             { tab: 'tab-config', allow: isAdmin || userPerms.includes('config') }
         ];
 
@@ -4539,6 +4540,590 @@ document.addEventListener('DOMContentLoaded', async () => {
         });
     }
 
+    // =========================================================================
+    // 16. GESTÃO DE PATROCINADORES E PARCEIROS COM ATIVOS GRÁFICOS
+    // =========================================================================
+    let currentPatrocinadores = [];
+
+    // Elementos DOM de Patrocinadores
+    const btnNovoPatrocinador = document.getElementById('btn-novo-patrocinador');
+    const modalPatrocinador = document.getElementById('modal-patrocinador-container');
+    const btnCloseModalPatrocinador = document.getElementById('btn-close-modal-patrocinador');
+    const btnCancelModalPatrocinador = document.getElementById('btn-cancel-modal-patrocinador');
+    const formPatrocinador = document.getElementById('form-patrocinador');
+    const modalPatrocinadorTitle = document.getElementById('modal-patrocinador-title');
+    const msgPatrocinadorStatus = document.getElementById('msg-patrocinador-status');
+
+    // Filtros
+    const filtroPatBusca = document.getElementById('filtro-patrocinador-busca');
+    const filtroPatCanal = document.getElementById('filtro-patrocinador-canal');
+    const filtroPatCategoria = document.getElementById('filtro-patrocinador-categoria');
+    const filtroPatEstado = document.getElementById('filtro-patrocinador-estado');
+    const filtroPatEpoca = document.getElementById('filtro-patrocinador-epoca');
+
+    // Modal de Pré-visualização de Ativo
+    const modalPreviewAtivo = document.getElementById('modal-preview-ativo');
+    const modalPreviewAtivoTitle = document.getElementById('modal-preview-ativo-title');
+    const modalPreviewAtivoImg = document.getElementById('modal-preview-ativo-img');
+    const modalPreviewAtivoInfo = document.getElementById('modal-preview-ativo-info');
+    const btnDownloadAtivo = document.getElementById('btn-download-ativo');
+    const btnCloseModalPreviewAtivo = document.getElementById('btn-close-modal-preview-ativo');
+    const btnFecharPreviewAtivo = document.getElementById('btn-fechar-preview-ativo');
+
+    // Upload & Previews no Modal
+    const patFileLogo = document.getElementById('pat-file-logo');
+    const patUrlLogo = document.getElementById('pat-url-logo');
+    const patImgLogo = document.getElementById('pat-preview-logo-img');
+    const patTxtLogo = document.getElementById('pat-preview-logo-txt');
+
+    const patFilePavilhao = document.getElementById('pat-file-pavilhao');
+    const patUrlPavilhao = document.getElementById('pat-url-pavilhao');
+    const patImgPavilhao = document.getElementById('pat-preview-pavilhao-img');
+    const patTxtPavilhao = document.getElementById('pat-preview-pavilhao-txt');
+
+    const patFileRedes = document.getElementById('pat-file-redes');
+    const patUrlRedes = document.getElementById('pat-url-redes');
+    const patImgRedes = document.getElementById('pat-preview-redes-img');
+    const patTxtRedes = document.getElementById('pat-preview-redes-txt');
+
+    // Setup de previews em tempo real
+    function setupFilePreview(inputEl, imgEl, txtEl) {
+        if (!inputEl) return;
+        inputEl.addEventListener('change', (e) => {
+            const file = e.target.files[0];
+            if (file) {
+                const objectUrl = URL.createObjectURL(file);
+                if (imgEl) {
+                    imgEl.src = objectUrl;
+                    imgEl.style.display = 'block';
+                }
+                if (txtEl) txtEl.style.display = 'none';
+            }
+        });
+    }
+    setupFilePreview(patFileLogo, patImgLogo, patTxtLogo);
+    setupFilePreview(patFilePavilhao, patImgPavilhao, patTxtPavilhao);
+    setupFilePreview(patFileRedes, patImgRedes, patTxtRedes);
+
+    // Fecho do Modal de Pré-visualização
+    if (btnCloseModalPreviewAtivo) btnCloseModalPreviewAtivo.addEventListener('click', () => modalPreviewAtivo.classList.add('hidden'));
+    if (btnFecharPreviewAtivo) btnFecharPreviewAtivo.addEventListener('click', () => modalPreviewAtivo.classList.add('hidden'));
+
+    window.previewAtivoGrafico = function(titulo, imgUrl, info) {
+        if (!imgUrl) return;
+        if (modalPreviewAtivoTitle) modalPreviewAtivoTitle.textContent = titulo || 'Visualização do Ativo';
+        if (modalPreviewAtivoImg) modalPreviewAtivoImg.src = imgUrl;
+        if (modalPreviewAtivoInfo) modalPreviewAtivoInfo.textContent = info || '';
+        if (btnDownloadAtivo) {
+            btnDownloadAtivo.href = imgUrl;
+            btnDownloadAtivo.download = `${(titulo || 'ativo').toLowerCase().replace(/[^a-z0-9]/g, '_')}.png`;
+        }
+        if (modalPreviewAtivo) modalPreviewAtivo.classList.remove('hidden');
+    };
+
+    // Abertura / Fecho do Modal de Edição
+    if (btnNovoPatrocinador) {
+        btnNovoPatrocinador.addEventListener('click', () => {
+            window.openNovoPatrocinadorModal();
+        });
+    }
+    if (btnCloseModalPatrocinador) {
+        btnCloseModalPatrocinador.addEventListener('click', () => {
+            if (modalPatrocinador) modalPatrocinador.classList.add('hidden');
+        });
+    }
+    if (btnCancelModalPatrocinador) {
+        btnCancelModalPatrocinador.addEventListener('click', () => {
+            if (modalPatrocinador) modalPatrocinador.classList.add('hidden');
+        });
+    }
+
+    window.openNovoPatrocinadorModal = function() {
+        if (!formPatrocinador) return;
+        formPatrocinador.reset();
+        document.getElementById('pat-id').value = '';
+        document.getElementById('pat-epoca').value = '2026/2027';
+        document.getElementById('pat-ordem').value = '0';
+        document.getElementById('pat-ativo').checked = true;
+        document.getElementById('pat-expo-site').checked = true;
+        document.getElementById('pat-expo-pavilhao').checked = false;
+        document.getElementById('pat-expo-facebook').checked = false;
+        document.getElementById('pat-expo-instagram').checked = false;
+        document.getElementById('pat-expo-equipamento').checked = false;
+
+        // Limpar previews
+        if (patUrlLogo) patUrlLogo.value = '';
+        if (patImgLogo) { patImgLogo.src = ''; patImgLogo.style.display = 'none'; }
+        if (patTxtLogo) patTxtLogo.style.display = 'block';
+
+        if (patUrlPavilhao) patUrlPavilhao.value = '';
+        if (patImgPavilhao) { patImgPavilhao.src = ''; patImgPavilhao.style.display = 'none'; }
+        if (patTxtPavilhao) patTxtPavilhao.style.display = 'block';
+
+        if (patUrlRedes) patUrlRedes.value = '';
+        if (patImgRedes) { patImgRedes.src = ''; patImgRedes.style.display = 'none'; }
+        if (patTxtRedes) patTxtRedes.style.display = 'block';
+
+        if (modalPatrocinadorTitle) modalPatrocinadorTitle.textContent = '➕ Adicionar Novo Patrocinador';
+        if (msgPatrocinadorStatus) msgPatrocinadorStatus.classList.add('hidden');
+        if (modalPatrocinador) modalPatrocinador.classList.remove('hidden');
+    };
+
+    window.editPatrocinador = function(id) {
+        const p = currentPatrocinadores.find(item => item.id == id);
+        if (!p || !formPatrocinador) return;
+
+        document.getElementById('pat-id').value = p.id;
+        document.getElementById('pat-nome').value = p.nome || '';
+        document.getElementById('pat-categoria').value = p.categoria || 'Oficial';
+        document.getElementById('pat-epoca').value = p.epoca || '2026/2027';
+        document.getElementById('pat-website').value = p.website || '';
+        document.getElementById('pat-valor').value = p.valor || '';
+        document.getElementById('pat-ordem').value = p.ordem || 0;
+        document.getElementById('pat-contacto-nome').value = p.contacto_nome || '';
+        document.getElementById('pat-contacto-telefone').value = p.contacto_telefone || '';
+        document.getElementById('pat-contacto-email').value = p.contacto_email || '';
+        document.getElementById('pat-notas').value = p.notas || '';
+        document.getElementById('pat-ativo').checked = !!p.ativo;
+
+        document.getElementById('pat-expo-site').checked = !!p.expo_site;
+        document.getElementById('pat-expo-pavilhao').checked = !!p.expo_pavilhao;
+        document.getElementById('pat-expo-facebook').checked = !!p.expo_facebook;
+        document.getElementById('pat-expo-instagram').checked = !!p.expo_instagram;
+        document.getElementById('pat-expo-equipamento').checked = !!p.expo_equipamento;
+
+        // Ativos Gráficos
+        if (patUrlLogo) patUrlLogo.value = p.logo_url || '';
+        if (p.logo_url) {
+            if (patImgLogo) { patImgLogo.src = p.logo_url; patImgLogo.style.display = 'block'; }
+            if (patTxtLogo) patTxtLogo.style.display = 'none';
+        } else {
+            if (patImgLogo) { patImgLogo.src = ''; patImgLogo.style.display = 'none'; }
+            if (patTxtLogo) patTxtLogo.style.display = 'block';
+        }
+
+        if (patUrlPavilhao) patUrlPavilhao.value = p.pavilhao_img_url || '';
+        if (p.pavilhao_img_url) {
+            if (patImgPavilhao) { patImgPavilhao.src = p.pavilhao_img_url; patImgPavilhao.style.display = 'block'; }
+            if (patTxtPavilhao) patTxtPavilhao.style.display = 'none';
+        } else {
+            if (patImgPavilhao) { patImgPavilhao.src = ''; patImgPavilhao.style.display = 'none'; }
+            if (patTxtPavilhao) patTxtPavilhao.style.display = 'block';
+        }
+
+        if (patUrlRedes) patUrlRedes.value = p.redes_img_url || '';
+        if (p.redes_img_url) {
+            if (patImgRedes) { patImgRedes.src = p.redes_img_url; patImgRedes.style.display = 'block'; }
+            if (patTxtRedes) patTxtRedes.style.display = 'none';
+        } else {
+            if (patImgRedes) { patImgRedes.src = ''; patImgRedes.style.display = 'none'; }
+            if (patTxtRedes) patTxtRedes.style.display = 'block';
+        }
+
+        if (modalPatrocinadorTitle) modalPatrocinadorTitle.textContent = `✏️ Editar Patrocinador: ${p.nome}`;
+        if (msgPatrocinadorStatus) msgPatrocinadorStatus.classList.add('hidden');
+        if (modalPatrocinador) modalPatrocinador.classList.remove('hidden');
+    };
+
+    // Helper de Upload com Resiliência de Buckets
+    async function uploadPatrocinadorFile(file, prefixo) {
+        if (!file) return null;
+        const fileExt = file.name.split('.').pop();
+        const cleanName = `${prefixo}_${Date.now()}_${Math.random().toString(36).substring(2, 7)}.${fileExt}`;
+        const filePath = `patrocinadores/${cleanName}`;
+
+        // 1. Tenta bucket patrocinadores
+        let { error: err1 } = await supabase.storage.from('patrocinadores').upload(filePath, file);
+        if (!err1) {
+            return supabase.storage.from('patrocinadores').getPublicUrl(filePath).data.publicUrl;
+        }
+
+        // 2. Fallback para fotos
+        let { error: err2 } = await supabase.storage.from('fotos').upload(filePath, file);
+        if (!err2) {
+            return supabase.storage.from('fotos').getPublicUrl(filePath).data.publicUrl;
+        }
+
+        // 3. Fallback para galeria
+        let { error: err3 } = await supabase.storage.from('galeria').upload(filePath, file);
+        if (!err3) {
+            return supabase.storage.from('galeria').getPublicUrl(filePath).data.publicUrl;
+        }
+
+        console.error("Falha em todos os buckets de storage:", err1, err2, err3);
+        throw new Error("Não foi possível carregar o ficheiro para o armazenamento.");
+    }
+
+    // Submissão do Formulário de Patrocinador
+    if (formPatrocinador) {
+        formPatrocinador.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const btnSave = document.getElementById('btn-save-patrocinador');
+            const patId = document.getElementById('pat-id').value;
+
+            btnSave.disabled = true;
+            btnSave.textContent = '⏳ A carregar ficheiros e a guardar...';
+            if (msgPatrocinadorStatus) {
+                msgPatrocinadorStatus.classList.remove('hidden');
+                msgPatrocinadorStatus.style.color = '#7e22ce';
+                msgPatrocinadorStatus.textContent = 'A processar imagens e a atualizar base de dados...';
+            }
+
+            try {
+                // 1. Upload dos ficheiros novos se selecionados
+                let logoUrl = patUrlLogo ? patUrlLogo.value : null;
+                if (patFileLogo && patFileLogo.files && patFileLogo.files[0]) {
+                    logoUrl = await uploadPatrocinadorFile(patFileLogo.files[0], 'logo');
+                }
+
+                let pavilhaoUrl = patUrlPavilhao ? patUrlPavilhao.value : null;
+                if (patFilePavilhao && patFilePavilhao.files && patFilePavilhao.files[0]) {
+                    pavilhaoUrl = await uploadPatrocinadorFile(patFilePavilhao.files[0], 'pavilhao');
+                }
+
+                let redesUrl = patUrlRedes ? patUrlRedes.value : null;
+                if (patFileRedes && patFileRedes.files && patFileRedes.files[0]) {
+                    redesUrl = await uploadPatrocinadorFile(patFileRedes.files[0], 'redes');
+                }
+
+                const payload = {
+                    nome: document.getElementById('pat-nome').value.trim(),
+                    categoria: document.getElementById('pat-categoria').value,
+                    epoca: document.getElementById('pat-epoca').value.trim() || '2026/2027',
+                    website: document.getElementById('pat-website').value.trim() || null,
+                    valor: parseFloat(document.getElementById('pat-valor').value) || 0.00,
+                    ordem: parseInt(document.getElementById('pat-ordem').value, 10) || 0,
+                    contacto_nome: document.getElementById('pat-contacto-nome').value.trim() || null,
+                    contacto_telefone: document.getElementById('pat-contacto-telefone').value.trim() || null,
+                    contacto_email: document.getElementById('pat-contacto-email').value.trim() || null,
+                    notas: document.getElementById('pat-notas').value.trim() || null,
+                    ativo: document.getElementById('pat-ativo').checked,
+                    expo_site: document.getElementById('pat-expo-site').checked,
+                    expo_pavilhao: document.getElementById('pat-expo-pavilhao').checked,
+                    expo_facebook: document.getElementById('pat-expo-facebook').checked,
+                    expo_instagram: document.getElementById('pat-expo-instagram').checked,
+                    expo_equipamento: document.getElementById('pat-expo-equipamento').checked,
+                    logo_url: logoUrl,
+                    pavilhao_img_url: pavilhaoUrl,
+                    redes_img_url: redesUrl,
+                    updated_at: new Date().toISOString()
+                };
+
+                let dbError = null;
+                if (patId) {
+                    const { error } = await supabase.from('patrocinadores').update(payload).eq('id', patId);
+                    dbError = error;
+                } else {
+                    const { error } = await supabase.from('patrocinadores').insert([payload]);
+                    dbError = error;
+                }
+
+                if (dbError) throw dbError;
+
+                if (msgPatrocinadorStatus) {
+                    msgPatrocinadorStatus.style.color = '#15803d';
+                    msgPatrocinadorStatus.textContent = '✅ Patrocinador guardado com sucesso!';
+                }
+
+                setTimeout(() => {
+                    if (modalPatrocinador) modalPatrocinador.classList.add('hidden');
+                    loadPatrocinadores();
+                }, 700);
+
+            } catch (err) {
+                console.error("Erro ao guardar patrocinador:", err);
+                if (msgPatrocinadorStatus) {
+                    msgPatrocinadorStatus.style.color = '#b91c1c';
+                    msgPatrocinadorStatus.textContent = `❌ Erro: ${err.message || 'Falha ao guardar'}`;
+                }
+            } finally {
+                btnSave.disabled = false;
+                btnSave.textContent = '💾 Guardar Patrocinador';
+            }
+        });
+    }
+
+    // Toggle rápido de Ativo / Inativo
+    window.togglePatrocinadorAtivo = async function(id, currentStatus) {
+        try {
+            const { error } = await supabase
+                .from('patrocinadores')
+                .update({ ativo: !currentStatus, updated_at: new Date().toISOString() })
+                .eq('id', id);
+            if (error) throw error;
+            loadPatrocinadores();
+        } catch (err) {
+            console.error("Erro ao alterar estado do patrocinador:", err);
+            alert("Erro ao alterar estado: " + err.message);
+        }
+    };
+
+    // Eliminar Patrocinador
+    window.deletePatrocinador = async function(id) {
+        const p = currentPatrocinadores.find(item => item.id == id);
+        const nome = p ? p.nome : 'este patrocinador';
+        if (!confirm(`Tem a certeza de que pretende eliminar o patrocinador "${nome}"?`)) return;
+
+        try {
+            const { error } = await supabase.from('patrocinadores').delete().eq('id', id);
+            if (error) throw error;
+            loadPatrocinadores();
+        } catch (err) {
+            console.error("Erro ao eliminar patrocinador:", err);
+            alert("Erro ao eliminar: " + err.message);
+        }
+    };
+
+    // Carregar e Renderizar Patrocinadores
+    async function loadPatrocinadores() {
+        const container = document.getElementById('lista-patrocinadores');
+        if (!container) return;
+
+        try {
+            const { data, error } = await supabase
+                .from('patrocinadores')
+                .select('*')
+                .order('ordem', { ascending: true })
+                .order('nome', { ascending: true });
+
+            if (error) {
+                // Se a tabela ainda não foi criada na BD
+                if (error.code === '42P01') {
+                    container.innerHTML = `
+                        <tr>
+                            <td colspan="9" style="text-align: center; padding: 40px; color: #b91c1c;">
+                                ⚠️ A tabela <code>patrocinadores</code> ainda não foi criada no Supabase.<br>
+                                Execute o script <code>setup_patrocinadores.sql</code> no SQL Editor do Supabase para ativar este módulo.
+                            </td>
+                        </tr>
+                    `;
+                    return;
+                }
+                throw error;
+            }
+
+            currentPatrocinadores = data || [];
+
+            // Atualizar KPIs
+            const total = currentPatrocinadores.length;
+            const ativos = currentPatrocinadores.filter(p => p.ativo).length;
+            const pavilhao = currentPatrocinadores.filter(p => p.expo_pavilhao && p.ativo).length;
+            const redes = currentPatrocinadores.filter(p => (p.expo_facebook || p.expo_instagram) && p.ativo).length;
+            const site = currentPatrocinadores.filter(p => p.expo_site && p.ativo).length;
+
+            const elTotal = document.getElementById('kpi-patrocinadores-total');
+            const elAtivos = document.getElementById('kpi-patrocinadores-ativos');
+            const elPavilhao = document.getElementById('kpi-patrocinadores-pavilhao');
+            const elRedes = document.getElementById('kpi-patrocinadores-redes');
+            const elSite = document.getElementById('kpi-patrocinadores-site');
+
+            if (elTotal) elTotal.textContent = total;
+            if (elAtivos) elAtivos.textContent = ativos;
+            if (elPavilhao) elPavilhao.textContent = pavilhao;
+            if (elRedes) elRedes.textContent = redes;
+            if (elSite) elSite.textContent = site;
+
+            applyPatrocinadoresFilters();
+
+        } catch (err) {
+            console.error("Erro ao ler patrocinadores:", err);
+            container.innerHTML = `
+                <tr>
+                    <td colspan="9" style="text-align: center; padding: 30px; color: #b91c1c;">
+                        ❌ Erro ao carregar dados: ${err.message}
+                    </td>
+                </tr>
+            `;
+        }
+    }
+
+    // Filtragem em tempo real
+    function applyPatrocinadoresFilters() {
+        const busca = (filtroPatBusca ? filtroPatBusca.value : '').toLowerCase().trim();
+        const canal = filtroPatCanal ? filtroPatCanal.value : '';
+        const categoria = filtroPatCategoria ? filtroPatCategoria.value : '';
+        const estado = filtroPatEstado ? filtroPatEstado.value : '';
+        const epoca = filtroPatEpoca ? filtroPatEpoca.value : '';
+
+        const filtrados = currentPatrocinadores.filter(p => {
+            // Busca
+            if (busca) {
+                const matchNome = (p.nome || '').toLowerCase().includes(busca);
+                const matchContacto = (p.contacto_nome || '').toLowerCase().includes(busca);
+                const matchEmail = (p.contacto_email || '').toLowerCase().includes(busca);
+                if (!matchNome && !matchContacto && !matchEmail) return false;
+            }
+
+            // Canal
+            if (canal === 'site' && !p.expo_site) return false;
+            if (canal === 'pavilhao' && !p.expo_pavilhao) return false;
+            if (canal === 'facebook' && !p.expo_facebook) return false;
+            if (canal === 'instagram' && !p.expo_instagram) return false;
+            if (canal === 'equipamento' && !p.expo_equipamento) return false;
+
+            // Categoria
+            if (categoria && p.categoria !== categoria) return false;
+
+            // Estado
+            if (estado === 'ativo' && !p.ativo) return false;
+            if (estado === 'inativo' && p.ativo) return false;
+
+            // Época
+            if (epoca && p.epoca !== epoca) return false;
+
+            return true;
+        });
+
+        renderPatrocinadores(filtrados);
+    }
+
+    // Listeners dos Filtros
+    if (filtroPatBusca) filtroPatBusca.addEventListener('input', applyPatrocinadoresFilters);
+    if (filtroPatCanal) filtroPatCanal.addEventListener('change', applyPatrocinadoresFilters);
+    if (filtroPatCategoria) filtroPatCategoria.addEventListener('change', applyPatrocinadoresFilters);
+    if (filtroPatEstado) filtroPatEstado.addEventListener('change', applyPatrocinadoresFilters);
+    if (filtroPatEpoca) filtroPatEpoca.addEventListener('change', applyPatrocinadoresFilters);
+
+    // Renderização na Tabela
+    function renderPatrocinadores(lista) {
+        const container = document.getElementById('lista-patrocinadores');
+        if (!container) return;
+
+        if (lista.length === 0) {
+            container.innerHTML = `
+                <tr>
+                    <td colspan="9" style="text-align: center; padding: 40px; color: var(--text-secondary);">
+                        <div style="font-size: 2.2rem; margin-bottom: 8px;">🤝</div>
+                        <strong style="font-size: 1rem; color: var(--text-primary); display: block;">Nenhum patrocinador encontrado</strong>
+                        <span style="font-size: 0.85rem;">Não existem parceiros registados com os filtros selecionados.</span>
+                        <div style="margin-top: 15px;">
+                            <button type="button" onclick="window.openNovoPatrocinadorModal()" class="btn-primary" style="padding: 8px 18px; font-size: 0.85rem;">
+                                ➕ Registar Primeiro Patrocinador
+                            </button>
+                        </div>
+                    </td>
+                </tr>
+            `;
+            return;
+        }
+
+        const catColors = {
+            'Principal': { bg: '#fef3c7', text: '#92400e', border: '#fde68a' },
+            'Ouro': { bg: '#fef9c3', text: '#854d0e', border: '#fef08a' },
+            'Prata': { bg: '#f1f5f9', text: '#334155', border: '#cbd5e1' },
+            'Bronze': { bg: '#ffedd5', text: '#9a3412', border: '#fed7aa' },
+            'Apoio Institucional': { bg: '#e0e7ff', text: '#3730a3', border: '#c7d2fe' },
+            'Parceiro Desportivo': { bg: '#dcfce7', text: '#166534', border: '#bbf7d0' },
+            'Oficial': { bg: '#f3e8ff', text: '#6b21a8', border: '#e9d5ff' }
+        };
+
+        container.innerHTML = lista.map(p => {
+            const catStyle = catColors[p.categoria] || { bg: '#f3f4f6', text: '#374151', border: '#e5e7eb' };
+
+            // Badges dos Canais
+            const canaisBadges = [];
+            if (p.expo_site) canaisBadges.push(`<span title="Site BCV" style="background: #f3e8ff; color: #6b21a8; font-size: 0.72rem; font-weight: 700; padding: 3px 7px; border-radius: 6px; display: inline-block; margin: 2px;">🌐 Site</span>`);
+            if (p.expo_pavilhao) canaisBadges.push(`<span title="Painel no Pavilhão" style="background: #ffedd5; color: #c2410c; font-size: 0.72rem; font-weight: 700; padding: 3px 7px; border-radius: 6px; display: inline-block; margin: 2px;">🏟️ Pavilhão</span>`);
+            if (p.expo_facebook) canaisBadges.push(`<span title="Facebook" style="background: #dbeafe; color: #1d4ed8; font-size: 0.72rem; font-weight: 700; padding: 3px 7px; border-radius: 6px; display: inline-block; margin: 2px;">📘 FB</span>`);
+            if (p.expo_instagram) canaisBadges.push(`<span title="Instagram" style="background: #fce7f3; color: #be185d; font-size: 0.72rem; font-weight: 700; padding: 3px 7px; border-radius: 6px; display: inline-block; margin: 2px;">📸 IG</span>`);
+            if (p.expo_equipamento) canaisBadges.push(`<span title="Equipamentos Oficiais" style="background: #dcfce7; color: #15803d; font-size: 0.72rem; font-weight: 700; padding: 3px 7px; border-radius: 6px; display: inline-block; margin: 2px;">🎽 Equip.</span>`);
+            const canaisHtml = canaisBadges.length > 0 ? canaisBadges.join('') : '<span style="color: #94a3b8; font-size: 0.75rem;">Sem canal ativo</span>';
+
+            // Botões de Ativos Gráficos
+            const ativosBtns = [];
+            if (p.logo_url) {
+                ativosBtns.push(`<button type="button" onclick="window.previewAtivoGrafico('Logótipo: ${escapeHtml(p.nome)}', '${p.logo_url}', 'Ficheiro de Logótipo Oficial')" title="Ver Logótipo Oficial" style="background: #f8fafc; border: 1px solid var(--border-color); border-radius: 6px; padding: 4px 8px; font-size: 0.75rem; cursor: pointer; display: inline-flex; align-items: center; gap: 4px; margin: 2px;">🖼️ Logo</button>`);
+            }
+            if (p.pavilhao_img_url) {
+                ativosBtns.push(`<button type="button" onclick="window.previewAtivoGrafico('Painel Pavilhão: ${escapeHtml(p.nome)}', '${p.pavilhao_img_url}', 'Foto / Maquete do Painel Publicitário no Pavilhão')" title="Ver Painel no Pavilhão" style="background: #fff7ed; border: 1px solid #fdba74; border-radius: 6px; padding: 4px 8px; font-size: 0.75rem; color: #9a3412; font-weight: 600; cursor: pointer; display: inline-flex; align-items: center; gap: 4px; margin: 2px;">🏟️ Painel</button>`);
+            }
+            if (p.redes_img_url) {
+                ativosBtns.push(`<button type="button" onclick="window.previewAtivoGrafico('Post Redes Sociais: ${escapeHtml(p.nome)}', '${p.redes_img_url}', 'Arte Gráfica preparada para Facebook e Instagram')" title="Ver Arte para Redes" style="background: #eff6ff; border: 1px solid #93c5fd; border-radius: 6px; padding: 4px 8px; font-size: 0.75rem; color: #1e40af; font-weight: 600; cursor: pointer; display: inline-flex; align-items: center; gap: 4px; margin: 2px;">📱 Post FB/IG</button>`);
+            }
+            const ativosHtml = ativosBtns.length > 0 ? ativosBtns.join('') : '<span style="color: #94a3b8; font-size: 0.75rem;">Sem ficheiros</span>';
+
+            // Contacto
+            let contactoHtml = '<span style="color: #94a3b8; font-size: 0.8rem;">-</span>';
+            if (p.contacto_nome || p.contacto_telefone || p.contacto_email) {
+                contactoHtml = `
+                    <div style="font-size: 0.82rem; line-height: 1.4;">
+                        ${p.contacto_nome ? `<strong>${escapeHtml(p.contacto_nome)}</strong><br>` : ''}
+                        ${p.contacto_telefone ? `<span style="color: var(--text-secondary);">📞 ${escapeHtml(p.contacto_telefone)}</span><br>` : ''}
+                        ${p.contacto_email ? `<span style="color: var(--text-secondary);">✉️ ${escapeHtml(p.contacto_email)}</span>` : ''}
+                    </div>
+                `;
+            }
+
+            return `
+                <tr style="border-bottom: 1px solid var(--border-color); transition: background 0.15s ease;">
+                    <!-- Logo -->
+                    <td style="padding: 10px; text-align: center;">
+                        ${p.logo_url ? `
+                            <img src="${p.logo_url}" alt="${escapeHtml(p.nome)}" onclick="window.previewAtivoGrafico('Logótipo: ${escapeHtml(p.nome)}', '${p.logo_url}', 'Logótipo Oficial')" style="width: 44px; height: 44px; object-fit: contain; background: #ffffff; border: 1px solid var(--border-color); border-radius: 8px; padding: 3px; cursor: pointer;">
+                        ` : `
+                            <div style="width: 44px; height: 44px; background: #f1f5f9; border-radius: 8px; display: inline-flex; align-items: center; justify-content: center; font-size: 1.2rem; color: #94a3b8;">🏢</div>
+                        `}
+                    </td>
+
+                    <!-- Nome & Website -->
+                    <td style="padding: 10px;">
+                        <strong style="color: var(--text-primary); font-size: 0.95rem;">${escapeHtml(p.nome)}</strong>
+                        ${p.website ? `
+                            <br><a href="${p.website}" target="_blank" style="font-size: 0.78rem; color: #7e22ce; text-decoration: none; display: inline-flex; align-items: center; gap: 4px; margin-top: 2px;">🔗 ${escapeHtml(p.website.replace(/^https?:\/\//, '').replace(/\/$/, ''))}</a>
+                        ` : ''}
+                        ${p.valor > 0 ? `
+                            <div style="font-size: 0.75rem; color: #16a34a; font-weight: 700; margin-top: 3px;">💶 ${parseFloat(p.valor).toFixed(2)}€</div>
+                        ` : ''}
+                    </td>
+
+                    <!-- Categoria -->
+                    <td style="padding: 10px;">
+                        <span style="background: ${catStyle.bg}; color: ${catStyle.text}; border: 1px solid ${catStyle.border}; font-size: 0.78rem; font-weight: 700; padding: 4px 9px; border-radius: 6px; display: inline-block;">
+                            ${escapeHtml(p.categoria || 'Oficial')}
+                        </span>
+                    </td>
+
+                    <!-- Época -->
+                    <td style="padding: 10px;">
+                        <span style="font-size: 0.85rem; font-weight: 600; color: var(--text-secondary);">${escapeHtml(p.epoca || '-')}</span>
+                    </td>
+
+                    <!-- Canais -->
+                    <td style="padding: 10px; max-width: 170px;">
+                        ${canaisHtml}
+                    </td>
+
+                    <!-- Ativos Gráficos -->
+                    <td style="padding: 10px;">
+                        ${ativosHtml}
+                    </td>
+
+                    <!-- Contacto -->
+                    <td style="padding: 10px;">
+                        ${contactoHtml}
+                    </td>
+
+                    <!-- Estado -->
+                    <td style="padding: 10px; text-align: center;">
+                        <button type="button" onclick="window.togglePatrocinadorAtivo(${p.id}, ${!!p.ativo})" title="Clique para alternar estado" style="background: ${p.ativo ? '#dcfce7' : '#fee2e2'}; color: ${p.ativo ? '#15803d' : '#b91c1c'}; border: 1px solid ${p.ativo ? '#86efac' : '#fca5a5'}; border-radius: 20px; padding: 4px 10px; font-size: 0.75rem; font-weight: 700; cursor: pointer;">
+                            ${p.ativo ? '● Ativo' : '○ Inativo'}
+                        </button>
+                    </td>
+
+                    <!-- Ações -->
+                    <td style="padding: 10px; text-align: right; white-space: nowrap;">
+                        <button type="button" onclick="window.editPatrocinador(${p.id})" title="Editar Patrocinador" class="btn-secondary" style="padding: 6px 10px; font-size: 0.8rem; margin-right: 4px;">
+                            ✏️ Editar
+                        </button>
+                        <button type="button" onclick="window.deletePatrocinador(${p.id})" title="Eliminar Patrocinador" style="background: #fee2e2; color: #b91c1c; border: 1px solid #fca5a5; border-radius: 6px; padding: 6px 10px; font-size: 0.8rem; cursor: pointer;">
+                            🗑️
+                        </button>
+                    </td>
+                </tr>
+            `;
+        }).join('');
+    }
+
     // Iniciar carregamento das tabs quando ativadas
     const tabButtons = document.querySelectorAll('.tab-btn');
     tabButtons.forEach(btn => {
@@ -4561,6 +5146,7 @@ document.addEventListener('DOMContentLoaded', async () => {
             if (target === 'tab-agenda') loadAgenda();
             if (target === 'tab-resultados') loadResultados();
             if (target === 'tab-equipas') loadEquipas();
+            if (target === 'tab-patrocinadores') loadPatrocinadores();
             if (target === 'tab-config') loadConfiguracoes();
             if (target === 'tab-equipamentos') loadEquipamentos();
             if (target === 'tab-desportiva') loadDesportiva();

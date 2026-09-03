@@ -112,6 +112,7 @@ document.addEventListener('DOMContentLoaded', () => {
         loadNoticiasIndex(supabase);
         loadEquipasMenu(supabase);
         loadGlobalClubConfig(supabase);
+        loadPatrocinadoresPublic(supabase);
     }
 });
 
@@ -568,6 +569,76 @@ if (modalNoticiaPublica) {
     modalNoticiaPublica.addEventListener('click', (e) => {
         if (e.target === modalNoticiaPublica) closePublicNoticiaModal();
     });
+}
+
+// =========================================================================
+// CARREGAMENTO DE PATROCINADORES NO WEBSITE PÚBLICO
+// =========================================================================
+async function loadPatrocinadoresPublic(supabase) {
+    const section = document.getElementById('patrocinadores-section');
+    const grid = document.getElementById('patrocinadores-public-grid');
+    if (!section || !grid) return;
+
+    try {
+        const { data, error } = await supabase
+            .from('patrocinadores')
+            .select('nome, categoria, website, logo_url, pavilhao_img_url, redes_img_url')
+            .eq('ativo', true)
+            .eq('expo_site', true)
+            .order('ordem', { ascending: true })
+            .order('nome', { ascending: true });
+
+        if (error || !data || data.length === 0) {
+            section.style.display = 'none';
+            return;
+        }
+
+        grid.innerHTML = data.map(p => {
+            const logoContent = p.logo_url 
+                ? `<img src="${p.logo_url}" alt="${p.nome}" title="${p.nome}" style="max-height: 52px; max-width: 150px; object-fit: contain; filter: drop-shadow(0 2px 4px rgba(0,0,0,0.05)); transition: transform 0.2s ease;">`
+                : `<span style="font-weight: 700; color: #374151; font-size: 0.95rem; letter-spacing: 0.5px;">${p.nome}</span>`;
+
+            if (p.website) {
+                return `
+                    <a href="${p.website}" target="_blank" rel="noopener noreferrer" title="${p.nome}" 
+                       style="display: flex; align-items: center; justify-content: center; padding: 14px 22px; background: #ffffff; border: 1px solid #e2e8f0; border-radius: 12px; box-shadow: 0 2px 6px rgba(0,0,0,0.03); transition: all 0.25s ease; text-decoration: none;" 
+                       onmouseover="this.style.transform='translateY(-3px)'; this.style.borderColor='#a855f7'; this.style.boxShadow='0 8px 18px rgba(126,34,206,0.12)';" 
+                       onmouseout="this.style.transform='none'; this.style.borderColor='#e2e8f0'; this.style.boxShadow='0 2px 6px rgba(0,0,0,0.03)';">
+                        ${logoContent}
+                    </a>
+                `;
+            }
+
+            return `
+                <div style="display: flex; align-items: center; justify-content: center; padding: 14px 22px; background: #ffffff; border: 1px solid #e2e8f0; border-radius: 12px; box-shadow: 0 2px 6px rgba(0,0,0,0.03);">
+                    ${logoContent}
+                </div>
+            `;
+        }).join('');
+
+        section.style.display = 'block';
+
+        // Atualizar widgets de publicidade lateral se houver parceiros
+        const adSquare = document.querySelector('.ad-widget.ad-square');
+        if (adSquare && data.length > 0) {
+            const principal = data.find(p => p.categoria === 'Principal') || data[0];
+            if (principal) {
+                adSquare.innerHTML = `
+                    <span class="ad-label" style="background: #7e22ce; color: #fff;">Parceiro Oficial</span>
+                    <div style="margin: 15px 0;">
+                        ${principal.logo_url 
+                            ? `<img src="${principal.logo_url}" alt="${principal.nome}" style="max-height: 70px; max-width: 90%; object-fit: contain; margin: 0 auto; display: block;">` 
+                            : `<div style="font-size: 2rem;">🤝</div><h4 style="margin: 8px 0 0 0;">${principal.nome}</h4>`
+                        }
+                    </div>
+                    ${principal.website ? `<a href="${principal.website}" target="_blank" class="btn-primary" style="display: inline-block; padding: 6px 14px; font-size: 0.8rem; text-decoration: none; border-radius: 6px; margin-top: 6px;">Visitar Website →</a>` : ''}
+                `;
+            }
+        }
+
+    } catch (err) {
+        console.warn("Aviso ao carregar patrocinadores públicos:", err);
+    }
 }
 
 
