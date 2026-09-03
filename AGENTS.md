@@ -93,4 +93,4 @@
 - [2026-09-01] Gemini: Criação da sub-aba 'História do Clube' no Admin e substituição do texto estático em clube.html/js/clube.js.
 - [2026-09-03] Gemini: Remoção do texto secundário provisório da Direção na secção História de clube.html e js/clube.js.
 - [2026-09-03] Gemini: Integração de envio de emails de confirmação de inscrição via Resend (Edge Function confirmacao-inscricao e trigger alternativo SQL pg_net).
-- [2026-09-03] Gemini: Implementação do módulo Gestão de Patrocinadores no Admin (admin.html, js/admin.js), upload de ativos (logos, painéis, redes), script setup_patrocinadores.sql e montra no site.
+- [2026-09-03] Gemini: Módulo Gestão de Patrocinadores no Admin com tabela dedicada patrocinadores_bcv (isolada do Torneio), upload de ativos (logos, painéis, redes), script setup_patrocinadores.sql e montra pública.

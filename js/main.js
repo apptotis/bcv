@@ -581,7 +581,7 @@ async function loadPatrocinadoresPublic(supabase) {
 
     try {
         const { data, error } = await supabase
-            .from('patrocinadores')
+            .from('patrocinadores_bcv')
             .select('nome, categoria, website, logo_url, pavilhao_img_url, redes_img_url')
             .eq('ativo', true)
             .eq('expo_site', true)

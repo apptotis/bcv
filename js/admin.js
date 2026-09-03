@@ -4811,10 +4811,10 @@ document.addEventListener('DOMContentLoaded', async () => {
 
                 let dbError = null;
                 if (patId) {
-                    const { error } = await supabase.from('patrocinadores').update(payload).eq('id', patId);
+                    const { error } = await supabase.from('patrocinadores_bcv').update(payload).eq('id', patId);
                     dbError = error;
                 } else {
-                    const { error } = await supabase.from('patrocinadores').insert([payload]);
+                    const { error } = await supabase.from('patrocinadores_bcv').insert([payload]);
                     dbError = error;
                 }
 
@@ -4847,7 +4847,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     window.togglePatrocinadorAtivo = async function(id, currentStatus) {
         try {
             const { error } = await supabase
-                .from('patrocinadores')
+                .from('patrocinadores_bcv')
                 .update({ ativo: !currentStatus, updated_at: new Date().toISOString() })
                 .eq('id', id);
             if (error) throw error;
@@ -4865,7 +4865,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         if (!confirm(`Tem a certeza de que pretende eliminar o patrocinador "${nome}"?`)) return;
 
         try {
-            const { error } = await supabase.from('patrocinadores').delete().eq('id', id);
+            const { error } = await supabase.from('patrocinadores_bcv').delete().eq('id', id);
             if (error) throw error;
             loadPatrocinadores();
         } catch (err) {
@@ -4881,7 +4881,7 @@ document.addEventListener('DOMContentLoaded', async () => {
 
         try {
             const { data, error } = await supabase
-                .from('patrocinadores')
+                .from('patrocinadores_bcv')
                 .select('*')
                 .order('ordem', { ascending: true })
                 .order('nome', { ascending: true });
@@ -4892,7 +4892,7 @@ document.addEventListener('DOMContentLoaded', async () => {
                     container.innerHTML = `
                         <tr>
                             <td colspan="9" style="text-align: center; padding: 40px; color: #b91c1c;">
-                                ⚠️ A tabela <code>patrocinadores</code> ainda não foi criada no Supabase.<br>
+                                ⚠️ A tabela <code>patrocinadores_bcv</code> ainda não foi criada no Supabase.<br>
                                 Execute o script <code>setup_patrocinadores.sql</code> no SQL Editor do Supabase para ativar este módulo.
                             </td>
                         </tr>

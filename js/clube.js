@@ -265,7 +265,7 @@ document.addEventListener('DOMContentLoaded', () => {
     async function loadPatrocinadoresSidebar() {
         try {
             const { data } = await supabase
-                .from('patrocinadores')
+                .from('patrocinadores_bcv')
                 .select('*')
                 .eq('ativo', true)
                 .eq('expo_site', true)
