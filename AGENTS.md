@@ -92,3 +92,4 @@
 - [2026-09-01] Gemini: Implementação do pré-preenchimento integral e recuperação automática de fichas de atletas (inscricao.html) para todos os 7 passos (FPB, Morada, Encarregado, Seguro, Exame Médico EMD e Equipamentos), permitindo correções/atualizações rápidas sem necessidade de preencher tudo do zero.
 - [2026-09-01] Gemini: Criação da sub-aba 'História do Clube' no Admin e substituição do texto estático em clube.html/js/clube.js.
 - [2026-09-03] Gemini: Remoção do texto secundário provisório da Direção na secção História de clube.html e js/clube.js.
+- [2026-09-03] Gemini: Integração de envio de emails de confirmação de inscrição via Resend (Edge Function confirmacao-inscricao e trigger alternativo SQL pg_net).

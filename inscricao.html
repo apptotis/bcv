@@ -2051,11 +2051,35 @@
 
                 if (dbError) throw dbError;
 
+                // =========================================================================
+                // DISPARO DE EMAIL DE CONFIRMAÇÃO VIA RESEND (SUPABASE EDGE FUNCTION)
+                // =========================================================================
+                const emailDestino = payload.encarregado_email || payload.email;
+                if (emailDestino && client.functions) {
+                    client.functions.invoke('confirmacao-inscricao', {
+                        body: { atleta: payload }
+                    }).then(({ data, error }) => {
+                        if (error) {
+                            console.warn("Aviso no envio de email pelo Resend:", error);
+                        } else {
+                            console.log("Email de confirmação enviado com sucesso via Resend:", data);
+                        }
+                    }).catch(errEmail => {
+                        console.warn("Exceção ao invocar confirmacao-inscricao:", errEmail);
+                    });
+                }
+
                 msgSucesso.style.display = 'block';
                 const isUpdate = !!selectedAtletaId;
                 msgSucesso.innerHTML = `
                     <div style="font-size: 1.15rem; font-weight: 800; margin-bottom: 6px;">🎉 ${isUpdate ? 'INSCRIÇÃO ATUALIZADA COM SUCESSO!' : 'INSCRIÇÃO CONCLUÍDA COM SUCESSO!'}</div>
-                    <p style="margin: 0;">A ficha de <strong>${payload.nome}</strong> foi ${isUpdate ? 'atualizada' : 'registada'} com sucesso para a <strong>Época 2026/2027</strong> (Federação FPB, Exame Médico e Equipamentos).</p>
+                    <p style="margin: 0 0 10px 0;">A ficha de <strong>${payload.nome}</strong> foi ${isUpdate ? 'atualizada' : 'registada'} com sucesso para a <strong>Época 2026/2027</strong> (Federação FPB, Exame Médico e Equipamentos).</p>
+                    ${emailDestino ? `
+                        <div style="display: flex; align-items: center; gap: 8px; font-size: 0.92rem; background: rgba(255,255,255,0.22); padding: 10px 14px; border-radius: 8px; margin-top: 8px;">
+                            <span>📧</span>
+                            <span>Foi enviado um email de confirmação com o resumo dos dados para <strong>${emailDestino}</strong>.</span>
+                        </div>
+                    ` : ''}
                 `;
                 btn.textContent = isUpdate ? 'DADOS ATUALIZADOS COM SUCESSO ✓' : 'INSCRIÇÃO SUBMETIDA COM SUCESSO ✓';
                 btn.style.background = '#15803d';
