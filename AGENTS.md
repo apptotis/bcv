@@ -90,6 +90,5 @@
 - [2026-09-01] Gemini: Ajuste da notícia em destaque no mobile (css/style.css) posicionando a imagem no topo como banner retangular antes do conteúdo e botão de leitura.
 - [2026-09-01] Gemini: Integração de Call-to-Action (CTA) direto para inscricao.html no final do modal de notícias e adição de banner panorâmico de destaque de Inscrições (#cta-inscricoes) na coluna principal visível em mobile e desktop (index.html).
 - [2026-09-01] Gemini: Implementação do pré-preenchimento integral e recuperação automática de fichas de atletas (inscricao.html) para todos os 7 passos (FPB, Morada, Encarregado, Seguro, Exame Médico EMD e Equipamentos), permitindo correções/atualizações rápidas sem necessidade de preencher tudo do zero.
-- [2026-09-01] Gemini: Criação da sub-aba 'História do Clube' no módulo Configurações do Admin (admin.html, js/admin.js) para gestão do texto oficial após aprovação da Direção, e substituição do texto estático em clube.html/js/clube.js pela mensagem provisória 'Brevemente conheça a história do Clube...' com carregamento dinâmico.
-
-
+- [2026-09-01] Gemini: Criação da sub-aba 'História do Clube' no Admin e substituição do texto estático em clube.html/js/clube.js.
+- [2026-09-03] Gemini: Remoção do texto secundário provisório da Direção na secção História de clube.html e js/clube.js.
