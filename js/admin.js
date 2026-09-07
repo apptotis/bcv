@@ -990,6 +990,23 @@ document.addEventListener('DOMContentLoaded', async () => {
         });
     }
 
+    const btnToggleFormEquipa = document.getElementById('btn-toggle-form-equipa');
+    const containerFormEquipa = document.getElementById('container-form-equipa');
+
+    if (btnToggleFormEquipa && containerFormEquipa) {
+        btnToggleFormEquipa.addEventListener('click', function() {
+            if (containerFormEquipa.classList.contains('hidden')) {
+                resetEquipaForm();
+                containerFormEquipa.classList.remove('hidden');
+                containerFormEquipa.scrollIntoView({ behavior: 'smooth' });
+                btnToggleFormEquipa.textContent = '✖ Fechar Formulário';
+            } else {
+                containerFormEquipa.classList.add('hidden');
+                btnToggleFormEquipa.textContent = '+ Adicionar Nova Equipa';
+            }
+        });
+    }
+
     if (btnRemoveEquipaFoto) {
         btnRemoveEquipaFoto.addEventListener('click', function() {
             equipaFotoFileInput.value = '';
@@ -1009,10 +1026,14 @@ document.addEventListener('DOMContentLoaded', async () => {
         btnSaveEquipa.textContent = 'Adicionar Equipa';
         if (btnCancelEquipa) btnCancelEquipa.classList.add('hidden');
         if (equipaMsg) equipaMsg.classList.add('hidden');
-    }
+        if (btnToggleFormEquipa) btnToggleFormEquipa.textContent = '+ Adicionar Nova Equipa';
+    };
 
     if (btnCancelEquipa) {
-        btnCancelEquipa.addEventListener('click', resetEquipaForm);
+        btnCancelEquipa.addEventListener('click', function() {
+            resetEquipaForm();
+            if (containerFormEquipa) containerFormEquipa.classList.add('hidden');
+        });
     }
 
     let currentEquipas = [];
@@ -1146,6 +1167,12 @@ document.addEventListener('DOMContentLoaded', async () => {
         if (btnCancelEquipa) btnCancelEquipa.classList.remove('hidden');
         if (equipaMsg) equipaMsg.classList.add('hidden');
         
+        if (containerFormEquipa) {
+            containerFormEquipa.classList.remove('hidden');
+        }
+        if (btnToggleFormEquipa) {
+            btnToggleFormEquipa.textContent = '✖ Fechar Formulário';
+        }
         formEquipaTitle.scrollIntoView({ behavior: 'smooth' });
     };
 
@@ -1578,6 +1605,9 @@ document.addEventListener('DOMContentLoaded', async () => {
                 equipaMsg.classList.remove('hidden');
                 
                 resetEquipaForm();
+                setTimeout(() => {
+                    if (containerFormEquipa) containerFormEquipa.classList.add('hidden');
+                }, 1200);
                 loadEquipas();
 
             } catch (error) {

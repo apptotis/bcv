@@ -574,10 +574,13 @@
 
                 <!-- Tab: Gestão de Equipas -->
                 <div id="tab-equipas" class="tab-pane hidden">
-                    <h2 style="margin-bottom: 20px;">Gestão de Equipas BCV</h2>
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; flex-wrap: wrap; gap: 10px;">
+                        <h2>Gestão de Equipas BCV</h2>
+                        <button id="btn-toggle-form-equipa" class="btn-primary" style="width: auto; padding: 10px 20px;">+ Adicionar Nova Equipa</button>
+                    </div>
                     
                     <!-- Formulário de Criação / Edição -->
-                    <div class="welcome-box" style="margin-bottom: 30px;">
+                    <div id="container-form-equipa" class="welcome-box hidden" style="margin-bottom: 30px;">
                         <h3 id="form-equipa-title">Adicionar Nova Equipa</h3>
                         <form id="form-equipa" style="display: grid; gap: 15px; margin-top: 15px; max-width: 600px;">
                             <input type="hidden" id="edit-equipa-id">
