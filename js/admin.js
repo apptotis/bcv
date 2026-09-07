@@ -1335,37 +1335,69 @@ document.addEventListener('DOMContentLoaded', async () => {
             plantelCountBadge.textContent = currentPlantelRelacoes.length;
         }
 
-        // 1. RENDERIZAR ATLETAS ATUALMENTE NO PLANTEL
+        const isStaffRole = (papel) => {
+            const p = (papel || '').toLowerCase();
+            return p.includes('treinador') || p.includes('preparador') || p.includes('diretor') || p.includes('seccionista') || p.includes('fisioterapeuta') || p.includes('staff') || p.includes('apoio');
+        };
+
+        // 1. RENDERIZAR PLANTEL ATUAL (Separado em Equipa Técnica e Jogadores)
         if (plantelListaAtuais) {
             plantelListaAtuais.innerHTML = '';
             if (currentPlantelRelacoes.length === 0) {
                 plantelListaAtuais.innerHTML = `
                     <div style="text-align: center; color: var(--text-secondary); padding: 40px 15px;">
                         <div style="font-size: 2rem; margin-bottom: 8px;">📋</div>
-                        <p style="margin: 0; font-weight: 600;">Nenhum atleta convocado</p>
-                        <p style="margin: 5px 0 0 0; font-size: 0.8rem;">Pesquise e adicione atletas na coluna ao lado.</p>
+                        <p style="margin: 0; font-weight: 600;">Nenhum elemento no plantel</p>
+                        <p style="margin: 5px 0 0 0; font-size: 0.8rem;">Pesquise e adicione jogadores ou equipa técnica na coluna ao lado.</p>
                     </div>
                 `;
             } else {
-                currentPlantelRelacoes.forEach(rel => {
-                    const a = rel.atleta;
+                const relacoesStaff = currentPlantelRelacoes.filter(r => isStaffRole(r.papel));
+                const relacoesJogadores = currentPlantelRelacoes.filter(r => !isStaffRole(r.papel));
+
+                const renderCardAtual = (rel, isStaff) => {
+                    const a = rel.atleta || {};
                     const card = document.createElement('div');
                     card.className = 'plantel-item-card';
 
                     const avatarHtml = a.foto
                         ? `<img src="${a.foto}" class="plantel-item-avatar" alt="${a.nome}">`
-                        : `<div class="plantel-item-avatar">👤</div>`;
+                        : `<div class="plantel-item-avatar">${isStaff ? '👔' : '👤'}</div>`;
 
                     const dorsal = rel.numero_camisola !== null && rel.numero_camisola !== undefined
                         ? rel.numero_camisola
                         : (a.numero_camisola || a.equipamento_numero_1 || '-');
 
-                    const isReforco = a.escalao && (getIndexEscalao(a.escalao) !== getIndexEscalao(currentPlantelEquipa.escalao));
-                    const badgeHtml = isReforco
-                        ? `<span class="plantel-badge-reforco" title="Escalão etário natural: ${a.escalao}">Reforço (${a.escalao})</span>`
-                        : `<span class="plantel-badge-escalao">${a.escalao || 'Atleta'}</span>`;
+                    const isReforco = !isStaff && a.escalao && (getIndexEscalao(a.escalao) !== getIndexEscalao(currentPlantelEquipa.escalao));
+                    const badgeHtml = isStaff
+                        ? `<span class="plantel-badge-staff">${a.funcao || 'Staff'}</span>`
+                        : (isReforco
+                            ? `<span class="plantel-badge-reforco" title="Escalão etário natural: ${a.escalao}">Reforço (${a.escalao})</span>`
+                            : `<span class="plantel-badge-escalao">${a.escalao || 'Atleta'}</span>`);
 
                     const displayNome = a.nickname ? `${a.nome} <span style="color: var(--accent-primary); font-weight: 700;">"${a.nickname}"</span>` : a.nome;
+
+                    const papelAtual = rel.papel || (isStaff ? 'Treinador Principal' : 'Jogador');
+
+                    const opcoesCargo = isStaff ? `
+                        <option value="Treinador Principal" ${papelAtual === 'Treinador Principal' ? 'selected' : ''}>👔 Treinador Principal</option>
+                        <option value="Treinador Adjunto" ${papelAtual === 'Treinador Adjunto' ? 'selected' : ''}>📋 Treinador Adjunto</option>
+                        <option value="Preparador Físico" ${papelAtual === 'Preparador Físico' ? 'selected' : ''}>💪 Preparador Físico</option>
+                        <option value="Diretor de Campo" ${papelAtual === 'Diretor de Campo' ? 'selected' : ''}>🎖️ Diretor de Campo</option>
+                        <option value="Seccionista" ${papelAtual === 'Seccionista' ? 'selected' : ''}>📂 Seccionista</option>
+                        <option value="Fisioterapeuta" ${papelAtual === 'Fisioterapeuta' ? 'selected' : ''}>🩺 Fisioterapeuta</option>
+                        <option value="Apoio Técnico" ${papelAtual === 'Apoio Técnico' ? 'selected' : ''}>🤝 Apoio Técnico</option>
+                        <option value="Jogador">🏀 Jogador</option>
+                    ` : `
+                        <option value="Jogador" ${papelAtual === 'Jogador' ? 'selected' : ''}>🏀 Jogador</option>
+                        <option value="Capitão" ${papelAtual === 'Capitão' ? 'selected' : ''}>⭐ Capitão</option>
+                        <option value="Sub-Capitão" ${papelAtual === 'Sub-Capitão' ? 'selected' : ''}>🥈 Sub-Capitão</option>
+                        <option value="Treinador Principal">👔 Treinador Principal</option>
+                        <option value="Treinador Adjunto">📋 Treinador Adjunto</option>
+                        <option value="Diretor de Campo">🎖️ Diretor de Campo</option>
+                    `;
+
+                    const dorsalHtml = isStaff ? '' : `<strong style="color: var(--text-primary);">#${dorsal}</strong><span>•</span>`;
 
                     card.innerHTML = `
                         <div class="plantel-item-info">
@@ -1373,26 +1405,54 @@ document.addEventListener('DOMContentLoaded', async () => {
                             <div class="plantel-item-texts">
                                 <div class="plantel-item-name">${displayNome}</div>
                                 <div class="plantel-item-meta">
-                                    <strong style="color: var(--text-primary);">#${dorsal}</strong>
-                                    <span>•</span>
+                                    ${dorsalHtml}
                                     ${badgeHtml}
-                                    <span>•</span>
-                                    <span style="color: #64748b;">${rel.papel || 'Jogador'}</span>
                                 </div>
                             </div>
                         </div>
-                        <div style="display: flex; align-items: center; gap: 6px;">
-                            <button type="button" class="btn-plantel-remove" onclick="window.removerAtletaPlantel('${rel.id}')" title="Remover do Plantel">
-                                🗑️ Retirar
+                        <div style="display: flex; align-items: center; gap: 8px; flex-shrink: 0;">
+                            <select class="plantel-select-cargo" title="Alterar Cargo / Função" onchange="window.alterarPapelPlantel('${rel.id}', this.value)">
+                                ${opcoesCargo}
+                            </select>
+                            <button type="button" class="btn-plantel-remove" onclick="window.removerAtletaPlantel('${rel.id}')" title="Retirar do Plantel">
+                                🗑️
                             </button>
                         </div>
                     `;
-                    plantelListaAtuais.appendChild(card);
-                });
+                    return card;
+                };
+
+                // Secção da Equipa Técnica
+                if (relacoesStaff.length > 0) {
+                    const headerStaff = document.createElement('div');
+                    headerStaff.className = 'plantel-section-title';
+                    headerStaff.innerHTML = `
+                        <span>📋 Equipa Técnica & Staff</span>
+                        <span style="font-size: 0.72rem; background: #e0f2fe; color: #0369a1; padding: 1px 7px; border-radius: 8px;">${relacoesStaff.length}</span>
+                    `;
+                    plantelListaAtuais.appendChild(headerStaff);
+                    relacoesStaff.forEach(rel => {
+                        plantelListaAtuais.appendChild(renderCardAtual(rel, true));
+                    });
+                }
+
+                // Secção de Jogadores
+                if (relacoesJogadores.length > 0) {
+                    const headerJog = document.createElement('div');
+                    headerJog.className = 'plantel-section-title';
+                    headerJog.innerHTML = `
+                        <span>🏀 Jogadores Convocados</span>
+                        <span style="font-size: 0.72rem; background: #ede9fe; color: var(--accent-primary); padding: 1px 7px; border-radius: 8px;">${relacoesJogadores.length}</span>
+                    `;
+                    plantelListaAtuais.appendChild(headerJog);
+                    relacoesJogadores.forEach(rel => {
+                        plantelListaAtuais.appendChild(renderCardAtual(rel, false));
+                    });
+                }
             }
         }
 
-        // 2. RENDERIZAR ATLETAS DISPONÍVEIS PARA ADICIONAR
+        // 2. RENDERIZAR ATLETAS / MEMBROS DISPONÍVEIS PARA ADICIONAR
         if (plantelListaDisponiveis) {
             plantelListaDisponiveis.innerHTML = '';
 
@@ -1400,15 +1460,50 @@ document.addEventListener('DOMContentLoaded', async () => {
             const searchTerm = (plantelSearchAtleta ? plantelSearchAtleta.value : '').toLowerCase().trim();
             const filtroOrigem = (plantelFiltroOrigem ? plantelFiltroOrigem.value : 'recomendados');
 
+            // Atualizar tag visual no cabeçalho da coluna direita
+            const tagEl = document.getElementById('plantel-disponiveis-tag');
+            if (tagEl) {
+                if (filtroOrigem === 'staff') {
+                    tagEl.textContent = 'Staff / Treinadores';
+                    tagEl.style.background = 'rgba(3, 105, 161, 0.12)';
+                    tagEl.style.color = '#0369a1';
+                    tagEl.style.borderColor = 'rgba(3, 105, 161, 0.25)';
+                } else {
+                    tagEl.textContent = 'Inscritos 2026/2027';
+                    tagEl.style.background = 'rgba(22, 163, 74, 0.12)';
+                    tagEl.style.color = '#16a34a';
+                    tagEl.style.borderColor = 'rgba(22, 163, 74, 0.25)';
+                }
+            }
+
             const teamEscIdx = getIndexEscalao(currentPlantelEquipa.escalao);
+            const jaTemTreinadorPrincipal = currentPlantelRelacoes.some(r => (r.papel || '').toLowerCase() === 'treinador principal');
 
             const disponiveis = (allAtletasClub || []).filter(a => {
+                // Não pode já estar nesta equipa
+                if (idsNoPlantel.has(String(a.id))) return false;
+
+                // MODO STAFF:
+                if (filtroOrigem === 'staff') {
+                    const func = (a.funcao || '').toLowerCase();
+                    const isStaffRoleInDb = func && !func.includes('jogador') && !func.includes('jogadora');
+                    
+                    if (searchTerm) {
+                        const matchNome = (a.nome || '').toLowerCase().includes(searchTerm);
+                        const matchNick = (a.nickname || '').toLowerCase().includes(searchTerm);
+                        const matchFunc = (a.funcao || '').toLowerCase().includes(searchTerm);
+                        if (!matchNome && !matchNick && !matchFunc) return false;
+                    } else {
+                        // Sem pesquisa: mostra todos com função de staff/treinador registada
+                        if (!isStaffRoleInDb) return false;
+                    }
+                    return true;
+                }
+
+                // MODO JOGADORES:
                 // Apenas atletas inscritos na época 2026/2027
                 const epNorm = (a.epoca || '').replace('-', '/');
                 if (epNorm !== '2026/2027') return false;
-
-                // Não pode já estar nesta equipa
-                if (idsNoPlantel.has(String(a.id))) return false;
 
                 // Deve cumprir compatibilidade de género
                 if (!isGeneroApropriado(currentPlantelEquipa.sexo, a.sexo)) return false;
@@ -1422,9 +1517,9 @@ document.addEventListener('DOMContentLoaded', async () => {
                         if (atlEscIdx !== teamEscIdx) return false;
                     }
                 } else if (filtroOrigem === 'recomendados') {
-                    // Recomendados: mesmo escalão ou escalões inferiores (jogar em escalão acima permitido)
+                    // Recomendados: mesmo escalão ou escalões inferiores
                     if (atlEscIdx !== -1 && teamEscIdx !== -1) {
-                        if (atlEscIdx > teamEscIdx) return false; // Escalão mais velho não pode jogar em escalão mais jovem
+                        if (atlEscIdx > teamEscIdx) return false;
                     }
                 }
 
@@ -1444,29 +1539,67 @@ document.addEventListener('DOMContentLoaded', async () => {
             }
 
             if (disponiveis.length === 0) {
-                plantelListaDisponiveis.innerHTML = `
-                    <div style="text-align: center; color: var(--text-secondary); padding: 40px 15px;">
-                        <p style="margin: 0; font-size: 0.9rem;">Nenhum atleta encontrado com os filtros atuais.</p>
-                        <p style="margin: 5px 0 0 0; font-size: 0.8rem; color: #94a3b8;">Tente mudar o filtro de escalão ou limpar a pesquisa.</p>
-                    </div>
-                `;
+                if (filtroOrigem === 'staff') {
+                    plantelListaDisponiveis.innerHTML = `
+                        <div style="text-align: center; color: var(--text-secondary); padding: 40px 15px;">
+                            <p style="margin: 0; font-size: 0.9rem; font-weight: 600;">Nenhum membro de staff encontrado.</p>
+                            <p style="margin: 6px 0 0 0; font-size: 0.8rem; color: #64748b;">
+                                Digite o nome de qualquer membro ou treinador na barra de pesquisa acima para convocá-lo para a equipa técnica.
+                            </p>
+                        </div>
+                    `;
+                } else {
+                    plantelListaDisponiveis.innerHTML = `
+                        <div style="text-align: center; color: var(--text-secondary); padding: 40px 15px;">
+                            <p style="margin: 0; font-size: 0.9rem;">Nenhum atleta encontrado com os filtros atuais.</p>
+                            <p style="margin: 5px 0 0 0; font-size: 0.8rem; color: #94a3b8;">Tente mudar o filtro de escalão ou limpar a pesquisa.</p>
+                        </div>
+                    `;
+                }
             } else {
                 disponiveis.forEach(a => {
                     const card = document.createElement('div');
                     card.className = 'plantel-item-card';
 
+                    const isStaff = (filtroOrigem === 'staff');
                     const avatarHtml = a.foto
                         ? `<img src="${a.foto}" class="plantel-item-avatar" alt="${a.nome}">`
-                        : `<div class="plantel-item-avatar">👤</div>`;
+                        : `<div class="plantel-item-avatar">${isStaff ? '👔' : '👤'}</div>`;
 
-                    const atlEscIdx = getIndexEscalao(a.escalao);
-                    const isAbaixo = (atlEscIdx !== -1 && teamEscIdx !== -1 && atlEscIdx < teamEscIdx);
-
-                    const badgeHtml = isAbaixo
-                        ? `<span class="plantel-badge-reforco">+ Escalão Abaixo (${a.escalao})</span>`
-                        : `<span class="plantel-badge-escalao">${a.escalao || 'Geral'}</span>`;
+                    let badgeHtml = '';
+                    if (isStaff) {
+                        badgeHtml = `<span class="plantel-badge-staff">${a.funcao || 'Membro'}</span>`;
+                    } else {
+                        const atlEscIdx = getIndexEscalao(a.escalao);
+                        const isAbaixo = (atlEscIdx !== -1 && teamEscIdx !== -1 && atlEscIdx < teamEscIdx);
+                        badgeHtml = isAbaixo
+                            ? `<span class="plantel-badge-reforco">+ Escalão Abaixo (${a.escalao})</span>`
+                            : `<span class="plantel-badge-escalao">${a.escalao || 'Geral'}</span>`;
+                    }
 
                     const displayNome = a.nickname ? `${a.nome} <span style="color: var(--accent-primary);">"${a.nickname}"</span>` : a.nome;
+
+                    const defaultStaffRole = jaTemTreinadorPrincipal ? 'Treinador Adjunto' : 'Treinador Principal';
+
+                    const opcoesCargosAdicionar = isStaff ? `
+                        <option value="Treinador Principal" ${defaultStaffRole === 'Treinador Principal' ? 'selected' : ''}>👔 Treinador Principal</option>
+                        <option value="Treinador Adjunto" ${defaultStaffRole === 'Treinador Adjunto' ? 'selected' : ''}>📋 Treinador Adjunto</option>
+                        <option value="Preparador Físico">💪 Preparador Físico</option>
+                        <option value="Diretor de Campo">🎖️ Diretor de Campo</option>
+                        <option value="Seccionista">📂 Seccionista</option>
+                        <option value="Fisioterapeuta">🩺 Fisioterapeuta</option>
+                        <option value="Apoio Técnico">🤝 Apoio Técnico</option>
+                    ` : `
+                        <option value="Jogador" selected>🏀 Jogador</option>
+                        <option value="Capitão">⭐ Capitão</option>
+                        <option value="Sub-Capitão">🥈 Sub-Capitão</option>
+                        <option value="Treinador Principal">👔 Treinador Principal</option>
+                        <option value="Treinador Adjunto">📋 Treinador Adjunto</option>
+                    `;
+
+                    const metaSub = isStaff 
+                        ? `${badgeHtml} <span>•</span> <span>${a.sexo || '-'}</span>`
+                        : `${badgeHtml} <span>•</span> <span>${a.sexo || '-'}</span> ${a.numero_camisola ? `<span>• #${a.numero_camisola}</span>` : ''}`;
 
                     card.innerHTML = `
                         <div class="plantel-item-info">
@@ -1474,16 +1607,18 @@ document.addEventListener('DOMContentLoaded', async () => {
                             <div class="plantel-item-texts">
                                 <div class="plantel-item-name">${displayNome}</div>
                                 <div class="plantel-item-meta">
-                                    ${badgeHtml}
-                                    <span>•</span>
-                                    <span>${a.sexo || '-'}</span>
-                                    ${a.numero_camisola ? `<span>• #${a.numero_camisola}</span>` : ''}
+                                    ${metaSub}
                                 </div>
                             </div>
                         </div>
-                        <button type="button" class="btn-plantel-add" onclick="window.adicionarAtletaPlantel('${a.id}')">
-                            + Convocar
-                        </button>
+                        <div style="display: flex; align-items: center; gap: 8px; flex-shrink: 0;">
+                            <select id="cargo-atleta-${a.id}" class="plantel-select-cargo" title="Escolher Cargo ao Adicionar">
+                                ${opcoesCargosAdicionar}
+                            </select>
+                            <button type="button" class="btn-plantel-add" onclick="window.adicionarAtletaPlantel('${a.id}')">
+                                + Adicionar
+                            </button>
+                        </div>
                     `;
                     plantelListaDisponiveis.appendChild(card);
                 });
@@ -1491,26 +1626,31 @@ document.addEventListener('DOMContentLoaded', async () => {
         }
     }
 
-    // Ações de Adicionar e Remover Atletas do Plantel
+    // Ações de Adicionar, Alterar Cargo e Remover do Plantel
     window.adicionarAtletaPlantel = async function(atletaId) {
         if (!currentPlantelEquipa) return;
 
         const btn = event?.target;
         if (btn) {
             btn.disabled = true;
-            btn.textContent = 'A adicionar...';
+            btn.textContent = '...';
         }
 
         try {
             const atletaObj = allAtletasClub.find(a => String(a.id) === String(atletaId));
             const numCam = atletaObj ? (atletaObj.numero_camisola || atletaObj.equipamento_numero_1 || null) : null;
+            
+            const cargoSelect = document.getElementById(`cargo-atleta-${atletaId}`);
+            const papelEscolhido = cargoSelect ? cargoSelect.value : 'Jogador';
+
+            const isStaff = !['Jogador', 'Capitão', 'Sub-Capitão'].includes(papelEscolhido);
 
             const novoVinculo = {
                 equipa_id: currentPlantelEquipa.id,
                 atleta_id: atletaId,
                 epoca: currentPlantelEquipa.epoca || '2026/2027',
-                numero_camisola: numCam ? parseInt(numCam) : null,
-                papel: 'Jogador'
+                numero_camisola: (!isStaff && numCam) ? parseInt(numCam) : null,
+                papel: papelEscolhido
             };
 
             const { data, error } = await supabase
@@ -1523,17 +1663,33 @@ document.addEventListener('DOMContentLoaded', async () => {
             await reloadPlantelData();
 
         } catch (err) {
-            console.error("Erro ao adicionar atleta ao plantel:", err);
-            alert("Erro ao adicionar atleta ao plantel: " + err.message);
+            console.error("Erro ao adicionar elemento ao plantel:", err);
+            alert("Erro ao adicionar ao plantel: " + err.message);
             if (btn) {
                 btn.disabled = false;
-                btn.textContent = '+ Convocar';
+                btn.textContent = '+ Adicionar';
             }
         }
     };
 
+    window.alterarPapelPlantel = async function(relacaoId, novoPapel) {
+        try {
+            const { error } = await supabase
+                .from('equipas_atletas')
+                .update({ papel: novoPapel })
+                .eq('id', relacaoId);
+
+            if (error) throw error;
+
+            await reloadPlantelData();
+        } catch (err) {
+            console.error("Erro ao alterar cargo do elemento:", err);
+            alert("Erro ao alterar cargo: " + err.message);
+        }
+    };
+
     window.removerAtletaPlantel = async function(relacaoId) {
-        if (!confirm("Deseja retirar este atleta do plantel desta equipa?")) return;
+        if (!confirm("Deseja retirar este elemento do plantel desta equipa?")) return;
 
         try {
             const { error } = await supabase
@@ -1546,8 +1702,8 @@ document.addEventListener('DOMContentLoaded', async () => {
             await reloadPlantelData();
 
         } catch (err) {
-            console.error("Erro ao remover atleta do plantel:", err);
-            alert("Erro ao remover atleta do plantel: " + err.message);
+            console.error("Erro ao remover do plantel:", err);
+            alert("Erro ao remover do plantel: " + err.message);
         }
     };
 

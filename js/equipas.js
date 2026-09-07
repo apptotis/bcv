@@ -112,9 +112,14 @@ document.addEventListener('DOMContentLoaded', async () => {
                 }
             }
 
-            const jogadores = atletas.filter(a => (a.funcao || 'Jogador') === 'Jogador' || a.funcao === 'Jogadora')
+            const isJogadorPapel = (f) => {
+                const papel = (f || 'Jogador').toLowerCase();
+                return papel === 'jogador' || papel === 'jogadora' || papel === 'capitão' || papel === 'capitao' || papel === 'sub-capitão' || papel === 'sub-capitao';
+            };
+
+            const jogadores = atletas.filter(a => isJogadorPapel(a.funcao))
                                      .sort((a, b) => (a.nickname || a.nome || '').localeCompare(b.nickname || b.nome || ''));
-            const equipaTecnica = atletas.filter(a => a.funcao && a.funcao !== 'Jogador' && a.funcao !== 'Jogadora')
+            const equipaTecnica = atletas.filter(a => !isJogadorPapel(a.funcao))
                                          .sort((a, b) => (a.nickname || a.nome || '').localeCompare(b.nickname || b.nome || ''));
 
             const playersGrid = document.getElementById('roster-players-grid');
@@ -130,7 +135,8 @@ document.addEventListener('DOMContentLoaded', async () => {
                         ? `<img src="${j.foto}" alt="${j.nome}" class="player-photo">` 
                         : `<div class="player-photo-placeholder">👤</div>`;
                     
-                    const nomeExibicao = j.nickname ? j.nickname : j.nome.split(' ')[0]; // Alcunha ou primeiro nome
+                    const nomeExibicao = j.nickname ? j.nickname : j.nome.split(' ')[0];
+                    const papelBadge = (j.funcao === 'Capitão' || j.funcao === 'Sub-Capitão') ? ` • <span style="color: var(--accent-primary); font-weight:700;">⭐ ${j.funcao}</span>` : '';
                     
                     card.innerHTML = `
                         <div class="player-photo-container">
@@ -140,7 +146,7 @@ document.addEventListener('DOMContentLoaded', async () => {
                             <div class="player-mobile-number">${j.numero_camisola ? '#' + j.numero_camisola : ''}</div>
                             <div class="player-text-wrap">
                                 <h4 class="player-name">${nomeExibicao}</h4>
-                                <div class="player-role">${j.nome}</div>
+                                <div class="player-role">${j.nome}${papelBadge}</div>
                             </div>
                         </div>
                         ${numBadge}
@@ -158,7 +164,7 @@ document.addEventListener('DOMContentLoaded', async () => {
                     
                     const photoHtml = t.foto 
                         ? `<img src="${t.foto}" alt="${t.nome}" class="player-photo">` 
-                        : `<div class="player-photo-placeholder">👤</div>`;
+                        : `<div class="player-photo-placeholder">👔</div>`;
                     
                     card.innerHTML = `
                         <div class="player-photo-container">

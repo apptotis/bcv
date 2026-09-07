@@ -28,11 +28,7 @@
 - [2026-05-12] Gemini: Simplificação do Hero da página Clube (apenas emblema).
 - [2026-05-13] Gemini: Substituição global do logo (Logo_bcv.jpg -> emblema_png.png).
 - [2026-05-14] Gemini: Remoção de ícones decorativos (Agenda, Taça, Megafone) nos títulos dos cards.
-- [2026-05-24] Gemini: Criação de protótipo de design (teste-design.html/css) com logo centrado e menu drawer lateral.
-- [2026-05-24] Gemini: Ajuste do tamanho da fonte do menu, texto do cabeçalho do drawer para 'BCV', correção do emblema e adição do botão fechar no drawer.
-- [2026-05-24] Gemini: Migração completa do cabeçalho clássico do index.html para o modelo centrado com drawer lateral interativo de teste-design.
-- [2026-05-24] Gemini: Remoção do display:none nas redes sociais no mobile da navbar para manter visibilidade em todos os ecrãs.
-- [2026-05-24] Gemini: Alinhamento do cabeçalho do drawer menu em linha única (emblema + BCV + botão fechar) e redução do padding superior para economizar espaço.
+- [2026-05-24] Gemini: Protótipo e migração do cabeçalho centrado com drawer lateral interativo, alinhamento mobile e redes sociais.
 - [2026-05-27] Gemini: Simplificação do modal de aniversários (index.html) com fotos quadradas sem recorte, remoção da idade e dos textos fixos repetidos, exibição de "PARABÉNS, [Nickname/Nome]" no topo, e integração do campo Nickname no Admin e DB.
 - [2026-05-27] Gemini: Alinhamento horizontal (display: flex) do logo e nome no rodapé em desktop para index.html e clube.html.
 - [2026-05-27] Gemini: Reformulação visual do Admin (admin.html, admin.css) para tema claro (ambiente de trabalho branco, sidebar roxa escura, e cards/tabelas em cinza contrastante), remoção da barra superior, integração do botão de logout na sidebar, correção de contraste no dashboard de aniversariantes, e correção do bug "null" no título de edição do utilizador.
@@ -95,4 +91,5 @@
 - [2026-09-03] Gemini: Integração de envio de emails de confirmação de inscrição via Resend (Edge Function confirmacao-inscricao e trigger alternativo SQL pg_net).
 - [2026-09-03] Gemini: Módulo Gestão de Patrocinadores no Admin com tabela dedicada patrocinadores_bcv (isolada do Torneio), upload de ativos (logos, painéis, redes), script setup_patrocinadores.sql e montra pública.
 - [2026-09-07] Gemini: Implementação da Gestão de Plantéis N:M (equipas_atletas): atletas convocáveis para múltiplas equipas/escalões com filtros inteligentes, modal de plantel no Admin, integração em equipas.html e portais mobile (treinador/diretor).
+- [2026-09-07] Gemini: Suporte a Equipa Técnica e Staff no modal de Plantel (treinador principal/adjunto, preparador, diretor, etc.), seleção e alteração inline de cargos, e destaque público em equipas.html.
 
