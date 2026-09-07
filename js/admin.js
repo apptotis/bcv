@@ -1355,8 +1355,8 @@ document.addEventListener('DOMContentLoaded', async () => {
                             </div>
                         </div>
                         <div style="display: flex; align-items: center; gap: 6px;">
-                            <button type="button" class="btn-action delete" onclick="window.removerAtletaPlantel('${rel.id}')" title="Remover do Plantel" style="padding: 5px 8px; font-size: 0.85rem;">
-                                🗑️
+                            <button type="button" class="btn-plantel-remove" onclick="window.removerAtletaPlantel('${rel.id}')" title="Remover do Plantel">
+                                🗑️ Retirar
                             </button>
                         </div>
                     `;
@@ -1450,7 +1450,7 @@ document.addEventListener('DOMContentLoaded', async () => {
                                 </div>
                             </div>
                         </div>
-                        <button type="button" class="btn-primary" onclick="window.adicionarAtletaPlantel('${a.id}')" style="padding: 6px 12px; font-size: 0.8rem; font-weight: 600; white-space: nowrap; border-radius: 6px;">
+                        <button type="button" class="btn-plantel-add" onclick="window.adicionarAtletaPlantel('${a.id}')">
                             + Convocar
                         </button>
                     `;
