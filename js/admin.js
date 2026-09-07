@@ -1017,11 +1017,13 @@ document.addEventListener('DOMContentLoaded', async () => {
 
     let currentEquipas = [];
 
+    let atletasPorEquipaCount = {};
+
     window.loadEquipas = async function() {
         if (!equipasTableBody) return;
         
         try {
-            equipasTableBody.innerHTML = '<tr><td colspan="6" style="padding: 10px;">A carregar equipas...</td></tr>';
+            equipasTableBody.innerHTML = '<tr><td colspan="7" style="padding: 10px;">A carregar equipas...</td></tr>';
             
             let { data: equipas, error } = await supabase
                 .from('equipasbcv')
@@ -1029,21 +1031,35 @@ document.addEventListener('DOMContentLoaded', async () => {
 
             if (error) {
                 if (error.code === '42P01') {
-                    equipasTableBody.innerHTML = '<tr><td colspan="6" style="padding: 10px;">A tabela "equipasbcv" não existe na base de dados. Por favor, crie-a no Supabase.</td></tr>';
+                    equipasTableBody.innerHTML = '<tr><td colspan="7" style="padding: 10px;">A tabela "equipasbcv" não existe na base de dados. Por favor, crie-a no Supabase.</td></tr>';
                     return;
                 }
                 throw error;
             }
 
+            // Consultar contagem de atletas por equipa em equipas_atletas
+            atletasPorEquipaCount = {};
+            try {
+                const { data: relacoes, error: relError } = await supabase
+                    .from('equipas_atletas')
+                    .select('equipa_id');
+                if (!relError && relacoes) {
+                    relacoes.forEach(r => {
+                        const eqKey = String(r.equipa_id);
+                        atletasPorEquipaCount[eqKey] = (atletasPorEquipaCount[eqKey] || 0) + 1;
+                    });
+                }
+            } catch (eRel) {
+                console.warn("Aviso ao carregar contagem de plantéis:", eRel);
+            }
+
             const ordemEscalao = [
-                "Mini 8", 
-                "Mini 10", 
-                "Mini 12", 
-                "Sub-14", 
-                "Sub-16", 
-                "Sub-18", 
-                "Seniores", 
-                "Veteranos"
+                "BabyBasket", "Mini 8", "Mini 10", "Mini 12", 
+                "Sub 14", "Sub-14", 
+                "Sub 16", "Sub-16", 
+                "Sub 18", "Sub-18", 
+                "Sub 20", "Sub-20", 
+                "Seniores", "Veteranos"
             ];
 
             if (equipas) {
@@ -1062,34 +1078,42 @@ document.addEventListener('DOMContentLoaded', async () => {
             
         } catch (error) {
             console.error("Erro ao carregar equipas:", error);
-            equipasTableBody.innerHTML = `<tr><td colspan="6" style="color: red; padding: 10px;">Erro: ${error.message}</td></tr>`;
+            equipasTableBody.innerHTML = `<tr><td colspan="7" style="color: red; padding: 10px;">Erro: ${error.message}</td></tr>`;
         }
-    }
+    };
 
     function renderEquipasTable(lista) {
         if (!equipasTableBody) return;
         equipasTableBody.innerHTML = '';
         
         if (!lista || lista.length === 0) {
-            equipasTableBody.innerHTML = '<tr><td colspan="6" style="padding: 10px;">Nenhuma equipa encontrada.</td></tr>';
+            equipasTableBody.innerHTML = '<tr><td colspan="7" style="padding: 10px;">Nenhuma equipa encontrada.</td></tr>';
             return;
         }
 
         lista.forEach(equipa => {
             const tr = document.createElement('tr');
-            tr.style.borderBottom = '1px solid rgba(255,255,255,0.05)';
+            tr.style.borderBottom = '1px solid rgba(0,0,0,0.06)';
             const equipaJson = JSON.stringify(equipa).replace(/'/g, "&apos;").replace(/"/g, "&quot;");
             
             const fotoHtml = equipa.foto 
-                ? `<img src="${equipa.foto}" style="width: 60px; height: 40px; object-fit: cover; border-radius: 4px;">` 
-                : '<div style="width: 60px; height: 40px; background: rgba(255,255,255,0.1); border-radius: 4px; display:flex; align-items:center; justify-content:center; font-size: 1rem;">🏀</div>';
+                ? `<img src="${equipa.foto}" style="width: 55px; height: 38px; object-fit: cover; border-radius: 6px; border: 1px solid #e2e8f0;">` 
+                : '<div style="width: 55px; height: 38px; background: #f1f5f9; border-radius: 6px; display:flex; align-items:center; justify-content:center; font-size: 1.1rem; border: 1px solid #e2e8f0;">🏀</div>';
+
+            const numAtletas = atletasPorEquipaCount[String(equipa.id)] || 0;
 
             tr.innerHTML = `
                 <td style="padding: 10px;">${fotoHtml}</td>
-                <td style="padding: 10px;"><strong>${equipa.nome || '-'}</strong></td>
-                <td style="padding: 10px;">${equipa.epoca || '-'}</td>
-                <td style="padding: 10px;">${equipa.escalao || '-'}</td>
+                <td style="padding: 10px;"><strong style="color: var(--text-primary);">${equipa.nome || '-'}</strong></td>
+                <td style="padding: 10px;"><span style="background: #f1f5f9; padding: 2px 8px; border-radius: 6px; font-size: 0.85rem;">${equipa.epoca || '-'}</span></td>
+                <td style="padding: 10px;"><strong>${equipa.escalao || '-'}</strong></td>
                 <td style="padding: 10px;">${equipa.sexo || '-'}</td>
+                <td style="padding: 10px; text-align: center;">
+                    <button class="btn-action" onclick="window.openPlantelModal('${equipa.id}')" title="Gerir Plantel da Equipa" style="background: rgba(106, 27, 154, 0.08); color: var(--accent-primary); border: 1px solid var(--accent-primary); font-weight: 600; padding: 5px 12px; border-radius: 6px; cursor: pointer; display: inline-flex; align-items: center; gap: 6px; transition: all 0.2s ease;">
+                        <span>👥 Plantel</span>
+                        <span class="badge" style="background: var(--accent-primary); color: white; border-radius: 12px; padding: 1px 7px; font-size: 0.75rem; font-weight: 700;">${numAtletas}</span>
+                    </button>
+                </td>
                 <td style="padding: 10px; text-align: center;">
                     <button class="btn-action" onclick="window.editEquipa('${equipaJson}')" title="Editar">✏️</button>
                     <button class="btn-action delete" onclick="window.deleteEquipa('${equipa.id}')" title="Apagar">🗑️</button>
@@ -1126,7 +1150,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     };
 
     window.deleteEquipa = async function(id) {
-        if (!confirm('Tem a certeza que deseja apagar esta equipa?')) return;
+        if (!confirm('Tem a certeza que deseja apagar esta equipa? Os vínculos de plantel serão removidos.')) return;
 
         try {
             const { error } = await supabase.from('equipasbcv').delete().eq('id', id);
@@ -1142,6 +1166,368 @@ document.addEventListener('DOMContentLoaded', async () => {
             alert("Erro ao eliminar equipa: " + error.message);
         }
     };
+
+    // ==========================================
+    // GESTÃO DE PLANTÉIS N:M (equipas_atletas)
+    // ==========================================
+    const modalGestaoPlantel = document.getElementById('modal-gestao-plantel');
+    const btnCloseModalPlantel = document.getElementById('btn-close-modal-plantel');
+    const plantelModalTitle = document.getElementById('plantel-modal-title');
+    const plantelModalSubtitle = document.getElementById('plantel-modal-subtitle');
+    const plantelListaAtuais = document.getElementById('plantel-lista-atuais');
+    const plantelListaDisponiveis = document.getElementById('plantel-lista-disponiveis');
+    const plantelSearchAtleta = document.getElementById('plantel-search-atleta');
+    const plantelFiltroOrigem = document.getElementById('plantel-filtro-origem');
+    const plantelCountBadge = document.getElementById('plantel-count-badge');
+    const plantelDisponiveisCount = document.getElementById('plantel-disponiveis-count');
+    const plantelFiltroInfo = document.getElementById('plantel-filtro-info');
+
+    let currentPlantelEquipa = null;
+    let currentPlantelRelacoes = [];
+    let allAtletasClub = [];
+
+    const escaloesSequencia = [
+        "babybasket", "mini8", "mini10", "mini12",
+        "sub14", "sub16", "sub18", "sub20", "seniores", "veteranos"
+    ];
+
+    function getIndexEscalao(esc) {
+        const norm = (esc || '').toLowerCase().replace(/[\s\-_]/g, '');
+        return escaloesSequencia.indexOf(norm);
+    }
+
+    function isGeneroApropriado(teamSexo, athleteSexo) {
+        if (!teamSexo || teamSexo.toLowerCase() === 'todos' || teamSexo.toLowerCase() === 'misto') return true;
+        const aSex = String(athleteSexo || '').trim().toUpperCase();
+        const tSex = String(teamSexo || '').trim().toLowerCase();
+        if (tSex.startsWith('masc')) return aSex === 'M' || aSex.startsWith('MASC');
+        if (tSex.startsWith('fem')) return aSex === 'F' || aSex.startsWith('FEM');
+        return true;
+    }
+
+    window.openPlantelModal = async function(equipaId) {
+        currentPlantelEquipa = (currentEquipas || []).find(e => String(e.id) === String(equipaId));
+        if (!currentPlantelEquipa) {
+            alert("Equipa não encontrada.");
+            return;
+        }
+
+        if (plantelModalTitle) plantelModalTitle.textContent = `Plantel: ${currentPlantelEquipa.nome}`;
+        if (plantelModalSubtitle) {
+            plantelModalSubtitle.textContent = `${currentPlantelEquipa.escalao} • ${currentPlantelEquipa.sexo} • Época ${currentPlantelEquipa.epoca || '2026/2027'}`;
+        }
+        if (plantelFiltroInfo) {
+            plantelFiltroInfo.textContent = `Escalão Base: ${currentPlantelEquipa.escalao}`;
+        }
+
+        if (modalGestaoPlantel) modalGestaoPlantel.classList.remove('hidden');
+
+        if (plantelListaAtuais) {
+            plantelListaAtuais.innerHTML = '<div style="text-align: center; color: var(--text-secondary); padding: 30px;">A carregar plantel...</div>';
+        }
+        if (plantelListaDisponiveis) {
+            plantelListaDisponiveis.innerHTML = '<div style="text-align: center; color: var(--text-secondary); padding: 30px;">A carregar atletas...</div>';
+        }
+
+        await reloadPlantelData();
+    };
+
+    window.closePlantelModal = function() {
+        if (modalGestaoPlantel) modalGestaoPlantel.classList.add('hidden');
+        currentPlantelEquipa = null;
+        currentPlantelRelacoes = [];
+    };
+
+    if (btnCloseModalPlantel) {
+        btnCloseModalPlantel.addEventListener('click', window.closePlantelModal);
+    }
+    if (modalGestaoPlantel) {
+        modalGestaoPlantel.addEventListener('click', (e) => {
+            if (e.target === modalGestaoPlantel) window.closePlantelModal();
+        });
+    }
+
+    async function reloadPlantelData() {
+        if (!currentPlantelEquipa) return;
+
+        try {
+            // 1. Carregar todos os atletas da base de dados se ainda não tivermos
+            if (!allAtletasClub || allAtletasClub.length === 0) {
+                const { data: atletas, error: errAtletas } = await supabase
+                    .from('atletasbcv')
+                    .select('id, nome, nickname, escalao, sexo, data_nascimento, numero_camisola, equipamento_numero_1, foto, licenca, epoca, funcao')
+                    .order('nome', { ascending: true });
+                if (errAtletas) throw errAtletas;
+                allAtletasClub = atletas || [];
+            }
+
+            // 2. Carregar os vínculos de equipas_atletas para a equipa selecionada
+            const { data: relacoes, error: errRel } = await supabase
+                .from('equipas_atletas')
+                .select('*')
+                .eq('equipa_id', currentPlantelEquipa.id);
+
+            if (errRel) {
+                if (errRel.code === '42P01') {
+                    if (plantelListaAtuais) {
+                        plantelListaAtuais.innerHTML = '<div style="color: red; padding: 15px; font-size: 0.85rem;">⚠️ A tabela <strong>equipas_atletas</strong> ainda não foi criada no Supabase. Execute o script <code>setup_equipas_atletas.sql</code>.</div>';
+                    }
+                    return;
+                }
+                throw errRel;
+            }
+
+            // Mapear detalhes do atleta em cada relação
+            currentPlantelRelacoes = (relacoes || []).map(r => {
+                const atl = allAtletasClub.find(a => String(a.id) === String(r.atleta_id));
+                return {
+                    ...r,
+                    atleta: atl || { nome: 'Atleta Desconhecido', id: r.atleta_id }
+                };
+            });
+
+            // Atualizar contagem no badge da equipa na tabela principal
+            atletasPorEquipaCount[String(currentPlantelEquipa.id)] = currentPlantelRelacoes.length;
+            renderEquipasTable(currentEquipas);
+
+            renderPlantelListas();
+
+        } catch (err) {
+            console.error("Erro ao carregar dados do plantel:", err);
+            if (plantelListaAtuais) {
+                plantelListaAtuais.innerHTML = `<div style="color: red; padding: 15px;">Erro: ${err.message}</div>`;
+            }
+        }
+    }
+
+    function renderPlantelListas() {
+        if (!currentPlantelEquipa) return;
+
+        // Atualizar Badge de Total de Convocados
+        if (plantelCountBadge) {
+            plantelCountBadge.textContent = currentPlantelRelacoes.length;
+        }
+
+        // 1. RENDERIZAR ATLETAS ATUALMENTE NO PLANTEL
+        if (plantelListaAtuais) {
+            plantelListaAtuais.innerHTML = '';
+            if (currentPlantelRelacoes.length === 0) {
+                plantelListaAtuais.innerHTML = `
+                    <div style="text-align: center; color: var(--text-secondary); padding: 40px 15px;">
+                        <div style="font-size: 2rem; margin-bottom: 8px;">📋</div>
+                        <p style="margin: 0; font-weight: 600;">Nenhum atleta convocado</p>
+                        <p style="margin: 5px 0 0 0; font-size: 0.8rem;">Pesquise e adicione atletas na coluna ao lado.</p>
+                    </div>
+                `;
+            } else {
+                currentPlantelRelacoes.forEach(rel => {
+                    const a = rel.atleta;
+                    const card = document.createElement('div');
+                    card.className = 'plantel-item-card';
+
+                    const avatarHtml = a.foto
+                        ? `<img src="${a.foto}" class="plantel-item-avatar" alt="${a.nome}">`
+                        : `<div class="plantel-item-avatar">👤</div>`;
+
+                    const dorsal = rel.numero_camisola !== null && rel.numero_camisola !== undefined
+                        ? rel.numero_camisola
+                        : (a.numero_camisola || a.equipamento_numero_1 || '-');
+
+                    const isReforco = a.escalao && (getIndexEscalao(a.escalao) !== getIndexEscalao(currentPlantelEquipa.escalao));
+                    const badgeHtml = isReforco
+                        ? `<span class="plantel-badge-reforco" title="Escalão etário natural: ${a.escalao}">Reforço (${a.escalao})</span>`
+                        : `<span class="plantel-badge-escalao">${a.escalao || 'Atleta'}</span>`;
+
+                    const displayNome = a.nickname ? `${a.nome} <span style="color: var(--accent-primary); font-weight: 700;">"${a.nickname}"</span>` : a.nome;
+
+                    card.innerHTML = `
+                        <div class="plantel-item-info">
+                            ${avatarHtml}
+                            <div class="plantel-item-texts">
+                                <div class="plantel-item-name">${displayNome}</div>
+                                <div class="plantel-item-meta">
+                                    <strong style="color: var(--text-primary);">#${dorsal}</strong>
+                                    <span>•</span>
+                                    ${badgeHtml}
+                                    <span>•</span>
+                                    <span style="color: #64748b;">${rel.papel || 'Jogador'}</span>
+                                </div>
+                            </div>
+                        </div>
+                        <div style="display: flex; align-items: center; gap: 6px;">
+                            <button type="button" class="btn-action delete" onclick="window.removerAtletaPlantel('${rel.id}')" title="Remover do Plantel" style="padding: 5px 8px; font-size: 0.85rem;">
+                                🗑️
+                            </button>
+                        </div>
+                    `;
+                    plantelListaAtuais.appendChild(card);
+                });
+            }
+        }
+
+        // 2. RENDERIZAR ATLETAS DISPONÍVEIS PARA ADICIONAR
+        if (plantelListaDisponiveis) {
+            plantelListaDisponiveis.innerHTML = '';
+
+            const idsNoPlantel = new Set(currentPlantelRelacoes.map(r => String(r.atleta_id)));
+            const searchTerm = (plantelSearchAtleta ? plantelSearchAtleta.value : '').toLowerCase().trim();
+            const filtroOrigem = (plantelFiltroOrigem ? plantelFiltroOrigem.value : 'recomendados');
+
+            const teamEscIdx = getIndexEscalao(currentPlantelEquipa.escalao);
+
+            const disponiveis = (allAtletasClub || []).filter(a => {
+                // Não pode já estar nesta equipa
+                if (idsNoPlantel.has(String(a.id))) return false;
+
+                // Deve cumprir compatibilidade de género
+                if (!isGeneroApropriado(currentPlantelEquipa.sexo, a.sexo)) return false;
+
+                // Filtro de Escalão
+                const atlEscIdx = getIndexEscalao(a.escalao);
+                if (filtroOrigem === 'mesmo_escalao') {
+                    if (atlEscIdx === -1 || teamEscIdx === -1) {
+                        if (normalizeEscalao(a.escalao) !== normalizeEscalao(currentPlantelEquipa.escalao)) return false;
+                    } else {
+                        if (atlEscIdx !== teamEscIdx) return false;
+                    }
+                } else if (filtroOrigem === 'recomendados') {
+                    // Recomendados: mesmo escalão ou escalões inferiores (jogar em escalão acima permitido)
+                    if (atlEscIdx !== -1 && teamEscIdx !== -1) {
+                        if (atlEscIdx > teamEscIdx) return false; // Escalão mais velho não pode jogar em escalão mais jovem
+                    }
+                }
+
+                // Pesquisa por texto
+                if (searchTerm) {
+                    const matchNome = (a.nome || '').toLowerCase().includes(searchTerm);
+                    const matchNick = (a.nickname || '').toLowerCase().includes(searchTerm);
+                    const matchLic = (a.licenca || '').toLowerCase().includes(searchTerm);
+                    if (!matchNome && !matchNick && !matchLic) return false;
+                }
+
+                return true;
+            });
+
+            if (plantelDisponiveisCount) {
+                plantelDisponiveisCount.textContent = `${disponiveis.length} disponíveis`;
+            }
+
+            if (disponiveis.length === 0) {
+                plantelListaDisponiveis.innerHTML = `
+                    <div style="text-align: center; color: var(--text-secondary); padding: 40px 15px;">
+                        <p style="margin: 0; font-size: 0.9rem;">Nenhum atleta encontrado com os filtros atuais.</p>
+                        <p style="margin: 5px 0 0 0; font-size: 0.8rem; color: #94a3b8;">Tente mudar o filtro de escalão ou limpar a pesquisa.</p>
+                    </div>
+                `;
+            } else {
+                disponiveis.forEach(a => {
+                    const card = document.createElement('div');
+                    card.className = 'plantel-item-card';
+
+                    const avatarHtml = a.foto
+                        ? `<img src="${a.foto}" class="plantel-item-avatar" alt="${a.nome}">`
+                        : `<div class="plantel-item-avatar">👤</div>`;
+
+                    const atlEscIdx = getIndexEscalao(a.escalao);
+                    const isAbaixo = (atlEscIdx !== -1 && teamEscIdx !== -1 && atlEscIdx < teamEscIdx);
+
+                    const badgeHtml = isAbaixo
+                        ? `<span class="plantel-badge-reforco">+ Escalão Abaixo (${a.escalao})</span>`
+                        : `<span class="plantel-badge-escalao">${a.escalao || 'Geral'}</span>`;
+
+                    const displayNome = a.nickname ? `${a.nome} <span style="color: var(--accent-primary);">"${a.nickname}"</span>` : a.nome;
+
+                    card.innerHTML = `
+                        <div class="plantel-item-info">
+                            ${avatarHtml}
+                            <div class="plantel-item-texts">
+                                <div class="plantel-item-name">${displayNome}</div>
+                                <div class="plantel-item-meta">
+                                    ${badgeHtml}
+                                    <span>•</span>
+                                    <span>${a.sexo || '-'}</span>
+                                    ${a.numero_camisola ? `<span>• #${a.numero_camisola}</span>` : ''}
+                                </div>
+                            </div>
+                        </div>
+                        <button type="button" class="btn-primary" onclick="window.adicionarAtletaPlantel('${a.id}')" style="padding: 6px 12px; font-size: 0.8rem; font-weight: 600; white-space: nowrap; border-radius: 6px;">
+                            + Convocar
+                        </button>
+                    `;
+                    plantelListaDisponiveis.appendChild(card);
+                });
+            }
+        }
+    }
+
+    // Ações de Adicionar e Remover Atletas do Plantel
+    window.adicionarAtletaPlantel = async function(atletaId) {
+        if (!currentPlantelEquipa) return;
+
+        const btn = event?.target;
+        if (btn) {
+            btn.disabled = true;
+            btn.textContent = 'A adicionar...';
+        }
+
+        try {
+            const atletaObj = allAtletasClub.find(a => String(a.id) === String(atletaId));
+            const numCam = atletaObj ? (atletaObj.numero_camisola || atletaObj.equipamento_numero_1 || null) : null;
+
+            const novoVinculo = {
+                equipa_id: currentPlantelEquipa.id,
+                atleta_id: atletaId,
+                epoca: currentPlantelEquipa.epoca || '2026/2027',
+                numero_camisola: numCam ? parseInt(numCam) : null,
+                papel: 'Jogador'
+            };
+
+            const { data, error } = await supabase
+                .from('equipas_atletas')
+                .insert([novoVinculo])
+                .select();
+
+            if (error) throw error;
+
+            await reloadPlantelData();
+
+        } catch (err) {
+            console.error("Erro ao adicionar atleta ao plantel:", err);
+            alert("Erro ao adicionar atleta ao plantel: " + err.message);
+            if (btn) {
+                btn.disabled = false;
+                btn.textContent = '+ Convocar';
+            }
+        }
+    };
+
+    window.removerAtletaPlantel = async function(relacaoId) {
+        if (!confirm("Deseja retirar este atleta do plantel desta equipa?")) return;
+
+        try {
+            const { error } = await supabase
+                .from('equipas_atletas')
+                .delete()
+                .eq('id', relacaoId);
+
+            if (error) throw error;
+
+            await reloadPlantelData();
+
+        } catch (err) {
+            console.error("Erro ao remover atleta do plantel:", err);
+            alert("Erro ao remover atleta do plantel: " + err.message);
+        }
+    };
+
+    // Eventos de Filtro e Pesquisa no Plantel
+    if (plantelSearchAtleta) {
+        plantelSearchAtleta.addEventListener('input', renderPlantelListas);
+    }
+    if (plantelFiltroOrigem) {
+        plantelFiltroOrigem.addEventListener('change', renderPlantelListas);
+    }
+
 
     if (formEquipa) {
         formEquipa.addEventListener('submit', async (e) => {

@@ -402,3 +402,92 @@ body {
 .admin-modal-close:hover {
     color: var(--text-primary);
 }
+
+/* Gestão de Plantel */
+.plantel-item-card {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    background: #ffffff;
+    border: 1px solid #e2e8f0;
+    border-radius: 8px;
+    padding: 8px 12px;
+    transition: all 0.2s ease;
+}
+
+.plantel-item-card:hover {
+    border-color: var(--accent-primary);
+    box-shadow: 0 2px 6px rgba(0,0,0,0.05);
+}
+
+.plantel-item-info {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    flex: 1;
+    min-width: 0;
+}
+
+.plantel-item-avatar {
+    width: 38px;
+    height: 38px;
+    border-radius: 50%;
+    object-fit: cover;
+    background: #f1f5f9;
+    flex-shrink: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.1rem;
+    border: 1px solid #e2e8f0;
+}
+
+.plantel-item-texts {
+    display: flex;
+    flex-direction: column;
+    min-width: 0;
+}
+
+.plantel-item-name {
+    font-weight: 600;
+    font-size: 0.85rem;
+    color: var(--text-primary);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.plantel-item-meta {
+    font-size: 0.75rem;
+    color: var(--text-secondary);
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    margin-top: 2px;
+}
+
+.plantel-badge-escalao {
+    background: #e0e7ff;
+    color: #3730a3;
+    font-size: 0.7rem;
+    font-weight: 600;
+    padding: 1px 6px;
+    border-radius: 6px;
+}
+
+.plantel-badge-reforco {
+    background: #fef3c7;
+    color: #92400e;
+    font-size: 0.7rem;
+    font-weight: 600;
+    padding: 1px 6px;
+    border-radius: 6px;
+}
+
+@media (max-width: 768px) {
+    .plantel-columns-grid {
+        grid-template-columns: 1fr !important;
+        gap: 15px !important;
+    }
+}
+

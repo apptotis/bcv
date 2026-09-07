@@ -94,3 +94,5 @@
 - [2026-09-03] Gemini: Remoção do texto secundário provisório da Direção na secção História de clube.html e js/clube.js.
 - [2026-09-03] Gemini: Integração de envio de emails de confirmação de inscrição via Resend (Edge Function confirmacao-inscricao e trigger alternativo SQL pg_net).
 - [2026-09-03] Gemini: Módulo Gestão de Patrocinadores no Admin com tabela dedicada patrocinadores_bcv (isolada do Torneio), upload de ativos (logos, painéis, redes), script setup_patrocinadores.sql e montra pública.
+- [2026-09-07] Gemini: Implementação da Gestão de Plantéis N:M (equipas_atletas): atletas convocáveis para múltiplas equipas/escalões com filtros inteligentes, modal de plantel no Admin, integração em equipas.html e portais mobile (treinador/diretor).
+

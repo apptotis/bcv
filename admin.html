@@ -655,11 +655,12 @@
                                     <th style="padding: 10px;">Época</th>
                                     <th style="padding: 10px;">Escalão</th>
                                     <th style="padding: 10px;">Sexo</th>
-                                    <th style="padding: 10px; text-align: center; width: 120px;">Ações</th>
+                                    <th style="padding: 10px; text-align: center; width: 130px;">Plantel</th>
+                                    <th style="padding: 10px; text-align: center; width: 100px;">Ações</th>
                                 </tr>
                             </thead>
                             <tbody id="equipas-table-body">
-                                <tr><td colspan="5" style="padding: 10px;">A carregar equipas...</td></tr>
+                                <tr><td colspan="7" style="padding: 10px;">A carregar equipas...</td></tr>
                             </tbody>
                         </table>
                     </div>
@@ -1766,6 +1767,65 @@
                                 <button type="submit" id="btn-save-geral" class="btn-primary" style="padding: 10px 24px;">💾 Guardar Dados Gerais</button>
                                 <span id="msg-geral-status" style="margin-left: 15px; font-size: 0.9rem; font-weight: 600;"></span>
                             </form>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Modal Popup de Gestão de Plantel da Equipa -->
+                <div id="modal-gestao-plantel" class="admin-modal-overlay hidden">
+                    <div class="admin-modal-content" style="max-width: 960px; width: 95%; max-height: 92vh; display: flex; flex-direction: column;">
+                        <div class="admin-modal-header" style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 12px; padding-bottom: 12px;">
+                            <div>
+                                <h3 id="plantel-modal-title" style="margin: 0; font-size: 1.35rem; color: var(--accent-primary);">Plantel da Equipa</h3>
+                                <div id="plantel-modal-subtitle" style="font-size: 0.85rem; color: var(--text-secondary); margin-top: 4px;">
+                                    A carregar detalhes da equipa...
+                                </div>
+                            </div>
+                            <button type="button" id="btn-close-modal-plantel" class="admin-modal-close" title="Fechar">&times;</button>
+                        </div>
+
+                        <!-- Grid de Gestão do Plantel -->
+                        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 18px; overflow-y: auto; padding-right: 4px;" class="plantel-columns-grid">
+                            <!-- Coluna Esquerda: Plantel Convocado Atual -->
+                            <div style="background: #f8fafc; border: 1px solid var(--border-color); border-radius: 12px; padding: 14px; display: flex; flex-direction: column; min-height: 380px;">
+                                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; border-bottom: 2px solid #e2e8f0; padding-bottom: 8px;">
+                                    <div style="display: flex; align-items: center; gap: 8px;">
+                                        <span style="font-weight: 700; font-size: 0.95rem; color: var(--text-primary);">👥 Atletas Convocados</span>
+                                        <span id="plantel-count-badge" style="background: var(--accent-primary); color: #fff; font-size: 0.75rem; padding: 2px 8px; border-radius: 10px; font-weight: 700;">0</span>
+                                    </div>
+                                    <span id="plantel-filtro-info" style="font-size: 0.75rem; color: var(--text-secondary);"></span>
+                                </div>
+
+                                <div id="plantel-lista-atuais" style="display: flex; flex-direction: column; gap: 8px; overflow-y: auto; max-height: 480px; flex: 1;">
+                                    <div style="text-align: center; color: var(--text-secondary); padding: 30px 10px;">A carregar plantel...</div>
+                                </div>
+                            </div>
+
+                            <!-- Coluna Direita: Recrutar / Adicionar Atletas -->
+                            <div style="background: #ffffff; border: 1px solid var(--border-color); border-radius: 12px; padding: 14px; display: flex; flex-direction: column; min-height: 380px;">
+                                <div style="margin-bottom: 10px; border-bottom: 2px solid #e2e8f0; padding-bottom: 10px;">
+                                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
+                                        <span style="font-weight: 700; font-size: 0.95rem; color: var(--text-primary);">➕ Adicionar ao Plantel</span>
+                                        <span id="plantel-disponiveis-count" style="font-size: 0.75rem; color: var(--text-secondary);">0 disponíveis</span>
+                                    </div>
+
+                                    <div style="display: flex; flex-direction: column; gap: 8px;">
+                                        <input type="text" id="plantel-search-atleta" placeholder="🔍 Pesquisar por nome ou alcunha..." class="admin-input" style="padding: 7px 12px; font-size: 0.85rem;">
+                                        
+                                        <div style="display: flex; gap: 8px;">
+                                            <select id="plantel-filtro-origem" class="admin-input" style="padding: 6px 10px; font-size: 0.8rem; flex: 1;">
+                                                <option value="recomendados">Recomendados (Mesmo escalão e inferiores)</option>
+                                                <option value="mesmo_escalao">Apenas mesmo escalão</option>
+                                                <option value="todos">Todos os atletas do clube</option>
+                                            </select>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div id="plantel-lista-disponiveis" style="display: flex; flex-direction: column; gap: 8px; overflow-y: auto; max-height: 440px; flex: 1;">
+                                    <div style="text-align: center; color: var(--text-secondary); padding: 30px 10px;">A carregar atletas...</div>
+                                </div>
+                            </div>
                         </div>
                     </div>
                 </div>

@@ -300,13 +300,40 @@ document.addEventListener('DOMContentLoaded', async () => {
                 const { data: todosAtletas, error } = await query;
                 if (error) throw error;
 
-                // Filtragem flexível de escalão
+                // Consultar atletas convocados para equipas deste escalão em equipas_atletas
+                let atletasPlantelIds = new Set();
+                try {
+                    const { data: eqs } = await supabase
+                        .from('equipasbcv')
+                        .select('id, escalao, nome');
+                    if (eqs) {
+                        const eqsMatch = eqs.filter(e => {
+                            const eEsc = (e.escalao || '').replace(/[-\s]/g, '').toLowerCase();
+                            const eNom = (e.nome || '').replace(/[-\s]/g, '').toLowerCase();
+                            return eEsc.includes(escClean) || eNom.includes(escClean);
+                        });
+                        if (eqsMatch.length > 0) {
+                            const eqIds = eqsMatch.map(e => e.id);
+                            const { data: vinculos } = await supabase
+                                .from('equipas_atletas')
+                                .select('atleta_id')
+                                .in('equipa_id', eqIds);
+                            if (vinculos) {
+                                vinculos.forEach(v => atletasPlantelIds.add(String(v.atleta_id)));
+                            }
+                        }
+                    }
+                } catch (eRel) {
+                    // Fallback silencioso
+                }
+
+                // Filtragem flexível de escalão + atletas convocados
                 currentAtletas = (todosAtletas || []).filter(a => {
                     const aEsc = (a.escalao || '').replace(/[-\s]/g, '').toLowerCase();
                     const aEq1 = (a.equipabcv1 || '').replace(/[-\s]/g, '').toLowerCase();
                     const aEq2 = (a.equipabcv2 || '').replace(/[-\s]/g, '').toLowerCase();
                     const aFpb = (a.equipafpb || '').replace(/[-\s]/g, '').toLowerCase();
-                    return aEsc.includes(escClean) || aEq1.includes(escClean) || aEq2.includes(escClean) || aFpb.includes(escClean);
+                    return aEsc.includes(escClean) || aEq1.includes(escClean) || aEq2.includes(escClean) || aFpb.includes(escClean) || atletasPlantelIds.has(String(a.id));
                 });
             } else {
                 const { data, error } = await query;

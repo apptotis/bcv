@@ -18,8 +18,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     try {
         let { data: equipas, error: errEquipas } = await supabaseClient
             .from('equipasbcv')
-            .select('*')
-            .eq('epoca', '2025-2026');
+            .select('*');
 
         if (errEquipas) throw errEquipas;
 
@@ -38,7 +37,7 @@ document.addEventListener('DOMContentLoaded', async () => {
                 let indexB = ordemEscalao.indexOf(b.escalao);
                 if (indexA === -1) indexA = 999;
                 if (indexB === -1) indexB = 999;
-                if (indexA === indexB) return a.nome.localeCompare(b.nome);
+                if (indexA === indexB) return (a.nome || '').localeCompare(b.nome || '');
                 return indexA - indexB;
             });
         }
@@ -53,10 +52,10 @@ document.addEventListener('DOMContentLoaded', async () => {
             if (allTeamsView) allTeamsView.style.display = 'none';
             if (teamDetailView) teamDetailView.style.display = 'block';
             
-            const equipaSelecionada = equipas.find(e => e.id === equipaIdFiltro);
+            const equipaSelecionada = equipas.find(e => String(e.id) === String(equipaIdFiltro));
             
             if (!equipaSelecionada) {
-                teamDetailView.innerHTML = '<p>Equipa não encontrada.</p>';
+                teamDetailView.innerHTML = '<p style="text-align: center; padding: 40px;">Equipa não encontrada. <a href="equipas.html">Voltar às equipas</a></p>';
                 return;
             }
 
@@ -67,25 +66,56 @@ document.addEventListener('DOMContentLoaded', async () => {
 
             // Atualizar cabeçalho da equipa
             document.getElementById('team-detail-title').innerText = equipaSelecionada.nome;
-            document.getElementById('team-detail-subtitle').innerText = `Época 2025-2026`;
+            document.getElementById('team-detail-subtitle').innerText = `Época ${equipaSelecionada.epoca || '2026/2027'} • ${escalaoDisplay}`;
             
             const fotoUrl = equipaSelecionada.foto || 'https://via.placeholder.com/1200x500?text=Sem+Foto';
             document.getElementById('team-detail-photo').innerHTML = `<img src="${fotoUrl}" alt="${equipaSelecionada.nome}">`;
 
-            // Buscar plantel
-            const nomeStr = `${equipaSelecionada.nome} (${equipaSelecionada.escalao})`;
-            const { data: atletas, error: errAtletas } = await supabaseClient
-                .from('atletasbcv')
-                .select('*')
-                .eq('epoca', '2025-2026')
-                .or(`equipabcv1.eq."${nomeStr}",equipabcv2.eq."${nomeStr}"`);
+            // Buscar plantel (Primeiro em equipas_atletas, com fallback para atletasbcv)
+            let atletas = [];
+            try {
+                const { data: relacoes, error: errRel } = await supabaseClient
+                    .from('equipas_atletas')
+                    .select(`
+                        id,
+                        equipa_id,
+                        atleta_id,
+                        numero_camisola,
+                        papel,
+                        atletasbcv (*)
+                    `)
+                    .eq('equipa_id', equipaSelecionada.id);
 
-            if (errAtletas) throw errAtletas;
+                if (!errRel && relacoes && relacoes.length > 0) {
+                    atletas = relacoes.map(r => {
+                        const a = r.atletasbcv || {};
+                        return {
+                            ...a,
+                            numero_camisola: (r.numero_camisola !== null && r.numero_camisola !== undefined) ? r.numero_camisola : a.numero_camisola,
+                            funcao: r.papel || a.funcao || 'Jogador'
+                        };
+                    });
+                }
+            } catch (eRel) {
+                console.warn("Consulta equipas_atletas falhou ou não existe, tentando fallback:", eRel);
+            }
 
-            const jogadores = atletas.filter(a => a.funcao === 'Jogador' || a.funcao === 'Jogadora')
-                                     .sort((a, b) => (a.nickname || a.nome).localeCompare(b.nickname || b.nome));
-            const equipaTecnica = atletas.filter(a => a.funcao !== 'Jogador' && a.funcao !== 'Jogadora')
-                                         .sort((a, b) => (a.nickname || a.nome).localeCompare(b.nickname || b.nome));
+            // Fallback para equipas antigas gravadas com equipabcv1 / equipabcv2
+            if (atletas.length === 0) {
+                const nomeStr = `${equipaSelecionada.nome} (${equipaSelecionada.escalao})`;
+                const { data: atletasOld, error: errOld } = await supabaseClient
+                    .from('atletasbcv')
+                    .select('*')
+                    .or(`equipabcv1.eq."${nomeStr}",equipabcv2.eq."${nomeStr}"`);
+                if (!errOld && atletasOld) {
+                    atletas = atletasOld;
+                }
+            }
+
+            const jogadores = atletas.filter(a => (a.funcao || 'Jogador') === 'Jogador' || a.funcao === 'Jogadora')
+                                     .sort((a, b) => (a.nickname || a.nome || '').localeCompare(b.nickname || b.nome || ''));
+            const equipaTecnica = atletas.filter(a => a.funcao && a.funcao !== 'Jogador' && a.funcao !== 'Jogadora')
+                                         .sort((a, b) => (a.nickname || a.nome || '').localeCompare(b.nickname || b.nome || ''));
 
             const playersGrid = document.getElementById('roster-players-grid');
             const staffGrid = document.getElementById('roster-staff-grid');
