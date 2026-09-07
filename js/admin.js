@@ -1460,6 +1460,12 @@ document.addEventListener('DOMContentLoaded', async () => {
             const searchTerm = (plantelSearchAtleta ? plantelSearchAtleta.value : '').toLowerCase().trim();
             const filtroOrigem = (plantelFiltroOrigem ? plantelFiltroOrigem.value : 'recomendados');
 
+            // Mostrar/ocultar botão de adicionar staff no topo do filtro
+            const btnQuickStaff = document.getElementById('btn-quick-add-staff');
+            if (btnQuickStaff) {
+                btnQuickStaff.style.display = (filtroOrigem === 'staff') ? 'inline-flex' : 'none';
+            }
+
             // Atualizar tag visual no cabeçalho da coluna direita
             const tagEl = document.getElementById('plantel-disponiveis-tag');
             if (tagEl) {
@@ -1541,11 +1547,15 @@ document.addEventListener('DOMContentLoaded', async () => {
             if (disponiveis.length === 0) {
                 if (filtroOrigem === 'staff') {
                     plantelListaDisponiveis.innerHTML = `
-                        <div style="text-align: center; color: var(--text-secondary); padding: 40px 15px;">
-                            <p style="margin: 0; font-size: 0.9rem; font-weight: 600;">Nenhum membro de staff encontrado.</p>
-                            <p style="margin: 6px 0 0 0; font-size: 0.8rem; color: #64748b;">
-                                Digite o nome de qualquer membro ou treinador na barra de pesquisa acima para convocá-lo para a equipa técnica.
+                        <div style="text-align: center; color: var(--text-secondary); padding: 35px 15px;">
+                            <div style="font-size: 2.2rem; margin-bottom: 8px;">👔</div>
+                            <p style="margin: 0; font-size: 0.95rem; font-weight: 700; color: var(--text-primary);">Nenhum membro de staff encontrado</p>
+                            <p style="margin: 6px 0 14px 0; font-size: 0.8rem; color: #64748b; line-height: 1.4;">
+                                Ainda não tem treinadores ou diretores registados com esta função no clube. Registe agora para ficarem disponíveis para todas as equipas:
                             </p>
+                            <button type="button" class="btn-primary" onclick="window.abrirModalCriarStaff()" style="width: auto; padding: 8px 16px; font-size: 0.82rem; margin: 0 auto; display: inline-flex; align-items: center; gap: 6px;">
+                                ➕ Registar Treinador / Staff
+                            </button>
                         </div>
                     `;
                 } else {
@@ -1848,9 +1858,10 @@ document.addEventListener('DOMContentLoaded', async () => {
         return String(val).toLowerCase().replace(/[\s\-_]/g, '');
     }
 
-    // Função de filtragem combinada em tempo real (Pesquisa + Estado/Época + Escalão)
+    // Função de filtragem combinada em tempo real (Pesquisa + Função + Estado/Época + Escalão)
     function applyAtletasFilters() {
         const searchVal = (document.getElementById('filter-search-atleta')?.value || '').toLowerCase().trim();
+        const funcaoVal = document.getElementById('filter-funcao-atleta')?.value || '';
         const epocaVal = document.getElementById('filter-epoca-atleta')?.value || '';
         const escalaoVal = document.getElementById('filter-escalao')?.value || '';
 
@@ -1858,6 +1869,14 @@ document.addEventListener('DOMContentLoaded', async () => {
             const matchesSearch = !searchVal || 
                 (atleta.nome && atleta.nome.toLowerCase().includes(searchVal)) || 
                 (atleta.nickname && atleta.nickname.toLowerCase().includes(searchVal));
+
+            let matchesFuncao = true;
+            if (funcaoVal === 'Jogador') {
+                matchesFuncao = (atleta.funcao || 'Jogador') === 'Jogador' || atleta.funcao === 'Jogadora';
+            } else if (funcaoVal === 'staff') {
+                const f = (atleta.funcao || '').toLowerCase();
+                matchesFuncao = f && !f.includes('jogador') && !f.includes('jogadora');
+            }
 
             let matchesEpoca = true;
             if (epocaVal === '2026/2027') {
@@ -1877,28 +1896,44 @@ document.addEventListener('DOMContentLoaded', async () => {
                                  (normFiltro.includes('master') && (normAtleta.includes('veterano') || normAtleta.includes('master')));
             }
 
-            return matchesSearch && matchesEpoca && matchesEscalao;
+            return matchesSearch && matchesFuncao && matchesEpoca && matchesEscalao;
         });
 
         renderAtletasTable(filtrados);
     }
 
     const filterSearchInput = document.getElementById('filter-search-atleta');
+    const filterFuncaoSelect = document.getElementById('filter-funcao-atleta');
     const filterEpocaSelect = document.getElementById('filter-epoca-atleta');
     const filterEscalaoSelect = document.getElementById('filter-escalao');
     const btnClearFilters = document.getElementById('btn-clear-filters');
 
     if (filterSearchInput) filterSearchInput.addEventListener('input', applyAtletasFilters);
+    if (filterFuncaoSelect) filterFuncaoSelect.addEventListener('change', applyAtletasFilters);
     if (filterEpocaSelect) filterEpocaSelect.addEventListener('change', applyAtletasFilters);
     if (filterEscalaoSelect) filterEscalaoSelect.addEventListener('change', applyAtletasFilters);
     if (btnClearFilters) {
         btnClearFilters.addEventListener('click', () => {
             if (filterSearchInput) filterSearchInput.value = '';
+            if (filterFuncaoSelect) filterFuncaoSelect.value = '';
             if (filterEpocaSelect) filterEpocaSelect.value = '';
             if (filterEscalaoSelect) filterEscalaoSelect.value = '';
             applyAtletasFilters();
         });
     }
+
+    window.abrirModalCriarStaff = function() {
+        resetAtletaForm();
+        if (formAtletaTitle) formAtletaTitle.textContent = 'Registar Treinador / Membro de Staff';
+        if (btnSaveAtleta) btnSaveAtleta.textContent = 'Guardar Membro de Staff';
+        const funcEl = document.getElementById('atleta-funcao');
+        if (funcEl) funcEl.value = 'Treinador';
+        const escEl = document.getElementById('atleta-escalao');
+        if (escEl) escEl.value = 'Staff / Clube';
+        const epEl = document.getElementById('atleta-epoca');
+        if (epEl) epEl.value = '2026/2027';
+        openAtletaModal();
+    };
 
     window.loadAtletas = async function() {
         if (!atletasTableBody) return;
@@ -2738,6 +2773,13 @@ document.addEventListener('DOMContentLoaded', async () => {
                 resetAtletaForm();
                 if (typeof loadAtletas === 'function') loadAtletas();
                 if (typeof loadEquipamentos === 'function') loadEquipamentos();
+                
+                // Recarregar dados de plantel se modal estiver aberto
+                allAtletasClub = [];
+                if (currentPlantelEquipa && typeof reloadPlantelData === 'function') {
+                    reloadPlantelData();
+                }
+
                 setTimeout(() => {
                     closeAtletaModal();
                 }, 700);

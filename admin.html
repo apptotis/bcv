@@ -671,21 +671,32 @@
                 
                 <!-- Tab: Gestão de Atletas -->
                 <div id="tab-atletas" class="tab-pane hidden">
-                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
-                        <h2>Gestão de Atletas</h2>
-                        <button id="btn-toggle-form-atleta" class="btn-primary" style="width: auto; padding: 10px 20px;">+ Adicionar Atleta</button>
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; flex-wrap: wrap; gap: 10px;">
+                        <h2>Gestão de Atletas & Staff</h2>
+                        <div style="display: flex; gap: 10px;">
+                            <button type="button" id="btn-toggle-form-staff" onclick="window.abrirModalCriarStaff()" class="btn-secondary" style="width: auto; padding: 10px 18px;">+ Registar Treinador / Staff</button>
+                            <button type="button" id="btn-toggle-form-atleta" class="btn-primary" style="width: auto; padding: 10px 20px;">+ Adicionar Atleta</button>
+                        </div>
                     </div>
 
 
                     <!-- Barra de Filtros -->
                     <div class="welcome-box" style="margin-bottom: 20px; padding: 15px; background: rgba(0,0,0,0.02); border: 1px solid var(--border-color);">
-                        <h4 style="margin-bottom: 10px; color: var(--text-secondary); font-size: 0.9rem;">Filtrar Atletas</h4>
+                        <h4 style="margin-bottom: 10px; color: var(--text-secondary); font-size: 0.9rem;">Filtrar Atletas & Staff</h4>
                         <div style="display: flex; gap: 15px; align-items: flex-end; flex-wrap: wrap;">
                             <div style="flex: 1; min-width: 180px;">
                                 <label style="display:block; margin-bottom:5px; font-size:0.8rem; color: var(--text-secondary);">Pesquisa por Nome / Nickname</label>
                                 <input type="text" id="filter-search-atleta" placeholder="Pesquisar..." class="admin-input" style="margin-bottom: 0;">
                             </div>
-                            <div style="flex: 1; min-width: 180px;">
+                            <div style="flex: 1; min-width: 160px;">
+                                <label style="display:block; margin-bottom:5px; font-size:0.8rem; color: var(--text-secondary);">Função</label>
+                                <select id="filter-funcao-atleta" class="admin-input" style="margin-bottom: 0;">
+                                    <option value="">Todas as Funções</option>
+                                    <option value="Jogador">🏀 Jogadores</option>
+                                    <option value="staff">📋 Treinadores & Staff</option>
+                                </select>
+                            </div>
+                            <div style="flex: 1; min-width: 160px;">
                                 <label style="display:block; margin-bottom:5px; font-size:0.8rem; color: var(--text-secondary);">Estado da Inscrição / Época</label>
                                 <select id="filter-epoca-atleta" class="admin-input" style="margin-bottom: 0;">
                                     <option value="">Todas as Épocas</option>
@@ -693,7 +704,7 @@
                                     <option value="pendente">🟡 Pendentes (2025/2026)</option>
                                 </select>
                             </div>
-                            <div style="flex: 1; min-width: 160px;">
+                            <div style="flex: 1; min-width: 150px;">
                                 <label style="display:block; margin-bottom:5px; font-size:0.8rem; color: var(--text-secondary);">Escalão</label>
                                 <select id="filter-escalao" class="admin-input" style="margin-bottom: 0;">
                                     <option value="">Todos os Escalões</option>
@@ -707,6 +718,7 @@
                                     <option value="Sub 20">Sub 20</option>
                                     <option value="Seniores">Seniores</option>
                                     <option value="Veteranos">Veteranos</option>
+                                    <option value="Staff / Clube">Staff / Clube</option>
                                 </select>
                             </div>
                             <div>
@@ -1825,6 +1837,9 @@
                                                 <option value="todos">🏀 Todos os atletas do clube</option>
                                                 <option value="staff">📋 Equipa Técnica & Staff (Treinadores, Seccionistas, etc.)</option>
                                             </select>
+                                            <button type="button" id="btn-quick-add-staff" onclick="window.abrirModalCriarStaff()" class="btn-secondary" style="display: none; padding: 6px 12px; font-size: 0.8rem; white-space: nowrap; width: auto;" title="Criar novo registo de Treinador ou Staff">
+                                                ➕ Novo Staff
+                                            </button>
                                         </div>
                                     </div>
                                 </div>
@@ -1871,9 +1886,14 @@
                                     <select id="atleta-funcao" required class="admin-input">
                                         <option value="" disabled selected>Selecionar</option>
                                         <option value="Jogador">Jogador</option>
-                                        <option value="Treinador">Treinador</option>
-                                        <option value="Treinadora">Treinadora</option>
+                                        <option value="Treinador">Treinador Principal</option>
+                                        <option value="Treinadora">Treinadora Principal</option>
+                                        <option value="Treinador Adjunto">Treinador Adjunto</option>
+                                        <option value="Preparador Físico">Preparador Físico</option>
+                                        <option value="Diretor de Campo">Diretor de Campo</option>
                                         <option value="Seccionista">Seccionista</option>
+                                        <option value="Fisioterapeuta">Fisioterapeuta</option>
+                                        <option value="Apoio Técnico">Apoio Técnico</option>
                                     </select>
                                 </div>
                             </div>
@@ -1897,6 +1917,7 @@
                                         <option value="Sub 20">Sub 20</option>
                                         <option value="Seniores">Seniores</option>
                                         <option value="Veteranos">Veteranos</option>
+                                        <option value="Staff / Clube">Staff / Clube</option>
                                     </select>
                                 </div>
                             </div>
