@@ -1376,6 +1376,10 @@ document.addEventListener('DOMContentLoaded', async () => {
             const teamEscIdx = getIndexEscalao(currentPlantelEquipa.escalao);
 
             const disponiveis = (allAtletasClub || []).filter(a => {
+                // Apenas atletas inscritos na época 2026/2027
+                const epNorm = (a.epoca || '').replace('-', '/');
+                if (epNorm !== '2026/2027') return false;
+
                 // Não pode já estar nesta equipa
                 if (idsNoPlantel.has(String(a.id))) return false;
 
