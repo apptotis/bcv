@@ -416,6 +416,8 @@ body {
     padding: 10px 14px !important;
     transition: all 0.2s ease !important;
     box-sizing: border-box !important;
+    min-width: 0 !important;
+    width: 100% !important;
 }
 
 .plantel-item-card:hover {
@@ -430,6 +432,7 @@ body {
     gap: 12px !important;
     flex: 1 1 auto !important;
     min-width: 0 !important;
+    overflow: hidden !important;
 }
 
 .plantel-item-avatar {
@@ -450,16 +453,21 @@ body {
     display: flex !important;
     flex-direction: column !important;
     min-width: 0 !important;
-    flex: 1 !important;
+    flex: 1 1 auto !important;
+    overflow: hidden !important;
 }
 
 .plantel-item-name {
     font-weight: 700 !important;
     font-size: 0.9rem !important;
     color: #1e293b !important;
-    white-space: nowrap !important;
+    white-space: normal !important;
+    word-break: break-word !important;
+    display: -webkit-box !important;
+    -webkit-line-clamp: 2 !important;
+    -webkit-box-orient: vertical !important;
     overflow: hidden !important;
-    text-overflow: ellipsis !important;
+    line-height: 1.25 !important;
 }
 
 .plantel-item-meta {
