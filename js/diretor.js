@@ -122,6 +122,33 @@ document.addEventListener('DOMContentLoaded', async () => {
                 .map(s => s.trim())
                 .filter(Boolean);
 
+            // Se não tiver escalão definido no perfil, verificar equipas atribuídas em equipas_atletas
+            if (userEscaloes.length === 0) {
+                try {
+                    let staffAtletaIds = [];
+                    if (currentUser?.email) {
+                        const { data: byEmail } = await supabase.from('atletasbcv').select('id').ilike('email', currentUser.email.trim());
+                        if (byEmail) byEmail.forEach(a => staffAtletaIds.push(a.id));
+                    }
+                    if (staffAtletaIds.length === 0 && userProfile?.nome) {
+                        const { data: byName } = await supabase.from('atletasbcv').select('id').ilike('nome', userProfile.nome.trim());
+                        if (byName) byName.forEach(a => staffAtletaIds.push(a.id));
+                    }
+                    if (staffAtletaIds.length > 0) {
+                        const { data: vinculos } = await supabase.from('equipas_atletas').select('equipa_id').in('atleta_id', staffAtletaIds);
+                        if (vinculos && vinculos.length > 0) {
+                            const eqIds = vinculos.map(v => v.equipa_id);
+                            const { data: eqs } = await supabase.from('equipasbcv').select('escalao, nome').in('id', eqIds);
+                            if (eqs && eqs.length > 0) {
+                                userEscaloes = [...new Set(eqs.map(e => e.nome || e.escalao).filter(Boolean))];
+                            }
+                        }
+                    }
+                } catch (eRel) {
+                    console.warn("Aviso ao carregar equipas vinculadas do diretor:", eRel);
+                }
+            }
+
             // Definir escalão ativo inicial
             const savedEscalao = localStorage.getItem('bcv_diretor_active_escalao');
             if (savedEscalao && userEscaloes.some(e => e.toLowerCase() === savedEscalao.toLowerCase())) {

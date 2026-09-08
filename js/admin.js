@@ -292,9 +292,6 @@ document.addEventListener('DOMContentLoaded', async () => {
     const containerPermissoes = document.getElementById('container-permissoes-custom');
     const checkboxesPermissoes = document.querySelectorAll('input[name="user_permissoes"]');
 
-    const containerUserEscalao = document.getElementById('container-user-escalao');
-    const checkboxesEscaloes = document.querySelectorAll('input[name="user_escaloes"]');
-
     const MODULO_LABELS = {
         'noticias': 'Notícias',
         'agenda': 'Agenda',
@@ -313,16 +310,9 @@ document.addEventListener('DOMContentLoaded', async () => {
             const val = roleSelect.value;
             if (val === 'personalizado') {
                 if (containerPermissoes) containerPermissoes.style.display = 'block';
-                if (containerUserEscalao) containerUserEscalao.style.display = 'block';
-            } else if (val === 'diretor' || val === 'treinador') {
-                if (containerPermissoes) containerPermissoes.style.display = 'none';
-                if (containerUserEscalao) containerUserEscalao.style.display = 'block';
-                checkboxesPermissoes.forEach(cb => cb.checked = false);
             } else {
                 if (containerPermissoes) containerPermissoes.style.display = 'none';
-                if (containerUserEscalao) containerUserEscalao.style.display = 'none';
                 checkboxesPermissoes.forEach(cb => cb.checked = false);
-                checkboxesEscaloes.forEach(cb => cb.checked = false);
             }
         });
     }
@@ -342,29 +332,10 @@ document.addEventListener('DOMContentLoaded', async () => {
         });
     }
 
-    function getSelectedEscaloes() {
-        const selected = [];
-        checkboxesEscaloes.forEach(cb => {
-            if (cb.checked) selected.push(cb.value);
-        });
-        return selected;
-    }
-
-    function setSelectedEscaloes(val) {
-        let list = [];
-        if (Array.isArray(val)) {
-            list = val;
-        } else if (typeof val === 'string' && val.trim() !== '') {
-            list = val.split(',').map(s => s.trim().toLowerCase());
-        }
-        checkboxesEscaloes.forEach(cb => {
-            cb.checked = list.includes(cb.value.toLowerCase());
-        });
-    }
-
     function resetUserForm() {
         if(formCreateUser) formCreateUser.reset();
         editUserIdInput.value = '';
+        delete editUserIdInput.dataset.escalaoAfeto;
         formUserTitle.textContent = 'Criar Novo Utilizador';
         btnCreateUser.textContent = 'Criar Utilizador';
         btnCancelEdit.classList.add('hidden');
@@ -372,9 +343,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         passwordInput.required = true;
         document.getElementById('new-user-email').disabled = false;
         if (containerPermissoes) containerPermissoes.style.display = 'none';
-        if (containerUserEscalao) containerUserEscalao.style.display = 'none';
         checkboxesPermissoes.forEach(cb => cb.checked = false);
-        checkboxesEscaloes.forEach(cb => cb.checked = false);
         if(createUserMsg) createUserMsg.classList.add('hidden');
     }
 
@@ -649,22 +618,14 @@ document.addEventListener('DOMContentLoaded', async () => {
         
         const role = (user.role || 'personalizado').toLowerCase();
         roleSelect.value = role;
-        
-        setSelectedEscaloes(user.escalao_afeto || '');
+        editUserIdInput.dataset.escalaoAfeto = user.escalao_afeto || '';
 
         if (role === 'personalizado') {
             if (containerPermissoes) containerPermissoes.style.display = 'block';
-            if (containerUserEscalao) containerUserEscalao.style.display = 'block';
             setSelectedPermissions(user.permissoes || []);
-        } else if (role === 'diretor' || role === 'treinador') {
-            if (containerPermissoes) containerPermissoes.style.display = 'none';
-            if (containerUserEscalao) containerUserEscalao.style.display = 'block';
-            checkboxesPermissoes.forEach(cb => cb.checked = false);
         } else {
             if (containerPermissoes) containerPermissoes.style.display = 'none';
-            if (containerUserEscalao) containerUserEscalao.style.display = 'none';
             checkboxesPermissoes.forEach(cb => cb.checked = false);
-            checkboxesEscaloes.forEach(cb => cb.checked = false);
         }
         
         // Em modo edição, password não é obrigatória
@@ -716,7 +677,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         const nome = document.getElementById('new-user-name').value;
         const telemovel = document.getElementById('new-user-phone').value;
         const roleVal = document.getElementById('new-user-role').value;
-        const escalaoAfeto = getSelectedEscaloes().join(', ');
+        const escalaoAfeto = (isEditMode && editUserIdInput.dataset?.escalaoAfeto) ? editUserIdInput.dataset.escalaoAfeto : '';
         
         const role = roleVal || 'personalizado';
         const allModules = ['noticias', 'agenda', 'resultados', 'galeria', 'equipas', 'atletas', 'equipamentos', 'desportiva', 'financeira', 'config'];
