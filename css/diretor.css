@@ -916,114 +916,59 @@ body {
 }
 
 .atleta-plantel-card {
-    background: var(--bg-card);
-    border: 1px solid var(--border);
-    border-radius: var(--radius-md);
-    padding: 12px 14px;
-    margin-bottom: 10px;
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    gap: 12px;
-    box-shadow: var(--shadow-sm);
     cursor: pointer;
-    transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
-    -webkit-tap-highlight-color: transparent;
+    transition: all 0.15s ease;
 }
 
 .atleta-plantel-card:hover {
     border-color: var(--primary-light);
     box-shadow: var(--shadow-md);
-    transform: translateY(-1px);
 }
 
 .atleta-plantel-card:active {
     transform: scale(0.985);
-    background: #fdfcff;
 }
 
-.atleta-plantel-left {
+.plantel-action-row {
+    width: 100%;
+}
+
+.btn-plantel-ficha {
+    width: 100%;
     display: flex;
     align-items: center;
-    gap: 12px;
-    min-width: 0;
-    flex: 1;
-}
-
-.atleta-plantel-avatar-wrap {
-    position: relative;
-    flex-shrink: 0;
-}
-
-.atleta-plantel-avatar {
-    width: 48px;
-    height: 48px;
-    border-radius: 12px;
-    object-fit: cover;
-    background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
-    color: #ffffff;
-    font-weight: 800;
-    font-size: 1.15rem;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    border: 2px solid #ffffff;
-    box-shadow: 0 2px 6px rgba(0,0,0,0.1);
-}
-
-.atleta-plantel-dorsal-tag {
-    position: absolute;
-    bottom: -4px;
-    right: -4px;
-    background: #1e1b4b;
-    color: #ffffff;
-    font-size: 0.65rem;
-    font-weight: 800;
-    padding: 1px 5px;
-    border-radius: 6px;
-    border: 1.5px solid #ffffff;
-    line-height: 1.2;
-}
-
-.atleta-plantel-info {
-    min-width: 0;
-    flex: 1;
-}
-
-.atleta-plantel-nome {
-    font-size: 0.95rem;
+    justify-content: space-between;
+    background: #f8fafc;
+    border: 1px solid var(--border);
+    color: var(--primary-dark);
+    padding: 9px 12px;
+    border-radius: var(--radius-sm);
+    font-size: 0.82rem;
     font-weight: 700;
-    color: var(--text-main);
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    line-height: 1.25;
+    cursor: pointer;
+    transition: all 0.15s ease;
 }
 
-.atleta-plantel-sub {
-    font-size: 0.76rem;
-    color: var(--text-muted);
-    margin-top: 2px;
-    display: flex;
-    align-items: center;
-    gap: 6px;
-    flex-wrap: wrap;
-}
-
-.atleta-plantel-right {
+.btn-plantel-ficha-left {
     display: flex;
     align-items: center;
     gap: 8px;
-    flex-shrink: 0;
 }
 
-.atleta-plantel-arrow {
+.btn-plantel-ficha-arrow {
+    font-size: 0.95rem;
     color: var(--text-light);
-    font-size: 1.1rem;
-    transition: transform 0.2s ease;
+    transition: transform 0.15s ease;
 }
 
-.atleta-plantel-card:hover .atleta-plantel-arrow {
+.atleta-plantel-card:hover .btn-plantel-ficha,
+.btn-plantel-ficha:hover {
+    background: var(--primary-subtle);
+    border-color: rgba(126, 34, 206, 0.3);
+    color: var(--primary);
+}
+
+.atleta-plantel-card:hover .btn-plantel-ficha-arrow {
     color: var(--primary);
     transform: translateX(3px);
 }

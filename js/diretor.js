@@ -1122,29 +1122,34 @@ document.addEventListener('DOMContentLoaded', async () => {
         lista.forEach(a => {
             const dorsal = a.dorsal_equipa || a.equipamento_numero_1 || a.equipamento_numero_2 || a.dorsal || '-';
             const fotoHtml = a.foto_url 
-                ? `<img src="${a.foto_url}" class="atleta-plantel-avatar" alt="${escapeHtml(a.nome)}">`
-                : `<div class="atleta-plantel-avatar">${(a.nome || 'A').charAt(0).toUpperCase()}</div>`;
+                ? `<img src="${a.foto_url}" class="atleta-avatar" alt="${escapeHtml(a.nome)}">`
+                : `<div class="atleta-avatar">${(a.nome || 'A').charAt(0).toUpperCase()}</div>`;
             
             const idade = calcularIdade(a.data_nascimento);
 
             html += `
-                <div class="atleta-plantel-card" onclick="window.openFichaAtleta(${a.id})" title="Ver ficha de ${escapeHtml(a.nome)}">
-                    <div class="atleta-plantel-left">
-                        <div class="atleta-plantel-avatar-wrap">
-                            ${fotoHtml}
-                            <div class="atleta-plantel-dorsal-tag">#${dorsal}</div>
-                        </div>
-                        <div class="atleta-plantel-info">
-                            <div class="atleta-plantel-nome">${escapeHtml(a.nome)}</div>
-                            <div class="atleta-plantel-sub">
-                                ${a.nickname ? `<span style="color: var(--primary); font-weight: 600;">"${escapeHtml(a.nickname)}"</span> • ` : ''}
+                <div class="atleta-presenca-card atleta-plantel-card" onclick="window.openFichaAtleta(${a.id})" title="Ver ficha de ${escapeHtml(a.nome)}">
+                    <div class="atleta-info-row">
+                        ${fotoHtml}
+                        <div class="atleta-details">
+                            <div class="atleta-nome">${escapeHtml(a.nome)}</div>
+                            <div class="atleta-meta">
+                                <span class="badge-numero">Nº ${dorsal}</span>
+                                ${a.nickname ? `<span>"${escapeHtml(a.nickname)}"</span>` : ''}
                                 <span>${escapeHtml(a.escalao || activeEscalao)}</span>
                                 ${idade ? `<span>• ${idade} anos</span>` : ''}
                             </div>
                         </div>
                     </div>
-                    <div class="atleta-plantel-right">
-                        <span class="atleta-plantel-arrow">➔</span>
+
+                    <div class="plantel-action-row">
+                        <button type="button" class="btn-plantel-ficha">
+                            <span class="btn-plantel-ficha-left">
+                                <span>📋</span>
+                                <span>Ver Ficha & Diário Desportivo</span>
+                            </span>
+                            <span class="btn-plantel-ficha-arrow">➔</span>
+                        </button>
                     </div>
                 </div>
             `;
