@@ -95,4 +95,4 @@
 - [2026-09-08] Gemini: Sincronização automática bidirecional entre Gestão de Utilizadores (users) e Treinadores/Staff (atletasbcv/equipas_atletas) com autocomplete e afetação dinâmica de escalão.
 - [2026-09-08] Gemini: Portal do Treinador centrado em Equipas geridas (equipas_atletas / equipasbcv): alternância multi-equipa no topo/drawer e carregamento do plantel real convocado.
 - [2026-09-08] Gemini: Sincronização da tabela Utilizadores Ativos com equipas do Plantel e aprimoramento da edição de permissões/menus por perfil.
-- [2026-09-08] Gemini: Portal do Treinador: restrição estrita a equipas vinculadas em equipas_atletas (sem fallback para escalões antigos) e estado vazio informativo.
+- [2026-09-08] Gemini: Portais do Treinador e Diretor: restrição estrita a equipas vinculadas em equipas_atletas (sem fallback para escalões antigos) e estado vazio informativo.

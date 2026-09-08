@@ -116,47 +116,85 @@ document.addEventListener('DOMContentLoaded', async () => {
                 escalao_afeto: ''
             };
 
-            // Extrair lista de escalões (ex: "Mini 12, Sub 14" -> ['Mini 12', 'Sub 14'])
-            userEscaloes = (userProfile.escalao_afeto || '')
-                .split(',')
-                .map(s => s.trim())
-                .filter(Boolean);
+            const userRole = (userProfile.role || 'diretor').toLowerCase();
+            const isAdmin = userRole === 'admin';
 
-            // Se não tiver escalão definido no perfil, verificar equipas atribuídas em equipas_atletas
-            if (userEscaloes.length === 0) {
-                try {
-                    let staffAtletaIds = [];
-                    if (currentUser?.email) {
-                        const { data: byEmail } = await supabase.from('atletasbcv').select('id').ilike('email', currentUser.email.trim());
-                        if (byEmail) byEmail.forEach(a => staffAtletaIds.push(a.id));
+            // Carregar equipas estritamente onde o diretor está associado em equipas_atletas
+            userEscaloes = [];
+            try {
+                let staffAtletaIds = [];
+                const userEmail = (currentUser?.email || '').trim().toLowerCase();
+                const userName = (userProfile?.nome || '').trim().toLowerCase();
+
+                if (userEmail) {
+                    const { data: byEmail } = await supabase
+                        .from('atletasbcv')
+                        .select('id')
+                        .ilike('email', userEmail);
+                    if (byEmail && byEmail.length > 0) {
+                        byEmail.forEach(a => {
+                            if (!staffAtletaIds.includes(a.id)) staffAtletaIds.push(a.id);
+                        });
                     }
-                    if (staffAtletaIds.length === 0 && userProfile?.nome) {
-                        const { data: byName } = await supabase.from('atletasbcv').select('id').ilike('nome', userProfile.nome.trim());
-                        if (byName) byName.forEach(a => staffAtletaIds.push(a.id));
+                }
+                if (userName) {
+                    const { data: byName } = await supabase
+                        .from('atletasbcv')
+                        .select('id')
+                        .ilike('nome', userName);
+                    if (byName && byName.length > 0) {
+                        byName.forEach(a => {
+                            if (!staffAtletaIds.includes(a.id)) staffAtletaIds.push(a.id);
+                        });
                     }
-                    if (staffAtletaIds.length > 0) {
-                        const { data: vinculos } = await supabase.from('equipas_atletas').select('equipa_id').in('atleta_id', staffAtletaIds);
-                        if (vinculos && vinculos.length > 0) {
-                            const eqIds = vinculos.map(v => v.equipa_id);
-                            const { data: eqs } = await supabase.from('equipasbcv').select('escalao, nome').in('id', eqIds);
-                            if (eqs && eqs.length > 0) {
-                                userEscaloes = [...new Set(eqs.map(e => e.nome || e.escalao).filter(Boolean))];
-                            }
+                }
+
+                if (staffAtletaIds.length > 0) {
+                    const { data: vinculos } = await supabase
+                        .from('equipas_atletas')
+                        .select('equipa_id')
+                        .in('atleta_id', staffAtletaIds);
+
+                    if (vinculos && vinculos.length > 0) {
+                        const eqIds = vinculos.map(v => v.equipa_id);
+                        const { data: eqs } = await supabase
+                            .from('equipasbcv')
+                            .select('escalao, nome')
+                            .in('id', eqIds);
+                        if (eqs && eqs.length > 0) {
+                            userEscaloes = [...new Set(eqs.map(e => e.nome || e.escalao).filter(Boolean))];
                         }
                     }
-                } catch (eRel) {
-                    console.warn("Aviso ao carregar equipas vinculadas do diretor:", eRel);
+                }
+            } catch (eRel) {
+                console.warn("Aviso ao carregar equipas vinculadas do diretor:", eRel);
+            }
+
+            // Se for Admin e não tiver equipa específica no plantel, tem acesso global
+            if (userEscaloes.length === 0 && isAdmin) {
+                try {
+                    const { data: allEqs } = await supabase
+                        .from('equipasbcv')
+                        .select('escalao, nome');
+                    if (allEqs && allEqs.length > 0) {
+                        userEscaloes = [...new Set(allEqs.map(e => e.nome || e.escalao).filter(Boolean))];
+                    }
+                } catch (eAll) {
+                    console.warn("Aviso ao carregar todas equipas para admin:", eAll);
                 }
             }
 
             // Definir escalão ativo inicial
-            const savedEscalao = localStorage.getItem('bcv_diretor_active_escalao');
-            if (savedEscalao && userEscaloes.some(e => e.toLowerCase() === savedEscalao.toLowerCase())) {
-                activeEscalao = savedEscalao;
-            } else if (userEscaloes.length > 0) {
-                activeEscalao = userEscaloes[0];
+            if (userEscaloes.length > 0) {
+                const savedEscalao = localStorage.getItem('bcv_diretor_active_escalao');
+                if (savedEscalao && userEscaloes.some(e => e.toLowerCase() === savedEscalao.toLowerCase())) {
+                    activeEscalao = savedEscalao;
+                } else {
+                    activeEscalao = userEscaloes[0];
+                }
             } else {
                 activeEscalao = '';
+                localStorage.removeItem('bcv_diretor_active_escalao');
             }
 
             showApp();
@@ -188,13 +226,26 @@ document.addEventListener('DOMContentLoaded', async () => {
     }
 
     function updateHeaderBadge() {
+        if (!activeEscalao || userEscaloes.length === 0) {
+            if (headerEscalaoBadge) {
+                headerEscalaoBadge.textContent = '⚠️ Sem Equipa';
+                headerEscalaoBadge.style.background = '#fef2f2';
+                headerEscalaoBadge.style.color = '#dc2626';
+                headerEscalaoBadge.style.border = '1px solid #fecaca';
+            }
+            if (drawerEscalaoName) {
+                drawerEscalaoName.textContent = 'Sem Equipa Atribuída';
+            }
+            return;
+        }
         if (headerEscalaoBadge) {
-            headerEscalaoBadge.innerHTML = activeEscalao 
-                ? `🏀 ${activeEscalao}` 
-                : `🏀 Geral (Todos)`;
+            headerEscalaoBadge.innerHTML = `🏀 ${activeEscalao}`;
+            headerEscalaoBadge.style.background = '';
+            headerEscalaoBadge.style.color = '';
+            headerEscalaoBadge.style.border = '';
         }
         if (drawerEscalaoName) {
-            drawerEscalaoName.textContent = activeEscalao ? `Equipa: ${activeEscalao}` : 'Todas as Equipas';
+            drawerEscalaoName.textContent = `Equipa: ${activeEscalao}`;
         }
     }
 
@@ -339,9 +390,61 @@ document.addEventListener('DOMContentLoaded', async () => {
         });
     });
 
+    // Exibir mensagem informativa quando o diretor ainda não tem nenhuma equipa associada
+    function renderEmptyNoTeams() {
+        const msgHtml = `
+            <div style="background: white; border-radius: 14px; padding: 36px 20px; text-align: center; border: 1px dashed var(--border); margin: 20px 0; box-shadow: var(--shadow-sm);">
+                <span style="font-size: 2.8rem; display: block; margin-bottom: 12px;">📋</span>
+                <h3 style="margin: 0; font-size: 1.1rem; color: var(--text-main); font-weight: 700;">Nenhuma Equipa Atribuída</h3>
+                <p style="font-size: 0.85rem; color: var(--text-muted); margin: 8px auto 0; max-width: 320px; line-height: 1.5;">
+                    O seu utilizador ainda não tem nenhuma equipa associada.
+                </p>
+                <div style="margin-top: 16px; display: inline-block; background: #f8fafc; border: 1px solid var(--border); border-radius: 8px; padding: 12px 16px; font-size: 0.8rem; color: var(--text-secondary); text-align: left; line-height: 1.5; max-width: 340px;">
+                    👉 <strong>Como ativar o seu acesso:</strong><br>
+                    A Direção deve aceder a <strong>Equipas &gt; Plantel</strong> no Painel de Administração e adicionar o seu perfil à <strong>Equipa Técnica / Staff</strong> da respetiva equipa.
+                </div>
+            </div>
+        `;
+
+        if (listaPresencasContainer) listaPresencasContainer.innerHTML = msgHtml;
+        if (listaMensalidadesContainer) listaMensalidadesContainer.innerHTML = msgHtml;
+        if (listaPlantelContainer) listaPlantelContainer.innerHTML = msgHtml;
+
+        const stickySaveBar = document.querySelector('.sticky-save-bar');
+        if (stickySaveBar) stickySaveBar.style.display = 'none';
+        if (btnMarcarTodos) btnMarcarTodos.style.display = 'none';
+        const presencasControl = document.querySelector('#tab-presencas .control-card');
+        if (presencasControl) presencasControl.style.display = 'none';
+        const mensalidadesControl = document.querySelector('#tab-mensalidades .control-card');
+        if (mensalidadesControl) mensalidadesControl.style.display = 'none';
+        const mensalidadesResumo = document.querySelector('.resumo-grid');
+        if (mensalidadesResumo) mensalidadesResumo.style.display = 'none';
+        const plantelControl = document.querySelector('#tab-plantel .control-card');
+        if (plantelControl) plantelControl.style.display = 'none';
+    }
+
     // 4. Carregar Atletas Afetos ao Escalão Ativo
     async function loadData() {
         try {
+            if (!activeEscalao || userEscaloes.length === 0) {
+                currentAtletas = [];
+                renderEmptyNoTeams();
+                return;
+            }
+
+            // Restaurar controlos caso estivessem ocultos
+            const stickySaveBar = document.querySelector('.sticky-save-bar');
+            if (stickySaveBar) stickySaveBar.style.display = '';
+            if (btnMarcarTodos) btnMarcarTodos.style.display = '';
+            const presencasControl = document.querySelector('#tab-presencas .control-card');
+            if (presencasControl) presencasControl.style.display = '';
+            const mensalidadesControl = document.querySelector('#tab-mensalidades .control-card');
+            if (mensalidadesControl) mensalidadesControl.style.display = '';
+            const mensalidadesResumo = document.querySelector('.resumo-grid');
+            if (mensalidadesResumo) mensalidadesResumo.style.display = '';
+            const plantelControl = document.querySelector('#tab-plantel .control-card');
+            if (plantelControl) plantelControl.style.display = '';
+
             let query = supabase
                 .from('atletasbcv')
                 .select('*')
@@ -412,6 +515,10 @@ document.addEventListener('DOMContentLoaded', async () => {
     // =======================================================
     async function loadPresencas() {
         if (!listaPresencasContainer) return;
+        if (!activeEscalao || userEscaloes.length === 0) {
+            renderEmptyNoTeams();
+            return;
+        }
         const dataSel = presencasDataInput.value || hojeIso;
         const tipoSel = presencasTipoSelect.value || 'Treino';
 
@@ -593,6 +700,10 @@ document.addEventListener('DOMContentLoaded', async () => {
 
     async function loadMensalidades() {
         if (!listaMensalidadesContainer) return;
+        if (!activeEscalao || userEscaloes.length === 0) {
+            renderEmptyNoTeams();
+            return;
+        }
         const mesSel = mensalidadesMesSelect.value || '2026-09';
         const epoca = '2026/2027';
 
@@ -879,6 +990,10 @@ document.addEventListener('DOMContentLoaded', async () => {
     // =======================================================
     function renderPlantel() {
         if (!listaPlantelContainer) return;
+        if (!activeEscalao || userEscaloes.length === 0) {
+            renderEmptyNoTeams();
+            return;
+        }
         const filtro = (filtroPlantel?.value || '').toLowerCase().trim();
 
         const lista = currentAtletas.filter(a => {
