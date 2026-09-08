@@ -15,14 +15,7 @@
 - Múltiplos agentes (Gemini, Claude, Codex) mantêm este ficheiro como Single Source of Truth (SSOT).
 
 ## Histórico de Atualizações
-- [2026-05-07] Gemini: Criação do AGENTS.md e definição da stack.
-- [2026-05-08] Gemini: Reversão da galeria do torneio e implementação de slider de ecrã inteiro.
-- [2026-05-09] Gemini: Implementação da Gestão de Atletas no Admin.
-- [2026-05-10] Gemini: Adição de aniversariantes e barra de pesquisa no Admin.
-- [2026-05-11] Gemini: Reestruturação da Home (Agenda e Resultados lado a lado).
-- [2026-05-11] Gemini: Transformação das Notícias no elemento central (`card-featured`).
-- [2026-05-11] Gemini: Otimização da Navbar mobile e remoção de ícones excessivos no banner.
-- [2026-05-11] Gemini: Implementação do Popup Automático de Aniversariantes (Modal) e remoção do card fixo.
+- [2026-05-07 a 2026-05-11] Gemini: Inicialização do projeto, stack, gestão de atletas/aniversariantes e reestruturação da home.
 - [2026-05-12] Gemini: Reformulação Radical para Tema Claro Institucional (Roxo Sólido, Base Branca).
 - [2026-05-12] Gemini: Implementação de Sub-menu (Dropdown) para a secção Clube.
 - [2026-05-12] Gemini: Simplificação do Hero da página Clube (apenas emblema).
@@ -96,3 +89,4 @@
 - [2026-09-08] Gemini: Portal do Treinador centrado em Equipas geridas (equipas_atletas / equipasbcv): alternância multi-equipa no topo/drawer e carregamento do plantel real convocado.
 - [2026-09-08] Gemini: Sincronização da tabela Utilizadores Ativos com equipas do Plantel e aprimoramento da edição de permissões/menus por perfil.
 - [2026-09-08] Gemini: Portais do Treinador e Diretor: restrição estrita a equipas vinculadas em equipas_atletas (sem fallback para escalões antigos) e estado vazio informativo.
+- [2026-09-08] Gemini: Sincronização segura de Staff/Diretores em atletasbcv sem sobrepor registos de jogadores/filhos, pesquisa por email/telefone no modal de Plantel e auto-seleção de cargo.

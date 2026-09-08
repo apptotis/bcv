@@ -405,52 +405,48 @@ document.addEventListener('DOMContentLoaded', async () => {
 
     // Sincronização Inteligente entre Utilizadores (Users) e Fichas de Staff (Atletasbcv)
     async function sincronizarUserComAtletas(user) {
-        if (!user || !user.nome) return;
+        if (!user || (!user.nome && !user.email)) return;
         const role = (user.role || '').toLowerCase();
         if (role !== 'treinador' && role !== 'diretor' && role !== 'seccionista') return;
 
         try {
             const funcaoStaff = (role === 'treinador') ? 'Treinador' : 'Diretor de Campo';
-            const primeiroEsc = (user.escalao_afeto || '').split(',')[0]?.trim() || 'Staff / Clube';
+            const uNome = (user.nome || user.email.split('@')[0]).trim();
+            const uEmail = (user.email || '').trim().toLowerCase();
 
-            // Procurar em atletasbcv por email ou nome
-            let query = supabase.from('atletasbcv').select('id, nome, email, funcao, escalao, epoca, telefone');
-            if (user.email) {
-                query = query.or(`email.ilike."${user.email}",nome.ilike."${user.nome}"`);
-            } else {
-                query = query.ilike('nome', user.nome);
-            }
+            // Buscar todos os atletas/staff para verificar existência segura
+            const { data: todosAtletas, error } = await supabase
+                .from('atletasbcv')
+                .select('id, nome, email, funcao, escalao, epoca, telefone');
 
-            const { data: existentes, error } = await query;
             if (error) throw error;
+            const atlList = todosAtletas || [];
 
-            if (existentes && existentes.length > 0) {
-                const atl = existentes[0];
+            // Procurar ficha que já seja STAFF (não atleta jogador)
+            let existingStaff = atlList.find(a => {
+                const f = (a.funcao || '').toLowerCase();
+                const isStaff = f && !f.includes('jogador') && !f.includes('jogadora');
+                if (!isStaff) return false;
+                const aEmail = (a.email || '').trim().toLowerCase();
+                const aNome = (a.nome || '').trim().toLowerCase();
+                return (uEmail && aEmail === uEmail) || (uNome && aNome === uNome.toLowerCase());
+            });
+
+            if (existingStaff) {
                 const updates = {};
-                const f = (atl.funcao || '').toLowerCase();
-                if (!f || f.includes('jogador') || f.includes('jogadora')) {
-                    updates.funcao = funcaoStaff;
-                }
-                if (user.telemovel && !atl.telefone) {
-                    updates.telefone = user.telemovel;
-                }
-                if (user.email && !atl.email) {
-                    updates.email = user.email;
-                }
-                if (!atl.epoca || !atl.epoca.includes('2026/2027')) {
-                    updates.epoca = '2026/2027';
-                }
-                if (Object.keys(updates).length > 0) {
-                    await supabase.from('atletasbcv').update(updates).eq('id', atl.id);
-                }
+                updates.funcao = funcaoStaff;
+                if (user.telemovel && !existingStaff.telefone) updates.telefone = user.telemovel;
+                if (user.email && !existingStaff.email) updates.email = user.email;
+                if (!existingStaff.epoca || !existingStaff.epoca.includes('2026/2027')) updates.epoca = '2026/2027';
+                await supabase.from('atletasbcv').update(updates).eq('id', existingStaff.id);
             } else {
-                // Inserir novo elemento de staff em atletasbcv
+                // Inserir novo elemento de staff em atletasbcv (sem alterar jogadores existentes)
                 await supabase.from('atletasbcv').insert([{
-                    nome: user.nome,
+                    nome: uNome,
                     email: user.email || null,
                     telefone: user.telemovel || null,
                     funcao: funcaoStaff,
-                    escalao: primeiroEsc,
+                    escalao: 'Staff / Clube',
                     epoca: '2026/2027',
                     sexo: 'M'
                 }]);
@@ -479,23 +475,26 @@ document.addEventListener('DOMContentLoaded', async () => {
             const atlList = atletas || [];
 
             for (const su of staffUsers) {
-                const uNome = (su.nome || '').trim().toLowerCase();
+                const uNome = (su.nome || su.email.split('@')[0]).trim().toLowerCase();
                 const uEmail = (su.email || '').trim().toLowerCase();
                 
-                const match = atlList.find(a => 
-                    (uEmail && a.email && a.email.trim().toLowerCase() === uEmail) ||
-                    (uNome && a.nome && a.nome.trim().toLowerCase() === uNome)
-                );
+                const matchStaff = atlList.find(a => {
+                    const f = (a.funcao || '').toLowerCase();
+                    const isStaff = f && !f.includes('jogador') && !f.includes('jogadora');
+                    if (!isStaff) return false;
+                    const aEmail = (a.email || '').trim().toLowerCase();
+                    const aNome = (a.nome || '').trim().toLowerCase();
+                    return (uEmail && aEmail === uEmail) || (uNome && aNome === uNome);
+                });
 
-                if (!match) {
+                if (!matchStaff) {
                     const funcaoStaff = (su.role === 'treinador') ? 'Treinador' : 'Diretor de Campo';
-                    const primeiroEsc = (su.escalao_afeto || '').split(',')[0]?.trim() || 'Staff / Clube';
                     await supabase.from('atletasbcv').insert([{
-                        nome: su.nome,
+                        nome: su.nome || su.email.split('@')[0],
                         email: su.email || null,
                         telefone: su.telemovel || null,
                         funcao: funcaoStaff,
-                        escalao: primeiroEsc,
+                        escalao: 'Staff / Clube',
                         epoca: '2026/2027',
                         sexo: 'M'
                     }]);
@@ -1517,15 +1516,26 @@ document.addEventListener('DOMContentLoaded', async () => {
         if (!currentPlantelEquipa) return;
 
         try {
-            // 1. Carregar todos os atletas da base de dados se ainda não tivermos
-            if (!allAtletasClub || allAtletasClub.length === 0) {
-                const { data: atletas, error: errAtletas } = await supabase
-                    .from('atletasbcv')
-                    .select('id, nome, nickname, escalao, sexo, data_nascimento, numero_camisola, equipamento_numero_1, foto, licenca, epoca, funcao')
-                    .order('nome', { ascending: true });
-                if (errAtletas) throw errAtletas;
-                allAtletasClub = atletas || [];
+            // Sincronizar em lote quaisquer utilizadores de staff (treinadores/diretores) para atletasbcv
+            try {
+                const { data: staffUsers } = await supabase
+                    .from('users')
+                    .select('id, nome, email, telemovel, role')
+                    .in('role', ['treinador', 'diretor', 'seccionista']);
+                if (staffUsers && staffUsers.length > 0) {
+                    await sincronizarStaffUsersEmLote(staffUsers);
+                }
+            } catch (eSync) {
+                console.warn("Aviso ao sincronizar staff antes do plantel:", eSync);
             }
+
+            // 1. Carregar todos os atletas e staff da base de dados (sempre frescos ao recarregar plantel)
+            const { data: atletas, error: errAtletas } = await supabase
+                .from('atletasbcv')
+                .select('id, nome, nickname, escalao, sexo, data_nascimento, numero_camisola, equipamento_numero_1, foto, licenca, epoca, funcao, email, telefone')
+                .order('nome', { ascending: true });
+            if (errAtletas) throw errAtletas;
+            allAtletasClub = atletas || [];
 
             // 2. Carregar os vínculos de equipas_atletas para a equipa selecionada
             const { data: relacoes, error: errRel } = await supabase
@@ -1737,7 +1747,9 @@ document.addEventListener('DOMContentLoaded', async () => {
                         const matchNome = (a.nome || '').toLowerCase().includes(searchTerm);
                         const matchNick = (a.nickname || '').toLowerCase().includes(searchTerm);
                         const matchFunc = (a.funcao || '').toLowerCase().includes(searchTerm);
-                        if (!matchNome && !matchNick && !matchFunc) return false;
+                        const matchEmail = (a.email || '').toLowerCase().includes(searchTerm);
+                        const matchTel = (a.telefone || '').toLowerCase().includes(searchTerm);
+                        if (!matchNome && !matchNick && !matchFunc && !matchEmail && !matchTel) return false;
                     } else {
                         // Sem pesquisa: mostra todos com função de staff/treinador registada
                         if (!isStaffRoleInDb) return false;
@@ -1773,7 +1785,9 @@ document.addEventListener('DOMContentLoaded', async () => {
                     const matchNome = (a.nome || '').toLowerCase().includes(searchTerm);
                     const matchNick = (a.nickname || '').toLowerCase().includes(searchTerm);
                     const matchLic = (a.licenca || '').toLowerCase().includes(searchTerm);
-                    if (!matchNome && !matchNick && !matchLic) return false;
+                    const matchEmail = (a.email || '').toLowerCase().includes(searchTerm);
+                    const matchTel = (a.telefone || '').toLowerCase().includes(searchTerm);
+                    if (!matchNome && !matchNick && !matchLic && !matchEmail && !matchTel) return false;
                 }
 
                 return true;
@@ -1828,16 +1842,26 @@ document.addEventListener('DOMContentLoaded', async () => {
 
                     const displayNome = a.nickname ? `${a.nome} <span style="color: var(--accent-primary);">"${a.nickname}"</span>` : a.nome;
 
-                    const defaultStaffRole = jaTemTreinadorPrincipal ? 'Treinador Adjunto' : 'Treinador Principal';
+                    let initialCargo = 'Treinador Principal';
+                    if (a.funcao) {
+                        const f = a.funcao.toLowerCase();
+                        if (f.includes('diretor')) initialCargo = 'Diretor de Campo';
+                        else if (f.includes('seccionista')) initialCargo = 'Seccionista';
+                        else if (f.includes('preparador')) initialCargo = 'Preparador Físico';
+                        else if (f.includes('fisioterapeuta')) initialCargo = 'Fisioterapeuta';
+                        else if (f.includes('adjunto')) initialCargo = 'Treinador Adjunto';
+                        else if (jaTemTreinadorPrincipal && f.includes('treinador')) initialCargo = 'Treinador Adjunto';
+                        else if (f.includes('treinador')) initialCargo = 'Treinador Principal';
+                    }
 
                     const opcoesCargosAdicionar = isStaff ? `
-                        <option value="Treinador Principal" ${defaultStaffRole === 'Treinador Principal' ? 'selected' : ''}>👔 Treinador Principal</option>
-                        <option value="Treinador Adjunto" ${defaultStaffRole === 'Treinador Adjunto' ? 'selected' : ''}>📋 Treinador Adjunto</option>
-                        <option value="Preparador Físico">💪 Preparador Físico</option>
-                        <option value="Diretor de Campo">🎖️ Diretor de Campo</option>
-                        <option value="Seccionista">📂 Seccionista</option>
-                        <option value="Fisioterapeuta">🩺 Fisioterapeuta</option>
-                        <option value="Apoio Técnico">🤝 Apoio Técnico</option>
+                        <option value="Treinador Principal" ${initialCargo === 'Treinador Principal' ? 'selected' : ''}>👔 Treinador Principal</option>
+                        <option value="Treinador Adjunto" ${initialCargo === 'Treinador Adjunto' ? 'selected' : ''}>📋 Treinador Adjunto</option>
+                        <option value="Preparador Físico" ${initialCargo === 'Preparador Físico' ? 'selected' : ''}>💪 Preparador Físico</option>
+                        <option value="Diretor de Campo" ${initialCargo === 'Diretor de Campo' ? 'selected' : ''}>🎖️ Diretor de Campo</option>
+                        <option value="Seccionista" ${initialCargo === 'Seccionista' ? 'selected' : ''}>📂 Seccionista</option>
+                        <option value="Fisioterapeuta" ${initialCargo === 'Fisioterapeuta' ? 'selected' : ''}>🩺 Fisioterapeuta</option>
+                        <option value="Apoio Técnico" ${initialCargo === 'Apoio Técnico' ? 'selected' : ''}>🤝 Apoio Técnico</option>
                     ` : `
                         <option value="Jogador" selected>🏀 Jogador</option>
                         <option value="Capitão">⭐ Capitão</option>
@@ -1846,8 +1870,16 @@ document.addEventListener('DOMContentLoaded', async () => {
                         <option value="Treinador Adjunto">📋 Treinador Adjunto</option>
                     `;
 
+                    const emailBadgeHtml = (isStaff && a.email)
+                        ? `<span>•</span> <span style="color: #64748b; font-size: 0.76rem;">✉️ ${a.email}</span>`
+                        : '';
+
+                    const telBadgeHtml = (isStaff && a.telefone)
+                        ? `<span>•</span> <span style="color: #64748b; font-size: 0.76rem;">📞 ${a.telefone}</span>`
+                        : '';
+
                     const metaSub = isStaff 
-                        ? `${badgeHtml} <span>•</span> <span>${a.sexo || '-'}</span>`
+                        ? `${badgeHtml} ${emailBadgeHtml} ${telBadgeHtml}`
                         : `${badgeHtml} <span>•</span> <span>${a.sexo || '-'}</span> ${a.numero_camisola ? `<span>• #${a.numero_camisola}</span>` : ''}`;
 
                     card.innerHTML = `
@@ -1912,13 +1944,22 @@ document.addEventListener('DOMContentLoaded', async () => {
             // Sincronizar escalão afeto no utilizador em public.users se existir
             if (isStaff && atletaObj && currentPlantelEquipa.escalao) {
                 try {
-                    let uQuery = supabase.from('users').select('id, nome, email, escalao_afeto');
+                    let matchedUsers = [];
                     if (atletaObj.email) {
-                        uQuery = uQuery.or(`email.ilike."${atletaObj.email}",nome.ilike."${atletaObj.nome}"`);
-                    } else {
-                        uQuery = uQuery.ilike('nome', atletaObj.nome);
+                        const { data: byEmail } = await supabase
+                            .from('users')
+                            .select('id, nome, email, escalao_afeto')
+                            .ilike('email', atletaObj.email.trim());
+                        if (byEmail && byEmail.length > 0) matchedUsers = byEmail;
                     }
-                    const { data: matchedUsers } = await uQuery;
+                    if (matchedUsers.length === 0 && atletaObj.nome) {
+                        const { data: byName } = await supabase
+                            .from('users')
+                            .select('id, nome, email, escalao_afeto')
+                            .ilike('nome', atletaObj.nome.trim());
+                        if (byName && byName.length > 0) matchedUsers = byName;
+                    }
+
                     if (matchedUsers && matchedUsers.length > 0) {
                         const targetUser = matchedUsers[0];
                         const escAtuais = (targetUser.escalao_afeto || '').split(',').map(s => s.trim()).filter(Boolean);
