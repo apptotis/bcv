@@ -329,7 +329,7 @@ document.addEventListener('DOMContentLoaded', async () => {
             userRoleHelp.style.background = '#ecfdf5';
             userRoleHelp.style.color = '#065f46';
             userRoleHelp.style.border = '1px solid #a7f3d0';
-            userRoleHelp.innerHTML = '📱 <strong>Diretor de Campo (Mobile):</strong> Acede ao Portal do Diretor (<code>diretor.html</code>). As equipas que gere são geridas no menu <strong>Equipas ➔ Plantel</strong>.';
+            userRoleHelp.innerHTML = '📱 <strong>Diretor (Mobile):</strong> Acede ao Portal do Diretor (<code>diretor.html</code>). As equipas que gere são geridas no menu <strong>Equipas ➔ Plantel</strong>.';
         } else if (r === 'redator') {
             userRoleHelp.style.display = 'block';
             userRoleHelp.style.background = '#fff7ed';
@@ -410,7 +410,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         if (role !== 'treinador' && role !== 'diretor' && role !== 'seccionista') return;
 
         try {
-            const funcaoStaff = (role === 'treinador') ? 'Treinador' : 'Diretor de Campo';
+            const funcaoStaff = (role === 'treinador') ? 'Treinador' : 'Diretor';
             const uNome = (user.nome || user.email.split('@')[0]).trim();
             const uEmail = (user.email || '').trim().toLowerCase();
 
@@ -488,7 +488,7 @@ document.addEventListener('DOMContentLoaded', async () => {
                 });
 
                 if (!matchStaff) {
-                    const funcaoStaff = (su.role === 'treinador') ? 'Treinador' : 'Diretor de Campo';
+                    const funcaoStaff = (su.role === 'treinador') ? 'Treinador' : 'Diretor';
                     await supabase.from('atletasbcv').insert([{
                         nome: su.nome || su.email.split('@')[0],
                         email: su.email || null,
@@ -634,7 +634,7 @@ document.addEventListener('DOMContentLoaded', async () => {
                 if (isAdmin) {
                     roleBadgeHtml = '<strong style="color: #7e22ce;">Admin Total</strong>';
                 } else if (isDiretor) {
-                    roleBadgeHtml = '<span style="background: rgba(16, 185, 129, 0.15); color: #059669; font-weight: 700; padding: 2px 8px; border-radius: 6px; font-size: 0.8rem;">📱 Diretor de Campo</span>';
+                    roleBadgeHtml = '<span style="background: rgba(16, 185, 129, 0.15); color: #059669; font-weight: 700; padding: 2px 8px; border-radius: 6px; font-size: 0.8rem;">📱 Diretor</span>';
                 } else if (isTreinador) {
                     roleBadgeHtml = '<span style="background: rgba(59, 130, 246, 0.15); color: #2563eb; font-weight: 700; padding: 2px 8px; border-radius: 6px; font-size: 0.8rem;">🏀 Treinador</span>';
                 } else if (isRedator) {
@@ -1632,7 +1632,7 @@ document.addEventListener('DOMContentLoaded', async () => {
                         <option value="Treinador Principal" ${papelAtual === 'Treinador Principal' ? 'selected' : ''}>👔 Treinador Principal</option>
                         <option value="Treinador Adjunto" ${papelAtual === 'Treinador Adjunto' ? 'selected' : ''}>📋 Treinador Adjunto</option>
                         <option value="Preparador Físico" ${papelAtual === 'Preparador Físico' ? 'selected' : ''}>💪 Preparador Físico</option>
-                        <option value="Diretor de Campo" ${papelAtual === 'Diretor de Campo' ? 'selected' : ''}>🎖️ Diretor de Campo</option>
+                        <option value="Diretor" ${papelAtual === 'Diretor' || papelAtual === 'Diretor de Campo' ? 'selected' : ''}>🎖️ Diretor</option>
                         <option value="Seccionista" ${papelAtual === 'Seccionista' ? 'selected' : ''}>📂 Seccionista</option>
                         <option value="Fisioterapeuta" ${papelAtual === 'Fisioterapeuta' ? 'selected' : ''}>🩺 Fisioterapeuta</option>
                         <option value="Apoio Técnico" ${papelAtual === 'Apoio Técnico' ? 'selected' : ''}>🤝 Apoio Técnico</option>
@@ -1643,7 +1643,7 @@ document.addEventListener('DOMContentLoaded', async () => {
                         <option value="Sub-Capitão" ${papelAtual === 'Sub-Capitão' ? 'selected' : ''}>🥈 Sub-Capitão</option>
                         <option value="Treinador Principal">👔 Treinador Principal</option>
                         <option value="Treinador Adjunto">📋 Treinador Adjunto</option>
-                        <option value="Diretor de Campo">🎖️ Diretor de Campo</option>
+                        <option value="Diretor">🎖️ Diretor</option>
                     `;
 
                     const dorsalHtml = isStaff ? '' : `<strong style="color: var(--text-primary);">#${dorsal}</strong><span>•</span>`;
@@ -1845,7 +1845,7 @@ document.addEventListener('DOMContentLoaded', async () => {
                     let initialCargo = 'Treinador Principal';
                     if (a.funcao) {
                         const f = a.funcao.toLowerCase();
-                        if (f.includes('diretor')) initialCargo = 'Diretor de Campo';
+                        if (f.includes('diretor')) initialCargo = 'Diretor';
                         else if (f.includes('seccionista')) initialCargo = 'Seccionista';
                         else if (f.includes('preparador')) initialCargo = 'Preparador Físico';
                         else if (f.includes('fisioterapeuta')) initialCargo = 'Fisioterapeuta';
@@ -1858,7 +1858,7 @@ document.addEventListener('DOMContentLoaded', async () => {
                         <option value="Treinador Principal" ${initialCargo === 'Treinador Principal' ? 'selected' : ''}>👔 Treinador Principal</option>
                         <option value="Treinador Adjunto" ${initialCargo === 'Treinador Adjunto' ? 'selected' : ''}>📋 Treinador Adjunto</option>
                         <option value="Preparador Físico" ${initialCargo === 'Preparador Físico' ? 'selected' : ''}>💪 Preparador Físico</option>
-                        <option value="Diretor de Campo" ${initialCargo === 'Diretor de Campo' ? 'selected' : ''}>🎖️ Diretor de Campo</option>
+                        <option value="Diretor" ${initialCargo === 'Diretor' || initialCargo === 'Diretor de Campo' ? 'selected' : ''}>🎖️ Diretor</option>
                         <option value="Seccionista" ${initialCargo === 'Seccionista' ? 'selected' : ''}>📂 Seccionista</option>
                         <option value="Fisioterapeuta" ${initialCargo === 'Fisioterapeuta' ? 'selected' : ''}>🩺 Fisioterapeuta</option>
                         <option value="Apoio Técnico" ${initialCargo === 'Apoio Técnico' ? 'selected' : ''}>🤝 Apoio Técnico</option>
@@ -1868,6 +1868,7 @@ document.addEventListener('DOMContentLoaded', async () => {
                         <option value="Sub-Capitão">🥈 Sub-Capitão</option>
                         <option value="Treinador Principal">👔 Treinador Principal</option>
                         <option value="Treinador Adjunto">📋 Treinador Adjunto</option>
+                        <option value="Diretor">🎖️ Diretor</option>
                     `;
 
                     const emailBadgeHtml = (isStaff && a.email)

@@ -90,3 +90,4 @@
 - [2026-09-08] Gemini: Sincronização da tabela Utilizadores Ativos com equipas do Plantel e aprimoramento da edição de permissões/menus por perfil.
 - [2026-09-08] Gemini: Portais do Treinador e Diretor: restrição estrita a equipas vinculadas em equipas_atletas (sem fallback para escalões antigos) e estado vazio informativo.
 - [2026-09-08] Gemini: Sincronização segura de Staff/Diretores em atletasbcv sem sobrepor registos de jogadores/filhos, pesquisa por email/telefone no modal de Plantel e auto-seleção de cargo.
+- [2026-09-08] Gemini: Simplificação da designação de 'Diretor de Campo' para 'Diretor' no Admin (utilizadores, atletas, plantel) e atualização dos registos na base de dados.
