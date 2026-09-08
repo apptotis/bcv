@@ -289,8 +289,11 @@ document.addEventListener('DOMContentLoaded', async () => {
     const passwordHint = document.getElementById('password-hint');
     const passwordInput = document.getElementById('new-user-password');
     const roleSelect = document.getElementById('new-user-role');
+    const userRoleHelp = document.getElementById('user-role-help');
     const containerPermissoes = document.getElementById('container-permissoes-custom');
     const checkboxesPermissoes = document.querySelectorAll('input[name="user_permissoes"]');
+    const btnSelectAllPerms = document.getElementById('btn-select-all-perms');
+    const btnClearAllPerms = document.getElementById('btn-clear-all-perms');
 
     const MODULO_LABELS = {
         'noticias': 'Notícias',
@@ -302,18 +305,70 @@ document.addEventListener('DOMContentLoaded', async () => {
         'equipamentos': 'Equipamentos',
         'desportiva': 'Gestão Desportiva',
         'financeira': 'Gestão Financeira',
-        'config': 'Config'
+        'patrocinadores': 'Patrocinadores',
+        'config': 'Configurações'
     };
+
+    function updateUserRoleHelp(role) {
+        if (!userRoleHelp) return;
+        const r = (role || '').toLowerCase();
+        if (r === 'admin') {
+            userRoleHelp.style.display = 'block';
+            userRoleHelp.style.background = '#f3e8ff';
+            userRoleHelp.style.color = '#6b21a8';
+            userRoleHelp.style.border = '1px solid #d8b4fe';
+            userRoleHelp.innerHTML = '⭐ <strong>Administrador Total:</strong> Acesso ilimitado e completo a todas as páginas e menus do Painel Admin.';
+        } else if (r === 'treinador') {
+            userRoleHelp.style.display = 'block';
+            userRoleHelp.style.background = '#eff6ff';
+            userRoleHelp.style.color = '#1e40af';
+            userRoleHelp.style.border = '1px solid #bfdbfe';
+            userRoleHelp.innerHTML = '🏀 <strong>Treinador (Mobile):</strong> Acede ao Portal do Treinador (<code>treinador.html</code>). As equipas e atletas que gere são geridos no menu <strong>Equipas ➔ Plantel</strong>.';
+        } else if (r === 'diretor') {
+            userRoleHelp.style.display = 'block';
+            userRoleHelp.style.background = '#ecfdf5';
+            userRoleHelp.style.color = '#065f46';
+            userRoleHelp.style.border = '1px solid #a7f3d0';
+            userRoleHelp.innerHTML = '📱 <strong>Diretor de Campo (Mobile):</strong> Acede ao Portal do Diretor (<code>diretor.html</code>). As equipas que gere são geridas no menu <strong>Equipas ➔ Plantel</strong>.';
+        } else if (r === 'redator') {
+            userRoleHelp.style.display = 'block';
+            userRoleHelp.style.background = '#fff7ed';
+            userRoleHelp.style.color = '#9a3412';
+            userRoleHelp.style.border = '1px solid #fed7aa';
+            userRoleHelp.innerHTML = '📰 <strong>Redator de Notícias (Mobile):</strong> Acede ao Portal do Redator (<code>redator.html</code>) para criar, editar e publicar artigos.';
+        } else if (r === 'personalizado') {
+            userRoleHelp.style.display = 'block';
+            userRoleHelp.style.background = '#f8fafc';
+            userRoleHelp.style.color = '#334155';
+            userRoleHelp.style.border = '1px solid #cbd5e1';
+            userRoleHelp.innerHTML = '💻 <strong>Personalizado:</strong> Acede ao Painel de Administração apenas às páginas e opções de menu selecionadas abaixo.';
+        } else {
+            userRoleHelp.style.display = 'none';
+        }
+    }
 
     if (roleSelect) {
         roleSelect.addEventListener('change', () => {
             const val = roleSelect.value;
+            updateUserRoleHelp(val);
             if (val === 'personalizado') {
                 if (containerPermissoes) containerPermissoes.style.display = 'block';
             } else {
                 if (containerPermissoes) containerPermissoes.style.display = 'none';
                 checkboxesPermissoes.forEach(cb => cb.checked = false);
             }
+        });
+    }
+
+    if (btnSelectAllPerms) {
+        btnSelectAllPerms.addEventListener('click', () => {
+            checkboxesPermissoes.forEach(cb => cb.checked = true);
+        });
+    }
+
+    if (btnClearAllPerms) {
+        btnClearAllPerms.addEventListener('click', () => {
+            checkboxesPermissoes.forEach(cb => cb.checked = false);
         });
     }
 
@@ -343,6 +398,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         passwordInput.required = true;
         document.getElementById('new-user-email').disabled = false;
         if (containerPermissoes) containerPermissoes.style.display = 'none';
+        if (userRoleHelp) userRoleHelp.style.display = 'none';
         checkboxesPermissoes.forEach(cb => cb.checked = false);
         if(createUserMsg) createUserMsg.classList.add('hidden');
     }
@@ -521,6 +577,46 @@ document.addEventListener('DOMContentLoaded', async () => {
                 return;
             }
 
+            // Carregar dados de plantéis e equipas para mapear vínculos reais de treinadores/diretores
+            let allEquipasMap = {};
+            let userEquipasMap = {}; // email/nome -> [nomes das equipas]
+            try {
+                const [
+                    { data: allEqs },
+                    { data: allVinc },
+                    { data: allAtl }
+                ] = await Promise.all([
+                    supabase.from('equipasbcv').select('id, nome, escalao'),
+                    supabase.from('equipas_atletas').select('equipa_id, atleta_id, papel'),
+                    supabase.from('atletasbcv').select('id, nome, email')
+                ]);
+
+                if (allEqs) {
+                    allEqs.forEach(e => { allEquipasMap[e.id] = e.nome || e.escalao; });
+                }
+
+                if (allVinc && allAtl) {
+                    const atlTeams = {};
+                    allVinc.forEach(v => {
+                        if (!atlTeams[v.atleta_id]) atlTeams[v.atleta_id] = [];
+                        const eqNome = allEquipasMap[v.equipa_id];
+                        if (eqNome && !atlTeams[v.atleta_id].includes(eqNome)) {
+                            atlTeams[v.atleta_id].push(eqNome);
+                        }
+                    });
+
+                    allAtl.forEach(a => {
+                        const teams = atlTeams[a.id] || [];
+                        if (teams.length > 0) {
+                            if (a.email) userEquipasMap[a.email.trim().toLowerCase()] = teams;
+                            if (a.nome) userEquipasMap[a.nome.trim().toLowerCase()] = teams;
+                        }
+                    });
+                }
+            } catch (errEqs) {
+                console.warn("Aviso ao mapear plantéis de utilizadores:", errEqs);
+            }
+
             usersTableBody.innerHTML = '';
             users.forEach(user => {
                 const tr = document.createElement('tr');
@@ -530,6 +626,10 @@ document.addEventListener('DOMContentLoaded', async () => {
                 const isDiretor = uRole === 'diretor' || uRole === 'seccionista';
                 const isTreinador = uRole === 'treinador';
                 const isRedator = uRole === 'redator' || uRole === 'editor';
+
+                const uEmailKey = (user.email || '').trim().toLowerCase();
+                const uNomeKey = (user.nome || '').trim().toLowerCase();
+                const realTeams = userEquipasMap[uEmailKey] || userEquipasMap[uNomeKey] || [];
 
                 let roleBadgeHtml = '';
                 if (isAdmin) {
@@ -546,39 +646,52 @@ document.addEventListener('DOMContentLoaded', async () => {
                 
                 let permissoesBadgeHtml = '';
                 if (isAdmin) {
-                    permissoesBadgeHtml = '<span style="background: rgba(126, 34, 206, 0.12); color: #7e22ce; padding: 3px 8px; border-radius: 4px; font-weight: 600; font-size: 0.8rem; border: 1px solid rgba(126, 34, 206, 0.25);">⭐ Acesso a Tudo</span>';
+                    permissoesBadgeHtml = '<span style="background: rgba(126, 34, 206, 0.12); color: #7e22ce; padding: 4px 10px; border-radius: 6px; font-weight: 700; font-size: 0.8rem; border: 1px solid rgba(126, 34, 206, 0.25);">⭐ Painel Total (Todas as Páginas & Menus)</span>';
                 } else if (isDiretor) {
-                    const escList = (user.escalao_afeto || '').split(',').map(s => s.trim()).filter(Boolean);
-                    if (escList.length > 0) {
-                        permissoesBadgeHtml = `<div style="display: flex; flex-wrap: wrap; gap: 4px;">` +
-                            escList.map(esc => `<span style="background: rgba(16, 185, 129, 0.12); color: #047857; font-weight: 700; padding: 2px 7px; border-radius: 4px; font-size: 0.75rem; border: 1px solid rgba(16, 185, 129, 0.3);">🏀 ${esc}</span>`).join('') +
-                            `</div>`;
+                    let equipasHtml = '';
+                    if (realTeams.length > 0) {
+                        equipasHtml = realTeams.map(t => `<span style="background: rgba(16, 185, 129, 0.12); color: #047857; font-weight: 700; padding: 2px 7px; border-radius: 4px; font-size: 0.75rem; border: 1px solid rgba(16, 185, 129, 0.3);">🏀 ${t}</span>`).join(' ');
                     } else {
-                        permissoesBadgeHtml = `<span style="background: rgba(16, 185, 129, 0.08); color: #047857; padding: 3px 8px; border-radius: 4px; font-size: 0.8rem;">Todas as Equipas</span>`;
+                        equipasHtml = '<span style="background: rgba(16, 185, 129, 0.08); color: #047857; padding: 2px 7px; border-radius: 4px; font-size: 0.75rem;">Todas as Equipas</span>';
                     }
+                    permissoesBadgeHtml = `
+                        <div style="display: flex; flex-direction: column; gap: 4px;">
+                            <div style="display: flex; align-items: center; gap: 6px;">
+                                <span style="background: rgba(16, 185, 129, 0.15); color: #059669; font-weight: 700; padding: 2px 8px; border-radius: 4px; font-size: 0.78rem;">📱 Portal do Diretor</span>
+                            </div>
+                            <div style="display: flex; flex-wrap: wrap; gap: 4px;">${equipasHtml}</div>
+                        </div>
+                    `;
                 } else if (isTreinador) {
-                    const escList = (user.escalao_afeto || '').split(',').map(s => s.trim()).filter(Boolean);
-                    if (escList.length > 0) {
-                        permissoesBadgeHtml = `<div style="display: flex; flex-wrap: wrap; gap: 4px;">` +
-                            escList.map(esc => `<span style="background: rgba(59, 130, 246, 0.12); color: #1d4ed8; font-weight: 700; padding: 2px 7px; border-radius: 4px; font-size: 0.75rem; border: 1px solid rgba(59, 130, 246, 0.3);">🏀 ${esc}</span>`).join('') +
-                            `</div>`;
+                    let equipasHtml = '';
+                    if (realTeams.length > 0) {
+                        equipasHtml = realTeams.map(t => `<span style="background: rgba(59, 130, 246, 0.12); color: #1d4ed8; font-weight: 700; padding: 2px 7px; border-radius: 4px; font-size: 0.75rem; border: 1px solid rgba(59, 130, 246, 0.3);">🏀 ${t}</span>`).join(' ');
                     } else {
-                        permissoesBadgeHtml = `<span style="background: rgba(59, 130, 246, 0.08); color: #1d4ed8; padding: 3px 8px; border-radius: 4px; font-size: 0.8rem;">Todas as Equipas</span>`;
+                        equipasHtml = '<span style="background: #fef3c7; color: #b45309; padding: 2px 7px; border-radius: 4px; font-size: 0.75rem; border: 1px dashed #f59e0b;">⚠️ Sem equipas atribuídas (definir no Plantel)</span>';
                     }
+                    permissoesBadgeHtml = `
+                        <div style="display: flex; flex-direction: column; gap: 4px;">
+                            <div style="display: flex; align-items: center; gap: 6px;">
+                                <span style="background: rgba(59, 130, 246, 0.15); color: #2563eb; font-weight: 700; padding: 2px 8px; border-radius: 4px; font-size: 0.78rem;">📱 Portal do Treinador</span>
+                            </div>
+                            <div style="display: flex; flex-wrap: wrap; gap: 4px;">${equipasHtml}</div>
+                        </div>
+                    `;
                 } else if (isRedator) {
-                    permissoesBadgeHtml = '<span style="background: rgba(234, 88, 12, 0.1); color: #c2410c; padding: 3px 8px; border-radius: 4px; font-weight: 600; font-size: 0.8rem; border: 1px solid rgba(234, 88, 12, 0.25);">📰 Notícias & Artigos</span>';
+                    permissoesBadgeHtml = '<span style="background: rgba(234, 88, 12, 0.1); color: #c2410c; padding: 4px 10px; border-radius: 4px; font-weight: 700; font-size: 0.8rem; border: 1px solid rgba(234, 88, 12, 0.25);">📰 Portal do Redator (Notícias)</span>';
                 } else {
                     const userPerms = Array.isArray(user.permissoes) ? user.permissoes : [];
-                    const escList = (user.escalao_afeto || '').split(',').map(s => s.trim()).filter(Boolean);
-                    const escTags = escList.map(esc => `<span style="background: rgba(126, 34, 206, 0.08); color: #7e22ce; padding: 2px 6px; border-radius: 4px; font-size: 0.75rem; font-weight: 600;">🏀 ${esc}</span>`).join('');
-                    
                     if (userPerms.length > 0) {
-                        permissoesBadgeHtml = `<div style="display: flex; flex-wrap: wrap; gap: 4px; align-items: center;">` +
-                            escTags +
-                            userPerms.map(p => `<span style="background: rgba(0, 0, 0, 0.05); color: var(--text-primary); padding: 2px 6px; border-radius: 4px; font-size: 0.75rem; border: 1px solid var(--border-color);">${MODULO_LABELS[p] || p}</span>`).join('') +
-                            `</div>`;
+                        permissoesBadgeHtml = `
+                            <div style="display: flex; flex-direction: column; gap: 4px;">
+                                <span style="color: var(--text-secondary); font-size: 0.75rem; font-weight: 600;">💻 Painel Admin (${userPerms.length} Menus Autorizados):</span>
+                                <div style="display: flex; flex-wrap: wrap; gap: 4px;">
+                                    ${userPerms.map(p => `<span style="background: #f1f5f9; color: var(--text-primary); padding: 2px 6px; border-radius: 4px; font-size: 0.75rem; border: 1px solid var(--border-color);">${MODULO_LABELS[p] || p}</span>`).join('')}
+                                </div>
+                            </div>
+                        `;
                     } else {
-                        permissoesBadgeHtml = escTags || '<span style="color: var(--text-secondary); font-size: 0.8rem;">(Nenhum menu)</span>';
+                        permissoesBadgeHtml = '<span style="color: var(--text-secondary); font-size: 0.8rem;">(Nenhum menu autorizado)</span>';
                     }
                 }
 
@@ -618,6 +731,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         
         const role = (user.role || 'personalizado').toLowerCase();
         roleSelect.value = role;
+        updateUserRoleHelp(role);
         editUserIdInput.dataset.escalaoAfeto = user.escalao_afeto || '';
 
         if (role === 'personalizado') {

@@ -115,11 +115,21 @@
                                 <option value="personalizado">Personalizado (Definir Menus)</option>
                             </select>
 
+                            <!-- Caixa Informativa do Perfil Selecionado -->
+                            <div id="user-role-help" style="display: none; padding: 10px 14px; border-radius: 8px; font-size: 0.82rem; line-height: 1.4; margin-top: -4px;"></div>
+
                             <!-- Bloco de Permissões Granulares por Menus -->
                             <div id="container-permissoes-custom" style="display: none; background: #f8fafc; border: 1px solid var(--border-color); border-radius: 8px; padding: 15px;">
-                                <label style="font-weight: 600; font-size: 0.9rem; color: var(--text-primary); margin-bottom: 10px; display: block;">
-                                    Selecione os Menus com Acesso Autorizado:
-                                </label>
+                                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; flex-wrap: wrap; gap: 8px;">
+                                    <label style="font-weight: 600; font-size: 0.9rem; color: var(--text-primary); margin: 0;">
+                                        Selecione os Menus do Painel com Acesso Autorizado:
+                                    </label>
+                                    <div style="display: flex; gap: 8px; align-items: center;">
+                                        <button type="button" id="btn-select-all-perms" style="background: none; border: none; color: var(--primary); font-size: 0.78rem; font-weight: 700; cursor: pointer;">✓ Todos</button>
+                                        <span style="color: #cbd5e1;">|</span>
+                                        <button type="button" id="btn-clear-all-perms" style="background: none; border: none; color: var(--text-secondary); font-size: 0.78rem; cursor: pointer;">✕ Limpar</button>
+                                    </div>
+                                </div>
                                 <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)); gap: 10px;">
                                     <label style="display: flex; align-items: center; gap: 8px; cursor: pointer; font-size: 0.9rem; color: var(--text-primary);">
                                         <input type="checkbox" name="user_permissoes" value="atletas"> 👥 Atletas
@@ -175,7 +185,7 @@
                                     <th style="padding: 10px;">Nome</th>
                                     <th style="padding: 10px;">Email</th>
                                     <th style="padding: 10px;">Tipo</th>
-                                    <th style="padding: 10px;">Menus Autorizados</th>
+                                    <th style="padding: 10px;">Páginas & Menus / Equipas</th>
                                     <th style="padding: 10px;">Telemóvel</th>
                                     <th style="padding: 10px; text-align: center;">Ações</th>
                                 </tr>

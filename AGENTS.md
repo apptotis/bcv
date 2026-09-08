@@ -94,5 +94,4 @@
 - [2026-09-07] Gemini: Suporte a Equipa Técnica e Staff no modal de Plantel (treinador principal/adjunto, preparador, diretor, etc.), seleção e alteração inline de cargos, e destaque público em equipas.html.
 - [2026-09-08] Gemini: Sincronização automática bidirecional entre Gestão de Utilizadores (users) e Treinadores/Staff (atletasbcv/equipas_atletas) com autocomplete e afetação dinâmica de escalão.
 - [2026-09-08] Gemini: Portal do Treinador centrado em Equipas geridas (equipas_atletas / equipasbcv): alternância multi-equipa no topo/drawer e carregamento do plantel real convocado.
-- [2026-09-08] Gemini: Remoção das checkboxes de escalão no formulário de utilizadores (admin); vinculação de treinadores e diretores centralizada 100% no Plantel das Equipas.
-
+- [2026-09-08] Gemini: Sincronização da tabela Utilizadores Ativos com equipas do Plantel e aprimoramento da edição de permissões/menus por perfil.
