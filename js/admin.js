@@ -378,6 +378,160 @@ document.addEventListener('DOMContentLoaded', async () => {
         if(createUserMsg) createUserMsg.classList.add('hidden');
     }
 
+    // Sincronização Inteligente entre Utilizadores (Users) e Fichas de Staff (Atletasbcv)
+    async function sincronizarUserComAtletas(user) {
+        if (!user || !user.nome) return;
+        const role = (user.role || '').toLowerCase();
+        if (role !== 'treinador' && role !== 'diretor' && role !== 'seccionista') return;
+
+        try {
+            const funcaoStaff = (role === 'treinador') ? 'Treinador' : 'Diretor de Campo';
+            const primeiroEsc = (user.escalao_afeto || '').split(',')[0]?.trim() || 'Staff / Clube';
+
+            // Procurar em atletasbcv por email ou nome
+            let query = supabase.from('atletasbcv').select('id, nome, email, funcao, escalao, epoca, telefone');
+            if (user.email) {
+                query = query.or(`email.ilike."${user.email}",nome.ilike."${user.nome}"`);
+            } else {
+                query = query.ilike('nome', user.nome);
+            }
+
+            const { data: existentes, error } = await query;
+            if (error) throw error;
+
+            if (existentes && existentes.length > 0) {
+                const atl = existentes[0];
+                const updates = {};
+                const f = (atl.funcao || '').toLowerCase();
+                if (!f || f.includes('jogador') || f.includes('jogadora')) {
+                    updates.funcao = funcaoStaff;
+                }
+                if (user.telemovel && !atl.telefone) {
+                    updates.telefone = user.telemovel;
+                }
+                if (user.email && !atl.email) {
+                    updates.email = user.email;
+                }
+                if (!atl.epoca || !atl.epoca.includes('2026/2027')) {
+                    updates.epoca = '2026/2027';
+                }
+                if (Object.keys(updates).length > 0) {
+                    await supabase.from('atletasbcv').update(updates).eq('id', atl.id);
+                }
+            } else {
+                // Inserir novo elemento de staff em atletasbcv
+                await supabase.from('atletasbcv').insert([{
+                    nome: user.nome,
+                    email: user.email || null,
+                    telefone: user.telemovel || null,
+                    funcao: funcaoStaff,
+                    escalao: primeiroEsc,
+                    epoca: '2026/2027',
+                    sexo: 'M'
+                }]);
+            }
+
+            allAtletasClub = []; // Limpa cache para o modal de plantel
+            if (typeof loadAtletas === 'function') loadAtletas();
+            if (currentPlantelEquipa && typeof reloadPlantelData === 'function') {
+                reloadPlantelData();
+            }
+        } catch (err) {
+            console.warn("Aviso na sincronização de utilizador para ficha de staff:", err);
+        }
+    }
+
+    async function sincronizarStaffUsersEmLote(usersList) {
+        if (!usersList || usersList.length === 0) return;
+        const staffUsers = usersList.filter(u => {
+            const r = (u.role || '').toLowerCase();
+            return r === 'treinador' || r === 'diretor' || r === 'seccionista';
+        });
+        if (staffUsers.length === 0) return;
+
+        try {
+            const { data: atletas } = await supabase.from('atletasbcv').select('id, nome, email, funcao');
+            const atlList = atletas || [];
+
+            for (const su of staffUsers) {
+                const uNome = (su.nome || '').trim().toLowerCase();
+                const uEmail = (su.email || '').trim().toLowerCase();
+                
+                const match = atlList.find(a => 
+                    (uEmail && a.email && a.email.trim().toLowerCase() === uEmail) ||
+                    (uNome && a.nome && a.nome.trim().toLowerCase() === uNome)
+                );
+
+                if (!match) {
+                    const funcaoStaff = (su.role === 'treinador') ? 'Treinador' : 'Diretor de Campo';
+                    const primeiroEsc = (su.escalao_afeto || '').split(',')[0]?.trim() || 'Staff / Clube';
+                    await supabase.from('atletasbcv').insert([{
+                        nome: su.nome,
+                        email: su.email || null,
+                        telefone: su.telemovel || null,
+                        funcao: funcaoStaff,
+                        escalao: primeiroEsc,
+                        epoca: '2026/2027',
+                        sexo: 'M'
+                    }]);
+                    allAtletasClub = [];
+                }
+            }
+        } catch (e) {
+            console.warn("Aviso na sincronização em lote de staff:", e);
+        }
+    }
+
+    async function populateStaffDatalist() {
+        const datalist = document.getElementById('datalist-staff-nomes');
+        if (!datalist) return;
+        try {
+            if (!allAtletasClub || allAtletasClub.length === 0) {
+                const { data: atl } = await supabase.from('atletasbcv').select('id, nome, email, telefone, funcao, escalao');
+                if (atl) allAtletasClub = atl;
+            }
+            datalist.innerHTML = '';
+            (allAtletasClub || []).forEach(a => {
+                if (!a.nome) return;
+                const opt = document.createElement('option');
+                opt.value = a.nome;
+                opt.label = a.funcao ? `${a.funcao} (${a.escalao || 'Clube'})` : '';
+                datalist.appendChild(opt);
+            });
+        } catch (e) {
+            console.warn("Aviso ao preencher datalist de staff:", e);
+        }
+    }
+
+    const newUserNameInput = document.getElementById('new-user-name');
+    if (newUserNameInput) {
+        newUserNameInput.addEventListener('input', () => {
+            const val = newUserNameInput.value.trim().toLowerCase();
+            if (!val || !allAtletasClub || allAtletasClub.length === 0) return;
+            const match = allAtletasClub.find(a => a.nome && a.nome.trim().toLowerCase() === val);
+            if (match) {
+                const phoneInput = document.getElementById('new-user-phone');
+                const emailInput = document.getElementById('new-user-email');
+                if (phoneInput && !phoneInput.value && match.telefone) {
+                    phoneInput.value = match.telefone;
+                }
+                if (emailInput && !emailInput.value && match.email) {
+                    emailInput.value = match.email;
+                }
+                if (match.funcao && roleSelect && !roleSelect.value) {
+                    const f = match.funcao.toLowerCase();
+                    if (f.includes('diretor') || f.includes('seccionista')) {
+                        roleSelect.value = 'diretor';
+                        roleSelect.dispatchEvent(new Event('change'));
+                    } else if (f.includes('treinador') || f.includes('preparador') || f.includes('staff')) {
+                        roleSelect.value = 'treinador';
+                        roleSelect.dispatchEvent(new Event('change'));
+                    }
+                }
+            }
+        });
+    }
+
     if (btnCancelEdit) {
         btnCancelEdit.addEventListener('click', resetUserForm);
     }
@@ -472,6 +626,11 @@ document.addEventListener('DOMContentLoaded', async () => {
                 `;
                 usersTableBody.appendChild(tr);
             });
+
+            // Sincronizar em lote e alimentar datalist de nomes
+            sincronizarStaffUsersEmLote(users);
+            populateStaffDatalist();
+
         } catch (error) {
             console.error("Erro ao carregar users:", error);
             usersTableBody.innerHTML = '<tr><td colspan="6" style="color: red; padding: 10px;">Erro ao carregar utilizadores.</td></tr>';
@@ -619,6 +778,11 @@ document.addEventListener('DOMContentLoaded', async () => {
             createUserMsg.style.color = "#4caf50";
             createUserMsg.classList.remove('hidden');
             
+            // Sincronizar treinadores e diretores com atletasbcv
+            if (role === 'treinador' || role === 'diretor' || role === 'seccionista') {
+                await sincronizarUserComAtletas({ nome, email, telemovel, role, escalao_afeto: escalaoAfeto });
+            }
+
             resetUserForm();
             loadUsers(); // Recarregar a lista
 
@@ -1669,6 +1833,31 @@ document.addEventListener('DOMContentLoaded', async () => {
                 .select();
 
             if (error) throw error;
+
+            // Sincronizar escalão afeto no utilizador em public.users se existir
+            if (isStaff && atletaObj && currentPlantelEquipa.escalao) {
+                try {
+                    let uQuery = supabase.from('users').select('id, nome, email, escalao_afeto');
+                    if (atletaObj.email) {
+                        uQuery = uQuery.or(`email.ilike."${atletaObj.email}",nome.ilike."${atletaObj.nome}"`);
+                    } else {
+                        uQuery = uQuery.ilike('nome', atletaObj.nome);
+                    }
+                    const { data: matchedUsers } = await uQuery;
+                    if (matchedUsers && matchedUsers.length > 0) {
+                        const targetUser = matchedUsers[0];
+                        const escAtuais = (targetUser.escalao_afeto || '').split(',').map(s => s.trim()).filter(Boolean);
+                        const teamEsc = currentPlantelEquipa.escalao;
+                        if (!escAtuais.some(e => e.toLowerCase() === teamEsc.toLowerCase())) {
+                            escAtuais.push(teamEsc);
+                            const novoEscStr = escAtuais.join(', ');
+                            await supabase.from('users').update({ escalao_afeto: novoEscStr }).eq('id', targetUser.id);
+                        }
+                    }
+                } catch (eSync) {
+                    console.warn("Aviso ao vincular escalão ao utilizador:", eSync);
+                }
+            }
 
             await reloadPlantelData();
 

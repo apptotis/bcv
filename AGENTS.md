@@ -92,4 +92,5 @@
 - [2026-09-03] Gemini: Módulo Gestão de Patrocinadores no Admin com tabela dedicada patrocinadores_bcv (isolada do Torneio), upload de ativos (logos, painéis, redes), script setup_patrocinadores.sql e montra pública.
 - [2026-09-07] Gemini: Implementação da Gestão de Plantéis N:M (equipas_atletas): atletas convocáveis para múltiplas equipas/escalões com filtros inteligentes, modal de plantel no Admin, integração em equipas.html e portais mobile (treinador/diretor).
 - [2026-09-07] Gemini: Suporte a Equipa Técnica e Staff no modal de Plantel (treinador principal/adjunto, preparador, diretor, etc.), seleção e alteração inline de cargos, e destaque público em equipas.html.
+- [2026-09-08] Gemini: Sincronização automática bidirecional entre Gestão de Utilizadores (users) e Treinadores/Staff (atletasbcv/equipas_atletas) com autocomplete e afetação dinâmica de escalão.
 
