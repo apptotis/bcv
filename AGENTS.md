@@ -93,4 +93,5 @@
 - [2026-09-07] Gemini: Implementação da Gestão de Plantéis N:M (equipas_atletas): atletas convocáveis para múltiplas equipas/escalões com filtros inteligentes, modal de plantel no Admin, integração em equipas.html e portais mobile (treinador/diretor).
 - [2026-09-07] Gemini: Suporte a Equipa Técnica e Staff no modal de Plantel (treinador principal/adjunto, preparador, diretor, etc.), seleção e alteração inline de cargos, e destaque público em equipas.html.
 - [2026-09-08] Gemini: Sincronização automática bidirecional entre Gestão de Utilizadores (users) e Treinadores/Staff (atletasbcv/equipas_atletas) com autocomplete e afetação dinâmica de escalão.
+- [2026-09-08] Gemini: Portal do Treinador centrado em Equipas geridas (equipas_atletas / equipasbcv): alternância multi-equipa no topo/drawer e carregamento do plantel real convocado.
 

@@ -43,9 +43,9 @@ document.addEventListener('DOMContentLoaded', async () => {
     const filtroPlantel = document.getElementById('filtro-plantel');
     const listaPlantelContainer = document.getElementById('lista-plantel-container');
 
-    // Múltiplos Escalões
-    let userEscaloes = []; // Array de escalões afetos (ex: ['Mini 12', 'Sub 14'])
-    let activeEscalao = ''; // Escalão ativo no momento
+    // Gestão de Equipas BCV
+    let userTeams = []; // Array de equipas afetadas ao treinador [ { id, nome, escalao, ... } ]
+    let activeTeam = null; // Equipa ativa no momento
     const multiEscalaoBar = document.getElementById('multi-escalao-selector-bar');
     const multiEscalaoPills = document.getElementById('multi-escalao-pills');
     const drawerSectionEscaloes = document.getElementById('drawer-section-escaloes');
@@ -92,29 +92,118 @@ document.addEventListener('DOMContentLoaded', async () => {
                 escalao_afeto: ''
             };
 
-            // Extrair lista de escalões (ex: "Mini 12, Sub 14" -> ['Mini 12', 'Sub 14'])
-            userEscaloes = (userProfile.escalao_afeto || '')
-                .split(',')
-                .map(s => s.trim())
-                .filter(Boolean);
-
-            // Definir escalão ativo inicial
-            const savedEscalao = localStorage.getItem('bcv_treinador_active_escalao');
-            if (savedEscalao && userEscaloes.some(e => e.toLowerCase() === savedEscalao.toLowerCase())) {
-                activeEscalao = savedEscalao;
-            } else if (userEscaloes.length > 0) {
-                activeEscalao = userEscaloes[0];
-            } else {
-                activeEscalao = '';
-            }
+            // Carregar equipas atribuídas ao treinador
+            await loadUserTeams();
 
             showApp();
-            renderEscalaoSelectors();
+            renderTeamSelectors();
             await loadData();
 
         } catch (e) {
             console.error("Erro na verificação de sessão:", e);
             showLogin();
+        }
+    }
+
+    // Carregar todas as equipas atribuídas ao treinador (via equipas_atletas ou escalao_afeto)
+    async function loadUserTeams() {
+        try {
+            // 1. Buscar todas as equipas registadas
+            const { data: allTeams, error: tErr } = await supabase
+                .from('equipasbcv')
+                .select('*')
+                .order('nome', { ascending: true });
+
+            if (tErr) console.warn("Aviso ao carregar equipasbcv:", tErr);
+
+            // 2. Identificar ID do treinador na tabela atletasbcv
+            let coachAtletaIds = [];
+            if (currentUser?.email) {
+                const { data: byEmail } = await supabase
+                    .from('atletasbcv')
+                    .select('id')
+                    .ilike('email', currentUser.email.trim());
+                if (byEmail && byEmail.length > 0) {
+                    byEmail.forEach(a => coachAtletaIds.push(a.id));
+                }
+            }
+            if (coachAtletaIds.length === 0 && userProfile?.nome) {
+                const { data: byName } = await supabase
+                    .from('atletasbcv')
+                    .select('id')
+                    .ilike('nome', userProfile.nome.trim());
+                if (byName && byName.length > 0) {
+                    byName.forEach(a => coachAtletaIds.push(a.id));
+                }
+            }
+
+            // 3. Buscar equipas onde o treinador está associado em equipas_atletas
+            const linkedTeamIds = new Set();
+            if (coachAtletaIds.length > 0) {
+                try {
+                    const { data: vinculos } = await supabase
+                        .from('equipas_atletas')
+                        .select('equipa_id, papel')
+                        .in('atleta_id', coachAtletaIds);
+
+                    if (vinculos && vinculos.length > 0) {
+                        vinculos.forEach(v => linkedTeamIds.add(String(v.equipa_id)));
+                    }
+                } catch (vErr) {
+                    console.warn("Aviso ao consultar equipas_atletas para treinador:", vErr);
+                }
+            }
+
+            // 4. Escalões do perfil de utilizador (ex: "Sub 14, Sub 16")
+            const perfilEscaloes = (userProfile.escalao_afeto || '')
+                .split(',')
+                .map(s => s.trim().replace(/[-\s]/g, '').toLowerCase())
+                .filter(Boolean);
+
+            // 5. Filtrar equipas correspondentes
+            const matchedTeams = [];
+            const addedIds = new Set();
+
+            (allTeams || []).forEach(t => {
+                const tIdStr = String(t.id);
+                const isLinked = linkedTeamIds.has(tIdStr);
+                const tEsc = (t.escalao || '').replace(/[-\s]/g, '').toLowerCase();
+                const tNome = (t.nome || '').replace(/[-\s]/g, '').toLowerCase();
+                const matchesPerfil = perfilEscaloes.some(pe => tEsc.includes(pe) || tNome.includes(pe) || pe.includes(tEsc));
+
+                if (isLinked || matchesPerfil) {
+                    if (!addedIds.has(tIdStr)) {
+                        addedIds.add(tIdStr);
+                        matchedTeams.push(t);
+                    }
+                }
+            });
+
+            // Se encontrou equipas específicas, usa-as
+            if (matchedTeams.length > 0) {
+                userTeams = matchedTeams;
+            } else if (allTeams && allTeams.length > 0 && perfilEscaloes.length === 0) {
+                // Se não tem restrição de escalão nem vínculo específico, tem acesso a todas as equipas
+                userTeams = allTeams;
+            } else if (allTeams && allTeams.length > 0) {
+                userTeams = allTeams;
+            } else {
+                userTeams = [{
+                    id: 'geral',
+                    nome: userProfile.escalao_afeto || 'Geral BCV',
+                    escalao: userProfile.escalao_afeto || 'BCV'
+                }];
+            }
+
+            // Definir equipa ativa inicial
+            const savedTeamId = localStorage.getItem('bcv_treinador_active_team_id');
+            const foundSaved = userTeams.find(t => String(t.id) === String(savedTeamId));
+            activeTeam = foundSaved || userTeams[0];
+
+        } catch (err) {
+            console.error("Erro ao carregar equipas do treinador:", err);
+            userTeams = [{ id: 'geral', nome: 'Geral BCV', escalao: 'BCV' }];
+            activeTeam = userTeams[0];
         }
     }
 
@@ -130,29 +219,31 @@ document.addEventListener('DOMContentLoaded', async () => {
         if (headerUserName) headerUserName.textContent = userProfile.nome || 'Treinador BCV';
         if (drawerUserName) drawerUserName.textContent = userProfile.nome || 'Treinador BCV';
 
-        updateEscalaoDisplay();
+        updateTeamDisplay();
     }
 
-    function updateEscalaoDisplay() {
-        const displayText = activeEscalao || (userEscaloes.length > 0 ? userEscaloes.join(' / ') : 'Geral BCV');
+    function updateTeamDisplay() {
+        const displayText = activeTeam ? activeTeam.nome : 'Geral BCV';
         if (headerEscalaoBadge) headerEscalaoBadge.textContent = `🏀 ${displayText}`;
         if (drawerEscalaoName) drawerEscalaoName.textContent = displayText;
     }
 
-    // Renderizar seletores de escalão (Pills no Topo e Lista no Drawer)
-    function renderEscalaoSelectors() {
-        if (userEscaloes.length > 1) {
+    // Renderizar seletores de equipa (Pills no Topo e Lista no Drawer)
+    function renderTeamSelectors() {
+        if (userTeams.length > 1) {
             // Mostrar barra superior de alternância
             if (multiEscalaoBar) multiEscalaoBar.style.display = 'flex';
             if (drawerSectionEscaloes) drawerSectionEscaloes.style.display = 'block';
 
             // 1. Gerar Pills Superiores
             if (multiEscalaoPills) {
-                multiEscalaoPills.innerHTML = userEscaloes.map(esc => {
-                    const isActive = esc.toLowerCase() === (activeEscalao || '').toLowerCase();
+                multiEscalaoPills.innerHTML = userTeams.map(t => {
+                    const isActive = activeTeam && String(t.id) === String(activeTeam.id);
                     return `
-                        <button type="button" class="escalao-pill-btn ${isActive ? 'active' : ''}" onclick="window.switchEscalao('${esc}')">
-                            🏀 ${esc}
+                        <button type="button" class="pill-escalao ${isActive ? 'active' : ''}" onclick="window.switchTeam('${t.id}')">
+                            <span>🏀</span>
+                            <span>${t.nome}</span>
+                            ${isActive ? '<span>✓</span>' : ''}
                         </button>
                     `;
                 }).join('');
@@ -160,12 +251,15 @@ document.addEventListener('DOMContentLoaded', async () => {
 
             // 2. Gerar Lista no Drawer
             if (drawerEscaloesList) {
-                drawerEscaloesList.innerHTML = userEscaloes.map(esc => {
-                    const isActive = esc.toLowerCase() === (activeEscalao || '').toLowerCase();
+                drawerEscaloesList.innerHTML = userTeams.map(t => {
+                    const isActive = activeTeam && String(t.id) === String(activeTeam.id);
                     return `
-                        <button type="button" class="drawer-escalao-btn ${isActive ? 'active' : ''}" onclick="window.switchEscalao('${esc}')">
-                            <span>🏀 ${esc}</span>
-                            ${isActive ? '<span style="font-size: 0.8rem;">✓ Ativo</span>' : ''}
+                        <button type="button" class="drawer-escalao-btn ${isActive ? 'active' : ''}" onclick="window.switchTeam('${t.id}')">
+                            <span style="display: flex; align-items: center; gap: 8px;">
+                                <span>🏀</span>
+                                <span>${t.nome}</span>
+                            </span>
+                            ${isActive ? '<span style="color: var(--primary); font-weight: 800;">● Ativa</span>' : '<span style="color: var(--text-light); font-size: 0.75rem;">Alternar</span>'}
                         </button>
                     `;
                 }).join('');
@@ -176,22 +270,29 @@ document.addEventListener('DOMContentLoaded', async () => {
         }
     }
 
-    // Função global para alternar escalão ativo
-    window.switchEscalao = async function(novoEscalao) {
-        if (activeEscalao === novoEscalao) return;
-        activeEscalao = novoEscalao;
-        localStorage.setItem('bcv_treinador_active_escalao', novoEscalao);
+    // Função global para alternar equipa ativa
+    window.switchTeam = async function(teamId) {
+        const found = userTeams.find(t => String(t.id) === String(teamId));
+        if (!found || (activeTeam && String(activeTeam.id) === String(found.id))) {
+            closeDrawer();
+            return;
+        }
+        activeTeam = found;
+        localStorage.setItem('bcv_treinador_active_team_id', String(found.id));
         
-        updateEscalaoDisplay();
-        renderEscalaoSelectors();
+        updateTeamDisplay();
+        renderTeamSelectors();
         closeDrawer();
 
         if (listaPresencasContainer) {
-            listaPresencasContainer.innerHTML = '<div style="text-align: center; padding: 20px; color: var(--text-muted);">A carregar dados de ' + novoEscalao + '...</div>';
+            listaPresencasContainer.innerHTML = `<div style="text-align: center; padding: 20px; color: var(--text-muted);">A carregar dados de <strong>${activeTeam.nome}</strong>...</div>`;
         }
 
         await loadData();
     };
+
+    // Compatibilidade com possíveis chamadas anteriores
+    window.switchEscalao = window.switchTeam;
 
     if (formLogin) {
         formLogin.addEventListener('submit', async (e) => {
@@ -232,8 +333,8 @@ document.addEventListener('DOMContentLoaded', async () => {
             await supabase.auth.signOut();
             currentUser = null;
             userProfile = null;
-            activeEscalao = '';
-            localStorage.removeItem('bcv_treinador_active_escalao');
+            activeTeam = null;
+            localStorage.removeItem('bcv_treinador_active_team_id');
             showLogin();
         } catch (e) {
             console.error("Erro no logout:", e);
@@ -286,67 +387,94 @@ document.addEventListener('DOMContentLoaded', async () => {
         });
     });
 
-    // 4. Carregar Atletas Afetos ao Escalão Ativo
+    // 4. Carregar Atletas Afetos à Equipa Ativa
     async function loadData() {
         try {
-            let query = supabase
-                .from('atletasbcv')
-                .select('*')
-                .order('nome', { ascending: true });
+            if (!activeTeam) {
+                currentAtletas = [];
+                await loadPresencas();
+                renderPlantel();
+                return;
+            }
 
-            // Se existir um escalão ativo selecionado, filtrar na query
-            if (activeEscalao && activeEscalao.toLowerCase() !== 'todos') {
-                const escClean = activeEscalao.replace(/[-\s]/g, '').toLowerCase();
-                const { data: todosAtletas, error } = await query;
-                if (error) throw error;
+            let atletasCarregados = [];
 
-                // Consultar atletas convocados para equipas deste escalão em equipas_atletas
-                let atletasPlantelIds = new Set();
-                try {
-                    const { data: eqs } = await supabase
-                        .from('equipasbcv')
-                        .select('id, escalao, nome');
-                    if (eqs) {
-                        const eqsMatch = eqs.filter(e => {
-                            const eEsc = (e.escalao || '').replace(/[-\s]/g, '').toLowerCase();
-                            const eNom = (e.nome || '').replace(/[-\s]/g, '').toLowerCase();
-                            return eEsc.includes(escClean) || eNom.includes(escClean);
-                        });
-                        if (eqsMatch.length > 0) {
-                            const eqIds = eqsMatch.map(e => e.id);
-                            const { data: vinculos } = await supabase
-                                .from('equipas_atletas')
-                                .select('atleta_id')
-                                .in('equipa_id', eqIds);
-                            if (vinculos) {
-                                vinculos.forEach(v => atletasPlantelIds.add(String(v.atleta_id)));
-                            }
+            if (activeTeam.id !== 'geral') {
+                // 1. Procurar vínculos oficiais na tabela associativa equipas_atletas
+                const { data: vinculos, error: vErr } = await supabase
+                    .from('equipas_atletas')
+                    .select('atleta_id, numero_camisola, papel')
+                    .eq('equipa_id', activeTeam.id);
+
+                if (!vErr && vinculos && vinculos.length > 0) {
+                    // Filtrar apenas jogadores (excluir equipa técnica / staff)
+                    const isJogador = (papel) => {
+                        if (!papel) return true;
+                        const p = papel.toLowerCase();
+                        return !p.includes('treinador') && !p.includes('diretor') && !p.includes('seccionista') && !p.includes('staff') && !p.includes('fisioterapeuta') && !p.includes('adjunto');
+                    };
+
+                    const jogadoresVinculos = vinculos.filter(v => isJogador(v.papel));
+                    const mapDorsalPapel = {};
+                    jogadoresVinculos.forEach(v => {
+                        mapDorsalPapel[v.atleta_id] = {
+                            numero: v.numero_camisola,
+                            papel: v.papel
+                        };
+                    });
+
+                    const idsJogadores = jogadoresVinculos.map(v => v.atleta_id);
+
+                    if (idsJogadores.length > 0) {
+                        const { data: atletasDb, error: aErr } = await supabase
+                            .from('atletasbcv')
+                            .select('*')
+                            .in('id', idsJogadores)
+                            .order('nome', { ascending: true });
+
+                        if (!aErr && atletasDb) {
+                            atletasCarregados = atletasDb.map(a => {
+                                const extra = mapDorsalPapel[a.id];
+                                return {
+                                    ...a,
+                                    dorsal_equipa: extra?.numero || a.equipamento_numero_1 || a.dorsal,
+                                    papel_equipa: extra?.papel || 'Jogador'
+                                };
+                            });
                         }
                     }
-                } catch (eRel) {
-                    // Fallback silencioso
                 }
+            }
 
-                // Filtragem flexível de escalão + atletas convocados
-                currentAtletas = (todosAtletas || []).filter(a => {
+            // Fallback: se a equipa ainda não tiver jogadores registados em equipas_atletas
+            if (atletasCarregados.length === 0) {
+                const escAlvo = (activeTeam.escalao || activeTeam.nome || '').replace(/[-\s]/g, '').toLowerCase();
+                const { data: todosAtletas, error } = await supabase
+                    .from('atletasbcv')
+                    .select('*')
+                    .order('nome', { ascending: true });
+
+                if (error) throw error;
+
+                atletasCarregados = (todosAtletas || []).filter(a => {
                     const aEsc = (a.escalao || '').replace(/[-\s]/g, '').toLowerCase();
                     const aEq1 = (a.equipabcv1 || '').replace(/[-\s]/g, '').toLowerCase();
                     const aEq2 = (a.equipabcv2 || '').replace(/[-\s]/g, '').toLowerCase();
                     const aFpb = (a.equipafpb || '').replace(/[-\s]/g, '').toLowerCase();
-                    return aEsc.includes(escClean) || aEq1.includes(escClean) || aEq2.includes(escClean) || aFpb.includes(escClean) || atletasPlantelIds.has(String(a.id));
+                    const aNomeEq = (activeTeam.nome || '').replace(/[-\s]/g, '').toLowerCase();
+                    return aEsc.includes(escAlvo) || aEq1.includes(escAlvo) || aEq2.includes(escAlvo) || aFpb.includes(escAlvo) ||
+                           aNomeEq.includes(aEsc) || aEq1.includes(aNomeEq) || aEq2.includes(aNomeEq);
                 });
-            } else {
-                const { data, error } = await query;
-                if (error) throw error;
-                currentAtletas = data || [];
             }
+
+            currentAtletas = atletasCarregados;
 
             // Iniciar abas
             await loadPresencas();
             renderPlantel();
 
         } catch (error) {
-            console.error("Erro ao carregar atletas:", error);
+            console.error("Erro ao carregar atletas da equipa:", error);
             if (listaPresencasContainer) {
                 listaPresencasContainer.innerHTML = `<div style="color: red; text-align: center; padding: 20px;">Erro ao carregar atletas: ${error.message}</div>`;
             }
@@ -402,7 +530,7 @@ document.addEventListener('DOMContentLoaded', async () => {
                 <div style="background: white; border-radius: 12px; padding: 30px 20px; text-align: center; border: 1px dashed var(--border);">
                     <span style="font-size: 2rem;">🏀</span>
                     <h3 style="margin-top: 10px; font-size: 1rem; color: var(--text-main);">Nenhum atleta encontrado</h3>
-                    <p style="font-size: 0.82rem; color: var(--text-muted); margin-top: 4px;">Não há atletas associados à equipa <strong>${activeEscalao || 'selecionada'}</strong>.</p>
+                    <p style="font-size: 0.82rem; color: var(--text-muted); margin-top: 4px;">Não há atletas associados à equipa <strong>${activeTeam ? activeTeam.nome : 'selecionada'}</strong>.</p>
                 </div>
             `;
             return;
@@ -411,7 +539,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         let html = '';
         currentAtletas.forEach(a => {
             const estadoAtual = presencasState[a.id] || 'Presente';
-            const dorsal = a.equipamento_numero_1 || a.equipamento_numero_2 || a.dorsal || '-';
+            const dorsal = a.dorsal_equipa || a.equipamento_numero_1 || a.equipamento_numero_2 || a.dorsal || '-';
             const fotoHtml = a.foto_url 
                 ? `<img src="${a.foto_url}" class="atleta-avatar" alt="${a.nome}">`
                 : `<div class="atleta-avatar">${(a.nome || 'A').charAt(0).toUpperCase()}</div>`;
@@ -424,7 +552,7 @@ document.addEventListener('DOMContentLoaded', async () => {
                             <div class="atleta-nome">${a.nome}</div>
                             <div class="atleta-meta">
                                 <span class="badge-numero">Nº ${dorsal}</span>
-                                <span>${a.nickname ? `"${a.nickname}"` : (a.escalao || activeEscalao)}</span>
+                                <span>${a.nickname ? `"${a.nickname}"` : (activeTeam ? activeTeam.nome : a.escalao)}</span>
                             </div>
                         </div>
                     </div>
@@ -501,7 +629,7 @@ document.addEventListener('DOMContentLoaded', async () => {
                 data: dataSel,
                 tipo: tipoSel,
                 estado: presencasState[a.id] || 'Presente',
-                escalao: a.escalao || activeEscalao,
+                escalao: (activeTeam ? activeTeam.nome : a.escalao) || 'BCV',
                 registado_por: userProfile.nome || currentUser.email
             }));
 
@@ -555,7 +683,7 @@ document.addEventListener('DOMContentLoaded', async () => {
 
         let html = '';
         lista.forEach(a => {
-            const dorsal = a.equipamento_numero_1 || a.equipamento_numero_2 || a.dorsal || '-';
+            const dorsal = a.dorsal_equipa || a.equipamento_numero_1 || a.equipamento_numero_2 || a.dorsal || '-';
             const telAtleta = a.telefone || a.telemovel || '';
             const telEnc = a.encarregado_telefone || a.encarregado_telemovel || '';
             const nomeEnc = a.encarregado_nome || 'Encarregado de Educação';
@@ -572,7 +700,7 @@ document.addEventListener('DOMContentLoaded', async () => {
                             <div class="atleta-nome">${a.nome}</div>
                             <div class="atleta-meta">
                                 <span class="badge-numero">Nº ${dorsal}</span>
-                                <span>${a.nickname ? `"${a.nickname}" • ` : ''}${a.escalao || activeEscalao}</span>
+                                <span>${a.nickname ? `"${a.nickname}" • ` : ''}${activeTeam ? activeTeam.nome : a.escalao}</span>
                             </div>
                         </div>
                     </div>
