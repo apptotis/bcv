@@ -105,7 +105,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         }
     }
 
-    // Carregar todas as equipas atribuídas ao treinador (via equipas_atletas ou escalao_afeto)
+    // Carregar todas as equipas atribuídas ao treinador (estritamente via equipas_atletas)
     async function loadUserTeams() {
         try {
             // 1. Buscar todas as equipas registadas
@@ -116,24 +116,34 @@ document.addEventListener('DOMContentLoaded', async () => {
 
             if (tErr) console.warn("Aviso ao carregar equipasbcv:", tErr);
 
+            const userRole = (userProfile?.role || '').toLowerCase();
+            const isAdmin = userRole === 'admin';
+
             // 2. Identificar ID do treinador na tabela atletasbcv
             let coachAtletaIds = [];
-            if (currentUser?.email) {
+            const userEmail = (currentUser?.email || '').trim().toLowerCase();
+            const userName = (userProfile?.nome || '').trim().toLowerCase();
+
+            if (userEmail) {
                 const { data: byEmail } = await supabase
                     .from('atletasbcv')
                     .select('id')
-                    .ilike('email', currentUser.email.trim());
+                    .ilike('email', userEmail);
                 if (byEmail && byEmail.length > 0) {
-                    byEmail.forEach(a => coachAtletaIds.push(a.id));
+                    byEmail.forEach(a => {
+                        if (!coachAtletaIds.includes(a.id)) coachAtletaIds.push(a.id);
+                    });
                 }
             }
-            if (coachAtletaIds.length === 0 && userProfile?.nome) {
+            if (userName) {
                 const { data: byName } = await supabase
                     .from('atletasbcv')
                     .select('id')
-                    .ilike('nome', userProfile.nome.trim());
+                    .ilike('nome', userName);
                 if (byName && byName.length > 0) {
-                    byName.forEach(a => coachAtletaIds.push(a.id));
+                    byName.forEach(a => {
+                        if (!coachAtletaIds.includes(a.id)) coachAtletaIds.push(a.id);
+                    });
                 }
             }
 
@@ -154,56 +164,41 @@ document.addEventListener('DOMContentLoaded', async () => {
                 }
             }
 
-            // 4. Escalões do perfil de utilizador (ex: "Sub 14, Sub 16")
-            const perfilEscaloes = (userProfile.escalao_afeto || '')
-                .split(',')
-                .map(s => s.trim().replace(/[-\s]/g, '').toLowerCase())
-                .filter(Boolean);
-
-            // 5. Filtrar equipas correspondentes
+            // 4. Filtrar equipas estritamente vinculadas em equipas_atletas
             const matchedTeams = [];
-            const addedIds = new Set();
-
-            (allTeams || []).forEach(t => {
-                const tIdStr = String(t.id);
-                const isLinked = linkedTeamIds.has(tIdStr);
-                const tEsc = (t.escalao || '').replace(/[-\s]/g, '').toLowerCase();
-                const tNome = (t.nome || '').replace(/[-\s]/g, '').toLowerCase();
-                const matchesPerfil = perfilEscaloes.some(pe => tEsc.includes(pe) || tNome.includes(pe) || pe.includes(tEsc));
-
-                if (isLinked || matchesPerfil) {
-                    if (!addedIds.has(tIdStr)) {
-                        addedIds.add(tIdStr);
+            if (allTeams && allTeams.length > 0 && linkedTeamIds.size > 0) {
+                allTeams.forEach(t => {
+                    if (linkedTeamIds.has(String(t.id))) {
                         matchedTeams.push(t);
                     }
-                }
-            });
-
-            // Se encontrou equipas específicas, usa-as
-            if (matchedTeams.length > 0) {
-                userTeams = matchedTeams;
-            } else if (allTeams && allTeams.length > 0 && perfilEscaloes.length === 0) {
-                // Se não tem restrição de escalão nem vínculo específico, tem acesso a todas as equipas
-                userTeams = allTeams;
-            } else if (allTeams && allTeams.length > 0) {
-                userTeams = allTeams;
-            } else {
-                userTeams = [{
-                    id: 'geral',
-                    nome: userProfile.escalao_afeto || 'Geral BCV',
-                    escalao: userProfile.escalao_afeto || 'BCV'
-                }];
+                });
             }
 
-            // Definir equipa ativa inicial
-            const savedTeamId = localStorage.getItem('bcv_treinador_active_team_id');
-            const foundSaved = userTeams.find(t => String(t.id) === String(savedTeamId));
-            activeTeam = foundSaved || userTeams[0];
+            // 5. Definir userTeams:
+            // - Treinador: APENAS as equipas onde foi adicionado ao Plantel. Se não tiver vínculo, userTeams = [].
+            // - Admin: Se tiver equipas vinculadas usa-as; caso contrário, tem acesso a todas para supervisão.
+            if (matchedTeams.length > 0) {
+                userTeams = matchedTeams;
+            } else if (isAdmin && allTeams && allTeams.length > 0) {
+                userTeams = allTeams;
+            } else {
+                userTeams = [];
+            }
+
+            // 6. Definir equipa ativa inicial
+            if (userTeams.length > 0) {
+                const savedTeamId = localStorage.getItem('bcv_treinador_active_team_id');
+                const foundSaved = userTeams.find(t => String(t.id) === String(savedTeamId));
+                activeTeam = foundSaved || userTeams[0];
+            } else {
+                activeTeam = null;
+                localStorage.removeItem('bcv_treinador_active_team_id');
+            }
 
         } catch (err) {
             console.error("Erro ao carregar equipas do treinador:", err);
-            userTeams = [{ id: 'geral', nome: 'Geral BCV', escalao: 'BCV' }];
-            activeTeam = userTeams[0];
+            userTeams = [];
+            activeTeam = null;
         }
     }
 
@@ -223,8 +218,23 @@ document.addEventListener('DOMContentLoaded', async () => {
     }
 
     function updateTeamDisplay() {
-        const displayText = activeTeam ? activeTeam.nome : 'Geral BCV';
-        if (headerEscalaoBadge) headerEscalaoBadge.textContent = `🏀 ${displayText}`;
+        if (!activeTeam || userTeams.length === 0) {
+            if (headerEscalaoBadge) {
+                headerEscalaoBadge.textContent = '⚠️ Sem Equipa';
+                headerEscalaoBadge.style.background = '#fef2f2';
+                headerEscalaoBadge.style.color = '#dc2626';
+                headerEscalaoBadge.style.border = '1px solid #fecaca';
+            }
+            if (drawerEscalaoName) drawerEscalaoName.textContent = 'Sem Equipa Atribuída';
+            return;
+        }
+        const displayText = activeTeam.nome;
+        if (headerEscalaoBadge) {
+            headerEscalaoBadge.textContent = `🏀 ${displayText}`;
+            headerEscalaoBadge.style.background = '';
+            headerEscalaoBadge.style.color = '';
+            headerEscalaoBadge.style.border = '';
+        }
         if (drawerEscalaoName) drawerEscalaoName.textContent = displayText;
     }
 
@@ -387,15 +397,51 @@ document.addEventListener('DOMContentLoaded', async () => {
         });
     });
 
+    // Exibir mensagem informativa quando o treinador ainda não tem nenhuma equipa associada
+    function renderEmptyNoTeams() {
+        const msgHtml = `
+            <div style="background: white; border-radius: 14px; padding: 36px 20px; text-align: center; border: 1px dashed var(--border); margin: 20px 0; box-shadow: var(--shadow-sm);">
+                <span style="font-size: 2.8rem; display: block; margin-bottom: 12px;">📋</span>
+                <h3 style="margin: 0; font-size: 1.1rem; color: var(--text-main); font-weight: 700;">Nenhuma Equipa Atribuída</h3>
+                <p style="font-size: 0.85rem; color: var(--text-muted); margin: 8px auto 0; max-width: 320px; line-height: 1.5;">
+                    O seu utilizador ainda não tem nenhuma equipa associada.
+                </p>
+                <div style="margin-top: 16px; display: inline-block; background: #f8fafc; border: 1px solid var(--border); border-radius: 8px; padding: 12px 16px; font-size: 0.8rem; color: var(--text-secondary); text-align: left; line-height: 1.5; max-width: 340px;">
+                    👉 <strong>Como ativar o seu acesso:</strong><br>
+                    A Direção deve aceder a <strong>Equipas &gt; Plantel</strong> no Painel de Administração e adicionar o seu perfil à <strong>Equipa Técnica</strong> da respetiva equipa.
+                </div>
+            </div>
+        `;
+
+        if (listaPresencasContainer) listaPresencasContainer.innerHTML = msgHtml;
+        if (listaPlantelContainer) listaPlantelContainer.innerHTML = msgHtml;
+
+        const stickySaveBar = document.querySelector('.sticky-save-bar');
+        if (stickySaveBar) stickySaveBar.style.display = 'none';
+        if (btnMarcarTodos) btnMarcarTodos.style.display = 'none';
+        const presencasControl = document.querySelector('#tab-presencas .control-card');
+        if (presencasControl) presencasControl.style.display = 'none';
+        const plantelControl = document.querySelector('#tab-plantel .control-card');
+        if (plantelControl) plantelControl.style.display = 'none';
+    }
+
     // 4. Carregar Atletas Afetos à Equipa Ativa
     async function loadData() {
         try {
-            if (!activeTeam) {
+            if (!activeTeam || userTeams.length === 0) {
                 currentAtletas = [];
-                await loadPresencas();
-                renderPlantel();
+                renderEmptyNoTeams();
                 return;
             }
+
+            // Restaurar controlos caso estivessem ocultos
+            const stickySaveBar = document.querySelector('.sticky-save-bar');
+            if (stickySaveBar) stickySaveBar.style.display = '';
+            if (btnMarcarTodos) btnMarcarTodos.style.display = '';
+            const presencasControl = document.querySelector('#tab-presencas .control-card');
+            if (presencasControl) presencasControl.style.display = '';
+            const plantelControl = document.querySelector('#tab-plantel .control-card');
+            if (plantelControl) plantelControl.style.display = '';
 
             let atletasCarregados = [];
 
@@ -486,6 +532,10 @@ document.addEventListener('DOMContentLoaded', async () => {
     // =======================================================
     async function loadPresencas() {
         if (!listaPresencasContainer) return;
+        if (!activeTeam || userTeams.length === 0) {
+            renderEmptyNoTeams();
+            return;
+        }
         const dataSel = presencasDataInput.value || hojeIso;
         const tipoSel = presencasTipoSelect.value || 'Treino';
 
@@ -663,6 +713,10 @@ document.addEventListener('DOMContentLoaded', async () => {
     // =======================================================
     function renderPlantel() {
         if (!listaPlantelContainer) return;
+        if (!activeTeam || userTeams.length === 0) {
+            renderEmptyNoTeams();
+            return;
+        }
         const filtro = (filtroPlantel?.value || '').toLowerCase().trim();
 
         const lista = currentAtletas.filter(a => {
