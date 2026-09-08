@@ -102,9 +102,17 @@
                     </button>
                     
                     <button type="button" class="drawer-item" data-tab="tab-plantel">
-                        <span class="item-icon">👥</span>
+                        <span class="item-icon">📋</span>
                         <div class="item-text">
-                            <span class="item-label">Plantel & SOS</span>
+                            <span class="item-label">Plantel</span>
+                            <span class="item-desc">Lista de atletas, fichas e assiduidade</span>
+                        </div>
+                    </button>
+
+                    <button type="button" class="drawer-item" data-tab="tab-sos">
+                        <span class="item-icon">🆘</span>
+                        <div class="item-text">
+                            <span class="item-label">Contactos SOS</span>
                             <span class="item-desc">Contactos rápidos dos encarregados</span>
                         </div>
                     </button>
@@ -131,7 +139,7 @@
             </div>
 
             <!-- ======================================================= -->
-            <!-- ABA 1: PRESENÇAS (CHAMADA RÁPIDA)                       -->
+            <!-- ABA 1: DIÁRIO DESPORTIVO (CHAMADA & OBSERVAÇÕES)        -->
             <!-- ======================================================= -->
             <section id="tab-presencas" class="tab-content active">
                 
@@ -176,27 +184,67 @@
             </section>
 
             <!-- ======================================================= -->
-            <!-- ABA 2: PLANTEL & SOS (CONTACTOS DE EMERGÊNCIA)          -->
+            <!-- ABA 2: PLANTEL & FICHAS DE ATLETA                       -->
             <!-- ======================================================= -->
             <section id="tab-plantel" class="tab-content">
                 <div class="control-card">
-                    <input type="text" id="filtro-plantel" class="mobile-input" placeholder="🔍 Pesquisar atleta no plantel...">
+                    <input type="text" id="filtro-plantel" class="mobile-input" placeholder="🔍 Pesquisar por nome, alcunha ou dorsal...">
+                    <div id="plantel-count-info" style="display: flex; justify-content: flex-end; margin-top: 4px;">
+                        <span class="plantel-count-badge" id="plantel-total-badge">0 Atletas</span>
+                    </div>
+                </div>
+
+                <!-- Lista de Cartões de Atletas (clicáveis para abrir a Ficha) -->
+                <div id="lista-plantel-container">
+                    <div style="text-align: center; padding: 20px; color: var(--text-muted);">
+                        A carregar atletas do plantel...
+                    </div>
+                </div>
+            </section>
+
+            <!-- ======================================================= -->
+            <!-- ABA 3: CONTACTOS SOS (EMERGÊNCIA & ENCARREGADOS)        -->
+            <!-- ======================================================= -->
+            <section id="tab-sos" class="tab-content">
+                <div class="control-card">
+                    <input type="text" id="filtro-sos" class="mobile-input" placeholder="🔍 Pesquisar atleta ou encarregado...">
                 </div>
 
                 <!-- Lista de Contactos de Emergência -->
-                <div id="lista-plantel-container">
+                <div id="lista-sos-container">
                     <div style="text-align: center; padding: 20px; color: var(--text-muted);">
-                        A carregar plantel...
+                        A carregar contactos SOS...
                     </div>
                 </div>
             </section>
 
         </main>
 
+        <!-- ======================================================= -->
+        <!-- MODAL BOTTOM SHEET: FICHA INDIVIDUAL DO ATLETA          -->
+        <!-- ======================================================= -->
+        <div id="modal-ficha-atleta" class="modal-overlay">
+            <div class="modal-sheet ficha-atleta-sheet">
+                <div class="ficha-header-bar">
+                    <div class="ficha-header-title">
+                        <span>🏀</span>
+                        <span id="modal-ficha-header-title">Ficha do Atleta</span>
+                    </div>
+                    <button type="button" class="btn-close-sheet" onclick="closeFichaAtleta()">✕</button>
+                </div>
+                
+                <div class="ficha-body-scroll" id="ficha-atleta-content">
+                    <div style="text-align: center; padding: 30px; color: var(--text-muted);">
+                        A carregar ficha e registos do atleta...
+                    </div>
+                </div>
+            </div>
+        </div>
+
     </div>
 
     <!-- Scripts -->
     <script src="js/config.js"></script>
-    <script src="js/treinador.js?v=20260908_3"></script>
+    <script src="js/treinador.js?v=20260908_4"></script>
 </body>
 </html>

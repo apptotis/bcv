@@ -61,9 +61,19 @@ document.addEventListener('DOMContentLoaded', async () => {
     const btnMarcarTodos = document.getElementById('btn-marcar-todos-presentes');
     const btnGuardarPresencas = document.getElementById('btn-guardar-presencas');
 
-    // Plantel & SOS
+    // Plantel & Fichas de Atleta
     const filtroPlantel = document.getElementById('filtro-plantel');
     const listaPlantelContainer = document.getElementById('lista-plantel-container');
+    const plantelTotalBadge = document.getElementById('plantel-total-badge');
+
+    // Contactos SOS
+    const filtroSos = document.getElementById('filtro-sos');
+    const listaSosContainer = document.getElementById('lista-sos-container');
+
+    // Modal Ficha do Atleta
+    const modalFichaAtleta = document.getElementById('modal-ficha-atleta');
+    const modalFichaHeaderTitle = document.getElementById('modal-ficha-header-title');
+    const fichaAtletaContent = document.getElementById('ficha-atleta-content');
 
     // Gestão de Equipas BCV
     let userTeams = []; // Array de equipas afetadas ao treinador [ { id, nome, escalao, ... } ]
@@ -72,6 +82,29 @@ document.addEventListener('DOMContentLoaded', async () => {
     const multiEscalaoPills = document.getElementById('multi-escalao-pills');
     const drawerSectionEscaloes = document.getElementById('drawer-section-escaloes');
     const drawerEscaloesList = document.getElementById('drawer-escaloes-list');
+
+    function escapeHtml(str) {
+        if (!str) return '';
+        return String(str)
+            .replace(/&/g, '&amp;')
+            .replace(/</g, '&lt;')
+            .replace(/>/g, '&gt;')
+            .replace(/"/g, '&quot;')
+            .replace(/'/g, '&#039;');
+    }
+
+    function calcularIdade(dataNasc) {
+        if (!dataNasc) return null;
+        const d = new Date(dataNasc);
+        if (isNaN(d.getTime())) return null;
+        const hoje = new Date();
+        let idade = hoje.getFullYear() - d.getFullYear();
+        const m = hoje.getMonth() - d.getMonth();
+        if (m < 0 || (m === 0 && hoje.getDate() < d.getDate())) {
+            idade--;
+        }
+        return idade >= 0 ? idade : null;
+    }
 
     // 1. Inicializar Supabase
     if (typeof window.supabase !== 'undefined' && typeof SUPABASE_URL !== 'undefined' && typeof SUPABASE_ANON_KEY !== 'undefined') {
@@ -415,6 +448,8 @@ document.addEventListener('DOMContentLoaded', async () => {
                 loadPresencas();
             } else if (targetTabId === 'tab-plantel') {
                 renderPlantel();
+            } else if (targetTabId === 'tab-sos') {
+                renderSos();
             }
         });
     });
@@ -437,6 +472,7 @@ document.addEventListener('DOMContentLoaded', async () => {
 
         if (listaPresencasContainer) listaPresencasContainer.innerHTML = msgHtml;
         if (listaPlantelContainer) listaPlantelContainer.innerHTML = msgHtml;
+        if (listaSosContainer) listaSosContainer.innerHTML = msgHtml;
 
         const stickySaveBar = document.querySelector('.sticky-save-bar');
         if (stickySaveBar) stickySaveBar.style.display = 'none';
@@ -445,6 +481,8 @@ document.addEventListener('DOMContentLoaded', async () => {
         if (presencasControl) presencasControl.style.display = 'none';
         const plantelControl = document.querySelector('#tab-plantel .control-card');
         if (plantelControl) plantelControl.style.display = 'none';
+        const sosControl = document.querySelector('#tab-sos .control-card');
+        if (sosControl) sosControl.style.display = 'none';
     }
 
     // 4. Carregar Atletas Afetos à Equipa Ativa
@@ -537,6 +575,7 @@ document.addEventListener('DOMContentLoaded', async () => {
             // Iniciar abas
             await loadPresencas();
             renderPlantel();
+            renderSos();
 
         } catch (error) {
             console.error("Erro ao carregar atletas da equipa:", error);
@@ -761,7 +800,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     }
 
     // =======================================================
-    // 6. MÓDULO PLANTEL & SOS (CONTACTOS DE EMERGÊNCIA)
+    // 6. MÓDULO PLANTEL (FICHAS & REGISTOS DOS ATLETAS)
     // =======================================================
     function renderPlantel() {
         if (!listaPlantelContainer) return;
@@ -772,6 +811,276 @@ document.addEventListener('DOMContentLoaded', async () => {
         const filtro = (filtroPlantel?.value || '').toLowerCase().trim();
 
         const lista = currentAtletas.filter(a => {
+            if (isStaffMember(a.funcao) || isStaffMember(a.papel_equipa)) return false;
+            if (!filtro) return true;
+            const dorsal = String(a.dorsal_equipa || a.equipamento_numero_1 || a.equipamento_numero_2 || a.dorsal || '');
+            return (a.nome || '').toLowerCase().includes(filtro) ||
+                   (a.nickname || '').toLowerCase().includes(filtro) ||
+                   dorsal.includes(filtro);
+        });
+
+        if (plantelTotalBadge) {
+            plantelTotalBadge.textContent = `${lista.length} Atleta${lista.length === 1 ? '' : 's'}`;
+        }
+
+        if (lista.length === 0) {
+            listaPlantelContainer.innerHTML = `
+                <div style="background: white; border-radius: 12px; padding: 30px 20px; text-align: center; border: 1px dashed var(--border);">
+                    <span style="font-size: 2rem;">🏀</span>
+                    <p style="color: var(--text-muted); margin-top: 6px;">Nenhum atleta corresponde à pesquisa.</p>
+                </div>
+            `;
+            return;
+        }
+
+        let html = '';
+        lista.forEach(a => {
+            const dorsal = a.dorsal_equipa || a.equipamento_numero_1 || a.equipamento_numero_2 || a.dorsal || '-';
+            const fotoHtml = a.foto_url 
+                ? `<img src="${a.foto_url}" class="atleta-plantel-avatar" alt="${escapeHtml(a.nome)}">`
+                : `<div class="atleta-plantel-avatar">${(a.nome || 'A').charAt(0).toUpperCase()}</div>`;
+            
+            const idade = calcularIdade(a.data_nascimento);
+
+            html += `
+                <div class="atleta-plantel-card" onclick="window.openFichaAtleta(${a.id})" title="Ver ficha de ${escapeHtml(a.nome)}">
+                    <div class="atleta-plantel-left">
+                        <div class="atleta-plantel-avatar-wrap">
+                            ${fotoHtml}
+                            <div class="atleta-plantel-dorsal-tag">#${dorsal}</div>
+                        </div>
+                        <div class="atleta-plantel-info">
+                            <div class="atleta-plantel-nome">${escapeHtml(a.nome)}</div>
+                            <div class="atleta-plantel-sub">
+                                ${a.nickname ? `<span style="color: var(--primary); font-weight: 600;">"${escapeHtml(a.nickname)}"</span> • ` : ''}
+                                <span>${escapeHtml(activeTeam ? activeTeam.nome : (a.escalao || 'BCV'))}</span>
+                                ${idade ? `<span>• ${idade} anos</span>` : ''}
+                            </div>
+                        </div>
+                    </div>
+                    <div class="atleta-plantel-right">
+                        <span class="atleta-plantel-arrow">➔</span>
+                    </div>
+                </div>
+            `;
+        });
+
+        listaPlantelContainer.innerHTML = html;
+    }
+
+    if (filtroPlantel) {
+        filtroPlantel.addEventListener('input', renderPlantel);
+    }
+
+    // =======================================================
+    // 7. FICHA INDIVIDUAL DO ATLETA (MODAL / DETALHE)
+    // =======================================================
+    window.openFichaAtleta = async function(atletaId) {
+        if (!modalFichaAtleta || !fichaAtletaContent) return;
+        const atleta = currentAtletas.find(a => String(a.id) === String(atletaId));
+        if (!atleta) return;
+
+        modalFichaAtleta.classList.add('active');
+        document.body.style.overflow = 'hidden';
+        if (modalFichaHeaderTitle) {
+            modalFichaHeaderTitle.textContent = `Ficha • ${atleta.nome}`;
+        }
+
+        fichaAtletaContent.innerHTML = `
+            <div style="text-align: center; padding: 40px 20px; color: var(--text-muted);">
+                <span style="font-size: 2rem; display: block; margin-bottom: 10px;">⏳</span>
+                A carregar registos do diário desportivo...
+            </div>
+        `;
+
+        const dorsal = atleta.dorsal_equipa || atleta.equipamento_numero_1 || atleta.equipamento_numero_2 || atleta.dorsal || '-';
+        const idade = calcularIdade(atleta.data_nascimento);
+        const dataNascFmt = atleta.data_nascimento ? atleta.data_nascimento.split('-').reverse().join('/') : null;
+
+        const fotoHtml = atleta.foto_url 
+            ? `<img src="${atleta.foto_url}" class="ficha-avatar-large" alt="${escapeHtml(atleta.nome)}">`
+            : `<div class="ficha-avatar-large">${(atleta.nome || 'A').charAt(0).toUpperCase()}</div>`;
+
+        try {
+            // Consultar presenças e observações deste atleta na tabela presencas
+            const { data: presencas, error } = await supabase
+                .from('presencas')
+                .select('*')
+                .eq('atleta_id', atleta.id)
+                .order('data', { ascending: false });
+
+            if (error && error.code !== '42P01') {
+                console.warn("Aviso ao carregar histórico do atleta:", error);
+            }
+
+            const listaPresencas = presencas || [];
+            let cPresentes = 0, cFaltas = 0, cJustificados = 0, cLesionados = 0;
+
+            listaPresencas.forEach(p => {
+                if (p.estado === 'Presente') cPresentes++;
+                else if (p.estado === 'Falta') cFaltas++;
+                else if (p.estado === 'Justificado') cJustificados++;
+                else if (p.estado === 'Lesionado') cLesionados++;
+            });
+
+            const total = listaPresencas.length;
+            const taxa = total > 0 ? Math.round((cPresentes / total) * 100) : 0;
+            const rateClass = taxa >= 80 ? 'excelente' : (taxa >= 60 ? 'bom' : 'baixo');
+
+            // Renderizar Timeline
+            let timelineHtml = '';
+            if (listaPresencas.length === 0) {
+                timelineHtml = `
+                    <div class="ficha-empty-history">
+                        🏀 Ainda não existem registos no Diário Desportivo para este atleta.
+                    </div>
+                `;
+            } else {
+                timelineHtml = '<div class="ficha-timeline">';
+                listaPresencas.forEach(p => {
+                    const dataFmt = p.data ? p.data.split('-').reverse().join('/') : '-';
+                    let badgeEstadoHtml = '';
+                    if (p.estado === 'Presente') {
+                        badgeEstadoHtml = '<span style="background: rgba(16,185,129,0.12); color: #047857; font-weight: 700; padding: 3px 8px; border-radius: 6px; font-size: 0.78rem;">🟢 Presente</span>';
+                    } else if (p.estado === 'Falta') {
+                        badgeEstadoHtml = '<span style="background: rgba(239,68,68,0.12); color: #dc2626; font-weight: 700; padding: 3px 8px; border-radius: 6px; font-size: 0.78rem;">🔴 Falta</span>';
+                    } else if (p.estado === 'Justificado') {
+                        badgeEstadoHtml = '<span style="background: rgba(245,158,11,0.12); color: #d97706; font-weight: 700; padding: 3px 8px; border-radius: 6px; font-size: 0.78rem;">🟡 Justificado</span>';
+                    } else if (p.estado === 'Lesionado') {
+                        badgeEstadoHtml = '<span style="background: rgba(99,102,241,0.12); color: #4f46e5; font-weight: 700; padding: 3px 8px; border-radius: 6px; font-size: 0.78rem;">🏥 Lesionado</span>';
+                    } else {
+                        badgeEstadoHtml = `<span style="font-weight: 700; font-size: 0.78rem;">${escapeHtml(p.estado || '-')}</span>`;
+                    }
+
+                    const temObs = p.observacoes && p.observacoes.trim().length > 0;
+
+                    timelineHtml += `
+                        <div class="ficha-timeline-item">
+                            <div class="ficha-timeline-top">
+                                <div class="ficha-timeline-date">
+                                    <span>📅 ${dataFmt}</span>
+                                    <span class="ficha-timeline-badge-tipo">${escapeHtml(p.tipo || 'Treino')}</span>
+                                </div>
+                                <div>${badgeEstadoHtml}</div>
+                            </div>
+                            ${temObs ? `
+                                <div class="ficha-obs-bubble">
+                                    <strong>📝 Observação:</strong> ${escapeHtml(p.observacoes)}
+                                    ${p.registado_por ? `<div class="ficha-obs-author">Registo: ${escapeHtml(p.registado_por)}</div>` : ''}
+                                </div>
+                            ` : ''}
+                        </div>
+                    `;
+                });
+                timelineHtml += '</div>';
+            }
+
+            // Montar todo o HTML da ficha
+            fichaAtletaContent.innerHTML = `
+                <!-- Hero do Atleta -->
+                <div class="ficha-hero-card">
+                    ${fotoHtml}
+                    <div class="ficha-hero-details">
+                        <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 4px;">
+                            <span class="ficha-badge-dorsal">CAMISOLA Nº ${dorsal}</span>
+                            ${atleta.posicao ? `<span style="font-size: 0.75rem; color: var(--primary); font-weight: 700;">${escapeHtml(atleta.posicao)}</span>` : ''}
+                        </div>
+                        <div class="ficha-hero-nome">${escapeHtml(atleta.nome)}</div>
+                        <div class="ficha-hero-meta">
+                            ${atleta.nickname ? `<span>Alcunha: <strong>"${escapeHtml(atleta.nickname)}"</strong></span> • ` : ''}
+                            <span>${escapeHtml(activeTeam ? activeTeam.nome : (atleta.escalao || 'BCV'))}</span>
+                        </div>
+                        ${idade ? `
+                            <div style="font-size: 0.78rem; color: var(--text-muted); margin-top: 4px;">
+                                🎂 ${idade} anos ${dataNascFmt ? `(${dataNascFmt})` : ''}
+                            </div>
+                        ` : ''}
+                    </div>
+                </div>
+
+                <!-- Assiduidade / Estatísticas -->
+                <div class="ficha-section-title">
+                    <span>📊 Assiduidade no Clube</span>
+                    <span style="font-size: 0.72rem; color: var(--text-muted); text-transform: none; font-weight: normal;">${total} registo${total === 1 ? '' : 's'}</span>
+                </div>
+
+                <div class="ficha-kpi-banner">
+                    <div class="ficha-rate-row">
+                        <div>
+                            <div style="font-size: 0.78rem; font-weight: 700; color: var(--text-muted); text-transform: uppercase;">Taxa de Presenças</div>
+                            <div class="ficha-rate-val ${rateClass}">${taxa}%</div>
+                        </div>
+                        <div style="text-align: right;">
+                            <div style="font-size: 0.78rem; font-weight: 700; color: var(--text-muted); text-transform: uppercase;">Total Sessões</div>
+                            <div style="font-size: 1.3rem; font-weight: 800; color: var(--text-main);">${total}</div>
+                        </div>
+                    </div>
+                    <div class="ficha-kpi-subgrid">
+                        <div class="ficha-mini-stat">
+                            <div class="ficha-mini-stat-num" style="color: #047857;">${cPresentes}</div>
+                            <div class="ficha-mini-stat-lbl">Presente</div>
+                        </div>
+                        <div class="ficha-mini-stat">
+                            <div class="ficha-mini-stat-num" style="color: #dc2626;">${cFaltas}</div>
+                            <div class="ficha-mini-stat-lbl">Faltas</div>
+                        </div>
+                        <div class="ficha-mini-stat">
+                            <div class="ficha-mini-stat-num" style="color: #d97706;">${cJustificados}</div>
+                            <div class="ficha-mini-stat-lbl">Justif.</div>
+                        </div>
+                        <div class="ficha-mini-stat">
+                            <div class="ficha-mini-stat-num" style="color: #4f46e5;">${cLesionados}</div>
+                            <div class="ficha-mini-stat-lbl">Lesões</div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Histórico Diário Desportivo -->
+                <div class="ficha-section-title">
+                    <span>📖 Diário Desportivo & Observações</span>
+                </div>
+                ${timelineHtml}
+
+                <div style="margin-top: 24px; text-align: center;">
+                    <button type="button" class="btn-call" style="width: 100%; justify-content: center; background: #f8fafc; color: var(--text-muted); border-color: var(--border);" onclick="window.closeFichaAtleta()">
+                        Fechar Ficha
+                    </button>
+                </div>
+            `;
+
+        } catch (err) {
+            console.error("Erro ao abrir ficha do atleta:", err);
+            fichaAtletaContent.innerHTML = `<div style="color: #ef4444; padding: 20px; text-align: center;">Erro ao carregar dados: ${err.message}</div>`;
+        }
+    };
+
+    window.closeFichaAtleta = function() {
+        if (modalFichaAtleta) modalFichaAtleta.classList.remove('active');
+        document.body.style.overflow = '';
+    };
+
+    if (modalFichaAtleta) {
+        modalFichaAtleta.addEventListener('click', (e) => {
+            if (e.target === modalFichaAtleta) window.closeFichaAtleta();
+        });
+    }
+
+    // =======================================================
+    // 8. MÓDULO CONTACTOS SOS (EMERGÊNCIA & ENCARREGADOS)
+    // =======================================================
+    function renderSos() {
+        if (!listaSosContainer) return;
+        if (!activeTeam || userTeams.length === 0) {
+            listaSosContainer.innerHTML = `
+                <div style="background: white; border-radius: 12px; padding: 30px 20px; text-align: center; border: 1px dashed var(--border);">
+                    <p style="color: var(--text-muted);">Selecione uma equipa para consultar os contactos de emergência.</p>
+                </div>
+            `;
+            return;
+        }
+        const filtro = (filtroSos?.value || '').toLowerCase().trim();
+
+        const lista = currentAtletas.filter(a => {
             if (!filtro) return true;
             return (a.nome || '').toLowerCase().includes(filtro) ||
                    (a.nickname || '').toLowerCase().includes(filtro) ||
@@ -779,9 +1088,9 @@ document.addEventListener('DOMContentLoaded', async () => {
         });
 
         if (lista.length === 0) {
-            listaPlantelContainer.innerHTML = `
+            listaSosContainer.innerHTML = `
                 <div style="background: white; border-radius: 12px; padding: 30px 20px; text-align: center; border: 1px dashed var(--border);">
-                    <p style="color: var(--text-muted);">Nenhum atleta corresponde à pesquisa.</p>
+                    <p style="color: var(--text-muted);">Nenhum contacto encontrado para a pesquisa.</p>
                 </div>
             `;
             return;
@@ -795,7 +1104,7 @@ document.addEventListener('DOMContentLoaded', async () => {
             const nomeEnc = a.encarregado_nome || 'Encarregado de Educação';
 
             const fotoHtml = a.foto_url 
-                ? `<img src="${a.foto_url}" class="atleta-avatar" alt="${a.nome}">`
+                ? `<img src="${a.foto_url}" class="atleta-avatar" alt="${escapeHtml(a.nome)}">`
                 : `<div class="atleta-avatar">${(a.nome || 'A').charAt(0).toUpperCase()}</div>`;
 
             html += `
@@ -803,10 +1112,10 @@ document.addEventListener('DOMContentLoaded', async () => {
                     <div class="atleta-info-row">
                         ${fotoHtml}
                         <div class="atleta-details">
-                            <div class="atleta-nome">${a.nome}</div>
+                            <div class="atleta-nome">${escapeHtml(a.nome)}</div>
                             <div class="atleta-meta">
                                 <span class="badge-numero">Nº ${dorsal}</span>
-                                <span>${a.nickname ? `"${a.nickname}" • ` : ''}${activeTeam ? activeTeam.nome : a.escalao}</span>
+                                <span>${a.nickname ? `"${escapeHtml(a.nickname)}" • ` : ''}${activeTeam ? activeTeam.nome : a.escalao}</span>
                             </div>
                         </div>
                     </div>
@@ -815,7 +1124,7 @@ document.addEventListener('DOMContentLoaded', async () => {
                         ${telEnc ? `
                             <a href="tel:${telEnc}" class="btn-call encarregado">
                                 <span>📞</span>
-                                <span>Ligar Encarregado: ${nomeEnc} (${telEnc})</span>
+                                <span>Ligar Encarregado: ${escapeHtml(nomeEnc)} (${telEnc})</span>
                             </a>
                         ` : `
                             <div style="font-size: 0.78rem; color: var(--text-muted); padding: 4px 8px; background: #f8fafc; border-radius: 6px;">
@@ -834,11 +1143,11 @@ document.addEventListener('DOMContentLoaded', async () => {
             `;
         });
 
-        listaPlantelContainer.innerHTML = html;
+        listaSosContainer.innerHTML = html;
     }
 
-    if (filtroPlantel) {
-        filtroPlantel.addEventListener('input', renderPlantel);
+    if (filtroSos) {
+        filtroSos.addEventListener('input', renderSos);
     }
 
     // Inicialização da Sessão

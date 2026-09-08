@@ -899,3 +899,369 @@ body {
     color: var(--text-muted);
     margin-bottom: 20px;
 }
+
+/* ====================================================================
+   10. MÓDULO PLANTEL & FICHA DO ATLETA
+   ==================================================================== */
+.plantel-count-badge {
+    font-size: 0.78rem;
+    font-weight: 700;
+    color: var(--primary);
+    background: rgba(126, 34, 206, 0.08);
+    border: 1px solid rgba(126, 34, 206, 0.2);
+    padding: 3px 10px;
+    border-radius: var(--radius-full);
+    display: inline-block;
+    margin-top: 4px;
+}
+
+.atleta-plantel-card {
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-md);
+    padding: 12px 14px;
+    margin-bottom: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    box-shadow: var(--shadow-sm);
+    cursor: pointer;
+    transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+    -webkit-tap-highlight-color: transparent;
+}
+
+.atleta-plantel-card:hover {
+    border-color: var(--primary-light);
+    box-shadow: var(--shadow-md);
+    transform: translateY(-1px);
+}
+
+.atleta-plantel-card:active {
+    transform: scale(0.985);
+    background: #fdfcff;
+}
+
+.atleta-plantel-left {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    min-width: 0;
+    flex: 1;
+}
+
+.atleta-plantel-avatar-wrap {
+    position: relative;
+    flex-shrink: 0;
+}
+
+.atleta-plantel-avatar {
+    width: 48px;
+    height: 48px;
+    border-radius: 12px;
+    object-fit: cover;
+    background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
+    color: #ffffff;
+    font-weight: 800;
+    font-size: 1.15rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border: 2px solid #ffffff;
+    box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+}
+
+.atleta-plantel-dorsal-tag {
+    position: absolute;
+    bottom: -4px;
+    right: -4px;
+    background: #1e1b4b;
+    color: #ffffff;
+    font-size: 0.65rem;
+    font-weight: 800;
+    padding: 1px 5px;
+    border-radius: 6px;
+    border: 1.5px solid #ffffff;
+    line-height: 1.2;
+}
+
+.atleta-plantel-info {
+    min-width: 0;
+    flex: 1;
+}
+
+.atleta-plantel-nome {
+    font-size: 0.95rem;
+    font-weight: 700;
+    color: var(--text-main);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    line-height: 1.25;
+}
+
+.atleta-plantel-sub {
+    font-size: 0.76rem;
+    color: var(--text-muted);
+    margin-top: 2px;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    flex-wrap: wrap;
+}
+
+.atleta-plantel-right {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    flex-shrink: 0;
+}
+
+.atleta-plantel-arrow {
+    color: var(--text-light);
+    font-size: 1.1rem;
+    transition: transform 0.2s ease;
+}
+
+.atleta-plantel-card:hover .atleta-plantel-arrow {
+    color: var(--primary);
+    transform: translateX(3px);
+}
+
+/* ====================================================================
+   MODAL / SHEET: FICHA DO ATLETA
+   ==================================================================== */
+.ficha-atleta-sheet {
+    max-height: 92vh;
+    display: flex;
+    flex-direction: column;
+    padding: 0;
+    overflow: hidden;
+}
+
+.ficha-header-bar {
+    padding: 16px 20px;
+    border-bottom: 1px solid var(--border);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    background: #ffffff;
+    position: sticky;
+    top: 0;
+    z-index: 10;
+}
+
+.ficha-header-title {
+    font-size: 1.05rem;
+    font-weight: 800;
+    color: var(--text-main);
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.ficha-body-scroll {
+    padding: 20px;
+    overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
+}
+
+/* Hero do Perfil */
+.ficha-hero-card {
+    background: linear-gradient(135deg, #fbfaff 0%, #f3e8ff 100%);
+    border: 1px solid rgba(126, 34, 206, 0.15);
+    border-radius: var(--radius-lg);
+    padding: 18px;
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    margin-bottom: 16px;
+    position: relative;
+}
+
+.ficha-avatar-large {
+    width: 72px;
+    height: 72px;
+    border-radius: 18px;
+    object-fit: cover;
+    background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
+    color: #ffffff;
+    font-weight: 800;
+    font-size: 1.8rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border: 3px solid #ffffff;
+    box-shadow: 0 4px 12px rgba(126, 34, 206, 0.2);
+    flex-shrink: 0;
+}
+
+.ficha-hero-details {
+    min-width: 0;
+    flex: 1;
+}
+
+.ficha-hero-nome {
+    font-size: 1.15rem;
+    font-weight: 800;
+    color: var(--primary-dark);
+    line-height: 1.2;
+}
+
+.ficha-hero-meta {
+    font-size: 0.8rem;
+    color: var(--text-muted);
+    margin-top: 4px;
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 6px;
+}
+
+.ficha-badge-dorsal {
+    background: #1e1b4b;
+    color: #ffffff;
+    font-weight: 800;
+    font-size: 0.78rem;
+    padding: 2px 8px;
+    border-radius: 6px;
+}
+
+/* Grelha de Assiduidade e Estatísticas */
+.ficha-section-title {
+    font-size: 0.82rem;
+    font-weight: 800;
+    color: var(--text-main);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    margin: 18px 0 10px 0;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+
+.ficha-kpi-banner {
+    background: #ffffff;
+    border: 1px solid var(--border);
+    border-radius: var(--radius-md);
+    padding: 14px;
+    margin-bottom: 16px;
+    box-shadow: var(--shadow-sm);
+}
+
+.ficha-rate-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 12px;
+    padding-bottom: 10px;
+    border-bottom: 1px dashed var(--border);
+}
+
+.ficha-rate-val {
+    font-size: 1.7rem;
+    font-weight: 900;
+    line-height: 1;
+}
+
+.ficha-rate-val.excelente { color: #059669; }
+.ficha-rate-val.bom { color: #d97706; }
+.ficha-rate-val.baixo { color: #dc2626; }
+
+.ficha-kpi-subgrid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 6px;
+    text-align: center;
+}
+
+.ficha-mini-stat {
+    background: #f8fafc;
+    border-radius: 8px;
+    padding: 8px 4px;
+    border: 1px solid #f1f5f9;
+}
+
+.ficha-mini-stat-num {
+    font-size: 1.1rem;
+    font-weight: 800;
+    color: var(--text-main);
+    line-height: 1.1;
+}
+
+.ficha-mini-stat-lbl {
+    font-size: 0.65rem;
+    font-weight: 700;
+    color: var(--text-muted);
+    text-transform: uppercase;
+    margin-top: 2px;
+}
+
+/* Timeline do Histórico de Diário Desportivo */
+.ficha-timeline {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.ficha-timeline-item {
+    background: #ffffff;
+    border: 1px solid var(--border);
+    border-radius: var(--radius-md);
+    padding: 12px;
+    box-shadow: var(--shadow-sm);
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.ficha-timeline-top {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+
+.ficha-timeline-date {
+    font-size: 0.85rem;
+    font-weight: 700;
+    color: var(--text-main);
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.ficha-timeline-badge-tipo {
+    font-size: 0.72rem;
+    font-weight: 600;
+    color: var(--text-muted);
+    background: #f1f5f9;
+    padding: 2px 6px;
+    border-radius: 4px;
+}
+
+.ficha-obs-bubble {
+    background: #faf5ff;
+    border-left: 3px solid var(--primary);
+    border-radius: 0 8px 8px 0;
+    padding: 8px 12px;
+    font-size: 0.82rem;
+    color: #4c1d95;
+    line-height: 1.4;
+}
+
+.ficha-obs-author {
+    font-size: 0.7rem;
+    color: var(--text-light);
+    margin-top: 4px;
+    text-align: right;
+}
+
+.ficha-empty-history {
+    background: #f8fafc;
+    border: 1px dashed var(--border);
+    border-radius: var(--radius-md);
+    padding: 24px 16px;
+    text-align: center;
+    color: var(--text-muted);
+    font-size: 0.85rem;
+}

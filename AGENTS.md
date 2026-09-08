@@ -92,3 +92,4 @@
 - [2026-09-08] Gemini: Sincronização segura de Staff/Diretores em atletasbcv sem sobrepor registos de jogadores/filhos, pesquisa por email/telefone no modal de Plantel e auto-seleção de cargo.
 - [2026-09-08] Gemini: Simplificação da designação de 'Diretor de Campo' para 'Diretor' no Admin (utilizadores, atletas, plantel) e atualização dos registos na base de dados.
 - [2026-09-08] Gemini: Evolução de Presenças para 'Diário Desportivo' nos portais Diretor e Treinador: filtragem estrita apenas de jogadores (sem staff), adição do campo de observações por atleta nos cartões e script SQL add_observacoes_to_presencas.sql.
+- [2026-09-08] Gemini: Criação da opção 'Plantel' nos menus do Treinador e Diretor com listagem de atletas e Ficha Individual (foto, dados, KPIs de assiduidade em tempo real e timeline de registos com observações do Diário Desportivo), mantendo a aba Contactos SOS dedicada.
