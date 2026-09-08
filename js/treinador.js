@@ -9,6 +9,28 @@ document.addEventListener('DOMContentLoaded', async () => {
     let userProfile = null;
     let currentAtletas = [];
     let presencasState = {}; // atleta_id -> estado ('Presente', 'Falta', 'Justificado', 'Lesionado')
+    let observacoesState = {}; // atleta_id -> texto de observações do diário desportivo
+
+    // Helper para escapar HTML seguro em inputs
+    function escapeHtml(str) {
+        if (!str) return '';
+        return String(str)
+            .replace(/&/g, '&amp;')
+            .replace(/"/g, '&quot;')
+            .replace(/'/g, '&#39;')
+            .replace(/</g, '&lt;')
+            .replace(/>/g, '&gt;');
+    }
+
+    // Helper rigoroso para filtrar apenas atletas (excluir qualquer cargo de equipa técnica / direção)
+    function isStaffMember(cargo) {
+        if (!cargo) return false;
+        const c = String(cargo).toLowerCase().trim();
+        return c.includes('treinador') || c.includes('diretor') || c.includes('seccionista') || 
+               c.includes('staff') || c.includes('fisioterapeuta') || c.includes('adjunto') || 
+               c.includes('preparador') || c.includes('apoio') || c.includes('coordenador') ||
+               c.includes('presidente') || c.includes('vice');
+    }
 
     // Elementos DOM
     const loginContainer = document.getElementById('login-container');
@@ -453,14 +475,8 @@ document.addEventListener('DOMContentLoaded', async () => {
                     .eq('equipa_id', activeTeam.id);
 
                 if (!vErr && vinculos && vinculos.length > 0) {
-                    // Filtrar apenas jogadores (excluir equipa técnica / staff)
-                    const isJogador = (papel) => {
-                        if (!papel) return true;
-                        const p = papel.toLowerCase();
-                        return !p.includes('treinador') && !p.includes('diretor') && !p.includes('seccionista') && !p.includes('staff') && !p.includes('fisioterapeuta') && !p.includes('adjunto');
-                    };
-
-                    const jogadoresVinculos = vinculos.filter(v => isJogador(v.papel));
+                    // Filtrar apenas jogadores (excluir estritamente equipa técnica / staff)
+                    const jogadoresVinculos = vinculos.filter(v => !isStaffMember(v.papel));
                     const mapDorsalPapel = {};
                     jogadoresVinculos.forEach(v => {
                         mapDorsalPapel[v.atleta_id] = {
@@ -479,14 +495,16 @@ document.addEventListener('DOMContentLoaded', async () => {
                             .order('nome', { ascending: true });
 
                         if (!aErr && atletasDb) {
-                            atletasCarregados = atletasDb.map(a => {
-                                const extra = mapDorsalPapel[a.id];
-                                return {
-                                    ...a,
-                                    dorsal_equipa: extra?.numero || a.equipamento_numero_1 || a.dorsal,
-                                    papel_equipa: extra?.papel || 'Jogador'
-                                };
-                            });
+                            atletasCarregados = atletasDb
+                                .filter(a => !isStaffMember(a.funcao))
+                                .map(a => {
+                                    const extra = mapDorsalPapel[a.id];
+                                    return {
+                                        ...a,
+                                        dorsal_equipa: extra?.numero || a.equipamento_numero_1 || a.dorsal,
+                                        papel_equipa: extra?.papel || 'Jogador'
+                                    };
+                                });
                         }
                     }
                 }
@@ -503,6 +521,7 @@ document.addEventListener('DOMContentLoaded', async () => {
                 if (error) throw error;
 
                 atletasCarregados = (todosAtletas || []).filter(a => {
+                    if (isStaffMember(a.funcao)) return false; // Apenas atletas (jogadores)
                     const aEsc = (a.escalao || '').replace(/[-\s]/g, '').toLowerCase();
                     const aEq1 = (a.equipabcv1 || '').replace(/[-\s]/g, '').toLowerCase();
                     const aEq2 = (a.equipabcv2 || '').replace(/[-\s]/g, '').toLowerCase();
@@ -528,7 +547,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     }
 
     // =======================================================
-    // 5. MÓDULO DE PRESENÇAS
+    // 5. MÓDULO DE DIÁRIO DESPORTIVO (PRESENÇAS & OBSERVAÇÕES)
     // =======================================================
     async function loadPresencas() {
         if (!listaPresencasContainer) return;
@@ -539,7 +558,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         const dataSel = presencasDataInput.value || hojeIso;
         const tipoSel = presencasTipoSelect.value || 'Treino';
 
-        listaPresencasContainer.innerHTML = '<div style="text-align: center; padding: 20px; color: var(--text-muted);">A verificar presenças gravadas...</div>';
+        listaPresencasContainer.innerHTML = '<div style="text-align: center; padding: 20px; color: var(--text-muted);">A verificar registos do diário desportivo...</div>';
 
         try {
             // Consultar presenças gravadas na BD para a data e tipo selecionados
@@ -554,14 +573,18 @@ document.addEventListener('DOMContentLoaded', async () => {
             }
 
             const mapaGravado = {};
+            const mapaObs = {};
             (gravadas || []).forEach(p => {
                 mapaGravado[p.atleta_id] = p.estado;
+                mapaObs[p.atleta_id] = p.observacoes || '';
             });
 
             // Preencher o estado local: se já gravado usa o estado da BD, caso contrário inicia como 'Presente'
             presencasState = {};
+            observacoesState = {};
             currentAtletas.forEach(a => {
                 presencasState[a.id] = mapaGravado[a.id] || 'Presente';
+                observacoesState[a.id] = mapaObs[a.id] || '';
             });
 
             renderPresencasTable();
@@ -589,6 +612,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         let html = '';
         currentAtletas.forEach(a => {
             const estadoAtual = presencasState[a.id] || 'Presente';
+            const obsAtual = observacoesState[a.id] || '';
             const dorsal = a.dorsal_equipa || a.equipamento_numero_1 || a.equipamento_numero_2 || a.dorsal || '-';
             const fotoHtml = a.foto_url 
                 ? `<img src="${a.foto_url}" class="atleta-avatar" alt="${a.nome}">`
@@ -625,6 +649,15 @@ document.addEventListener('DOMContentLoaded', async () => {
                             <span>Lesão</span>
                         </button>
                     </div>
+
+                    <div class="presenca-obs-row">
+                        <input type="text" 
+                               class="input-presenca-obs" 
+                               id="obs-atleta-${a.id}" 
+                               placeholder="📝 Observações (atraso, motivo, queixas...)" 
+                               value="${escapeHtml(obsAtual)}"
+                               oninput="window.setObservacao(${a.id}, this.value)">
+                    </div>
                 </div>
             `;
         });
@@ -649,6 +682,11 @@ document.addEventListener('DOMContentLoaded', async () => {
         if (estado === 'Lesionado') btns[3]?.classList.add('active-lesionado');
     };
 
+    // Atualizar texto de observações no estado em tempo real
+    window.setObservacao = function(atletaId, valor) {
+        observacoesState[atletaId] = valor;
+    };
+
     // Marcar todos como presentes
     if (btnMarcarTodos) {
         btnMarcarTodos.addEventListener('click', () => {
@@ -663,7 +701,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     if (presencasDataInput) presencasDataInput.addEventListener('change', loadPresencas);
     if (presencasTipoSelect) presencasTipoSelect.addEventListener('change', loadPresencas);
 
-    // Guardar presenças em lote
+    // Guardar presenças e diário desportivo em lote
     if (btnGuardarPresencas) {
         btnGuardarPresencas.addEventListener('click', async () => {
             if (currentAtletas.length === 0) return;
@@ -679,31 +717,45 @@ document.addEventListener('DOMContentLoaded', async () => {
                 data: dataSel,
                 tipo: tipoSel,
                 estado: presencasState[a.id] || 'Presente',
+                observacoes: (observacoesState[a.id] || '').trim() || null,
                 escalao: (activeTeam ? activeTeam.nome : a.escalao) || 'BCV',
                 registado_por: userProfile.nome || currentUser.email
             }));
 
             try {
-                const { error } = await supabase
+                let { error } = await supabase
                     .from('presencas')
                     .upsert(payload, { onConflict: 'atleta_id, data, tipo' });
 
-                if (error) throw error;
+                // Se a coluna 'observacoes' ainda não existir na BD (código 42703), grava sem observações e avisa
+                if (error && (error.code === '42703' || (error.message && error.message.includes('observacoes')))) {
+                    console.warn("Coluna 'observacoes' não encontrada na tabela presencas. A gravar sem observações...", error);
+                    const fallbackPayload = payload.map(({ observacoes, ...resto }) => resto);
+                    const retry = await supabase
+                        .from('presencas')
+                        .upsert(fallbackPayload, { onConflict: 'atleta_id, data, tipo' });
+                    
+                    if (retry.error) throw retry.error;
 
-                btnGuardarPresencas.textContent = '✅ Presenças Gravadas!';
+                    alert("⚠️ Presenças gravadas com sucesso!\nNota: Para gravar o texto de observações, execute o script SQL 'add_observacoes_to_presencas.sql' no Supabase.");
+                } else if (error) {
+                    throw error;
+                }
+
+                btnGuardarPresencas.textContent = '✅ Diário Desportivo Gravado!';
                 btnGuardarPresencas.style.background = '#059669';
 
                 setTimeout(() => {
                     btnGuardarPresencas.disabled = false;
-                    btnGuardarPresencas.textContent = '💾 Guardar Presenças';
+                    btnGuardarPresencas.textContent = '💾 Guardar Diário Desportivo';
                     btnGuardarPresencas.style.background = '';
                 }, 2000);
 
             } catch (err) {
-                console.error("Erro ao guardar presenças:", err);
-                alert("Erro ao guardar presenças: " + err.message);
+                console.error("Erro ao guardar diário desportivo:", err);
+                alert("Erro ao guardar registos: " + err.message);
                 btnGuardarPresencas.disabled = false;
-                btnGuardarPresencas.textContent = '💾 Guardar Presenças';
+                btnGuardarPresencas.textContent = '💾 Guardar Diário Desportivo';
             }
         });
     }
