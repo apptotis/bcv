@@ -2948,8 +2948,14 @@ document.addEventListener('DOMContentLoaded', async () => {
         }
 
         // Equipamento
-        if (document.getElementById('atleta-equip-tam')) document.getElementById('atleta-equip-tam').value = atleta.equipamento_tamanho || '';
-        if (document.getElementById('atleta-equip-calcao')) document.getElementById('atleta-equip-calcao').value = atleta.equipamento_tamanho_calcao || '';
+        if (document.getElementById('atleta-equip-tam')) {
+            const tCam = String(atleta.equipamento_tamanho || '').trim().toUpperCase() === '14' ? 'XS' : (atleta.equipamento_tamanho || '');
+            document.getElementById('atleta-equip-tam').value = tCam;
+        }
+        if (document.getElementById('atleta-equip-calcao')) {
+            const tCalc = String(atleta.equipamento_tamanho_calcao || '').trim().toUpperCase() === '14' ? 'XS' : (atleta.equipamento_tamanho_calcao || '');
+            document.getElementById('atleta-equip-calcao').value = tCalc;
+        }
         if (document.getElementById('atleta-equip-num1')) document.getElementById('atleta-equip-num1').value = atleta.equipamento_numero_1 || atleta.numero_camisola || '';
         if (document.getElementById('atleta-equip-num2')) document.getElementById('atleta-equip-num2').value = atleta.equipamento_numero_2 || '';
         if (document.getElementById('atleta-equip-nome')) document.getElementById('atleta-equip-nome').value = atleta.equipamento_nome_camisola || atleta.nickname || '';
@@ -4139,17 +4145,19 @@ document.addEventListener('DOMContentLoaded', async () => {
 
         list.forEach(atleta => {
             if (atleta.equipamento_tamanho) {
-                const t = atleta.equipamento_tamanho.toUpperCase().trim();
+                let t = atleta.equipamento_tamanho.toUpperCase().trim();
+                if (t === '14') t = 'XS';
                 camisolasCount[t] = (camisolasCount[t] || 0) + 1;
             }
             if (atleta.equipamento_tamanho_calcao) {
-                const t = atleta.equipamento_tamanho_calcao.toUpperCase().trim();
+                let t = atleta.equipamento_tamanho_calcao.toUpperCase().trim();
+                if (t === '14') t = 'XS';
                 calcoesCount[t] = (calcoesCount[t] || 0) + 1;
             }
         });
 
         const sortSizes = (a, b) => {
-            const sizeOrder = ['6', '8', '10', '12', '14', 'XS', 'S', 'M', 'L', 'XL', 'XXL', '3XL'];
+            const sizeOrder = ['6', '8', '10', '12', 'XS', 'S', 'M', 'L', 'XL', 'XXL', '3XL', '14'];
             const idxA = sizeOrder.indexOf(a);
             const idxB = sizeOrder.indexOf(b);
             if (idxA !== -1 && idxB !== -1) return idxA - idxB;
@@ -4208,12 +4216,15 @@ document.addEventListener('DOMContentLoaded', async () => {
                 ? `<span style="background: rgba(236, 72, 153, 0.15); color: #db2777; padding: 2px 6px; border-radius: 4px; font-size: 0.75rem; font-weight: 700;">F</span>`
                 : `<span style="background: rgba(59, 130, 246, 0.15); color: #2563eb; padding: 2px 6px; border-radius: 4px; font-size: 0.75rem; font-weight: 700;">M</span>`;
 
-            const tamCamisolaBadge = atleta.equipamento_tamanho
-                ? `<span style="background: rgba(59, 130, 246, 0.12); color: #1d4ed8; font-weight: 700; padding: 3px 8px; border-radius: 6px; font-size: 0.85rem;">${atleta.equipamento_tamanho}</span>`
+            const tCamDisplay = (String(atleta.equipamento_tamanho || '').trim().toUpperCase() === '14') ? 'XS' : atleta.equipamento_tamanho;
+            const tCalcDisplay = (String(atleta.equipamento_tamanho_calcao || '').trim().toUpperCase() === '14') ? 'XS' : atleta.equipamento_tamanho_calcao;
+
+            const tamCamisolaBadge = tCamDisplay
+                ? `<span style="background: rgba(59, 130, 246, 0.12); color: #1d4ed8; font-weight: 700; padding: 3px 8px; border-radius: 6px; font-size: 0.85rem;">${tCamDisplay}</span>`
                 : `<span style="color: #a0a0ab;">-</span>`;
 
-            const tamCalcaoBadge = atleta.equipamento_tamanho_calcao
-                ? `<span style="background: rgba(16, 185, 129, 0.12); color: #047857; font-weight: 700; padding: 3px 8px; border-radius: 6px; font-size: 0.85rem;">${atleta.equipamento_tamanho_calcao}</span>`
+            const tamCalcaoBadge = tCalcDisplay
+                ? `<span style="background: rgba(16, 185, 129, 0.12); color: #047857; font-weight: 700; padding: 3px 8px; border-radius: 6px; font-size: 0.85rem;">${tCalcDisplay}</span>`
                 : `<span style="color: #a0a0ab;">-</span>`;
 
             const estampaNome = atleta.equipamento_nome_camisola || atleta.nickname
@@ -4294,8 +4305,8 @@ document.addEventListener('DOMContentLoaded', async () => {
                     `"${(a.escalao || '').replace(/"/g, '""')}"`,
                     `"${(a.sexo || '').replace(/"/g, '""')}"`,
                     `"${(a.epoca || '').replace(/"/g, '""')}"`,
-                    `"${(a.equipamento_tamanho || '').replace(/"/g, '""')}"`,
-                    `"${(a.equipamento_tamanho_calcao || '').replace(/"/g, '""')}"`,
+                    `"${(String(a.equipamento_tamanho || '').trim().toUpperCase() === '14' ? 'XS' : (a.equipamento_tamanho || '')).replace(/"/g, '""')}"`,
+                    `"${(String(a.equipamento_tamanho_calcao || '').trim().toUpperCase() === '14' ? 'XS' : (a.equipamento_tamanho_calcao || '')).replace(/"/g, '""')}"`,
                     `"${(a.equipamento_nome_camisola || a.nickname || '').replace(/"/g, '""')}"`,
                     `"${(a.equipamento_numero_1 || '').replace(/"/g, '""')}"`,
                     `"${(a.equipamento_numero_2 || '').replace(/"/g, '""')}"`,
@@ -4361,17 +4372,19 @@ document.addEventListener('DOMContentLoaded', async () => {
                 const calcoesCount = {};
                 filteredEquipamentos.forEach(a => {
                     if (a.equipamento_tamanho) {
-                        const t = a.equipamento_tamanho.toUpperCase().trim();
+                        let t = a.equipamento_tamanho.toUpperCase().trim();
+                        if (t === '14') t = 'XS';
                         camisolasCount[t] = (camisolasCount[t] || 0) + 1;
                     }
                     if (a.equipamento_tamanho_calcao) {
-                        const t = a.equipamento_tamanho_calcao.toUpperCase().trim();
+                        let t = a.equipamento_tamanho_calcao.toUpperCase().trim();
+                        if (t === '14') t = 'XS';
                         calcoesCount[t] = (calcoesCount[t] || 0) + 1;
                     }
                 });
 
                 const sortSizes = (a, b) => {
-                    const sizeOrder = ['6', '8', '10', '12', '14', 'XS', 'S', 'M', 'L', 'XL', 'XXL', '3XL'];
+                    const sizeOrder = ['6', '8', '10', '12', 'XS', 'S', 'M', 'L', 'XL', 'XXL', '3XL', '14'];
                     const idxA = sizeOrder.indexOf(a);
                     const idxB = sizeOrder.indexOf(b);
                     if (idxA !== -1 && idxB !== -1) return idxA - idxB;
@@ -4496,8 +4509,8 @@ document.addEventListener('DOMContentLoaded', async () => {
                             (atleta.nome || '-').slice(0, 32),
                             (atleta.escalao || '-').slice(0, 12),
                             (atleta.sexo || '').toUpperCase().startsWith('F') ? 'F' : 'M',
-                            atleta.equipamento_tamanho || '-',
-                            atleta.equipamento_tamanho_calcao || '-',
+                            (String(atleta.equipamento_tamanho || '').trim().toUpperCase() === '14' ? 'XS' : (atleta.equipamento_tamanho || '-')),
+                            (String(atleta.equipamento_tamanho_calcao || '').trim().toUpperCase() === '14' ? 'XS' : (atleta.equipamento_tamanho_calcao || '-')),
                             (atleta.equipamento_nome_camisola || atleta.nickname || '-').slice(0, 20),
                             atleta.equipamento_numero_1 ? `#${atleta.equipamento_numero_1}` : '-',
                             atleta.equipamento_numero_2 ? `#${atleta.equipamento_numero_2}` : '-',
