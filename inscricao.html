@@ -1164,7 +1164,7 @@
                             <option value="8">8 anos</option>
                             <option value="10">10 anos</option>
                             <option value="12">12 anos</option>
-                            <option value="14">14 anos</option>
+                            <option value="XS">XS</option>
                             <option value="S">S (Adulto)</option>
                             <option value="M">M (Adulto)</option>
                             <option value="L">L (Adulto)</option>
@@ -1180,7 +1180,7 @@
                             <option value="8">8 anos</option>
                             <option value="10">10 anos</option>
                             <option value="12">12 anos</option>
-                            <option value="14">14 anos</option>
+                            <option value="XS">XS</option>
                             <option value="S">S (Adulto)</option>
                             <option value="M">M (Adulto)</option>
                             <option value="L">L (Adulto)</option>
@@ -1602,10 +1602,12 @@
 
             // 7. Passo 7: Equipamentos Oficiais BCV
             if (form.elements['equipamento_tamanho'] && atletaFull.equipamento_tamanho) {
-                form.elements['equipamento_tamanho'].value = atletaFull.equipamento_tamanho;
+                const tam = String(atletaFull.equipamento_tamanho).trim().toUpperCase() === '14' ? 'XS' : atletaFull.equipamento_tamanho;
+                form.elements['equipamento_tamanho'].value = tam;
             }
             if (form.elements['equipamento_tamanho_calcao'] && atletaFull.equipamento_tamanho_calcao) {
-                form.elements['equipamento_tamanho_calcao'].value = atletaFull.equipamento_tamanho_calcao;
+                const tamC = String(atletaFull.equipamento_tamanho_calcao).trim().toUpperCase() === '14' ? 'XS' : atletaFull.equipamento_tamanho_calcao;
+                form.elements['equipamento_tamanho_calcao'].value = tamC;
             }
             if (form.elements['equipamento_nome_camisola']) {
                 form.elements['equipamento_nome_camisola'].value = atletaFull.equipamento_nome_camisola || atletaFull.nickname || '';
