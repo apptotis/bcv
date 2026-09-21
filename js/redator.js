@@ -361,6 +361,19 @@ document.addEventListener('DOMContentLoaded', async () => {
                                 <span>🗑️</span>
                             </button>
                         </div>
+                        ${n.publicada ? `
+                            <div style="margin-top: 10px; padding-top: 10px; border-top: 1px dashed var(--border); display: flex; gap: 8px;">
+                                <button type="button" onclick="window.copiarLinkNoticiaRedator(${n.id})" style="flex: 1; background: #f8fafc; color: var(--text-main); border: 1px solid var(--border); border-radius: 8px; padding: 7px 10px; font-size: 0.78rem; font-weight: 700; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 5px;">
+                                    <span>🔗</span> Copiar Link
+                                </button>
+                                <button type="button" onclick="window.partilharWhatsAppRedator(${n.id})" style="background: #25D366; color: #ffffff; border: none; border-radius: 8px; padding: 7px 12px; font-size: 0.78rem; font-weight: 700; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 5px;">
+                                    <i class="fab fa-whatsapp"></i> WhatsApp
+                                </button>
+                                <a href="noticia.html?id=${n.id}" target="_blank" style="background: #f1f5f9; color: var(--text-main); border: 1px solid var(--border); border-radius: 8px; padding: 7px 10px; font-size: 0.78rem; font-weight: 700; text-decoration: none; display: flex; align-items: center; justify-content: center;" title="Abrir página pública da notícia">
+                                    ↗️
+                                </a>
+                            </div>
+                        ` : ''}
                     </div>
                 </div>
             `;
@@ -652,6 +665,32 @@ document.addEventListener('DOMContentLoaded', async () => {
 
     window.closeNewsPreviewModal = function() {
         if (modalNoticiaPreview) modalNoticiaPreview.classList.remove('active');
+    };
+
+    window.getNoticiaShareUrl = function(id) {
+        const baseUrl = window.location.origin + window.location.pathname.replace(/\/redator\.html$/i, '/').replace(/\/$/, '');
+        return `${baseUrl}/noticia.html?id=${id}`;
+    };
+
+    window.copiarLinkNoticiaRedator = function(id) {
+        const url = window.getNoticiaShareUrl(id);
+        if (navigator.clipboard && navigator.clipboard.writeText) {
+            navigator.clipboard.writeText(url).then(() => {
+                alert("✅ Link da notícia copiado com sucesso!\n\n" + url + "\n\nJá podes colar e partilhar no Facebook, Instagram, WhatsApp, etc.");
+            }).catch(() => {
+                prompt("Copia o link da notícia para partilhar:", url);
+            });
+        } else {
+            prompt("Copia o link da notícia para partilhar:", url);
+        }
+    };
+
+    window.partilharWhatsAppRedator = function(id) {
+        const n = currentNoticias.find(item => item.id === id);
+        const tit = n ? n.titulo : 'Notícia BCV';
+        const url = window.getNoticiaShareUrl(id);
+        const waUrl = `https://api.whatsapp.com/send?text=${encodeURIComponent(tit + ' - Basket Clube de Valença: ' + url)}`;
+        window.open(waUrl, '_blank');
     };
 
     // Inicialização

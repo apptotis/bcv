@@ -407,7 +407,10 @@ async function loadGlobalClubConfig(supabase) {
 // =========================================================================
 let publicNoticiasCache = [];
 
+let publicSupabaseClient = null;
+
 async function loadNoticiasIndex(supabase) {
+    publicSupabaseClient = supabase;
     const sectionNoticias = document.getElementById('noticias');
     const featuredCard = document.getElementById('noticia-featured-card');
     if (!featuredCard) return;
@@ -499,18 +502,54 @@ async function loadNoticiasIndex(supabase) {
             }
         }
 
+        // 3. Verificar se há link direto na URL (?noticia=ID ou ?noticiaId=ID)
+        const urlParams = new URLSearchParams(window.location.search);
+        const directNoticiaId = urlParams.get('noticia') || urlParams.get('noticiaId');
+        if (directNoticiaId) {
+            openPublicNoticiaModal(directNoticiaId);
+        }
+
     } catch (err) {
         console.warn("Aviso ao carregar notícias no index:", err);
     }
 }
 
-window.openPublicNoticiaModal = function(id) {
-    const n = publicNoticiasCache.find(item => item.id === id);
+window.openPublicNoticiaModal = async function(id) {
+    let n = publicNoticiasCache.find(item => String(item.id) === String(id));
+    
+    // Se não estiver no cache das primeiras 6 notícias, busca na BD pelo ID
+    if (!n && publicSupabaseClient) {
+        try {
+            const { data, error } = await publicSupabaseClient
+                .from('noticias')
+                .select('*')
+                .eq('id', id)
+                .single();
+            if (!error && data) n = data;
+        } catch (e) {
+            console.warn("Aviso ao buscar notícia por ID:", e);
+        }
+    }
+
     if (!n) return;
 
     const modal = document.getElementById('modal-noticia-publica');
     const content = document.getElementById('modal-noticia-publica-content');
     if (!modal || !content) return;
+
+    // Atualizar URL no navegador suavemente para facilitar partilha
+    const currentUrlParams = new URLSearchParams(window.location.search);
+    if (currentUrlParams.get('noticia') !== String(n.id)) {
+        const newUrl = window.location.pathname + '?noticia=' + n.id;
+        try {
+            window.history.pushState({ noticiaId: n.id }, '', newUrl);
+        } catch (e) {}
+    }
+
+    // Gerar links de partilha
+    const baseUrl = window.location.origin + window.location.pathname.replace(/\/index\.html$/i, '/').replace(/\/$/, '');
+    const shareUrl = `${baseUrl}/noticia.html?id=${n.id}`;
+    const directHomeUrl = `${baseUrl}/?noticia=${n.id}`;
 
     const dataFmt = n.data_publicacao ? new Date(n.data_publicacao).toLocaleDateString('pt-PT', { day: 'numeric', month: 'long', year: 'numeric' }) : '';
     const imgHtml = n.imagem_url ? `<img src="${n.imagem_url}" style="width: 100%; max-height: 340px; object-fit: cover;" alt="${n.titulo}">` : '';
@@ -531,6 +570,26 @@ window.openPublicNoticiaModal = function(id) {
         </div>
     ` : ``;
 
+    const shareBarHtml = `
+        <div class="noticia-share-box" style="margin-top: 25px; padding: 16px; background: #f8fafc; border: 1px solid var(--border-color); border-radius: 12px; display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 10px;">
+            <div style="display: flex; align-items: center; gap: 8px;">
+                <span style="font-size: 1.1rem;">📢</span>
+                <span style="font-size: 0.88rem; font-weight: 700; color: var(--text-primary);">Partilhar esta notícia:</span>
+            </div>
+            <div style="display: flex; gap: 8px; align-items: center; flex-wrap: wrap;">
+                <a href="https://api.whatsapp.com/send?text=${encodeURIComponent(n.titulo + ' - Basket Clube de Valença: ' + shareUrl)}" target="_blank" rel="noopener noreferrer" style="background: #25D366; color: #ffffff; padding: 7px 14px; border-radius: 8px; font-size: 0.82rem; font-weight: 700; text-decoration: none; display: inline-flex; align-items: center; gap: 6px; box-shadow: 0 2px 4px rgba(0,0,0,0.08); transition: transform 0.2s;">
+                    <i class="fab fa-whatsapp" style="font-size: 1rem;"></i> WhatsApp
+                </a>
+                <a href="https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(shareUrl)}" target="_blank" rel="noopener noreferrer" style="background: #1877F2; color: #ffffff; padding: 7px 14px; border-radius: 8px; font-size: 0.82rem; font-weight: 700; text-decoration: none; display: inline-flex; align-items: center; gap: 6px; box-shadow: 0 2px 4px rgba(0,0,0,0.08); transition: transform 0.2s;">
+                    <i class="fab fa-facebook" style="font-size: 1rem;"></i> Facebook
+                </a>
+                <button type="button" onclick="window.copiarLinkNoticia('${shareUrl}', this)" style="background: #ffffff; color: var(--text-primary); border: 1px solid var(--border-color); padding: 7px 14px; border-radius: 8px; font-size: 0.82rem; font-weight: 700; cursor: pointer; display: inline-flex; align-items: center; gap: 6px; box-shadow: 0 2px 4px rgba(0,0,0,0.04); transition: background 0.2s;">
+                    🔗 Copiar Link
+                </button>
+            </div>
+        </div>
+    `;
+
     content.innerHTML = `
         ${imgHtml}
         <div style="padding: 24px;">
@@ -543,6 +602,7 @@ window.openPublicNoticiaModal = function(id) {
             ${n.subtitulo ? `<p style="font-size: 1rem; color: var(--text-secondary); font-weight: 500; margin-bottom: 16px; line-height: 1.4;">${n.subtitulo}</p>` : ''}
             <hr style="border: 0; border-top: 1px solid var(--border-color); margin: 16px 0;">
             <div style="font-size: 0.95rem; line-height: 1.7; color: var(--text-primary); white-space: pre-wrap;">${n.conteudo}</div>
+            ${shareBarHtml}
             ${ctaInscricaoHtml}
         </div>
     `;
@@ -551,13 +611,55 @@ window.openPublicNoticiaModal = function(id) {
     document.body.style.overflow = 'hidden';
 };
 
+window.copiarLinkNoticia = function(url, btnEl) {
+    if (navigator.clipboard && navigator.clipboard.writeText) {
+        navigator.clipboard.writeText(url).then(() => {
+            if (btnEl) {
+                const originalHtml = btnEl.innerHTML;
+                btnEl.innerHTML = '✅ Link Copiado!';
+                btnEl.style.borderColor = '#16a34a';
+                btnEl.style.color = '#16a34a';
+                setTimeout(() => {
+                    btnEl.innerHTML = originalHtml;
+                    btnEl.style.borderColor = '';
+                    btnEl.style.color = '';
+                }, 2500);
+            }
+        }).catch(() => {
+            prompt("Copia o link da notícia para partilhar:", url);
+        });
+    } else {
+        prompt("Copia o link da notícia para partilhar:", url);
+    }
+};
+
 window.closePublicNoticiaModal = function() {
     const modal = document.getElementById('modal-noticia-publica');
     if (modal) {
         modal.style.display = 'none';
         document.body.style.overflow = '';
+        // Limpar parâmetro da URL suavemente
+        const currentUrlParams = new URLSearchParams(window.location.search);
+        if (currentUrlParams.has('noticia')) {
+            try {
+                window.history.pushState(null, '', window.location.pathname);
+            } catch (e) {}
+        }
     }
 };
+
+window.addEventListener('popstate', (e) => {
+    const urlParams = new URLSearchParams(window.location.search);
+    const nId = urlParams.get('noticia');
+    if (nId) {
+        openPublicNoticiaModal(nId);
+    } else {
+        const modal = document.getElementById('modal-noticia-publica');
+        if (modal && modal.style.display === 'flex') {
+            closePublicNoticiaModal();
+        }
+    }
+});
 
 const btnClosePublicNoticia = document.getElementById('btn-close-noticia-publica');
 if (btnClosePublicNoticia) {

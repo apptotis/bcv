@@ -3364,6 +3364,10 @@ document.addEventListener('DOMContentLoaded', async () => {
                 <td style="padding: 10px;">${statusHtml}</td>
                 <td style="padding: 10px; text-align: center;">${destaqueHtml}</td>
                 <td style="padding: 10px; text-align: center; white-space: nowrap;">
+                    ${n.publicada ? `
+                        <button class="btn-action" title="Copiar Link para Redes Sociais" onclick="window.copiarLinkNoticiaAdmin(${n.id})" style="background: rgba(126, 34, 206, 0.12); color: #7e22ce; font-weight: 700; margin-right: 3px;">🔗</button>
+                        <button class="btn-action" title="Partilhar no WhatsApp" onclick="window.partilharWhatsAppAdmin(${n.id})" style="background: rgba(37, 211, 102, 0.15); color: #15803d; font-weight: 700; margin-right: 3px;">📲</button>
+                    ` : ''}
                     <button class="btn-action" title="Editar Notícia" onclick="window.editNoticiaAdmin(${n.id})">✏️</button>
                     <button class="btn-action" title="${n.publicada ? 'Despublicar' : 'Publicar'}" onclick="window.togglePublishAdmin(${n.id}, ${!n.publicada})">${n.publicada ? '⏸️' : '🚀'}</button>
                     <button class="btn-action delete" title="Eliminar Notícia" onclick="window.deleteNoticiaAdmin(${n.id})">🗑️</button>
@@ -3507,6 +3511,32 @@ document.addEventListener('DOMContentLoaded', async () => {
         } catch (err) {
             alert('Erro ao eliminar notícia: ' + err.message);
         }
+    };
+
+    window.getNoticiaShareUrlAdmin = function(id) {
+        const baseUrl = window.location.origin + window.location.pathname.replace(/\/admin\.html$/i, '/').replace(/\/$/, '');
+        return `${baseUrl}/noticia.html?id=${id}`;
+    };
+
+    window.copiarLinkNoticiaAdmin = function(id) {
+        const url = window.getNoticiaShareUrlAdmin(id);
+        if (navigator.clipboard && navigator.clipboard.writeText) {
+            navigator.clipboard.writeText(url).then(() => {
+                alert("✅ Link da notícia copiado com sucesso!\n\n" + url + "\n\nJá pode colar e partilhar no Facebook, Instagram, WhatsApp, etc.");
+            }).catch(() => {
+                prompt("Copia o link da notícia para partilhar:", url);
+            });
+        } else {
+            prompt("Copia o link da notícia para partilhar:", url);
+        }
+    };
+
+    window.partilharWhatsAppAdmin = function(id) {
+        const n = currentAdminNoticias.find(item => item.id === id);
+        const tit = n ? n.titulo : 'Notícia BCV';
+        const url = window.getNoticiaShareUrlAdmin(id);
+        const waUrl = `https://api.whatsapp.com/send?text=${encodeURIComponent(tit + ' - Basket Clube de Valença: ' + url)}`;
+        window.open(waUrl, '_blank');
     };
 
     // ==========================================
