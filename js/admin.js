@@ -3514,13 +3514,10 @@ document.addEventListener('DOMContentLoaded', async () => {
     };
 
     window.getNoticiaShareUrlAdmin = function(id) {
-        let baseUrl = window.location.origin;
-        if (!baseUrl || baseUrl.startsWith('file:') || baseUrl.includes('localhost') || baseUrl.includes('127.0.0.1')) {
-            baseUrl = 'https://bcvalenca.pt';
-        } else {
-            baseUrl = baseUrl + window.location.pathname.replace(/\/admin\.html$/i, '/').replace(/\/$/, '');
-        }
-        return `${baseUrl}/noticia.html?id=${id}`;
+        const origin = (window.location.origin && !window.location.origin.startsWith('file:') && !window.location.origin.includes('localhost') && !window.location.origin.includes('127.0.0.1'))
+            ? window.location.origin
+            : 'https://bcvalenca.pt';
+        return `${origin}/noticia.html?id=${id}`;
     };
 
     window.copiarLinkNoticiaAdmin = function(id) {

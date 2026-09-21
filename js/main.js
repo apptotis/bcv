@@ -547,14 +547,11 @@ window.openPublicNoticiaModal = async function(id) {
     }
 
     // Gerar links de partilha
-    let baseUrl = window.location.origin;
-    if (!baseUrl || baseUrl.startsWith('file:') || baseUrl.includes('localhost') || baseUrl.includes('127.0.0.1')) {
-        baseUrl = 'https://bcvalenca.pt';
-    } else {
-        baseUrl = baseUrl + window.location.pathname.replace(/\/index\.html$/i, '/').replace(/\/$/, '');
-    }
-    const shareUrl = `${baseUrl}/noticia.html?id=${n.id}`;
-    const directHomeUrl = `${baseUrl}/?noticia=${n.id}`;
+    const origin = (window.location.origin && !window.location.origin.startsWith('file:') && !window.location.origin.includes('localhost') && !window.location.origin.includes('127.0.0.1'))
+        ? window.location.origin
+        : 'https://bcvalenca.pt';
+    const shareUrl = `${origin}/noticia.html?id=${n.id}`;
+    const directHomeUrl = `${origin}/?noticia=${n.id}`;
 
     const dataFmt = n.data_publicacao ? new Date(n.data_publicacao).toLocaleDateString('pt-PT', { day: 'numeric', month: 'long', year: 'numeric' }) : '';
     const imgHtml = n.imagem_url ? `<img src="${n.imagem_url}" style="width: 100%; max-height: 340px; object-fit: cover;" alt="${n.titulo}">` : '';
