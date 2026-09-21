@@ -24,7 +24,7 @@
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700;800&family=Outfit:wght@400;700;900&display=swap" rel="stylesheet">
     
     <!-- Stylesheets -->
-    <link rel="stylesheet" href="/css/style.css?v=20260921_2">
+    <link rel="stylesheet" href="/css/style.css?v=20260921_3">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     
     <!-- Favicon -->
@@ -235,15 +235,45 @@
 
         <ul class="drawer-links-list">
             <li><a href="/index.html#inicio" class="drawer-link">Início</a></li>
+            <li class="drawer-item">
+                <div style="display: flex; justify-content: space-between; align-items: center;">
+                    <a href="/clube.html" class="drawer-link" style="flex: 1;">O Clube</a>
+                    <button class="drawer-dropdown-btn" id="dropdown-toggle" aria-label="Expandir submenu O Clube">
+                        <i class="fas fa-chevron-down"></i>
+                    </button>
+                </div>
+                <ul class="drawer-dropdown-content" id="dropdown-menu">
+                    <li><a href="/clube.html#historia" class="drawer-dropdown-link">História</a></li>
+                    <li><a href="/clube.html#orgaos-sociais" class="drawer-dropdown-link">Órgãos Sociais</a></li>
+                    <li><a href="/clube.html#contactos" class="drawer-dropdown-link">Contactos</a></li>
+                </ul>
+            </li>
+            <li class="drawer-item">
+                <div style="display: flex; justify-content: space-between; align-items: center;">
+                    <a href="/equipas.html" class="drawer-link" style="flex: 1;">Equipas</a>
+                    <button class="drawer-dropdown-btn" id="dropdown-equipas-toggle" aria-label="Expandir submenu Equipas">
+                        <i class="fas fa-chevron-down"></i>
+                    </button>
+                </div>
+                <ul class="drawer-dropdown-content" id="dropdown-equipas-menu">
+                    <!-- Preenchido via JS -->
+                </ul>
+            </li>
+            <li><a href="/index.html#competicoes" class="drawer-link">Competições</a></li>
             <li><a href="/index.html#noticias" class="drawer-link">Notícias</a></li>
-            <li><a href="/clube.html" class="drawer-link">O Clube</a></li>
-            <li><a href="/equipas.html" class="drawer-link">Equipas</a></li>
-            <li><a href="/index.html#destaques" class="drawer-link">Agenda & Resultados</a></li>
-            <li><a href="/clube.html#contactos" class="drawer-link">Contactos</a></li>
+            <li><a href="/index.html#agenda" class="drawer-link">Agenda</a></li>
+            <li><a href="/index.html#galeria" class="drawer-link">Galeria</a></li>
             <li class="drawer-btn-item">
                 <a href="/inscricao.html" class="drawer-btn-highlight">Inscrições 2026/2027</a>
             </li>
         </ul>
+
+        <div class="drawer-footer">
+            <p class="drawer-footer-text">
+                &copy; 2026 Basket Clube de Valença.<br>
+                Todos os direitos reservados.
+            </p>
+        </div>
     </nav>
 
     <!-- Main Content -->
@@ -325,25 +355,9 @@
     <!-- Scripts -->
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script src="/js/config.js"></script>
+    <script src="/js/main.js?v=20260921_3"></script>
     <script>
         document.addEventListener('DOMContentLoaded', async () => {
-            // Menu Hambúrguer Drawer
-            const hamburgerBtn = document.getElementById('hamburger-trigger');
-            const drawerMenu = document.getElementById('drawer-menu');
-            const drawerOverlay = document.getElementById('drawer-overlay');
-            const drawerCloseBtn = document.getElementById('drawer-close-btn');
-
-            function toggleDrawer() {
-                const isOpen = drawerMenu.classList.toggle('active');
-                drawerOverlay.classList.toggle('active');
-                hamburgerBtn.setAttribute('aria-expanded', isOpen);
-                document.body.style.overflow = isOpen ? 'hidden' : '';
-            }
-
-            if (hamburgerBtn) hamburgerBtn.addEventListener('click', toggleDrawer);
-            if (drawerCloseBtn) drawerCloseBtn.addEventListener('click', toggleDrawer);
-            if (drawerOverlay) drawerOverlay.addEventListener('click', toggleDrawer);
-
             // Carregar Notícia por ID
             const urlParams = new URLSearchParams(window.location.search);
             const noticiaId = urlParams.get('id') || urlParams.get('noticia');

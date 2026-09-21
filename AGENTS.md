@@ -95,3 +95,4 @@
 - [2026-09-09] Gemini: Substituição do tamanho de equipamento '14 anos' por 'XS' em inscricao.html, migração direta de dados legados no Supabase e atualização completa do Admin (admin.html, admin.js) nos filtros, modal e mapas de produção.
 - [2026-09-21] Gemini: Exibição de Username/Alcunha para a Equipa Técnica em equipas.html com função formatada tipo (Treinador) e (Diretor), integração de campo de username na Gestão de Utilizadores e sincronização em atletasbcv (admin.html, js/admin.js, js/equipas.js).
 - [2026-09-21] Gemini: Sistema de Links Diretos/Partilha Social e correção do dropdown de Equipas no Menu Drawer (carregamento dinâmico das equipas ativas por escalão com opção 'Ver Todas as Equipas').
+- [2026-09-21] Gemini: Correção da abertura do menu lateral (drawer) na página de notícia (noticia.html) com integração do js/main.js, alinhamento dos seletores CSS (.is-open/.active) e padronização da navegação com submenus dinâmicos.

@@ -292,20 +292,24 @@ img {
 }
 
 /* Opened state transition */
-.hamburger-btn.is-active .hamburger-line {
+.hamburger-btn.is-active .hamburger-line,
+.hamburger-btn.active .hamburger-line {
     background-color: #ffffff; /* Turns white over the dark purple drawer */
 }
 
-.hamburger-btn.is-active .hamburger-line:nth-child(1) {
+.hamburger-btn.is-active .hamburger-line:nth-child(1),
+.hamburger-btn.active .hamburger-line:nth-child(1) {
     transform: translateY(9px) rotate(45deg);
 }
 
-.hamburger-btn.is-active .hamburger-line:nth-child(2) {
+.hamburger-btn.is-active .hamburger-line:nth-child(2),
+.hamburger-btn.active .hamburger-line:nth-child(2) {
     opacity: 0;
     transform: translateX(-20px);
 }
 
-.hamburger-btn.is-active .hamburger-line:nth-child(3) {
+.hamburger-btn.is-active .hamburger-line:nth-child(3),
+.hamburger-btn.active .hamburger-line:nth-child(3) {
     transform: translateY(-9px) rotate(-45deg);
 }
 
@@ -330,7 +334,8 @@ img {
     overflow-y: auto;
 }
 
-.drawer-menu.is-open {
+.drawer-menu.is-open,
+.drawer-menu.active {
     transform: translateX(0);
 }
 
@@ -349,7 +354,8 @@ img {
     transition: opacity var(--transition-normal);
 }
 
-.drawer-overlay.is-open {
+.drawer-overlay.is-open,
+.drawer-overlay.active {
     opacity: 1;
     pointer-events: auto;
 }
@@ -501,18 +507,26 @@ img {
 }
 
 /* Animation entry delays for links (sequential fade-in) */
-.drawer-menu.is-open .drawer-links-list li {
+.drawer-menu.is-open .drawer-links-list li,
+.drawer-menu.active .drawer-links-list li {
     animation: fadeInSlideRight 0.4s ease forwards;
     opacity: 0;
 }
 
-.drawer-menu.is-open .drawer-links-list li:nth-child(1) { animation-delay: 0.1s; }
-.drawer-menu.is-open .drawer-links-list li:nth-child(2) { animation-delay: 0.15s; }
-.drawer-menu.is-open .drawer-links-list li:nth-child(3) { animation-delay: 0.2s; }
-.drawer-menu.is-open .drawer-links-list li:nth-child(4) { animation-delay: 0.25s; }
-.drawer-menu.is-open .drawer-links-list li:nth-child(5) { animation-delay: 0.3s; }
-.drawer-menu.is-open .drawer-links-list li:nth-child(6) { animation-delay: 0.35s; }
-.drawer-menu.is-open .drawer-links-list li:nth-child(7) { animation-delay: 0.4s; }
+.drawer-menu.is-open .drawer-links-list li:nth-child(1),
+.drawer-menu.active .drawer-links-list li:nth-child(1) { animation-delay: 0.1s; }
+.drawer-menu.is-open .drawer-links-list li:nth-child(2),
+.drawer-menu.active .drawer-links-list li:nth-child(2) { animation-delay: 0.15s; }
+.drawer-menu.is-open .drawer-links-list li:nth-child(3),
+.drawer-menu.active .drawer-links-list li:nth-child(3) { animation-delay: 0.2s; }
+.drawer-menu.is-open .drawer-links-list li:nth-child(4),
+.drawer-menu.active .drawer-links-list li:nth-child(4) { animation-delay: 0.25s; }
+.drawer-menu.is-open .drawer-links-list li:nth-child(5),
+.drawer-menu.active .drawer-links-list li:nth-child(5) { animation-delay: 0.3s; }
+.drawer-menu.is-open .drawer-links-list li:nth-child(6),
+.drawer-menu.active .drawer-links-list li:nth-child(6) { animation-delay: 0.35s; }
+.drawer-menu.is-open .drawer-links-list li:nth-child(7),
+.drawer-menu.active .drawer-links-list li:nth-child(7) { animation-delay: 0.4s; }
 
 @keyframes fadeInSlideRight {
     from {

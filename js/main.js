@@ -63,7 +63,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const menuLinks = document.querySelectorAll('.drawer-link, .drawer-dropdown-link');
     menuLinks.forEach(link => {
         const href = link.getAttribute('href');
-        if (href === 'clube.html' || href === '#clube') {
+        if (href === 'clube.html' || href === '#clube' || href === '/clube.html') {
             link.addEventListener('click', (e) => {
                 e.preventDefault();
                 if (dropdownToggle) dropdownToggle.click();
