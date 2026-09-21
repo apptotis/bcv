@@ -166,15 +166,21 @@ document.addEventListener('DOMContentLoaded', async () => {
                         ? `<img src="${t.foto}" alt="${t.nome}" class="player-photo">` 
                         : `<div class="player-photo-placeholder">👔</div>`;
                     
+                    const nomeExibicaoStaff = t.nickname ? t.nickname : (t.nome ? (t.nome.split(' ').length > 2 ? `${t.nome.split(' ')[0]} ${t.nome.split(' ').slice(-1)[0]}` : t.nome) : 'Staff');
+
+                    let cargoFormatado = t.funcao || 'Staff';
+                    const cLower = cargoFormatado.toLowerCase();
+                    if (cLower === 'treinador principal') cargoFormatado = 'Treinador';
+                    else if (cLower === 'diretor de campo') cargoFormatado = 'Diretor';
+
                     card.innerHTML = `
                         <div class="player-photo-container">
                             ${photoHtml}
                         </div>
-                        <div class="player-info">
-                            <div class="player-mobile-number"></div>
+                        <div class="player-info" style="padding-left: 0.8rem;">
                             <div class="player-text-wrap">
-                                <h4 class="player-name">${t.nickname ? t.nickname : t.nome}</h4>
-                                <div class="player-role">${t.funcao}</div>
+                                <h4 class="player-name">${nomeExibicaoStaff}</h4>
+                                <div style="font-size: 0.82rem; color: var(--accent-primary); font-weight: 700; margin-top: 2px;">(${cargoFormatado})</div>
                             </div>
                         </div>
                     `;

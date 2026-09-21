@@ -391,6 +391,8 @@ document.addEventListener('DOMContentLoaded', async () => {
         if(formCreateUser) formCreateUser.reset();
         editUserIdInput.value = '';
         delete editUserIdInput.dataset.escalaoAfeto;
+        const nickInput = document.getElementById('new-user-nickname');
+        if (nickInput) nickInput.value = '';
         formUserTitle.textContent = 'Criar Novo Utilizador';
         btnCreateUser.textContent = 'Criar Utilizador';
         btnCancelEdit.classList.add('hidden');
@@ -413,11 +415,12 @@ document.addEventListener('DOMContentLoaded', async () => {
             const funcaoStaff = (role === 'treinador') ? 'Treinador' : 'Diretor';
             const uNome = (user.nome || user.email.split('@')[0]).trim();
             const uEmail = (user.email || '').trim().toLowerCase();
+            const uNickname = (user.nickname || '').trim();
 
             // Buscar todos os atletas/staff para verificar existência segura
             const { data: todosAtletas, error } = await supabase
                 .from('atletasbcv')
-                .select('id, nome, email, funcao, escalao, epoca, telefone');
+                .select('id, nome, nickname, email, funcao, escalao, epoca, telefone');
 
             if (error) throw error;
             const atlList = todosAtletas || [];
@@ -435,14 +438,17 @@ document.addEventListener('DOMContentLoaded', async () => {
             if (existingStaff) {
                 const updates = {};
                 updates.funcao = funcaoStaff;
+                if (uNickname) updates.nickname = uNickname;
                 if (user.telemovel && !existingStaff.telefone) updates.telefone = user.telemovel;
                 if (user.email && !existingStaff.email) updates.email = user.email;
                 if (!existingStaff.epoca || !existingStaff.epoca.includes('2026/2027')) updates.epoca = '2026/2027';
                 await supabase.from('atletasbcv').update(updates).eq('id', existingStaff.id);
             } else {
                 // Inserir novo elemento de staff em atletasbcv (sem alterar jogadores existentes)
+                const defaultNick = uNickname || (uNome.split(' ').length > 2 ? `${uNome.split(' ')[0]} ${uNome.split(' ').slice(-1)[0]}` : uNome);
                 await supabase.from('atletasbcv').insert([{
                     nome: uNome,
+                    nickname: defaultNick,
                     email: user.email || null,
                     telefone: user.telemovel || null,
                     funcao: funcaoStaff,
@@ -536,6 +542,10 @@ document.addEventListener('DOMContentLoaded', async () => {
             if (match) {
                 const phoneInput = document.getElementById('new-user-phone');
                 const emailInput = document.getElementById('new-user-email');
+                const nickInput = document.getElementById('new-user-nickname');
+                if (nickInput && !nickInput.value && match.nickname) {
+                    nickInput.value = match.nickname;
+                }
                 if (phoneInput && !phoneInput.value && match.telefone) {
                     phoneInput.value = match.telefone;
                 }
@@ -724,6 +734,22 @@ document.addEventListener('DOMContentLoaded', async () => {
         
         editUserIdInput.value = user.id;
         document.getElementById('new-user-name').value = user.nome || '';
+
+        const nickInput = document.getElementById('new-user-nickname');
+        if (nickInput) {
+            let userNick = user.nickname || '';
+            if (!userNick && allAtletasClub && allAtletasClub.length > 0) {
+                const uEmail = (user.email || '').trim().toLowerCase();
+                const uNome = (user.nome || '').trim().toLowerCase();
+                const foundAtl = allAtletasClub.find(a => 
+                    (uEmail && a.email && a.email.trim().toLowerCase() === uEmail) ||
+                    (uNome && a.nome && a.nome.trim().toLowerCase() === uNome)
+                );
+                if (foundAtl && foundAtl.nickname) userNick = foundAtl.nickname;
+            }
+            nickInput.value = userNick;
+        }
+
         document.getElementById('new-user-email').value = user.email || '';
         document.getElementById('new-user-email').disabled = true; // Não deixamos editar o email
         document.getElementById('new-user-phone').value = user.telemovel || '';
@@ -788,6 +814,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         const email = document.getElementById('new-user-email').value;
         const password = document.getElementById('new-user-password').value;
         const nome = document.getElementById('new-user-name').value;
+        const nickname = document.getElementById('new-user-nickname') ? document.getElementById('new-user-nickname').value.trim() : '';
         const telemovel = document.getElementById('new-user-phone').value;
         const roleVal = document.getElementById('new-user-role').value;
         const escalaoAfeto = (isEditMode && editUserIdInput.dataset?.escalaoAfeto) ? editUserIdInput.dataset.escalaoAfeto : '';
@@ -854,7 +881,7 @@ document.addEventListener('DOMContentLoaded', async () => {
             
             // Sincronizar treinadores e diretores com atletasbcv
             if (role === 'treinador' || role === 'diretor' || role === 'seccionista') {
-                await sincronizarUserComAtletas({ nome, email, telemovel, role, escalao_afeto: escalaoAfeto });
+                await sincronizarUserComAtletas({ nome, nickname, email, telemovel, role, escalao_afeto: escalaoAfeto });
             }
 
             resetUserForm();
