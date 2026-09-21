@@ -668,7 +668,12 @@ document.addEventListener('DOMContentLoaded', async () => {
     };
 
     window.getNoticiaShareUrl = function(id) {
-        const baseUrl = window.location.origin + window.location.pathname.replace(/\/redator\.html$/i, '/').replace(/\/$/, '');
+        let baseUrl = window.location.origin;
+        if (!baseUrl || baseUrl.startsWith('file:') || baseUrl.includes('localhost') || baseUrl.includes('127.0.0.1')) {
+            baseUrl = 'https://bcvalenca.pt';
+        } else {
+            baseUrl = baseUrl + window.location.pathname.replace(/\/redator\.html$/i, '/').replace(/\/$/, '');
+        }
         return `${baseUrl}/noticia.html?id=${id}`;
     };
 

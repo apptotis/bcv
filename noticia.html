@@ -2,6 +2,7 @@
 <html lang="pt-PT">
 
 <head>
+    <base href="/">
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title id="page-title">Notícia | Basket Clube de Valença</title>
@@ -10,7 +11,7 @@
     <meta name="description" id="meta-desc" content="Notícias e novidades oficiais do Basket Clube de Valença (BCV).">
     <meta property="og:title" id="og-title" content="Basket Clube de Valença">
     <meta property="og:description" id="og-desc" content="Notícias e novidades oficiais do Basket Clube de Valença (BCV).">
-    <meta property="og:image" id="og-image" content="assets/emblema_png.png">
+    <meta property="og:image" id="og-image" content="https://bcvalenca.pt/assets/emblema_png.png">
     <meta property="og:type" content="article">
     <meta name="twitter:card" content="summary_large_image">
     
@@ -20,11 +21,11 @@
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700;800&family=Outfit:wght@400;700;900&display=swap" rel="stylesheet">
     
     <!-- Stylesheets -->
-    <link rel="stylesheet" href="css/style.css?v=20260921_1">
+    <link rel="stylesheet" href="/css/style.css?v=20260921_2">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     
     <!-- Favicon -->
-    <link rel="icon" type="image/png" href="assets/emblema_png.png">
+    <link rel="icon" type="image/png" href="/assets/emblema_png.png">
 
     <style>
         .article-container {
@@ -197,8 +198,8 @@
             </div>
             
             <div class="nav-center">
-                <a href="index.html" class="brand-logo-container">
-                    <img src="assets/emblema_png.png" alt="BCV Logo" class="brand-logo">
+                <a href="/index.html" class="brand-logo-container">
+                    <img src="/assets/emblema_png.png" alt="BCV Logo" class="brand-logo">
                     <span class="brand-title-nav">Basket Clube de Valença</span>
                 </a>
             </div>
@@ -220,7 +221,7 @@
         <div class="drawer-header">
             <div class="drawer-header-row">
                 <div class="drawer-club-info">
-                    <img src="assets/emblema_png.png" alt="BCV Emblema" class="drawer-club-logo">
+                    <img src="/assets/emblema_png.png" alt="BCV Emblema" class="drawer-club-logo">
                     <span class="drawer-club-name">BCV</span>
                 </div>
                 <button class="drawer-close-btn" id="drawer-close-btn" aria-label="Fechar Menu">
@@ -230,14 +231,14 @@
         </div>
 
         <ul class="drawer-links-list">
-            <li><a href="index.html#inicio" class="drawer-link">Início</a></li>
-            <li><a href="index.html#noticias" class="drawer-link">Notícias</a></li>
-            <li><a href="clube.html" class="drawer-link">O Clube</a></li>
-            <li><a href="equipas.html" class="drawer-link">Equipas</a></li>
-            <li><a href="index.html#destaques" class="drawer-link">Agenda & Resultados</a></li>
-            <li><a href="clube.html#contactos" class="drawer-link">Contactos</a></li>
+            <li><a href="/index.html#inicio" class="drawer-link">Início</a></li>
+            <li><a href="/index.html#noticias" class="drawer-link">Notícias</a></li>
+            <li><a href="/clube.html" class="drawer-link">O Clube</a></li>
+            <li><a href="/equipas.html" class="drawer-link">Equipas</a></li>
+            <li><a href="/index.html#destaques" class="drawer-link">Agenda & Resultados</a></li>
+            <li><a href="/clube.html#contactos" class="drawer-link">Contactos</a></li>
             <li class="drawer-btn-item">
-                <a href="inscricao.html" class="drawer-btn-highlight">Inscrições 2026/2027</a>
+                <a href="/inscricao.html" class="drawer-btn-highlight">Inscrições 2026/2027</a>
             </li>
         </ul>
     </nav>
@@ -245,10 +246,10 @@
     <!-- Main Content -->
     <main class="article-container" style="margin-top: 2rem;">
         <div class="article-back-nav">
-            <a href="index.html#noticias" class="btn-back-home">
+            <a href="/index.html#noticias" class="btn-back-home">
                 <i class="fas fa-arrow-left"></i> Voltar às Notícias
             </a>
-            <a href="index.html" class="btn-back-home" style="color: var(--text-secondary); font-size: 0.85rem;">
+            <a href="/index.html" class="btn-back-home" style="color: var(--text-secondary); font-size: 0.85rem;">
                 Página Inicial
             </a>
         </div>
@@ -305,7 +306,7 @@
             <div style="font-size: 3rem; margin-bottom: 12px;">📰</div>
             <h2 style="font-size: 1.3rem; font-weight: 800; color: var(--text-primary); margin-bottom: 8px;">Notícia Não Encontrada</h2>
             <p style="color: var(--text-secondary); margin-bottom: 20px; font-size: 0.95rem;">A notícia que procuras pode ter sido removida ou o link está incorreto.</p>
-            <a href="index.html#noticias" class="btn btn-primary" style="display: inline-block; padding: 10px 24px; border-radius: 8px; text-decoration: none;">
+            <a href="/index.html#noticias" class="btn btn-primary" style="display: inline-block; padding: 10px 24px; border-radius: 8px; text-decoration: none;">
                 Ver Todas as Notícias
             </a>
         </div>
@@ -320,7 +321,7 @@
 
     <!-- Scripts -->
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-    <script src="js/config.js"></script>
+    <script src="/js/config.js"></script>
     <script>
         document.addEventListener('DOMContentLoaded', async () => {
             // Menu Hambúrguer Drawer
@@ -396,7 +397,9 @@
                 document.getElementById('article-content').textContent = n.conteudo || '';
 
                 // Links de Partilha
-                const currentShareUrl = window.location.href;
+                const currentShareUrl = (window.location.href.startsWith('http') && !window.location.href.includes('localhost') && !window.location.href.includes('127.0.0.1'))
+                    ? window.location.href 
+                    : `https://bcvalenca.pt/noticia.html?id=${n.id}`;
                 const shareWa = document.getElementById('btn-share-whatsapp');
                 const shareFb = document.getElementById('btn-share-facebook');
                 const shareCopy = document.getElementById('btn-share-copy');
@@ -441,7 +444,7 @@
                             <div style="font-size: 2rem; margin-bottom: 6px;">🏀</div>
                             <h3 style="font-size: 1.2rem; font-weight: 800; color: var(--accent-primary); margin-bottom: 6px;">Queres fazer parte da nossa equipa?</h3>
                             <p style="font-size: 0.9rem; color: var(--text-secondary); margin-bottom: 16px;">Inscrições abertas para a época 2026/2027! Processo 100% online, simples e rápido.</p>
-                            <a href="inscricao.html" class="btn btn-primary" style="display: inline-block; padding: 12px 28px; font-weight: 800; border-radius: 8px; text-decoration: none; box-shadow: 0 4px 12px rgba(126,34,206,0.3);">
+                            <a href="/inscricao.html" class="btn btn-primary" style="display: inline-block; padding: 12px 28px; font-weight: 800; border-radius: 8px; text-decoration: none; box-shadow: 0 4px 12px rgba(126,34,206,0.3);">
                                 📝 Iniciar Inscrição Online →
                             </a>
                         </div>
