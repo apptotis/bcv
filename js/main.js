@@ -323,11 +323,17 @@ async function loadEquipasMenu(supabase) {
     try {
         const { data: equipas, error } = await supabase
             .from('equipasbcv')
-            .select('id, nome, escalao, sexo')
-            .eq('epoca', '2025-2026');
+            .select('id, nome, escalao, sexo, epoca');
             
         if (!error && equipas && equipas.length > 0) {
-            const ordemEscalao = ["Mini 8", "Mini 10", "Mini 12", "Sub-14", "Sub-16", "Sub-18", "Seniores", "Veteranos"];
+            const ordemEscalao = [
+                "BabyBasket", "Mini 8", "Mini 10", "Mini 12",
+                "Sub 14", "Sub-14",
+                "Sub 16", "Sub-16",
+                "Sub 18", "Sub-18",
+                "Sub 20", "Sub-20",
+                "Seniores", "Veteranos"
+            ];
             equipas.sort((a, b) => {
                 let indexA = ordemEscalao.indexOf(a.escalao);
                 let indexB = ordemEscalao.indexOf(b.escalao);
@@ -337,11 +343,16 @@ async function loadEquipasMenu(supabase) {
                 return indexA - indexB;
             });
             
-            dropdownEquipasMenu.innerHTML = ''; // Limpar o texto de carregamento
+            dropdownEquipasMenu.innerHTML = ''; // Limpar o conteúdo anterior
+
+            // Opção inicial para ver todas as equipas
+            const liAll = document.createElement('li');
+            liAll.innerHTML = `<a href="equipas.html" class="drawer-dropdown-link" style="font-weight: 700; color: #ffffff;">🏀 Ver Todas as Equipas</a>`;
+            dropdownEquipasMenu.appendChild(liAll);
 
             equipas.forEach(equipa => {
                 const li = document.createElement('li');
-                let escalaoDisplay = equipa.escalao;
+                let escalaoDisplay = equipa.escalao || equipa.nome;
                 if (equipa.sexo && equipa.sexo !== 'Todos') {
                     escalaoDisplay += ` ${equipa.sexo}`;
                 }
@@ -367,9 +378,6 @@ async function loadEquipasMenu(supabase) {
         }
     } catch (error) {
         console.error("Erro ao carregar menu de equipas:", error);
-        if (dropdownEquipasMenu) {
-            dropdownEquipasMenu.innerHTML = `<li style="padding: 10px; color: rgba(255,255,255,0.5); font-size: 0.9rem;">Falha ao carregar. Tente novamente.</li>`;
-        }
     }
 }
 
