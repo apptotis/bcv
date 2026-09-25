@@ -25,7 +25,7 @@ export const onRequest: PagesFunction<Env> = async (context) => {
     const url = new URL(context.request.url);
     const { pathname, searchParams } = url;
 
-    // Ignorar ficheiros estáticos (imagens, css, js, fontes)
+    // Ignorar ficheiros estáticos (imagens, css, js, fontes, documentos)
     if (
         pathname.startsWith('/assets/') ||
         pathname.startsWith('/css/') ||
@@ -42,14 +42,24 @@ export const onRequest: PagesFunction<Env> = async (context) => {
         return context.next();
     }
 
-    // Verificar se é um pedido de notícia com ID (ex: /noticia.html?id=1 ou /noticia?id=1 ou /?noticia=1)
     const isNoticiaPage = pathname === '/noticia.html' || pathname === '/noticia';
     const noticiaId = searchParams.get('id') || searchParams.get('noticia');
+    const isHomePage = pathname === '/' || pathname === '/index.html' || pathname === '';
 
-    if ((isNoticiaPage || searchParams.has('noticia')) && noticiaId) {
+    // Tratar se for página de notícia com ID OU se for a homepage visitada por crawler
+    const userAgent = context.request.headers.get('User-Agent') || '';
+    const isCrawler = isSocialCrawler(userAgent);
+
+    if ((isNoticiaPage && noticiaId) || searchParams.has('noticia') || (isHomePage && isCrawler)) {
         try {
-            // Procurar notícia no Supabase REST API
-            const apiUrl = `${SUPABASE_URL}/rest/v1/noticias?id=eq.${encodeURIComponent(noticiaId)}&select=id,titulo,subtitulo,conteudo,imagem_url,categoria`;
+            let apiUrl = '';
+            if (noticiaId) {
+                apiUrl = `${SUPABASE_URL}/rest/v1/noticias?id=eq.${encodeURIComponent(noticiaId)}&select=id,titulo,subtitulo,conteudo,imagem_url,categoria`;
+            } else {
+                // Para a homepage sem ID, buscar a notícia mais recente para ter sempre imagem de alta resolução em destaque
+                apiUrl = `${SUPABASE_URL}/rest/v1/noticias?select=id,titulo,subtitulo,conteudo,imagem_url,categoria&order=data_publicacao.desc&limit=1`;
+            }
+
             const dbRes = await fetch(apiUrl, {
                 headers: {
                     'apikey': SUPABASE_ANON_KEY,
@@ -62,24 +72,32 @@ export const onRequest: PagesFunction<Env> = async (context) => {
                 const noticias = await dbRes.json() as any[];
                 if (noticias && noticias.length > 0) {
                     const n = noticias[0];
-                    const titulo = n.titulo || 'Notícia';
+                    const isSpecificNoticia = Boolean(noticiaId);
+
+                    const titulo = isSpecificNoticia 
+                        ? (n.titulo || 'Notícia') 
+                        : (n.titulo ? `Basket Clube de Valença | ${n.titulo}` : 'Basket Clube de Valença | Site Oficial');
+
                     const descricao = n.subtitulo || (n.conteudo ? n.conteudo.substring(0, 160).replace(/\r?\n/g, ' ') + '...' : 'Notícia oficial do Basket Clube de Valença (BCV).');
                     
-                    // Garantir URL absoluta para imagem
-                    let imagemUrl = n.imagem_url || 'https://bcvalenca.pt/assets/emblema_png.png';
+                    // Imagem de alta resolução
+                    let imagemUrl = n.imagem_url || 'https://images.unsplash.com/photo-1546519638-68e109498ffc?auto=format&fit=crop&w=1200&h=630&q=80';
                     if (!imagemUrl.startsWith('http')) {
                         imagemUrl = `https://bcvalenca.pt/${imagemUrl.replace(/^\//, '')}`;
                     }
 
-                    const canonicalUrl = url.href;
+                    const canonicalUrl = isSpecificNoticia 
+                        ? (url.href.includes('?') ? url.href : `https://bcvalenca.pt/noticia.html?id=${n.id}`)
+                        : 'https://bcvalenca.pt/';
+
                     const isPng = imagemUrl.toLowerCase().includes('.png');
                     const imgType = isPng ? 'image/png' : 'image/jpeg';
-                    const userAgent = context.request.headers.get('User-Agent') || '';
 
-                    // 1. Se for crawler do Facebook/WhatsApp/Twitter, responder com HTML ultra-leve e focado em Open Graph
-                    if (isSocialCrawler(userAgent)) {
+                    // 1. Se for crawler de redes sociais (Facebook, WhatsApp, Twitter, etc.):
+                    // Entregar HTML limpo, rápido e sem redirecionamentos para que o Facebook leia imediatamente a imagem e título
+                    if (isCrawler) {
                         const botHtml = `<!DOCTYPE html>
-<html lang="pt-PT" prefix="og: https://ogp.me/ns#">
+<html lang="pt-PT" prefix="og: https://ogp.me/ns# fb: https://ogp.me/ns/fb# article: https://ogp.me/ns/article#">
 <head>
     <meta charset="UTF-8">
     <title>${escapeHtml(titulo)} | Basket Clube de Valença</title>
@@ -105,15 +123,12 @@ export const onRequest: PagesFunction<Env> = async (context) => {
     <meta name="twitter:title" content="${escapeHtml(titulo)}">
     <meta name="twitter:description" content="${escapeHtml(descricao)}">
     <meta name="twitter:image" content="${escapeHtml(imagemUrl)}">
-    
-    <!-- Redirecionamento instantâneo se um utilizador real abrir com User-Agent de bot -->
-    <meta http-equiv="refresh" content="0; url=${canonicalUrl}">
 </head>
 <body>
     <h1>${escapeHtml(titulo)}</h1>
     <p>${escapeHtml(descricao)}</p>
-    <img src="${escapeHtml(imagemUrl)}" alt="${escapeHtml(titulo)}">
-    <p><a href="${canonicalUrl}">Ler notícia completa no website do Basket Clube de Valença</a></p>
+    <img src="${escapeHtml(imagemUrl)}" alt="${escapeHtml(titulo)}" width="1200" height="630">
+    <p><a href="${canonicalUrl}">Ler artigo completo no Basket Clube de Valença</a></p>
 </body>
 </html>`;
                         return new Response(botHtml, {
@@ -124,19 +139,19 @@ export const onRequest: PagesFunction<Env> = async (context) => {
                         });
                     }
 
-                    // 2. Se for um utilizador comum no browser, aplicar HTMLRewriter na resposta normal
-                    const response = await context.next();
-                    
-                    // Handlers para reescrever as tags de cabeçalho
-                    class RemoveHandler {
-                        element(element: Element) {
-                            element.remove();
+                    // 2. Se for um utilizador comum no browser numa página de notícia, injetar as tags dinâmicas no HTML da página
+                    if (isSpecificNoticia) {
+                        const response = await context.next();
+                        
+                        class RemoveHandler {
+                            element(element: Element) {
+                                element.remove();
+                            }
                         }
-                    }
 
-                    class HeadHandler {
-                        element(element: Element) {
-                            element.append(`
+                        class HeadHandler {
+                            element(element: Element) {
+                                element.append(`
     <!-- Open Graph Dinâmico (Facebook / Redes Sociais) -->
     <title>${escapeHtml(titulo)} | Basket Clube de Valença</title>
     <meta name="description" content="${escapeHtml(descricao)}">
@@ -157,16 +172,17 @@ export const onRequest: PagesFunction<Env> = async (context) => {
     <meta name="twitter:description" content="${escapeHtml(descricao)}">
     <meta name="twitter:image" content="${escapeHtml(imagemUrl)}">
 `, { html: true });
+                            }
                         }
-                    }
 
-                    return new HTMLRewriter()
-                        .on('title', new RemoveHandler())
-                        .on('meta[property^="og:"]', new RemoveHandler())
-                        .on('meta[name^="twitter:"]', new RemoveHandler())
-                        .on('meta[name="description"]', new RemoveHandler())
-                        .on('head', new HeadHandler())
-                        .transform(response);
+                        return new HTMLRewriter()
+                            .on('title', new RemoveHandler())
+                            .on('meta[property^="og:"]', new RemoveHandler())
+                            .on('meta[name^="twitter:"]', new RemoveHandler())
+                            .on('meta[name="description"]', new RemoveHandler())
+                            .on('head', new HeadHandler())
+                            .transform(response);
+                    }
                 }
             }
         } catch (err) {
