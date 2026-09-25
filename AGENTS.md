@@ -94,3 +94,4 @@
 - [2026-09-25] Gemini: Simplificação do cabeçalho de competicoes.html com a remoção do card Clube Oficial FPB nº 656 e do texto descritivo longo, mantendo apenas o título Competições Oficiais.
 - [2026-09-25] Gemini: Implementação de abas dinâmicas nos cards de Competições (1 - Agenda, 2 - Resultados) com expansão interativa de jogos via Supabase e eliminação do link de plantel.
 - [2026-09-25] Gemini: Módulo Gestão de Competições no Admin com controlo de visibilidade Sim/Não (1 toque), KPIs, CRUD completo, persistência em clube_config e sincronização dinâmica com competicoes.html.
+- [2026-09-25] Gemini: Resolução do erro de sincronização FPB no Admin via Cloudflare Pages Function nativa (/api/sync-fpb), múltiplos proxies resilientes com trailing slash e upsert resiliente.

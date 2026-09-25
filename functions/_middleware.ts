@@ -25,8 +25,9 @@ export const onRequest: PagesFunction<Env> = async (context) => {
     const url = new URL(context.request.url);
     const { pathname, searchParams } = url;
 
-    // Ignorar ficheiros estáticos (imagens, css, js, fontes, documentos)
+    // Ignorar ficheiros estáticos (imagens, css, js, fontes, documentos) e rotas de API
     if (
+        pathname.startsWith('/api/') ||
         pathname.startsWith('/assets/') ||
         pathname.startsWith('/css/') ||
         pathname.startsWith('/js/') ||

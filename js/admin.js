@@ -4037,35 +4037,66 @@ document.addEventListener('DOMContentLoaded', async () => {
         try {
             let jogos = [];
 
-            // 1. Tentar Edge Function Supabase primeiro
+            // 1. Tentar Endpoint da Cloudflare Pages (/api/sync-fpb)
             try {
-                const edgeRes = await fetch(`${SUPABASE_URL}/functions/v1/sync-fpb?preview=true`, {
-                    headers: {
-                        'apikey': SUPABASE_ANON_KEY,
-                        'Authorization': `Bearer ${SUPABASE_ANON_KEY}`
-                    }
-                });
-                if (edgeRes.ok) {
-                    const data = await edgeRes.json();
-                    if (data && data.jogos && data.jogos.length > 0) {
+                const cfRes = await fetch('/api/sync-fpb?preview=true');
+                if (cfRes.ok) {
+                    const data = await cfRes.json();
+                    if (data && data.success && Array.isArray(data.jogos) && data.jogos.length > 0) {
                         jogos = data.jogos;
                     }
                 }
-            } catch (eEdge) {
-                console.warn("Edge Function sync-fpb indisponível, a usar fallback de leitura direta...", eEdge);
+            } catch (eCf) {
+                console.warn("Endpoint Cloudflare /api/sync-fpb indisponível, tentando Edge Function...", eCf);
             }
 
-            // 2. Fallback: Leitura via Proxy CORS caso a Edge Function não esteja deployed
+            // 2. Tentar Edge Function Supabase
             if (jogos.length === 0) {
-                const proxyUrl = `https://api.allorigins.win/raw?url=${encodeURIComponent('https://www.fpb.pt/calendario/clube_656')}`;
-                const res = await fetch(proxyUrl);
-                if (!res.ok) throw new Error("Não foi possível aceder à página da FPB.");
-                const html = await res.text();
-                jogos = parseFPBHtml(html);
+                try {
+                    const edgeRes = await fetch(`${SUPABASE_URL}/functions/v1/sync-fpb?preview=true`, {
+                        headers: {
+                            'apikey': SUPABASE_ANON_KEY,
+                            'Authorization': `Bearer ${SUPABASE_ANON_KEY}`
+                        }
+                    });
+                    if (edgeRes.ok) {
+                        const data = await edgeRes.json();
+                        if (data && data.jogos && data.jogos.length > 0) {
+                            jogos = data.jogos;
+                        }
+                    }
+                } catch (eEdge) {
+                    console.warn("Edge Function sync-fpb indisponível, a tentar proxies diretos...", eEdge);
+                }
+            }
+
+            // 3. Fallback: Proxies CORS com URL canónica oficial da FPB (com barra final obrigatória)
+            if (jogos.length === 0) {
+                const targetUrl = 'https://www.fpb.pt/calendario/clube_656/';
+                const proxies = [
+                    `https://api.allorigins.win/raw?url=${encodeURIComponent(targetUrl)}`,
+                    `https://corsproxy.io/?${encodeURIComponent(targetUrl)}`,
+                    `https://api.codetabs.com/v1/proxy?quest=${encodeURIComponent(targetUrl)}`
+                ];
+
+                for (const proxyUrl of proxies) {
+                    try {
+                        const res = await fetch(proxyUrl);
+                        if (res.ok) {
+                            const html = await res.text();
+                            if (html && (html.includes('day-wrapper') || html.includes('ficha-de-jogo'))) {
+                                jogos = parseFPBHtml(html);
+                                if (jogos.length > 0) break;
+                            }
+                        }
+                    } catch (eProxy) {
+                        console.warn(`Proxy ${proxyUrl} falhou:`, eProxy);
+                    }
+                }
             }
 
             if (!jogos || jogos.length === 0) {
-                throw new Error("Nenhum jogo encontrado no calendário oficial da FPB para o Basket Clube de Valença.");
+                throw new Error("Não foi possível aceder aos dados da FPB nem pelos serviços do servidor nem pelos proxies auxiliares. Por favor tente novamente dentro de momentos.");
             }
 
             currentFPBGames = jogos;
@@ -4144,39 +4175,76 @@ document.addEventListener('DOMContentLoaded', async () => {
                     console.warn("RPC indisponível, a executar upsert manual de fallback...", eRpc);
                 }
 
-                // 2. Se a RPC não estiver disponível, faz upsert direto
+                // 2. Se a RPC não estiver configurada no Supabase, executa sincronização manual resiliente
                 if (!rpcSucesso) {
                     for (const jogo of currentFPBGames) {
-                        if (jogo.is_resultado) {
-                            await supabase.from('resultados_bcv').upsert({
-                                data_jogo: jogo.data_jogo,
-                                equipa_casa: jogo.equipa_casa,
-                                equipa_fora: jogo.equipa_fora,
-                                pontos_casa: jogo.pontos_casa,
-                                pontos_fora: jogo.pontos_fora,
-                                escalao: jogo.escalao,
-                                local: jogo.local,
-                                competicao: jogo.competicao,
-                                fpb_id: jogo.fpb_id
-                            }, { onConflict: 'data_jogo,equipa_casa,equipa_fora' });
+                        try {
+                            if (jogo.is_resultado) {
+                                // Verificar se jogo já existe em resultados
+                                let query = supabase.from('resultados_bcv').select('id');
+                                if (jogo.fpb_id) {
+                                    query = query.eq('fpb_id', jogo.fpb_id);
+                                } else {
+                                    query = query.eq('data_jogo', jogo.data_jogo).ilike('equipa_casa', jogo.equipa_casa).ilike('equipa_fora', jogo.equipa_fora);
+                                }
+                                const { data: existRes } = await query.limit(1);
 
-                            // Limpar da agenda se existir
-                            await supabase.from('agenda_bcv')
-                                .delete()
-                                .eq('data_jogo', jogo.data_jogo)
-                                .ilike('equipa_casa', jogo.equipa_casa)
-                                .ilike('equipa_fora', jogo.equipa_fora);
-                        } else {
-                            await supabase.from('agenda_bcv').upsert({
-                                data_jogo: jogo.data_jogo,
-                                hora_jogo: jogo.hora_jogo,
-                                equipa_casa: jogo.equipa_casa,
-                                equipa_fora: jogo.equipa_fora,
-                                local: jogo.local,
-                                escalao: jogo.escalao,
-                                competicao: jogo.competicao,
-                                fpb_id: jogo.fpb_id
-                            }, { onConflict: 'data_jogo,equipa_casa,equipa_fora' });
+                                const resData = {
+                                    data_jogo: jogo.data_jogo,
+                                    equipa_casa: jogo.equipa_casa,
+                                    equipa_fora: jogo.equipa_fora,
+                                    pontos_casa: jogo.pontos_casa,
+                                    pontos_fora: jogo.pontos_fora,
+                                    escalao: jogo.escalao,
+                                    local: jogo.local,
+                                    competicao: jogo.competicao,
+                                    fpb_id: jogo.fpb_id
+                                };
+
+                                if (existRes && existRes.length > 0) {
+                                    await supabase.from('resultados_bcv').update(resData).eq('id', existRes[0].id);
+                                } else {
+                                    await supabase.from('resultados_bcv').insert(resData);
+                                }
+
+                                // Remover da agenda se ainda constava como jogo futuro
+                                let delQuery = supabase.from('agenda_bcv').delete();
+                                if (jogo.fpb_id) {
+                                    delQuery = delQuery.eq('fpb_id', jogo.fpb_id);
+                                } else {
+                                    delQuery = delQuery.eq('data_jogo', jogo.data_jogo).ilike('equipa_casa', jogo.equipa_casa).ilike('equipa_fora', jogo.equipa_fora);
+                                }
+                                await delQuery;
+
+                            } else {
+                                // Verificar se jogo já existe na agenda
+                                let query = supabase.from('agenda_bcv').select('id');
+                                if (jogo.fpb_id) {
+                                    query = query.eq('fpb_id', jogo.fpb_id);
+                                } else {
+                                    query = query.eq('data_jogo', jogo.data_jogo).ilike('equipa_casa', jogo.equipa_casa).ilike('equipa_fora', jogo.equipa_fora);
+                                }
+                                const { data: existAg } = await query.limit(1);
+
+                                const agData = {
+                                    data_jogo: jogo.data_jogo,
+                                    hora_jogo: jogo.hora_jogo,
+                                    equipa_casa: jogo.equipa_casa,
+                                    equipa_fora: jogo.equipa_fora,
+                                    local: jogo.local,
+                                    escalao: jogo.escalao,
+                                    competicao: jogo.competicao,
+                                    fpb_id: jogo.fpb_id
+                                };
+
+                                if (existAg && existAg.length > 0) {
+                                    await supabase.from('agenda_bcv').update(agData).eq('id', existAg[0].id);
+                                } else {
+                                    await supabase.from('agenda_bcv').insert(agData);
+                                }
+                            }
+                        } catch (errJogo) {
+                            console.warn("Aviso ao guardar jogo FPB:", jogo, errJogo);
                         }
                     }
                 }
