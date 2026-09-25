@@ -4035,7 +4035,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         return games;
     }
 
-    async function abrirModalSyncFPB() {
+    async function abrirModalSyncFPB(tipoOrigem = 'todos') {
         if (!modalSyncFPB) return;
         modalSyncFPB.classList.remove('hidden');
         syncLoading.style.display = 'block';
@@ -4356,6 +4356,7 @@ document.addEventListener('DOMContentLoaded', async () => {
 
     if (btnSyncFPBAgenda) btnSyncFPBAgenda.addEventListener('click', () => abrirModalSyncFPB('agenda'));
     if (btnSyncFPBResultados) btnSyncFPBResultados.addEventListener('click', () => abrirModalSyncFPB('resultados'));
+    window.abrirModalSyncFPB = abrirModalSyncFPB;
 
     // Confirmar e Executar Importação dos Jogos Selecionados
     if (btnConfirmImportFPB) {
