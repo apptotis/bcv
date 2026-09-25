@@ -92,3 +92,4 @@
 - [2026-09-21] Gemini: Exibição de Username/Alcunha para a Equipa Técnica em equipas.html, links diretos de partilha social e correção de submenus do Drawer em noticias e equipas.
 - [2026-09-25] Gemini: Implementação do Sistema de Sincronização Oficial FPB (ID 656) para Agenda/Resultados, página dedicada competicoes.html, e middleware Cloudflare Pages com Open Graph dinâmico (og:title, og:image) para partilha de notícias no Facebook/WhatsApp.
 - [2026-09-25] Gemini: Simplificação do cabeçalho de competicoes.html com a remoção do card Clube Oficial FPB nº 656 e do texto descritivo longo, mantendo apenas o título Competições Oficiais.
+- [2026-09-25] Gemini: Implementação de abas dinâmicas nos cards de Competições (1 - Agenda, 2 - Resultados) com expansão interativa de jogos via Supabase e eliminação do link de plantel.

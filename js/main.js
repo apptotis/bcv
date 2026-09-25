@@ -841,36 +841,168 @@ async function loadCompeticoesSection(supabase) {
     ];
 
     try {
-        let equipasMap = {};
+        let allAgenda = [];
+        let allResultados = [];
+
         if (supabase) {
-            const { data: equipas } = await supabase
-                .from('equipasbcv')
-                .select('id, nome, escalao, sexo');
-            
-            if (equipas && equipas.length > 0) {
-                equipas.forEach(eq => {
-                    const esc = (eq.escalao || '').toLowerCase().replace(/[^a-z0-9]/g, '');
-                    const sex = (eq.sexo || '').toLowerCase();
-                    equipasMap[`${esc}_${sex}`] = eq;
-                    if (!equipasMap[esc]) {
-                        equipasMap[esc] = eq;
-                    }
-                });
-            }
+            const [agendaRes, resultadosRes] = await Promise.all([
+                supabase.from('agenda_bcv').select('*').order('data_jogo', { ascending: true }),
+                supabase.from('resultados_bcv').select('*').order('data_jogo', { ascending: false })
+            ]);
+
+            if (agendaRes && agendaRes.data) allAgenda = agendaRes.data;
+            if (resultadosRes && resultadosRes.data) allResultados = resultadosRes.data;
         }
+
+        // Função de correspondência inteligente de jogos com a competição
+        const matchJogoCompeticao = (j, comp) => {
+            if (!j) return false;
+            const sigla = (comp.sigla || '').toLowerCase();
+            const escalaoComp = (comp.escalao || '').toLowerCase().replace(/[^a-z0-9]/g, '');
+            const sexoComp = (comp.sexo || '').toLowerCase();
+
+            const jComp = (j.competicao || '').toLowerCase();
+            const jEsc = (j.escalao || '').toLowerCase().replace(/[^a-z0-9]/g, '');
+            const jCasa = (j.equipa_casa || '').toLowerCase();
+            const jFora = (j.equipa_fora || '').toLowerCase();
+
+            // 1. Taça de Portugal
+            if (sigla.includes('taça') || sigla.includes('taca')) {
+                return jComp.includes('taça') || jComp.includes('taca');
+            }
+
+            // 2. CN2 Nacional
+            if (sigla === 'cn2') {
+                if (jComp.includes('cn2') || jComp.includes('2ª div') || jComp.includes('2a div') || jComp.includes('nacional')) {
+                    return true;
+                }
+                if ((jEsc === 'seniores' || jEsc.includes('senior')) && !jComp.includes('taça') && !jComp.includes('taca')) {
+                    return true;
+                }
+                return false;
+            }
+
+            // 3. Minibasquete
+            if (sigla === 'minibasquete') {
+                const miniKeys = ['mini12', 'mini10', 'mini8', 'babybasket', 'minibasquete'];
+                return miniKeys.some(k => jEsc.includes(k) || jComp.includes(k));
+            }
+
+            // 4. Escalões de Formação por escalão e género
+            if (escalaoComp && jEsc === escalaoComp) {
+                const isFem = jComp.includes('fem') || jCasa.includes('fem') || jFora.includes('fem') || jEsc.includes('fem');
+                if (sexoComp === 'feminino') return isFem;
+                if (sexoComp === 'masculino') return !isFem;
+                return true;
+            }
+
+            // Fallback por texto da competição FPB
+            if (sigla.includes('sub 18') && (jComp.includes('sub 18') || jComp.includes('sub-18') || jComp.includes('sub18'))) return true;
+            if (sigla.includes('sub 16') && (jComp.includes('sub 16') || jComp.includes('sub-16') || jComp.includes('sub16'))) {
+                const isFem = jComp.includes('fem') || jCasa.includes('fem') || jFora.includes('fem');
+                return sexoComp === 'feminino' ? isFem : !isFem;
+            }
+            if (sigla.includes('sub 14') && (jComp.includes('sub 14') || jComp.includes('sub-14') || jComp.includes('sub14'))) {
+                const isFem = jComp.includes('fem') || jCasa.includes('fem') || jFora.includes('fem');
+                return sexoComp === 'feminino' ? isFem : !isFem;
+            }
+
+            return false;
+        };
+
+        // Formatação de data em português
+        const formatDataComp = (dateStr) => {
+            if (!dateStr) return '';
+            try {
+                const parts = dateStr.split('-');
+                if (parts.length === 3) {
+                    const d = new Date(parseInt(parts[0], 10), parseInt(parts[1], 10) - 1, parseInt(parts[2], 10));
+                    return d.toLocaleDateString('pt-PT', { weekday: 'short', day: 'numeric', month: 'short' });
+                }
+                return new Date(dateStr).toLocaleDateString('pt-PT', { weekday: 'short', day: 'numeric', month: 'short' });
+            } catch (e) {
+                return dateStr;
+            }
+        };
+
+        // Renderizadores HTML dos jogos
+        const renderAgendaList = (jogos) => {
+            if (!jogos || jogos.length === 0) {
+                return `
+                    <div class="comp-games-empty">
+                        <span class="empty-icon">📅</span>
+                        <span>Sem jogos agendados no momento.</span>
+                    </div>
+                `;
+            }
+            return `
+                <div class="comp-games-list">
+                    ${jogos.map(j => {
+                        const dataFmt = formatDataComp(j.data_jogo);
+                        const horaFmt = j.hora_jogo ? j.hora_jogo.substring(0, 5) : 'Hora a def.';
+                        const isCasaBCV = (j.equipa_casa || '').toLowerCase().includes('valença') || (j.equipa_casa || '').toLowerCase().includes('bcv');
+                        const isForaBCV = (j.equipa_fora || '').toLowerCase().includes('valença') || (j.equipa_fora || '').toLowerCase().includes('bcv');
+                        return `
+                            <div class="comp-game-card">
+                                <div class="comp-game-date-row">
+                                    <span>📅 ${dataFmt}</span>
+                                    <span class="game-hour">${horaFmt}</span>
+                                </div>
+                                <div class="comp-game-match-row">
+                                    <span class="comp-game-team ${isCasaBCV ? 'is-bcv' : ''}" title="${j.equipa_casa}">${j.equipa_casa}</span>
+                                    <span class="comp-game-vs">vs</span>
+                                    <span class="comp-game-team ${isForaBCV ? 'is-bcv' : ''}" title="${j.equipa_fora}">${j.equipa_fora}</span>
+                                </div>
+                                ${j.local ? `<div class="comp-game-venue">📍 ${j.local}</div>` : ''}
+                            </div>
+                        `;
+                    }).join('')}
+                </div>
+            `;
+        };
+
+        const renderResultadosList = (jogos) => {
+            if (!jogos || jogos.length === 0) {
+                return `
+                    <div class="comp-games-empty">
+                        <span class="empty-icon">🏁</span>
+                        <span>Ainda sem resultados registados.</span>
+                    </div>
+                `;
+            }
+            return `
+                <div class="comp-games-list">
+                    ${jogos.map(j => {
+                        const dataFmt = formatDataComp(j.data_jogo);
+                        const isCasaBCV = (j.equipa_casa || '').toLowerCase().includes('valença') || (j.equipa_casa || '').toLowerCase().includes('bcv');
+                        const isForaBCV = (j.equipa_fora || '').toLowerCase().includes('valença') || (j.equipa_fora || '').toLowerCase().includes('bcv');
+                        const ptsCasa = Number(j.pontos_casa) || 0;
+                        const ptsFora = Number(j.pontos_fora) || 0;
+                        return `
+                            <div class="comp-game-card">
+                                <div class="comp-game-date-row">
+                                    <span>📅 ${dataFmt}</span>
+                                    <span class="game-hour">${j.competicao || ''}</span>
+                                </div>
+                                <div class="comp-game-match-row">
+                                    <span class="comp-game-team ${isCasaBCV ? 'is-bcv' : ''}" title="${j.equipa_casa}">${j.equipa_casa}</span>
+                                    <span class="comp-game-score">${ptsCasa} - ${ptsFora}</span>
+                                    <span class="comp-game-team ${isForaBCV ? 'is-bcv' : ''}" title="${j.equipa_fora}">${j.equipa_fora}</span>
+                                </div>
+                            </div>
+                        `;
+                    }).join('')}
+                </div>
+            `;
+        };
 
         grid.innerHTML = '';
         baseCompeticoes.forEach(comp => {
             const card = document.createElement('div');
             card.className = `competicao-card ${comp.tipo === 'nacional' ? 'nacional' : ''}`;
 
-            const esc = (comp.escalao || '').toLowerCase().replace(/[^a-z0-9]/g, '');
-            const sex = (comp.sexo || '').toLowerCase();
-            const eq = equipasMap[`${esc}_${sex}`] || equipasMap[esc];
-
-            const linkPlantel = eq 
-                ? `<a href="equipas.html?equipaId=${eq.id}" class="competicao-btn-link">👥 Ver Plantel →</a>`
-                : `<a href="equipas.html" class="competicao-btn-link">👥 Equipas →</a>`;
+            const jogosAgenda = allAgenda.filter(j => matchJogoCompeticao(j, comp));
+            const jogosResultados = allResultados.filter(j => matchJogoCompeticao(j, comp));
 
             card.innerHTML = `
                 <div>
@@ -887,11 +1019,65 @@ async function loadCompeticoesSection(supabase) {
                         ${comp.detalhe}
                     </p>
                 </div>
+
+                <!-- Abas 1 - Agenda e 2 - Resultados -->
+                <div class="competicao-tabs-bar">
+                    <button type="button" class="competicao-tab-btn" data-action="agenda">
+                        <span>📅 Agenda</span>
+                        ${jogosAgenda.length > 0 ? `<span class="tab-badge">${jogosAgenda.length}</span>` : ''}
+                    </button>
+                    <button type="button" class="competicao-tab-btn" data-action="resultados">
+                        <span>🏁 Resultados</span>
+                        ${jogosResultados.length > 0 ? `<span class="tab-badge">${jogosResultados.length}</span>` : ''}
+                    </button>
+                </div>
+
+                <!-- Painel Expansível de Jogos -->
+                <div class="competicao-tab-panel" style="display: none;"></div>
+
                 <div class="competicao-footer">
                     <span style="font-size: 0.75rem; color: var(--text-secondary); font-weight: 600;">Época 2026/2027</span>
-                    ${linkPlantel}
+                    <span style="font-size: 0.72rem; color: var(--accent-primary); font-weight: 700; background: rgba(126,34,206,0.08); padding: 2px 8px; border-radius: 4px;">FPB Oficial</span>
                 </div>
             `;
+
+            // Event Listeners das Abas
+            const btnAgenda = card.querySelector('.competicao-tab-btn[data-action="agenda"]');
+            const btnResultados = card.querySelector('.competicao-tab-btn[data-action="resultados"]');
+            const panel = card.querySelector('.competicao-tab-panel');
+            let currentTab = null;
+
+            const handleTabClick = (action) => {
+                if (currentTab === action) {
+                    panel.style.display = 'none';
+                    btnAgenda.classList.remove('active');
+                    btnResultados.classList.remove('active');
+                    currentTab = null;
+                } else {
+                    panel.style.display = 'block';
+                    if (action === 'agenda') {
+                        btnAgenda.classList.add('active');
+                        btnResultados.classList.remove('active');
+                        panel.innerHTML = renderAgendaList(jogosAgenda);
+                    } else {
+                        btnResultados.classList.add('active');
+                        btnAgenda.classList.remove('active');
+                        panel.innerHTML = renderResultadosList(jogosResultados);
+                    }
+                    currentTab = action;
+                }
+            };
+
+            btnAgenda.addEventListener('click', (e) => {
+                e.stopPropagation();
+                handleTabClick('agenda');
+            });
+
+            btnResultados.addEventListener('click', (e) => {
+                e.stopPropagation();
+                handleTabClick('resultados');
+            });
+
             grid.appendChild(card);
         });
 
@@ -899,6 +1085,7 @@ async function loadCompeticoesSection(supabase) {
         console.warn("Aviso ao carregar secção de competições:", err);
     }
 }
+
 
 
 
