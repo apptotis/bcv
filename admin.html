@@ -2393,20 +2393,45 @@
                                 </div>
                             </div>
 
-                            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
-                                <span style="font-weight: 700; font-size: 0.9rem; color: var(--text-primary);">Lista de Jogos Extraídos:</span>
-                                <span style="font-size: 0.78rem; color: var(--text-secondary);">Os jogos já existentes na BD serão atualizados sem duplicação.</span>
+                            <!-- Barra de Filtros e Seleção Rápida -->
+                            <div style="display: flex; flex-wrap: wrap; justify-content: space-between; align-items: center; gap: 10px; margin-bottom: 12px; padding: 10px 14px; background: #f8fafc; border: 1px solid var(--border-color); border-radius: 8px;">
+                                <div style="display: flex; align-items: center; gap: 12px; flex-wrap: wrap;">
+                                    <label style="display: flex; align-items: center; gap: 8px; font-weight: 700; font-size: 0.88rem; cursor: pointer; user-select: none; margin: 0; color: var(--text-primary);">
+                                        <input type="checkbox" id="sync-select-all-checkbox" checked style="width: 18px; height: 18px; accent-color: var(--accent-primary); cursor: pointer;">
+                                        <span>Selecionar Todos</span>
+                                    </label>
+                                    <span style="font-size: 0.8rem; color: #475569; background: #e2e8f0; padding: 3px 10px; border-radius: 12px; font-weight: 600;">
+                                        <span id="sync-selected-count" style="color: var(--accent-primary); font-weight: 800;">0</span> selecionados para o site
+                                    </span>
+                                </div>
+
+                                <div style="display: flex; align-items: center; gap: 8px; flex-wrap: wrap;">
+                                    <select id="sync-filter-tipo" style="padding: 6px 10px; font-size: 0.82rem; border-radius: 6px; border: 1px solid var(--border-color); background: #fff; font-weight: 500;">
+                                        <option value="todos">Todos os Jogos</option>
+                                        <option value="agenda">📅 Apenas Agenda (Futuros)</option>
+                                        <option value="resultados">🏆 Apenas Resultados</option>
+                                    </select>
+                                    <select id="sync-filter-escalao" style="padding: 6px 10px; font-size: 0.82rem; border-radius: 6px; border: 1px solid var(--border-color); background: #fff; font-weight: 500;">
+                                        <option value="todos">Todos os Escalões</option>
+                                    </select>
+                                    <button type="button" id="btn-sync-quick-invert" class="btn-secondary" style="padding: 6px 10px; font-size: 0.8rem; width: auto;" title="Inverter Seleção">Inverter</button>
+                                </div>
                             </div>
 
-                            <div id="sync-fpb-jogos-list" style="max-height: 380px; overflow-y: auto; border: 1px solid var(--border-color); border-radius: 8px; background: #fff; padding: 8px; display: flex; flex-direction: column; gap: 8px;">
-                                <!-- Lista de jogos gerada por JS -->
+                            <div id="sync-fpb-jogos-list" style="max-height: 400px; overflow-y: auto; border: 1px solid var(--border-color); border-radius: 8px; background: #fff; padding: 8px; display: flex; flex-direction: column; gap: 8px;">
+                                <!-- Lista de jogos gerada por JS com checkboxes -->
                             </div>
 
-                            <div style="display: flex; justify-content: flex-end; gap: 10px; margin-top: 16px; padding-top: 12px; border-top: 1px solid var(--border-color);">
-                                <button type="button" id="btn-cancel-sync-fpb" class="btn-secondary" style="width: auto; padding: 8px 18px;">Fechar</button>
-                                <button type="button" id="btn-confirm-import-fpb" class="btn-primary" style="background: linear-gradient(135deg, #16a34a, #15803d); width: auto; padding: 8px 24px; font-weight: 700; box-shadow: 0 4px 12px rgba(22, 163, 74, 0.3);">
-                                    📥 Importar e Atualizar no Site
-                                </button>
+                            <div style="display: flex; justify-content: space-between; align-items: center; gap: 10px; margin-top: 16px; padding-top: 12px; border-top: 1px solid var(--border-color); flex-wrap: wrap;">
+                                <div style="font-size: 0.82rem; color: var(--text-secondary);">
+                                    💡 <em>Apenas os jogos com visto marcado serão gravados e apresentados no frontend do site.</em>
+                                </div>
+                                <div style="display: flex; gap: 10px;">
+                                    <button type="button" id="btn-cancel-sync-fpb" class="btn-secondary" style="width: auto; padding: 8px 18px;">Fechar</button>
+                                    <button type="button" id="btn-confirm-import-fpb" class="btn-primary" style="background: linear-gradient(135deg, #16a34a, #15803d); width: auto; padding: 8px 24px; font-weight: 700; box-shadow: 0 4px 12px rgba(22, 163, 74, 0.3);">
+                                        📥 Publicar Selecionados (<span id="sync-confirm-count">0</span>)
+                                    </button>
+                                </div>
                             </div>
                         </div>
 

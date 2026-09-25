@@ -3555,7 +3555,9 @@ document.addEventListener('DOMContentLoaded', async () => {
     const btnSyncFPBResultados = document.getElementById('btn-sync-fpb-resultados');
 
     let currentAgendaGames = [];
+    let currentResultadosGames = [];
     let currentFPBGames = [];
+    let selectedFPBIndices = new Set();
 
     async function loadAgenda() {
         if (!agendaTableBody) return;
@@ -3877,6 +3879,7 @@ document.addEventListener('DOMContentLoaded', async () => {
                 .order('data_jogo', { ascending: false });
 
             if (error) throw error;
+            currentResultadosGames = data || [];
 
             resultadosTableBody.innerHTML = '';
             if (!data || data.length === 0) {
@@ -3925,6 +3928,12 @@ document.addEventListener('DOMContentLoaded', async () => {
     const syncSummary = document.getElementById('sync-fpb-summary');
     const syncStatusBox = document.getElementById('sync-fpb-status-box');
     const syncJogosList = document.getElementById('sync-fpb-jogos-list');
+    const syncSelectAllCb = document.getElementById('sync-select-all-checkbox');
+    const syncSelectedCount = document.getElementById('sync-selected-count');
+    const syncConfirmCount = document.getElementById('sync-confirm-count');
+    const syncFilterTipo = document.getElementById('sync-filter-tipo');
+    const syncFilterEscalao = document.getElementById('sync-filter-escalao');
+    const btnSyncQuickInvert = document.getElementById('btn-sync-quick-invert');
 
     function fecharModalSyncFPB() {
         if (modalSyncFPB) modalSyncFPB.classList.add('hidden');
@@ -4101,7 +4110,7 @@ document.addEventListener('DOMContentLoaded', async () => {
 
             currentFPBGames = jogos;
 
-            // Renderizar Resumo
+            // Renderizar Resumo dos contadores gerais
             const agendados = jogos.filter(j => !j.is_resultado);
             const resultados = jogos.filter(j => j.is_resultado);
 
@@ -4109,32 +4118,38 @@ document.addEventListener('DOMContentLoaded', async () => {
             document.getElementById('sync-count-agenda').textContent = agendados.length;
             document.getElementById('sync-count-resultados').textContent = resultados.length;
 
-            syncJogosList.innerHTML = '';
-            jogos.forEach(jogo => {
-                const card = document.createElement('div');
-                card.style.cssText = "display: flex; justify-content: space-between; align-items: center; padding: 10px 14px; border-radius: 8px; background: #f8fafc; border: 1px solid var(--border-color); flex-wrap: wrap; gap: 8px;";
-                
-                const badge = jogo.is_resultado 
-                    ? `<span style="background: rgba(22, 163, 74, 0.15); color: #16a34a; font-weight: 700; font-size: 0.75rem; padding: 2px 8px; border-radius: 4px;">🏆 ${jogo.pontos_casa} - ${jogo.pontos_fora}</span>`
-                    : `<span style="background: rgba(37, 99, 235, 0.12); color: #2563eb; font-weight: 700; font-size: 0.75rem; padding: 2px 8px; border-radius: 4px;">📅 ${jogo.hora_jogo || 'A definir'}</span>`;
+            // Popular filtro de escalões dinamicamente
+            if (syncFilterEscalao) {
+                syncFilterEscalao.innerHTML = '<option value="todos">Todos os Escalões</option>';
+                const escaloesUnicos = [...new Set(jogos.map(j => j.escalao).filter(Boolean))].sort();
+                escaloesUnicos.forEach(esc => {
+                    const opt = document.createElement('option');
+                    opt.value = esc;
+                    opt.textContent = esc;
+                    syncFilterEscalao.appendChild(opt);
+                });
+            }
 
-                card.innerHTML = `
-                    <div style="flex: 1; min-width: 200px;">
-                        <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 2px;">
-                            ${badge}
-                            <span style="font-weight: 700; font-size: 0.88rem; color: var(--text-primary);">${jogo.equipa_casa} vs ${jogo.equipa_fora}</span>
-                            <span style="font-size: 0.75rem; background: rgba(126, 34, 206, 0.1); color: #7e22ce; padding: 1px 6px; border-radius: 4px; font-weight: 600;">${jogo.escalao}</span>
-                        </div>
-                        <div style="font-size: 0.76rem; color: var(--text-secondary);">
-                            <span>📍 ${jogo.local || 'Pavilhão'}</span> • <span>${jogo.competicao || 'Campeonato'}</span>
-                        </div>
-                    </div>
-                    <div style="font-weight: 700; font-size: 0.85rem; color: var(--text-primary); white-space: nowrap;">
-                        ${formatDate(jogo.data_jogo)}
-                    </div>
-                `;
-                syncJogosList.appendChild(card);
+            // Configurar filtro inicial baseado na origem do clique
+            if (syncFilterTipo) {
+                if (tipoOrigem === 'agenda') syncFilterTipo.value = 'agenda';
+                else if (tipoOrigem === 'resultados') syncFilterTipo.value = 'resultados';
+                else syncFilterTipo.value = 'todos';
+            }
+
+            // Seleção inicial: pre-selecionar os jogos relevantes à origem
+            selectedFPBIndices.clear();
+            jogos.forEach((j, idx) => {
+                if (tipoOrigem === 'agenda') {
+                    if (!j.is_resultado) selectedFPBIndices.add(idx);
+                } else if (tipoOrigem === 'resultados') {
+                    if (j.is_resultado) selectedFPBIndices.add(idx);
+                } else {
+                    selectedFPBIndices.add(idx);
+                }
             });
+
+            renderSyncJogosList();
 
             syncLoading.style.display = 'none';
             syncSummary.style.display = 'block';
@@ -4150,23 +4165,218 @@ document.addEventListener('DOMContentLoaded', async () => {
         }
     }
 
-    if (btnSyncFPBAgenda) btnSyncFPBAgenda.addEventListener('click', abrirModalSyncFPB);
-    if (btnSyncFPBResultados) btnSyncFPBResultados.addEventListener('click', abrirModalSyncFPB);
+    // Verificar se o jogo já existe na base de dados (agenda ou resultados)
+    function isJogoInDb(jogo) {
+        if (!jogo) return false;
+        if (jogo.is_resultado) {
+            return currentResultadosGames.some(r => 
+                (jogo.fpb_id && r.fpb_id && r.fpb_id === jogo.fpb_id) ||
+                (r.data_jogo === jogo.data_jogo && 
+                 r.equipa_casa && jogo.equipa_casa && r.equipa_casa.trim().toLowerCase() === jogo.equipa_casa.trim().toLowerCase() && 
+                 r.equipa_fora && jogo.equipa_fora && r.equipa_fora.trim().toLowerCase() === jogo.equipa_fora.trim().toLowerCase())
+            );
+        } else {
+            return currentAgendaGames.some(a => 
+                (jogo.fpb_id && a.fpb_id && a.fpb_id === jogo.fpb_id) ||
+                (a.data_jogo === jogo.data_jogo && 
+                 a.equipa_casa && jogo.equipa_casa && a.equipa_casa.trim().toLowerCase() === jogo.equipa_casa.trim().toLowerCase() && 
+                 a.equipa_fora && jogo.equipa_fora && a.equipa_fora.trim().toLowerCase() === jogo.equipa_fora.trim().toLowerCase())
+            );
+        }
+    }
 
-    // Confirmar e Executar Importação dos Jogos
+    // Atualizar contadores e estado do botão de confirmação e checkbox principal
+    function updateSyncCounters(visibleFiltered) {
+        const totalSelected = selectedFPBIndices.size;
+        if (syncSelectedCount) syncSelectedCount.textContent = totalSelected;
+        if (syncConfirmCount) syncConfirmCount.textContent = totalSelected;
+
+        if (btnConfirmImportFPB) {
+            btnConfirmImportFPB.disabled = (totalSelected === 0);
+            btnConfirmImportFPB.style.opacity = totalSelected === 0 ? '0.5' : '1';
+            btnConfirmImportFPB.style.cursor = totalSelected === 0 ? 'not-allowed' : 'pointer';
+            btnConfirmImportFPB.textContent = `📥 Publicar Selecionados (${totalSelected})`;
+        }
+
+        if (syncSelectAllCb && visibleFiltered && visibleFiltered.length > 0) {
+            const allVisibleSelected = visibleFiltered.every(({ originalIndex }) => selectedFPBIndices.has(originalIndex));
+            const someVisibleSelected = visibleFiltered.some(({ originalIndex }) => selectedFPBIndices.has(originalIndex));
+            syncSelectAllCb.checked = allVisibleSelected;
+            syncSelectAllCb.indeterminate = !allVisibleSelected && someVisibleSelected;
+        } else if (syncSelectAllCb) {
+            syncSelectAllCb.checked = false;
+            syncSelectAllCb.indeterminate = false;
+        }
+    }
+
+    // Renderizar a lista de jogos com seleção por checkbox
+    function renderSyncJogosList() {
+        if (!syncJogosList) return;
+        syncJogosList.innerHTML = '';
+
+        const filterTipo = syncFilterTipo ? syncFilterTipo.value : 'todos';
+        const filterEscalao = syncFilterEscalao ? syncFilterEscalao.value : 'todos';
+
+        const filtered = [];
+        currentFPBGames.forEach((jogo, idx) => {
+            if (filterTipo === 'agenda' && jogo.is_resultado) return;
+            if (filterTipo === 'resultados' && !jogo.is_resultado) return;
+            if (filterEscalao !== 'todos' && jogo.escalao !== filterEscalao) return;
+            filtered.push({ jogo, originalIndex: idx });
+        });
+
+        if (filtered.length === 0) {
+            syncJogosList.innerHTML = `
+                <div style="padding: 30px 15px; text-align: center; color: var(--text-secondary);">
+                    <div style="font-size: 1.5rem; margin-bottom: 6px;">🔍</div>
+                    <p style="margin: 0; font-size: 0.9rem;">Nenhum jogo encontrado para os filtros selecionados.</p>
+                </div>
+            `;
+            updateSyncCounters(filtered);
+            return;
+        }
+
+        filtered.forEach(({ jogo, originalIndex }) => {
+            const isSelected = selectedFPBIndices.has(originalIndex);
+            const inDb = isJogoInDb(jogo);
+
+            const card = document.createElement('div');
+            card.className = 'sync-game-card';
+            card.style.cssText = `
+                display: flex;
+                align-items: center;
+                gap: 12px;
+                padding: 10px 14px;
+                border-radius: 8px;
+                background: ${isSelected ? '#fbf8ff' : '#f8fafc'};
+                border: 1.5px solid ${isSelected ? '#9333ea' : 'var(--border-color)'};
+                box-shadow: ${isSelected ? '0 2px 8px rgba(147, 51, 234, 0.12)' : 'none'};
+                cursor: pointer;
+                transition: all 0.15s ease;
+                user-select: none;
+            `;
+
+            const badgeStatus = jogo.is_resultado 
+                ? `<span style="background: rgba(22, 163, 74, 0.15); color: #16a34a; font-weight: 700; font-size: 0.75rem; padding: 2px 8px; border-radius: 4px;">🏆 ${jogo.pontos_casa} - ${jogo.pontos_fora}</span>`
+                : `<span style="background: rgba(37, 99, 235, 0.12); color: #2563eb; font-weight: 700; font-size: 0.75rem; padding: 2px 8px; border-radius: 4px;">📅 ${jogo.hora_jogo || 'A definir'}</span>`;
+
+            const badgeDb = inDb 
+                ? `<span style="font-size: 0.72rem; background: #e0f2fe; color: #0284c7; padding: 1px 6px; border-radius: 4px; font-weight: 600;" title="Este jogo já está registado na base de dados">✓ Já no site</span>`
+                : `<span style="font-size: 0.72rem; background: #fef08a; color: #854d0e; padding: 1px 6px; border-radius: 4px; font-weight: 600;" title="Novo jogo ainda não importado">⭐ Novo</span>`;
+
+            card.innerHTML = `
+                <input type="checkbox" class="sync-item-cb" data-index="${originalIndex}" ${isSelected ? 'checked' : ''} style="width: 20px; height: 20px; accent-color: #7e22ce; cursor: pointer; flex-shrink: 0;">
+                <div style="flex: 1; min-width: 180px;">
+                    <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 3px; flex-wrap: wrap;">
+                        ${badgeStatus}
+                        <strong style="font-size: 0.9rem; color: var(--text-primary);">${jogo.equipa_casa} vs ${jogo.equipa_fora}</strong>
+                        <span style="font-size: 0.75rem; background: rgba(126, 34, 206, 0.1); color: #7e22ce; padding: 1px 6px; border-radius: 4px; font-weight: 600;">${jogo.escalao}</span>
+                        ${badgeDb}
+                    </div>
+                    <div style="font-size: 0.77rem; color: var(--text-secondary); display: flex; align-items: center; gap: 10px; flex-wrap: wrap;">
+                        <span>📍 ${jogo.local || 'Pavilhão'}</span>
+                        <span>•</span>
+                        <span>🏆 ${jogo.competicao || 'Competição Oficial FPB'}</span>
+                    </div>
+                </div>
+                <div style="text-align: right; white-space: nowrap;">
+                    <div style="font-weight: 700; font-size: 0.88rem; color: var(--text-primary);">${formatDate(jogo.data_jogo)}</div>
+                    <div style="font-size: 0.74rem; color: var(--text-secondary);">${jogo.is_resultado ? 'Terminado' : (jogo.hora_jogo || 'Hora a definir')}</div>
+                </div>
+            `;
+
+            const cb = card.querySelector('.sync-item-cb');
+            card.addEventListener('click', (e) => {
+                if (e.target !== cb) {
+                    cb.checked = !cb.checked;
+                }
+                if (cb.checked) {
+                    selectedFPBIndices.add(originalIndex);
+                    card.style.background = '#fbf8ff';
+                    card.style.borderColor = '#9333ea';
+                    card.style.boxShadow = '0 2px 8px rgba(147, 51, 234, 0.12)';
+                } else {
+                    selectedFPBIndices.delete(originalIndex);
+                    card.style.background = '#f8fafc';
+                    card.style.borderColor = 'var(--border-color)';
+                    card.style.boxShadow = 'none';
+                }
+                updateSyncCounters(filtered);
+            });
+
+            syncJogosList.appendChild(card);
+        });
+
+        updateSyncCounters(filtered);
+    }
+
+    // Controlos da barra de seleção
+    if (syncSelectAllCb) {
+        syncSelectAllCb.addEventListener('change', () => {
+            const filterTipo = syncFilterTipo ? syncFilterTipo.value : 'todos';
+            const filterEscalao = syncFilterEscalao ? syncFilterEscalao.value : 'todos';
+
+            currentFPBGames.forEach((jogo, idx) => {
+                if (filterTipo === 'agenda' && jogo.is_resultado) return;
+                if (filterTipo === 'resultados' && !jogo.is_resultado) return;
+                if (filterEscalao !== 'todos' && jogo.escalao !== filterEscalao) return;
+
+                if (syncSelectAllCb.checked) {
+                    selectedFPBIndices.add(idx);
+                } else {
+                    selectedFPBIndices.delete(idx);
+                }
+            });
+            renderSyncJogosList();
+        });
+    }
+
+    if (btnSyncQuickInvert) {
+        btnSyncQuickInvert.addEventListener('click', () => {
+            const filterTipo = syncFilterTipo ? syncFilterTipo.value : 'todos';
+            const filterEscalao = syncFilterEscalao ? syncFilterEscalao.value : 'todos';
+
+            currentFPBGames.forEach((jogo, idx) => {
+                if (filterTipo === 'agenda' && jogo.is_resultado) return;
+                if (filterTipo === 'resultados' && !jogo.is_resultado) return;
+                if (filterEscalao !== 'todos' && jogo.escalao !== filterEscalao) return;
+
+                if (selectedFPBIndices.has(idx)) {
+                    selectedFPBIndices.delete(idx);
+                } else {
+                    selectedFPBIndices.add(idx);
+                }
+            });
+            renderSyncJogosList();
+        });
+    }
+
+    if (syncFilterTipo) syncFilterTipo.addEventListener('change', renderSyncJogosList);
+    if (syncFilterEscalao) syncFilterEscalao.addEventListener('change', renderSyncJogosList);
+
+    if (btnSyncFPBAgenda) btnSyncFPBAgenda.addEventListener('click', () => abrirModalSyncFPB('agenda'));
+    if (btnSyncFPBResultados) btnSyncFPBResultados.addEventListener('click', () => abrirModalSyncFPB('resultados'));
+
+    // Confirmar e Executar Importação dos Jogos Selecionados
     if (btnConfirmImportFPB) {
         btnConfirmImportFPB.addEventListener('click', async () => {
             if (!currentFPBGames || currentFPBGames.length === 0) return;
 
+            const jogosParaImportar = currentFPBGames.filter((_, idx) => selectedFPBIndices.has(idx));
+            if (!jogosParaImportar || jogosParaImportar.length === 0) {
+                alert("Por favor selecione pelo menos um jogo para publicar no site.");
+                return;
+            }
+
             btnConfirmImportFPB.disabled = true;
-            btnConfirmImportFPB.textContent = "A importar para a Base de Dados...";
+            btnConfirmImportFPB.textContent = `A publicar ${jogosParaImportar.length} jogos...`;
 
             try {
                 // 1. Tentar executar via RPC sincronizar_jogos_fpb
                 let rpcSucesso = false;
                 try {
                     const { data, error } = await supabase.rpc('sincronizar_jogos_fpb', {
-                        jogos_payload: currentFPBGames
+                        jogos_payload: jogosParaImportar
                     });
                     if (!error && data) {
                         rpcSucesso = true;
@@ -4177,7 +4387,7 @@ document.addEventListener('DOMContentLoaded', async () => {
 
                 // 2. Se a RPC não estiver configurada no Supabase, executa sincronização manual resiliente
                 if (!rpcSucesso) {
-                    for (const jogo of currentFPBGames) {
+                    for (const jogo of jogosParaImportar) {
                         try {
                             if (jogo.is_resultado) {
                                 // Verificar se jogo já existe em resultados
@@ -4257,8 +4467,8 @@ document.addEventListener('DOMContentLoaded', async () => {
                 syncStatusBox.style.border = '1px solid #bbf7d0';
                 syncStatusBox.innerHTML = `
                     <div style="font-size: 1.5rem; margin-bottom: 6px;">🎉</div>
-                    <strong style="font-size: 1.1rem;">Sincronização Concluída com Sucesso!</strong><br>
-                    <span>${currentFPBGames.length} jogos foram processados e atualizados na base de dados do clube. O site público já reflete as marcações oficiais da FPB.</span>
+                    <strong style="font-size: 1.1rem;">Publicação Concluída com Sucesso!</strong><br>
+                    <span>Foram importados e publicados no site <strong>${jogosParaImportar.length}</strong> jogos selecionados. A página inicial e as competições já refletem estas marcações.</span>
                 `;
 
                 loadAgenda();
@@ -4267,14 +4477,14 @@ document.addEventListener('DOMContentLoaded', async () => {
                 setTimeout(() => {
                     fecharModalSyncFPB();
                     btnConfirmImportFPB.disabled = false;
-                    btnConfirmImportFPB.textContent = "📥 Importar e Atualizar no Site";
-                }, 2500);
+                    btnConfirmImportFPB.textContent = "📥 Publicar Selecionados";
+                }, 2200);
 
             } catch (err) {
                 console.error("Erro ao importar jogos:", err);
                 alert("Erro ao importar para a base de dados: " + err.message);
                 btnConfirmImportFPB.disabled = false;
-                btnConfirmImportFPB.textContent = "📥 Importar e Atualizar no Site";
+                btnConfirmImportFPB.textContent = "📥 Publicar Selecionados";
             }
         });
     }
