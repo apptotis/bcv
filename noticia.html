@@ -457,7 +457,8 @@
                     shareWa.href = `https://api.whatsapp.com/send?text=${encodeURIComponent(n.titulo + ' - Basket Clube de Valença: ' + currentShareUrl)}`;
                 }
                 if (shareFb) {
-                    shareFb.href = `https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(currentShareUrl)}`;
+                    const fbUrl = currentShareUrl + (currentShareUrl.includes('?') ? '&fb=1' : '?fb=1');
+                    shareFb.href = `https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(fbUrl)}`;
                 }
                 if (shareCopy) {
                     shareCopy.onclick = () => {

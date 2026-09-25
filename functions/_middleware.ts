@@ -71,7 +71,9 @@ export const onRequest: PagesFunction<Env> = async (context) => {
                         imagemUrl = `https://bcvalenca.pt/${imagemUrl.replace(/^\//, '')}`;
                     }
 
-                    const canonicalUrl = `https://bcvalenca.pt/noticia.html?id=${n.id}`;
+                    const canonicalUrl = url.href;
+                    const isPng = imagemUrl.toLowerCase().includes('.png');
+                    const imgType = isPng ? 'image/png' : 'image/jpeg';
                     const userAgent = context.request.headers.get('User-Agent') || '';
 
                     // 1. Se for crawler do Facebook/WhatsApp/Twitter, responder com HTML ultra-leve e focado em Open Graph
@@ -92,6 +94,7 @@ export const onRequest: PagesFunction<Env> = async (context) => {
     <meta property="og:description" content="${escapeHtml(descricao)}">
     <meta property="og:image" content="${escapeHtml(imagemUrl)}">
     <meta property="og:image:secure_url" content="${escapeHtml(imagemUrl)}">
+    <meta property="og:image:type" content="${imgType}">
     <meta property="og:image:width" content="1200">
     <meta property="og:image:height" content="630">
     <meta property="og:image:alt" content="${escapeHtml(titulo)}">
@@ -144,6 +147,7 @@ export const onRequest: PagesFunction<Env> = async (context) => {
     <meta property="og:description" content="${escapeHtml(descricao)}">
     <meta property="og:image" content="${escapeHtml(imagemUrl)}">
     <meta property="og:image:secure_url" content="${escapeHtml(imagemUrl)}">
+    <meta property="og:image:type" content="${imgType}">
     <meta property="og:image:width" content="1200">
     <meta property="og:image:height" content="630">
     <meta property="og:image:alt" content="${escapeHtml(titulo)}">
