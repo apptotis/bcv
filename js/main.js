@@ -1105,6 +1105,10 @@ async function loadCompeticoesSection(supabase) {
             grid.appendChild(card);
         });
 
+        // Garantir que a secção fica visível de imediato em mobile e desktop
+        const compWrapper = grid.closest('.reveal');
+        if (compWrapper) compWrapper.classList.add('active');
+
     } catch (err) {
         console.warn("Aviso ao carregar secção de competições:", err);
     }
