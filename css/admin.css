@@ -615,3 +615,48 @@ body {
     }
 }
 
+/* Botões Toggle Sim / Não para Visibilidade de Competições */
+.btn-toggle-vis {
+    border-radius: 20px;
+    padding: 6px 14px;
+    font-size: 0.78rem;
+    font-weight: 800;
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    transition: all 0.2s ease;
+    border-width: 1px;
+    border-style: solid;
+    outline: none;
+}
+
+.btn-toggle-vis.is-sim {
+    background: rgba(22, 163, 74, 0.12);
+    color: #15803d;
+    border-color: rgba(22, 163, 74, 0.3);
+}
+
+.btn-toggle-vis.is-sim:hover {
+    background: #16a34a;
+    color: #ffffff;
+    border-color: #16a34a;
+    box-shadow: 0 2px 8px rgba(22, 163, 74, 0.25);
+    transform: translateY(-1px);
+}
+
+.btn-toggle-vis.is-nao {
+    background: rgba(220, 38, 38, 0.1);
+    color: #b91c1c;
+    border-color: rgba(220, 38, 38, 0.25);
+}
+
+.btn-toggle-vis.is-nao:hover {
+    background: #dc2626;
+    color: #ffffff;
+    border-color: #dc2626;
+    box-shadow: 0 2px 8px rgba(220, 38, 38, 0.25);
+    transform: translateY(-1px);
+}
+
+

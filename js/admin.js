@@ -124,6 +124,7 @@ document.addEventListener('DOMContentLoaded', async () => {
             { tab: 'tab-resultados', allow: isAdmin || userPerms.includes('resultados') },
             { tab: 'tab-galeria', allow: isAdmin || userPerms.includes('galeria') || role === 'editor' },
             { tab: 'tab-equipas', allow: isAdmin || userPerms.includes('equipas') || role === 'treinador' },
+            { tab: 'tab-competicoes', allow: isAdmin || role === 'diretor' || userPerms.includes('competicoes') || userPerms.includes('equipas') || userPerms.length === 0 },
             { tab: 'tab-patrocinadores', allow: isAdmin || userPerms.includes('patrocinadores') },
             { tab: 'tab-config', allow: isAdmin || userPerms.includes('config') }
         ];
@@ -6606,6 +6607,429 @@ document.addEventListener('DOMContentLoaded', async () => {
         }).join('');
     }
 
+    // =========================================================================
+    // 13. GESTÃO DE COMPETIÇÕES OFICIAIS (clube_config -> 'competicoes')
+    // =========================================================================
+    let currentCompeticoes = [];
+
+    const DEFAULT_COMPETICOES_LIST = [
+        {
+            id: "cn2",
+            sigla: "CN2",
+            nome: "Campeonato Nacional da 2.ª Divisão Masculina (CN2)",
+            escalao: "Seniores",
+            sexo: "Masculino",
+            equipa_label: "Seniores Masculinos",
+            tag: "FPB • Nacional",
+            tipo: "nacional",
+            detalhe: "Zona Norte • Federação Portuguesa de Basquetebol",
+            icon: "🏀",
+            ativo: true,
+            ordem: 1
+        },
+        {
+            id: "taca_portugal",
+            sigla: "Taça de Portugal",
+            nome: "Taça de Portugal de Basquetebol",
+            escalao: "Seniores",
+            sexo: "Masculino",
+            equipa_label: "Seniores Masculinos",
+            tag: "FPB • Nacional",
+            tipo: "nacional",
+            detalhe: "Fases Eliminatórias Nacionais • Federação Portuguesa de Basquetebol",
+            icon: "🏆",
+            ativo: true,
+            ordem: 2
+        },
+        {
+            id: "sub18_masc",
+            sigla: "Sub 18 Masc",
+            nome: "Campeonato Distrital Sub 18 Masculino",
+            escalao: "Sub 18",
+            sexo: "Masculino",
+            equipa_label: "Sub 18 Masculinos",
+            tag: "ABVC • Distrital",
+            tipo: "distrital",
+            detalhe: "Fase Regular e Taça Distrital • AB Viana do Castelo",
+            icon: "🏀",
+            ativo: true,
+            ordem: 3
+        },
+        {
+            id: "sub16_fem",
+            sigla: "Sub 16 Fem",
+            nome: "Campeonato Distrital Sub 16 Feminino",
+            escalao: "Sub 16",
+            sexo: "Feminino",
+            equipa_label: "Sub 16 Femininos",
+            tag: "ABVC • Distrital",
+            tipo: "distrital",
+            detalhe: "Campeonato Inter-distrital • AB Viana do Castelo / FPB",
+            icon: "🏀",
+            ativo: true,
+            ordem: 4
+        },
+        {
+            id: "sub14_masc",
+            sigla: "Sub 14 Masc",
+            nome: "Campeonato Distrital Sub 14 Masculino",
+            escalao: "Sub 14",
+            sexo: "Masculino",
+            equipa_label: "Sub 14 Masculinos",
+            tag: "ABVC • Distrital",
+            tipo: "distrital",
+            detalhe: "Campeonato Distrital de Formação • AB Viana do Castelo",
+            icon: "🏀",
+            ativo: true,
+            ordem: 5
+        },
+        {
+            id: "sub14_fem",
+            sigla: "Sub 14 Fem",
+            nome: "Campeonato Distrital Sub 14 Feminino",
+            escalao: "Sub 14",
+            sexo: "Feminino",
+            equipa_label: "Sub 14 Femininos",
+            tag: "ABVC • Distrital",
+            tipo: "distrital",
+            detalhe: "Campeonato Distrital de Formação • AB Viana do Castelo",
+            icon: "🏀",
+            ativo: true,
+            ordem: 6
+        },
+        {
+            id: "minibasquete",
+            sigla: "Minibasquete",
+            nome: "Circuitos e Torneios de Minibasquete",
+            escalao: "Mini 12",
+            sexo: "Misto",
+            equipa_label: "Mini 12, Mini 10, Mini 8 & BabyBasket",
+            tag: "FPB / ABVC",
+            tipo: "distrital",
+            detalhe: "Festivais e Concentrações de Iniciação e Formação",
+            icon: "⭐",
+            ativo: true,
+            ordem: 7
+        }
+    ];
+
+    async function loadCompeticoesAdmin() {
+        const tbody = document.getElementById('competicoes-table-body');
+        if (!tbody) return;
+
+        try {
+            tbody.innerHTML = '<tr><td colspan="6" style="padding: 20px; text-align: center; color: var(--text-secondary);">A carregar competições...</td></tr>';
+
+            const { data, error } = await supabase
+                .from('clube_config')
+                .select('*')
+                .eq('chave', 'competicoes')
+                .maybeSingle();
+
+            if (error) throw error;
+
+            if (data && Array.isArray(data.dados) && data.dados.length > 0) {
+                currentCompeticoes = data.dados;
+            } else {
+                // Primeira inicialização com valores predefinidos
+                currentCompeticoes = JSON.parse(JSON.stringify(DEFAULT_COMPETICOES_LIST));
+                await saveCompeticoesToSupabase(currentCompeticoes, false);
+            }
+
+            renderCompeticoesAdmin();
+
+        } catch (err) {
+            console.error("Erro ao carregar competições no admin:", err);
+            tbody.innerHTML = '<tr><td colspan="6" style="padding: 20px; text-align: center; color: #dc2626;">Erro ao carregar competições.</td></tr>';
+        }
+    }
+
+    async function saveCompeticoesToSupabase(competicoesList, showToast = true) {
+        try {
+            const { error } = await supabase
+                .from('clube_config')
+                .upsert({
+                    chave: 'competicoes',
+                    dados: competicoesList,
+                    updated_at: new Date()
+                });
+
+            if (error) throw error;
+
+            if (showToast) {
+                showCompeticoesStatus("✅ Competições guardadas com sucesso!", "#15803d");
+            }
+            return true;
+        } catch (err) {
+            console.error("Erro ao guardar competições:", err);
+            if (showToast) {
+                showCompeticoesStatus("❌ Erro ao guardar: " + err.message, "#dc2626");
+            }
+            return false;
+        }
+    }
+
+    function showCompeticoesStatus(msg, color) {
+        const statusEl = document.getElementById('msg-competicoes-status');
+        if (!statusEl) return;
+        statusEl.textContent = msg;
+        statusEl.style.color = color;
+        statusEl.style.background = color === '#15803d' ? 'rgba(22, 163, 74, 0.1)' : 'rgba(220, 38, 38, 0.1)';
+        statusEl.style.border = `1px solid ${color}`;
+        statusEl.classList.remove('hidden');
+        setTimeout(() => {
+            statusEl.classList.add('hidden');
+        }, 4000);
+    }
+
+    function renderCompeticoesAdmin() {
+        const tbody = document.getElementById('competicoes-table-body');
+        if (!tbody) return;
+
+        // Atualizar KPIs
+        const total = currentCompeticoes.length;
+        const ativas = currentCompeticoes.filter(c => c.ativo !== false).length;
+        const inativas = total - ativas;
+        const nacionais = currentCompeticoes.filter(c => c.tipo === 'nacional').length;
+
+        if (document.getElementById('kpi-competicoes-total')) document.getElementById('kpi-competicoes-total').textContent = total;
+        if (document.getElementById('kpi-competicoes-ativas')) document.getElementById('kpi-competicoes-ativas').textContent = ativas;
+        if (document.getElementById('kpi-competicoes-inativas')) document.getElementById('kpi-competicoes-inativas').textContent = inativas;
+        if (document.getElementById('kpi-competicoes-nacionais')) document.getElementById('kpi-competicoes-nacionais').textContent = nacionais;
+
+        // Filtros
+        const termoBusca = (document.getElementById('filtro-competicao-busca')?.value || '').toLowerCase().trim();
+        const filtroEstado = document.getElementById('filtro-competicao-estado')?.value || '';
+        const filtroTipo = document.getElementById('filtro-competicao-tipo')?.value || '';
+
+        let filtradas = currentCompeticoes.filter(c => {
+            if (filtroEstado === 'sim' && c.ativo === false) return false;
+            if (filtroEstado === 'nao' && c.ativo !== false) return false;
+            if (filtroTipo && c.tipo !== filtroTipo) return false;
+            if (termoBusca) {
+                const matchNome = (c.nome || '').toLowerCase().includes(termoBusca);
+                const matchSigla = (c.sigla || '').toLowerCase().includes(termoBusca);
+                const matchEscalao = (c.escalao || '').toLowerCase().includes(termoBusca);
+                const matchEquipa = (c.equipa_label || '').toLowerCase().includes(termoBusca);
+                if (!matchNome && !matchSigla && !matchEscalao && !matchEquipa) return false;
+            }
+            return true;
+        });
+
+        // Ordenar por ordem ascendente
+        filtradas.sort((a, b) => (Number(a.ordem) || 99) - (Number(b.ordem) || 99));
+
+        if (filtradas.length === 0) {
+            tbody.innerHTML = '<tr><td colspan="6" style="padding: 25px; text-align: center; color: var(--text-secondary);">Nenhuma competição encontrada com os filtros selecionados.</td></tr>';
+            return;
+        }
+
+        tbody.innerHTML = '';
+        filtradas.forEach(comp => {
+            const tr = document.createElement('tr');
+            tr.style.borderBottom = "1px solid var(--border-color)";
+
+            const isAtiva = comp.ativo !== false;
+            const btnVisibilidade = isAtiva
+                ? `<button type="button" class="btn-toggle-vis is-sim" onclick="window.toggleVisibilidadeCompeticao('${comp.id}')" title="Clique para desativar e ocultar do site">
+                       🟢 SIM (Visível)
+                   </button>`
+                : `<button type="button" class="btn-toggle-vis is-nao" onclick="window.toggleVisibilidadeCompeticao('${comp.id}')" title="Clique para ativar e mostrar no site">
+                       🔴 NÃO (Oculto)
+                   </button>`;
+
+            const badgeTag = comp.tipo === 'nacional'
+                ? `<span style="background: rgba(245, 158, 11, 0.15); color: #b45309; padding: 3px 8px; border-radius: 6px; font-weight: 700; font-size: 0.75rem; border: 1px solid rgba(245, 158, 11, 0.3);">${comp.tag || 'FPB • Nacional'}</span>`
+                : `<span style="background: rgba(126, 34, 206, 0.08); color: #7e22ce; padding: 3px 8px; border-radius: 6px; font-weight: 700; font-size: 0.75rem;">${comp.tag || 'ABVC • Distrital'}</span>`;
+
+            tr.innerHTML = `
+                <td style="padding: 12px; text-align: center; white-space: nowrap;">
+                    ${btnVisibilidade}
+                </td>
+                <td style="padding: 12px;">
+                    <div style="font-weight: 800; color: var(--text-primary); font-size: 0.95rem;">
+                        ${comp.icon || '🏀'} ${comp.nome}
+                    </div>
+                    <div style="font-size: 0.8rem; color: var(--text-secondary); margin-top: 2px;">
+                        Sigla: <strong>${comp.sigla || '--'}</strong> • ${comp.detalhe || ''}
+                    </div>
+                </td>
+                <td style="padding: 12px;">
+                    <span style="font-weight: 700; color: var(--accent-primary); font-size: 0.88rem;">${comp.escalao || 'BCV'}</span>
+                    <span style="color: var(--text-secondary); font-size: 0.8rem; display: block;">${comp.sexo || 'Misto'} • ${comp.equipa_label || ''}</span>
+                </td>
+                <td style="padding: 12px;">
+                    ${badgeTag}
+                </td>
+                <td style="padding: 12px; text-align: center; font-weight: 700; color: var(--text-secondary);">
+                    ${comp.ordem || 1}
+                </td>
+                <td style="padding: 12px; text-align: center; white-space: nowrap;">
+                    <button class="btn-action edit" onclick="window.editCompeticao('${comp.id}')" title="Editar Competição" style="margin-right: 5px;">✏️</button>
+                    <button class="btn-action delete" onclick="window.deleteCompeticao('${comp.id}')" title="Eliminar Competição">🗑️</button>
+                </td>
+            `;
+            tbody.appendChild(tr);
+        });
+    }
+
+    // Toggle Sim / Não de Visibilidade com 1 Toque
+    window.toggleVisibilidadeCompeticao = async function(id) {
+        const comp = currentCompeticoes.find(c => c.id === id);
+        if (!comp) return;
+
+        const novoEstado = comp.ativo === false ? true : false;
+        comp.ativo = novoEstado;
+
+        renderCompeticoesAdmin();
+
+        const success = await saveCompeticoesToSupabase(currentCompeticoes, false);
+        if (success) {
+            showCompeticoesStatus(
+                novoEstado ? `🟢 "${comp.sigla}" agora está VISÍVEL no site público!` : `🔴 "${comp.sigla}" agora está OCULTA do site público!`,
+                novoEstado ? '#15803d' : '#b91c1c'
+            );
+        }
+    };
+
+    // Editar Competição
+    window.editCompeticao = function(id) {
+        const comp = currentCompeticoes.find(c => c.id === id);
+        if (!comp) return;
+
+        document.getElementById('modal-competicao-title').textContent = "Editar Competição";
+        document.getElementById('competicao-id').value = comp.id;
+        document.getElementById('comp-nome').value = comp.nome || '';
+        document.getElementById('comp-sigla').value = comp.sigla || '';
+        document.getElementById('comp-escalao').value = comp.escalao || 'Seniores';
+        document.getElementById('comp-sexo').value = comp.sexo || 'Masculino';
+        document.getElementById('comp-equipa-label').value = comp.equipa_label || '';
+        document.getElementById('comp-icon').value = comp.icon || '🏀';
+        document.getElementById('comp-tag').value = comp.tag || 'FPB • Nacional';
+        document.getElementById('comp-tipo').value = comp.tipo || 'distrital';
+        document.getElementById('comp-detalhe').value = comp.detalhe || '';
+        document.getElementById('comp-ativo').value = comp.ativo !== false ? 'sim' : 'nao';
+        document.getElementById('comp-ordem').value = comp.ordem || 1;
+
+        const modal = document.getElementById('modal-competicao-container');
+        if (modal) modal.classList.remove('hidden');
+    };
+
+    // Eliminar Competição
+    window.deleteCompeticao = async function(id) {
+        const comp = currentCompeticoes.find(c => c.id === id);
+        if (!comp) return;
+
+        if (!confirm(`Tem a certeza que deseja eliminar a competição "${comp.nome}"?`)) {
+            return;
+        }
+
+        currentCompeticoes = currentCompeticoes.filter(c => c.id !== id);
+        renderCompeticoesAdmin();
+        await saveCompeticoesToSupabase(currentCompeticoes, true);
+    };
+
+    // Submissão do Formulário de Competição
+    const formCompeticao = document.getElementById('form-competicao');
+    if (formCompeticao) {
+        formCompeticao.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const id = document.getElementById('competicao-id').value;
+            const nome = document.getElementById('comp-nome').value.trim();
+            const sigla = document.getElementById('comp-sigla').value.trim();
+            const escalao = document.getElementById('comp-escalao').value;
+            const sexo = document.getElementById('comp-sexo').value;
+            const equipa_label = document.getElementById('comp-equipa-label').value.trim() || `${escalao} ${sexo}`;
+            const icon = document.getElementById('comp-icon').value;
+            const tag = document.getElementById('comp-tag').value.trim() || 'FPB';
+            const tipo = document.getElementById('comp-tipo').value;
+            const detalhe = document.getElementById('comp-detalhe').value.trim();
+            const ativo = document.getElementById('comp-ativo').value === 'sim';
+            const ordem = parseInt(document.getElementById('comp-ordem').value, 10) || 1;
+
+            const btnSave = document.getElementById('btn-save-competicao');
+            btnSave.disabled = true;
+            btnSave.textContent = "A guardar...";
+
+            if (id) {
+                // Atualizar existente
+                const idx = currentCompeticoes.findIndex(c => c.id === id);
+                if (idx !== -1) {
+                    currentCompeticoes[idx] = {
+                        ...currentCompeticoes[idx],
+                        nome, sigla, escalao, sexo, equipa_label, icon, tag, tipo, detalhe, ativo, ordem
+                    };
+                }
+            } else {
+                // Criar nova
+                const novoId = 'comp_' + Date.now();
+                currentCompeticoes.push({
+                    id: novoId,
+                    nome, sigla, escalao, sexo, equipa_label, icon, tag, tipo, detalhe, ativo, ordem
+                });
+            }
+
+            const success = await saveCompeticoesToSupabase(currentCompeticoes, true);
+            btnSave.disabled = false;
+            btnSave.textContent = "Guardar Competição";
+
+            if (success) {
+                document.getElementById('modal-competicao-container').classList.add('hidden');
+                formCompeticao.reset();
+                renderCompeticoesAdmin();
+            }
+        });
+    }
+
+    // Botões de Abertura / Fecho do Modal de Competições
+    const btnNovaComp = document.getElementById('btn-nova-competicao');
+    if (btnNovaComp) {
+        btnNovaComp.addEventListener('click', () => {
+            document.getElementById('modal-competicao-title').textContent = "Adicionar Competição";
+            document.getElementById('competicao-id').value = '';
+            if (formCompeticao) formCompeticao.reset();
+            document.getElementById('comp-ativo').value = 'sim';
+            document.getElementById('comp-ordem').value = currentCompeticoes.length + 1;
+            document.getElementById('modal-competicao-container').classList.remove('hidden');
+        });
+    }
+
+    const btnCloseModalComp = document.getElementById('btn-close-modal-competicao');
+    if (btnCloseModalComp) {
+        btnCloseModalComp.addEventListener('click', () => {
+            document.getElementById('modal-competicao-container').classList.add('hidden');
+        });
+    }
+
+    const btnCancelModalComp = document.getElementById('btn-cancel-modal-competicao');
+    if (btnCancelModalComp) {
+        btnCancelModalComp.addEventListener('click', () => {
+            document.getElementById('modal-competicao-container').classList.add('hidden');
+        });
+    }
+
+    // Repor Competições Predefinidas
+    const btnReporComp = document.getElementById('btn-repor-competicoes');
+    if (btnReporComp) {
+        btnReporComp.addEventListener('click', async () => {
+            if (!confirm("Tem a certeza que deseja repor as 7 competições predefinidas oficiais da FPB/ABVC?")) {
+                return;
+            }
+            currentCompeticoes = JSON.parse(JSON.stringify(DEFAULT_COMPETICOES_LIST));
+            renderCompeticoesAdmin();
+            await saveCompeticoesToSupabase(currentCompeticoes, true);
+        });
+    }
+
+    // Filtros de Competições em Tempo Real
+    ['filtro-competicao-busca', 'filtro-competicao-estado', 'filtro-competicao-tipo'].forEach(id => {
+        const el = document.getElementById(id);
+        if (el) {
+            el.addEventListener('input', renderCompeticoesAdmin);
+            el.addEventListener('change', renderCompeticoesAdmin);
+        }
+    });
+
     // Iniciar carregamento das tabs quando ativadas
     const tabButtons = document.querySelectorAll('.tab-btn');
     tabButtons.forEach(btn => {
@@ -6628,6 +7052,7 @@ document.addEventListener('DOMContentLoaded', async () => {
             if (target === 'tab-agenda') loadAgenda();
             if (target === 'tab-resultados') loadResultados();
             if (target === 'tab-equipas') loadEquipas();
+            if (target === 'tab-competicoes') loadCompeticoesAdmin();
             if (target === 'tab-patrocinadores') loadPatrocinadores();
             if (target === 'tab-config') loadConfiguracoes();
             if (target === 'tab-equipamentos') loadEquipamentos();
@@ -6639,3 +7064,4 @@ document.addEventListener('DOMContentLoaded', async () => {
     // Iniciar
     checkSession();
 });
+

@@ -346,10 +346,14 @@ async function loadEquipasMenu(supabase) {
             
             dropdownEquipasMenu.innerHTML = ''; // Limpar o conteúdo anterior
 
-            // Opção inicial para ver todas as equipas
+            // Opção inicial para ver todas as equipas e competições
             const liAll = document.createElement('li');
             liAll.innerHTML = `<a href="equipas.html" class="drawer-dropdown-link" style="font-weight: 700; color: #ffffff;">🏀 Ver Todas as Equipas</a>`;
             dropdownEquipasMenu.appendChild(liAll);
+
+            const liComp = document.createElement('li');
+            liComp.innerHTML = `<a href="competicoes.html" class="drawer-dropdown-link" style="font-weight: 700; color: #f59e0b;">🏆 Competições Oficiais</a>`;
+            dropdownEquipasMenu.appendChild(liComp);
 
             equipas.forEach(equipa => {
                 const li = document.createElement('li');
@@ -843,15 +847,35 @@ async function loadCompeticoesSection(supabase) {
     try {
         let allAgenda = [];
         let allResultados = [];
+        let competicoesList = baseCompeticoes;
 
         if (supabase) {
-            const [agendaRes, resultadosRes] = await Promise.all([
+            const [agendaRes, resultadosRes, configRes] = await Promise.all([
                 supabase.from('agenda_bcv').select('*').order('data_jogo', { ascending: true }),
-                supabase.from('resultados_bcv').select('*').order('data_jogo', { ascending: false })
+                supabase.from('resultados_bcv').select('*').order('data_jogo', { ascending: false }),
+                supabase.from('clube_config').select('*').eq('chave', 'competicoes').maybeSingle()
             ]);
 
             if (agendaRes && agendaRes.data) allAgenda = agendaRes.data;
             if (resultadosRes && resultadosRes.data) allResultados = resultadosRes.data;
+            if (configRes && configRes.data && Array.isArray(configRes.data.dados) && configRes.data.dados.length > 0) {
+                competicoesList = configRes.data.dados;
+            }
+        }
+
+        // Filtrar apenas competições com visibilidade ativa no site (Sim no Admin)
+        const competicoesAtivas = competicoesList.filter(comp => comp.ativo !== false);
+        competicoesAtivas.sort((a, b) => (Number(a.ordem) || 99) - (Number(b.ordem) || 99));
+
+        if (competicoesAtivas.length === 0) {
+            grid.innerHTML = `
+                <div style="grid-column: 1 / -1; text-align: center; padding: 40px 20px; background: #ffffff; border-radius: 12px; border: 1px dashed var(--border-color); color: var(--text-secondary);">
+                    <div style="font-size: 2.2rem; margin-bottom: 10px;">🏀</div>
+                    <h3 style="font-size: 1.15rem; color: var(--text-primary); margin-bottom: 6px;">Nenhuma competição oficial ativa no momento</h3>
+                    <p style="font-size: 0.88rem; max-width: 480px; margin: 0 auto;">As competições oficiais para a época serão publicadas brevemente pela Federação e Direção do Clube.</p>
+                </div>
+            `;
+            return;
         }
 
         // Função de correspondência inteligente de jogos com a competição
@@ -997,7 +1021,7 @@ async function loadCompeticoesSection(supabase) {
         };
 
         grid.innerHTML = '';
-        baseCompeticoes.forEach(comp => {
+        competicoesAtivas.forEach(comp => {
             const card = document.createElement('div');
             card.className = `competicao-card ${comp.tipo === 'nacional' ? 'nacional' : ''}`;
 
