@@ -3561,7 +3561,7 @@ document.addEventListener('DOMContentLoaded', async () => {
 
     async function loadAgenda() {
         if (!agendaTableBody) return;
-        agendaTableBody.innerHTML = '<tr><td colspan="5" style="padding: 20px; text-align: center;">A carregar jogos...</td></tr>';
+        agendaTableBody.innerHTML = '<tr><td colspan="6" style="padding: 20px; text-align: center;">A carregar jogos...</td></tr>';
 
         try {
             const { data, error } = await supabase
@@ -3572,48 +3572,119 @@ document.addEventListener('DOMContentLoaded', async () => {
             if (error) throw error;
 
             currentAgendaGames = data || [];
-            agendaTableBody.innerHTML = '';
-            if (currentAgendaGames.length === 0) {
-                agendaTableBody.innerHTML = '<tr><td colspan="5" style="padding: 20px; text-align: center; color: var(--text-secondary);">Nenhum jogo agendado. Clique em <strong>Sincronizar com FPB</strong> para carregar o calendário oficial.</td></tr>';
-                return;
-            }
-
-            currentAgendaGames.forEach(jogo => {
-                const tr = document.createElement('tr');
-                tr.style.borderBottom = "1px solid var(--border-color, rgba(255,255,255,0.05))";
-                tr.innerHTML = `
-                    <td style="padding: 12px;"><strong>${formatDate(jogo.data_jogo)}</strong><br><small style="color:var(--text-secondary);">${jogo.hora_jogo || 'Hora a definir'}</small></td>
-                    <td style="padding: 12px;">
-                        <strong>${jogo.equipa_casa}</strong> vs <strong>${jogo.equipa_fora}</strong>
-                        ${jogo.competicao ? `<br><small style="color:var(--text-secondary);">${jogo.competicao}</small>` : ''}
-                    </td>
-                    <td style="padding: 12px;">${jogo.local || '--'}</td>
-                    <td style="padding: 12px;"><span style="font-size:0.8rem; background:rgba(126, 34, 206, 0.12); color:#7e22ce; padding:3px 8px; border-radius:4px; font-weight:600;">${jogo.escalao || 'BCV'}</span></td>
-                    <td style="padding: 12px; text-align: center; white-space: nowrap;">
-                        <button class="btn-action" onclick="abrirModalFinalizarJogo('${jogo.id}')" title="Registar Resultado e Finalizar Jogo" style="background: rgba(22, 163, 74, 0.15); color: #16a34a; border: 1px solid rgba(22, 163, 74, 0.3); font-weight: bold; margin-right: 4px; padding: 4px 8px;">🏁 Resultado</button>
-                        <button class="btn-action edit" onclick="editGame('${jogo.id}')" title="Editar">✏️</button>
-                        <button class="btn-action delete" onclick="deleteGame('${jogo.id}')" title="Eliminar">🗑️</button>
-                    </td>
-                `;
-                agendaTableBody.appendChild(tr);
-            });
+            renderAgendaTable();
         } catch (err) {
             console.error("Erro ao carregar agenda:", err);
-            agendaTableBody.innerHTML = '<tr><td colspan="5" style="padding: 20px; text-align: center; color: #ff5252;">Erro ao carregar dados.</td></tr>';
+            agendaTableBody.innerHTML = '<tr><td colspan="6" style="padding: 20px; text-align: center; color: #ff5252;">Erro ao carregar dados.</td></tr>';
         }
     }
+
+    function renderAgendaTable() {
+        if (!agendaTableBody) return;
+
+        const termoBusca = (document.getElementById('filtro-agenda-busca')?.value || '').toLowerCase().trim();
+        const filtroEstado = document.getElementById('filtro-agenda-estado')?.value || '';
+        const filtroEscalao = document.getElementById('filtro-agenda-escalao')?.value || '';
+
+        let filtrados = currentAgendaGames.filter(jogo => {
+            if (filtroEstado === 'sim' && jogo.publicado === false) return false;
+            if (filtroEstado === 'nao' && jogo.publicado !== false) return false;
+            if (filtroEscalao && (jogo.escalao || '').toLowerCase() !== filtroEscalao.toLowerCase()) return false;
+            if (termoBusca) {
+                const matchCasa = (jogo.equipa_casa || '').toLowerCase().includes(termoBusca);
+                const matchFora = (jogo.equipa_fora || '').toLowerCase().includes(termoBusca);
+                const matchComp = (jogo.competicao || '').toLowerCase().includes(termoBusca);
+                const matchLocal = (jogo.local || '').toLowerCase().includes(termoBusca);
+                const matchEsc = (jogo.escalao || '').toLowerCase().includes(termoBusca);
+                if (!matchCasa && !matchFora && !matchComp && !matchLocal && !matchEsc) return false;
+            }
+            return true;
+        });
+
+        agendaTableBody.innerHTML = '';
+        if (filtrados.length === 0) {
+            agendaTableBody.innerHTML = '<tr><td colspan="6" style="padding: 20px; text-align: center; color: var(--text-secondary);">Nenhum jogo encontrado com os filtros selecionados.</td></tr>';
+            return;
+        }
+
+        filtrados.forEach(jogo => {
+            const tr = document.createElement('tr');
+            tr.style.borderBottom = "1px solid var(--border-color, rgba(255,255,255,0.05))";
+
+            const isPublicado = jogo.publicado !== false;
+            const btnVisibilidade = isPublicado
+                ? `<button type="button" class="btn-toggle-vis is-sim" onclick="window.toggleVisibilidadeJogo('${jogo.id}', true)" title="Clique para ocultar este jogo do site público">
+                       🟢 SIM (Visível)
+                   </button>`
+                : `<button type="button" class="btn-toggle-vis is-nao" onclick="window.toggleVisibilidadeJogo('${jogo.id}', false)" title="Clique para publicar este jogo no site público">
+                       🔴 NÃO (Oculto)
+                   </button>`;
+
+            tr.innerHTML = `
+                <td style="padding: 12px; text-align: center; white-space: nowrap;">
+                    ${btnVisibilidade}
+                </td>
+                <td style="padding: 12px;"><strong>${formatDate(jogo.data_jogo)}</strong><br><small style="color:var(--text-secondary);">${jogo.hora_jogo || 'Hora a definir'}</small></td>
+                <td style="padding: 12px;">
+                    <strong>${jogo.equipa_casa}</strong> vs <strong>${jogo.equipa_fora}</strong>
+                    ${jogo.competicao ? `<br><small style="color:var(--text-secondary);">${jogo.competicao}</small>` : ''}
+                </td>
+                <td style="padding: 12px;">${jogo.local || '--'}</td>
+                <td style="padding: 12px;"><span style="font-size:0.8rem; background:rgba(126, 34, 206, 0.12); color:#7e22ce; padding:3px 8px; border-radius:4px; font-weight:600;">${jogo.escalao || 'BCV'}</span></td>
+                <td style="padding: 12px; text-align: center; white-space: nowrap;">
+                    <button class="btn-action" onclick="abrirModalFinalizarJogo('${jogo.id}')" title="Registar Resultado e Finalizar Jogo" style="background: rgba(22, 163, 74, 0.15); color: #16a34a; border: 1px solid rgba(22, 163, 74, 0.3); font-weight: bold; margin-right: 4px; padding: 4px 8px;">🏁 Resultado</button>
+                    <button class="btn-action edit" onclick="editGame('${jogo.id}')" title="Editar">✏️</button>
+                    <button class="btn-action delete" onclick="deleteGame('${jogo.id}')" title="Eliminar">🗑️</button>
+                </td>
+            `;
+            agendaTableBody.appendChild(tr);
+        });
+    }
+
+    window.toggleVisibilidadeJogo = async (id, currentStatus) => {
+        const novoStatus = !currentStatus;
+        const jogo = currentAgendaGames.find(g => String(g.id) === String(id));
+        if (jogo) jogo.publicado = novoStatus;
+        renderAgendaTable();
+
+        try {
+            const { error } = await supabase.from('agenda_bcv').update({ publicado: novoStatus }).eq('id', id);
+            if (error) {
+                if (jogo) jogo.publicado = currentStatus;
+                renderAgendaTable();
+                if (error.message && (error.message.includes('column') || error.code === '42703')) {
+                    alert("Atenção: A coluna 'publicado' ainda não existe na base de dados. Por favor execute o script SQL setup_agenda_publicado.sql no Supabase SQL Editor.");
+                } else {
+                    alert("Erro ao alterar visibilidade: " + error.message);
+                }
+            }
+        } catch (e) {
+            console.error(e);
+        }
+    };
+
+    // Filtros de pesquisa em tempo real na Agenda
+    const filtroAgendaBusca = document.getElementById('filtro-agenda-busca');
+    const filtroAgendaEstado = document.getElementById('filtro-agenda-estado');
+    const filtroAgendaEscalao = document.getElementById('filtro-agenda-escalao');
+
+    if (filtroAgendaBusca) filtroAgendaBusca.addEventListener('input', renderAgendaTable);
+    if (filtroAgendaEstado) filtroAgendaEstado.addEventListener('change', renderAgendaTable);
+    if (filtroAgendaEscalao) filtroAgendaEscalao.addEventListener('change', renderAgendaTable);
 
     if (formAgenda) {
         formAgenda.addEventListener('submit', async (e) => {
             e.preventDefault();
             const id = document.getElementById('agenda-id').value;
+            const publicadoCb = document.getElementById('agenda-publicado');
             const gameData = {
                 equipa_casa: document.getElementById('agenda-casa').value,
                 equipa_fora: document.getElementById('agenda-fora').value,
                 data_jogo: document.getElementById('agenda-data').value,
                 hora_jogo: document.getElementById('agenda-hora').value,
                 local: document.getElementById('agenda-local').value,
-                escalao: document.getElementById('agenda-escalao').value
+                escalao: document.getElementById('agenda-escalao').value,
+                publicado: publicadoCb ? publicadoCb.checked : true
             };
 
             btnSaveAgenda.disabled = true;
@@ -3654,6 +3725,9 @@ document.addEventListener('DOMContentLoaded', async () => {
     function resetAgendaForm() {
         formAgenda.reset();
         document.getElementById('agenda-id').value = '';
+        if (document.getElementById('agenda-publicado')) {
+            document.getElementById('agenda-publicado').checked = true;
+        }
         document.getElementById('form-agenda-title').textContent = "Adicionar Novo Jogo Manual";
         btnSaveAgenda.textContent = "Guardar Jogo";
         btnCancelAgenda.classList.add('hidden');
@@ -3673,6 +3747,9 @@ document.addEventListener('DOMContentLoaded', async () => {
             document.getElementById('agenda-hora').value = data.hora_jogo;
             document.getElementById('agenda-local').value = data.local;
             document.getElementById('agenda-escalao').value = data.escalao;
+            if (document.getElementById('agenda-publicado')) {
+                document.getElementById('agenda-publicado').checked = (data.publicado !== false);
+            }
 
             document.getElementById('form-agenda-title').textContent = "Editar Jogo";
             btnSaveAgenda.textContent = "Guardar Alterações";
@@ -3820,13 +3897,15 @@ document.addEventListener('DOMContentLoaded', async () => {
         formResultado.addEventListener('submit', async (e) => {
             e.preventDefault();
             const id = document.getElementById('resultado-id').value;
+            const publicadoCb = document.getElementById('resultado-publicado');
             const resData = {
                 equipa_casa: document.getElementById('resultado-casa').value.trim(),
                 equipa_fora: document.getElementById('resultado-fora').value.trim(),
                 pontos_casa: parseInt(document.getElementById('resultado-pontos-casa').value, 10),
                 pontos_fora: parseInt(document.getElementById('resultado-pontos-fora').value, 10),
                 data_jogo: document.getElementById('resultado-data').value,
-                escalao: document.getElementById('resultado-escalao').value
+                escalao: document.getElementById('resultado-escalao').value,
+                publicado: publicadoCb ? publicadoCb.checked : true
             };
 
             btnSaveResultado.disabled = true;
@@ -3849,6 +3928,9 @@ document.addEventListener('DOMContentLoaded', async () => {
                 resultadoMsg.classList.remove('hidden');
 
                 formResultado.reset();
+                if (document.getElementById('resultado-publicado')) {
+                    document.getElementById('resultado-publicado').checked = true;
+                }
                 loadResultados();
                 setTimeout(() => {
                     resultadoMsg.classList.add('hidden');
@@ -3863,14 +3945,14 @@ document.addEventListener('DOMContentLoaded', async () => {
                 resultadoMsg.classList.remove('hidden');
             } finally {
                 btnSaveResultado.disabled = false;
-                btnSaveResultado.textContent = "Guardar Resultado";
+                btnSaveResultado.textContent = id ? "Guardar Alterações" : "Guardar Resultado";
             }
         });
     }
 
     async function loadResultados() {
         if (!resultadosTableBody) return;
-        resultadosTableBody.innerHTML = '<tr><td colspan="5" style="padding: 20px; text-align: center;">A carregar resultados...</td></tr>';
+        resultadosTableBody.innerHTML = '<tr><td colspan="6" style="padding: 20px; text-align: center;">A carregar resultados...</td></tr>';
 
         try {
             const { data, error } = await supabase
@@ -3880,35 +3962,124 @@ document.addEventListener('DOMContentLoaded', async () => {
 
             if (error) throw error;
             currentResultadosGames = data || [];
-
-            resultadosTableBody.innerHTML = '';
-            if (!data || data.length === 0) {
-                resultadosTableBody.innerHTML = '<tr><td colspan="5" style="padding: 20px; text-align: center; color: var(--text-secondary);">Nenhum resultado registado. Clique em <strong>Sincronizar com FPB</strong> ou <strong>Novo Resultado</strong>.</td></tr>';
-                return;
-            }
-
-            data.forEach(jogo => {
-                const tr = document.createElement('tr');
-                tr.style.borderBottom = "1px solid var(--border-color, rgba(255,255,255,0.05))";
-                tr.innerHTML = `
-                    <td style="padding: 12px;"><strong>${formatDate(jogo.data_jogo)}</strong></td>
-                    <td style="padding: 12px;">
-                        <strong>${jogo.equipa_casa}</strong> vs <strong>${jogo.equipa_fora}</strong>
-                        ${jogo.local ? `<br><small style="color:var(--text-secondary);">${jogo.local}</small>` : ''}
-                    </td>
-                    <td style="padding: 12px;"><span style="background:linear-gradient(135deg, #7e22ce, #a855f7); color:#fff; padding:4px 10px; border-radius:6px; font-weight:800; font-size:0.95rem; box-shadow:0 2px 6px rgba(126,34,206,0.3);">${jogo.pontos_casa} - ${jogo.pontos_fora}</span></td>
-                    <td style="padding: 12px;"><span style="font-size:0.8rem; background:rgba(22, 163, 74, 0.12); color:#16a34a; padding:3px 8px; border-radius:4px; font-weight:600;">${jogo.escalao || 'BCV'}</span></td>
-                    <td style="padding: 12px; text-align: center;">
-                        <button class="btn-action delete" onclick="deleteResultado('${jogo.id}')" title="Eliminar Resultado">🗑️</button>
-                    </td>
-                `;
-                resultadosTableBody.appendChild(tr);
-            });
+            renderResultadosTable();
         } catch (err) {
             console.error("Erro ao carregar resultados:", err);
-            resultadosTableBody.innerHTML = '<tr><td colspan="5" style="padding: 20px; text-align: center; color: #ff5252;">Erro ao carregar resultados.</td></tr>';
+            resultadosTableBody.innerHTML = '<tr><td colspan="6" style="padding: 20px; text-align: center; color: #ff5252;">Erro ao carregar resultados.</td></tr>';
         }
     }
+
+    function renderResultadosTable() {
+        if (!resultadosTableBody) return;
+
+        const termoBusca = (document.getElementById('filtro-resultado-busca')?.value || '').toLowerCase().trim();
+        const filtroEstado = document.getElementById('filtro-resultado-estado')?.value || '';
+        const filtroEscalao = document.getElementById('filtro-resultado-escalao')?.value || '';
+
+        let filtrados = currentResultadosGames.filter(jogo => {
+            if (filtroEstado === 'sim' && jogo.publicado === false) return false;
+            if (filtroEstado === 'nao' && jogo.publicado !== false) return false;
+            if (filtroEscalao && (jogo.escalao || '').toLowerCase() !== filtroEscalao.toLowerCase()) return false;
+            if (termoBusca) {
+                const matchCasa = (jogo.equipa_casa || '').toLowerCase().includes(termoBusca);
+                const matchFora = (jogo.equipa_fora || '').toLowerCase().includes(termoBusca);
+                const matchEsc = (jogo.escalao || '').toLowerCase().includes(termoBusca);
+                if (!matchCasa && !matchFora && !matchEsc) return false;
+            }
+            return true;
+        });
+
+        resultadosTableBody.innerHTML = '';
+        if (filtrados.length === 0) {
+            resultadosTableBody.innerHTML = '<tr><td colspan="6" style="padding: 20px; text-align: center; color: var(--text-secondary);">Nenhum resultado encontrado com os filtros selecionados.</td></tr>';
+            return;
+        }
+
+        filtrados.forEach(jogo => {
+            const tr = document.createElement('tr');
+            tr.style.borderBottom = "1px solid var(--border-color, rgba(255,255,255,0.05))";
+
+            const isPublicado = jogo.publicado !== false;
+            const btnVisibilidade = isPublicado
+                ? `<button type="button" class="btn-toggle-vis is-sim" onclick="window.toggleVisibilidadeResultado('${jogo.id}', true)" title="Clique para ocultar do site">
+                       🟢 SIM (Visível)
+                   </button>`
+                : `<button type="button" class="btn-toggle-vis is-nao" onclick="window.toggleVisibilidadeResultado('${jogo.id}', false)" title="Clique para publicar no site">
+                       🔴 NÃO (Oculto)
+                   </button>`;
+
+            tr.innerHTML = `
+                <td style="padding: 12px; text-align: center; white-space: nowrap;">
+                    ${btnVisibilidade}
+                </td>
+                <td style="padding: 12px;"><strong>${formatDate(jogo.data_jogo)}</strong></td>
+                <td style="padding: 12px;">
+                    <strong>${jogo.equipa_casa}</strong> vs <strong>${jogo.equipa_fora}</strong>
+                    ${jogo.local ? `<br><small style="color:var(--text-secondary);">${jogo.local}</small>` : ''}
+                </td>
+                <td style="padding: 12px;"><span style="background:linear-gradient(135deg, #7e22ce, #a855f7); color:#fff; padding:4px 10px; border-radius:6px; font-weight:800; font-size:0.95rem; box-shadow:0 2px 6px rgba(126,34,206,0.3);">${jogo.pontos_casa} - ${jogo.pontos_fora}</span></td>
+                <td style="padding: 12px;"><span style="font-size:0.8rem; background:rgba(22, 163, 74, 0.12); color:#16a34a; padding:3px 8px; border-radius:4px; font-weight:600;">${jogo.escalao || 'BCV'}</span></td>
+                <td style="padding: 12px; text-align: center; white-space: nowrap;">
+                    <button class="btn-action edit" onclick="window.editResultado('${jogo.id}')" title="Editar Resultado" style="margin-right: 4px;">✏️</button>
+                    <button class="btn-action delete" onclick="deleteResultado('${jogo.id}')" title="Eliminar Resultado">🗑️</button>
+                </td>
+            `;
+            resultadosTableBody.appendChild(tr);
+        });
+    }
+
+    window.toggleVisibilidadeResultado = async (id, currentStatus) => {
+        const novoStatus = !currentStatus;
+        const jogo = currentResultadosGames.find(g => String(g.id) === String(id));
+        if (jogo) jogo.publicado = novoStatus;
+        renderResultadosTable();
+
+        try {
+            const { error } = await supabase.from('resultados_bcv').update({ publicado: novoStatus }).eq('id', id);
+            if (error) {
+                if (jogo) jogo.publicado = currentStatus;
+                renderResultadosTable();
+                if (error.message && (error.message.includes('column') || error.code === '42703')) {
+                    alert("Atenção: A coluna 'publicado' ainda não existe na base de dados. Por favor execute o script SQL setup_agenda_publicado.sql no Supabase SQL Editor.");
+                } else {
+                    alert("Erro ao alterar visibilidade: " + error.message);
+                }
+            }
+        } catch (e) {
+            console.error(e);
+        }
+    };
+
+    window.editResultado = async (id) => {
+        const jogo = currentResultadosGames.find(g => String(g.id) === String(id));
+        if (!jogo) return;
+        if (containerFormResultado.classList.contains('hidden')) {
+            containerFormResultado.classList.remove('hidden');
+        }
+        document.getElementById('resultado-id').value = jogo.id;
+        document.getElementById('resultado-casa').value = jogo.equipa_casa || '';
+        document.getElementById('resultado-fora').value = jogo.equipa_fora || '';
+        document.getElementById('resultado-pontos-casa').value = jogo.pontos_casa ?? '';
+        document.getElementById('resultado-pontos-fora').value = jogo.pontos_fora ?? '';
+        document.getElementById('resultado-data').value = jogo.data_jogo || '';
+        document.getElementById('resultado-escalao').value = jogo.escalao || '';
+        if (document.getElementById('resultado-publicado')) {
+            document.getElementById('resultado-publicado').checked = (jogo.publicado !== false);
+        }
+        document.getElementById('form-resultado-title').textContent = "Editar Resultado";
+        btnSaveResultado.textContent = "Guardar Alterações";
+        if (btnToggleFormResultado) btnToggleFormResultado.textContent = "✕ Fechar Formulário";
+        containerFormResultado.scrollIntoView({ behavior: 'smooth' });
+    };
+
+    // Filtros de pesquisa em tempo real nos Resultados
+    const filtroResultadoBusca = document.getElementById('filtro-resultado-busca');
+    const filtroResultadoEstado = document.getElementById('filtro-resultado-estado');
+    const filtroResultadoEscalao = document.getElementById('filtro-resultado-escalao');
+
+    if (filtroResultadoBusca) filtroResultadoBusca.addEventListener('input', renderResultadosTable);
+    if (filtroResultadoEstado) filtroResultadoEstado.addEventListener('change', renderResultadosTable);
+    if (filtroResultadoEscalao) filtroResultadoEscalao.addEventListener('change', renderResultadosTable);
 
     window.deleteResultado = async (id) => {
         if (!confirm("Tem a certeza que deseja eliminar este resultado?")) return;
@@ -4409,7 +4580,8 @@ document.addEventListener('DOMContentLoaded', async () => {
                                     escalao: jogo.escalao,
                                     local: jogo.local,
                                     competicao: jogo.competicao,
-                                    fpb_id: jogo.fpb_id
+                                    fpb_id: jogo.fpb_id,
+                                    publicado: true
                                 };
 
                                 if (existRes && existRes.length > 0) {
@@ -4445,7 +4617,8 @@ document.addEventListener('DOMContentLoaded', async () => {
                                     local: jogo.local,
                                     escalao: jogo.escalao,
                                     competicao: jogo.competicao,
-                                    fpb_id: jogo.fpb_id
+                                    fpb_id: jogo.fpb_id,
+                                    publicado: true
                                 };
 
                                 if (existAg && existAg.length > 0) {

@@ -145,11 +145,13 @@ async function loadPortalHighlights(supabase) {
                 .lte('data_jogo', nextWeekStr)
                 .order('data_jogo', { ascending: true });
 
-            if (!error && agenda && agenda.length > 0) {
+            const agendaPublicada = (agenda || []).filter(j => j.publicado !== false);
+
+            if (!error && agendaPublicada.length > 0) {
                 hasAgenda = true;
                 agendaContainer.innerHTML = '';
                 
-                agenda.forEach(jogo => {
+                agendaPublicada.forEach(jogo => {
                     const dataJogo = new Date(jogo.data_jogo).toLocaleDateString('pt-PT', { weekday: 'short', day: 'numeric', month: 'short' });
                     const horaJogo = jogo.hora_jogo ? jogo.hora_jogo.substring(0, 5) : '';
 
@@ -180,13 +182,15 @@ async function loadPortalHighlights(supabase) {
                 .from('resultados_bcv')
                 .select('*')
                 .order('data_jogo', { ascending: false })
-                .limit(5);
+                .limit(10);
 
-            if (!error && resultados && resultados.length > 0) {
+            const resultadosPublicados = (resultados || []).filter(r => r.publicado !== false).slice(0, 5);
+
+            if (!error && resultadosPublicados.length > 0) {
                 hasResultados = true;
                 resultadosContainer.innerHTML = '';
 
-                resultados.forEach(resultado => {
+                resultadosPublicados.forEach(resultado => {
                     const dataJogo = new Date(resultado.data_jogo).toLocaleDateString('pt-PT', { day: 'numeric', month: 'short' });
                     const ptsCasa = Number(resultado.pontos_casa) || 0;
                     const ptsFora = Number(resultado.pontos_fora) || 0;
@@ -1025,8 +1029,8 @@ async function loadCompeticoesSection(supabase) {
             const card = document.createElement('div');
             card.className = `competicao-card ${comp.tipo === 'nacional' ? 'nacional' : ''}`;
 
-            const jogosAgenda = allAgenda.filter(j => matchJogoCompeticao(j, comp));
-            const jogosResultados = allResultados.filter(j => matchJogoCompeticao(j, comp));
+            const jogosAgenda = allAgenda.filter(j => j.publicado !== false && matchJogoCompeticao(j, comp));
+            const jogosResultados = allResultados.filter(j => j.publicado !== false && matchJogoCompeticao(j, comp));
 
             card.innerHTML = `
                 <div>

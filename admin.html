@@ -404,6 +404,13 @@
                                 <option value="Veteranos">Veteranos</option>
                             </select>
 
+                            <div style="grid-column: span 2; display: flex; align-items: center; gap: 10px; background: rgba(126, 34, 206, 0.05); padding: 10px 14px; border-radius: 8px; border: 1px solid rgba(126, 34, 206, 0.15);">
+                                <input type="checkbox" id="agenda-publicado" checked style="width: 18px; height: 18px; cursor: pointer;">
+                                <label for="agenda-publicado" style="cursor: pointer; font-weight: 600; font-size: 0.9rem; color: var(--text-primary);">
+                                    Publicar no Site (Visível na Agenda e Competições)
+                                </label>
+                            </div>
+
                             <div style="grid-column: span 2; display: flex; gap: 10px;">
                                 <button type="submit" id="btn-save-agenda" class="btn-primary" style="flex: 2;">Guardar Jogo</button>
                                 <button type="button" id="btn-cancel-agenda" class="btn-secondary hidden" style="flex: 1;">Cancelar</button>
@@ -412,15 +419,45 @@
                         </form>
                     </div>
 
+                    <!-- Barra de Filtros da Agenda -->
+                    <div style="background: #fff; padding: 14px; border-radius: 10px; border: 1px solid var(--border-color); margin-bottom: 15px; display: flex; flex-wrap: wrap; gap: 10px; align-items: center;">
+                        <div style="flex: 2; min-width: 220px;">
+                            <input type="text" id="filtro-agenda-busca" placeholder="🔍 Pesquisar equipa, competição, local..." class="admin-input" style="width: 100%;">
+                        </div>
+                        <div style="flex: 1; min-width: 150px;">
+                            <select id="filtro-agenda-estado" class="admin-input" style="width: 100%;">
+                                <option value="">Todos os Estados</option>
+                                <option value="sim">🟢 Apenas Visíveis (Sim)</option>
+                                <option value="nao">🔴 Apenas Ocultos (Não)</option>
+                            </select>
+                        </div>
+                        <div style="flex: 1; min-width: 150px;">
+                            <select id="filtro-agenda-escalao" class="admin-input" style="width: 100%;">
+                                <option value="">Todos os Escalões</option>
+                                <option value="BabyBasket">BabyBasket</option>
+                                <option value="Mini 8">Mini 8</option>
+                                <option value="Mini 10">Mini 10</option>
+                                <option value="Mini 12">Mini 12</option>
+                                <option value="Sub 14">Sub 14</option>
+                                <option value="Sub 16">Sub 16</option>
+                                <option value="Sub 18">Sub 18</option>
+                                <option value="Sub 20">Sub 20</option>
+                                <option value="Seniores">Seniores</option>
+                                <option value="Veteranos">Veteranos</option>
+                            </select>
+                        </div>
+                    </div>
+
                     <!-- Tabela de Agenda -->
                     <div class="admin-table-container">
                         <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
                             <h3 style="margin: 0;">Jogos Agendados</h3>
-                            <small style="color: var(--text-secondary);">Os jogos oficiais são importados automaticamente da Federação Portuguesa de Basquetebol.</small>
+                            <small style="color: var(--text-secondary);">Controle individualmente com 1 toque a publicação de cada jogo no site.</small>
                         </div>
                         <table class="admin-table" style="width: 100%;">
                             <thead>
                                 <tr>
+                                    <th style="padding: 12px; width: 140px; text-align: center;">Visível no Site?</th>
                                     <th>Data / Hora</th>
                                     <th>Jogo (Casa vs Fora)</th>
                                     <th>Local</th>
@@ -429,7 +466,7 @@
                                 </tr>
                             </thead>
                             <tbody id="agenda-table-body">
-                                <tr><td colspan="5" style="padding: 20px; text-align: center;">A carregar jogos...</td></tr>
+                                <tr><td colspan="6" style="padding: 20px; text-align: center;">A carregar jogos...</td></tr>
                             </tbody>
                         </table>
                     </div>
@@ -490,6 +527,13 @@
                                 </div>
                             </div>
 
+                            <div style="grid-column: span 2; display: flex; align-items: center; gap: 10px; background: rgba(126, 34, 206, 0.05); padding: 10px 14px; border-radius: 8px; border: 1px solid rgba(126, 34, 206, 0.15);">
+                                <input type="checkbox" id="resultado-publicado" checked style="width: 18px; height: 18px; cursor: pointer;">
+                                <label for="resultado-publicado" style="cursor: pointer; font-weight: 600; font-size: 0.9rem; color: var(--text-primary);">
+                                    Publicar no Site (Visível nos Resultados e Competições)
+                                </label>
+                            </div>
+
                             <div style="grid-column: span 2; display: flex; gap: 10px;">
                                 <button type="submit" id="btn-save-resultado" class="btn-primary" style="flex: 2;">Guardar Resultado</button>
                                 <button type="button" id="btn-cancel-resultado" class="btn-secondary" style="flex: 1;">Fechar</button>
@@ -498,11 +542,41 @@
                         </form>
                     </div>
                     
+                    <!-- Barra de Filtros de Resultados -->
+                    <div style="background: #fff; padding: 14px; border-radius: 10px; border: 1px solid var(--border-color); margin-bottom: 15px; display: flex; flex-wrap: wrap; gap: 10px; align-items: center;">
+                        <div style="flex: 2; min-width: 220px;">
+                            <input type="text" id="filtro-resultado-busca" placeholder="🔍 Pesquisar equipa, escalão..." class="admin-input" style="width: 100%;">
+                        </div>
+                        <div style="flex: 1; min-width: 150px;">
+                            <select id="filtro-resultado-estado" class="admin-input" style="width: 100%;">
+                                <option value="">Todos os Estados</option>
+                                <option value="sim">🟢 Apenas Visíveis (Sim)</option>
+                                <option value="nao">🔴 Apenas Ocultos (Não)</option>
+                            </select>
+                        </div>
+                        <div style="flex: 1; min-width: 150px;">
+                            <select id="filtro-resultado-escalao" class="admin-input" style="width: 100%;">
+                                <option value="">Todos os Escalões</option>
+                                <option value="BabyBasket">BabyBasket</option>
+                                <option value="Mini 8">Mini 8</option>
+                                <option value="Mini 10">Mini 10</option>
+                                <option value="Mini 12">Mini 12</option>
+                                <option value="Sub 14">Sub 14</option>
+                                <option value="Sub 16">Sub 16</option>
+                                <option value="Sub 18">Sub 18</option>
+                                <option value="Sub 20">Sub 20</option>
+                                <option value="Seniores">Seniores</option>
+                                <option value="Veteranos">Veteranos</option>
+                            </select>
+                        </div>
+                    </div>
+
                     <!-- Tabela de Resultados -->
                     <div class="admin-table-container">
                         <table class="admin-table" style="width: 100%;">
                             <thead>
                                 <tr>
+                                    <th style="padding: 12px; width: 140px; text-align: center;">Visível no Site?</th>
                                     <th>Data</th>
                                     <th>Jogo (Casa vs Fora)</th>
                                     <th>Resultado</th>
@@ -511,7 +585,7 @@
                                 </tr>
                             </thead>
                             <tbody id="resultados-table-body">
-                                <tr><td colspan="5" style="padding: 20px; text-align: center;">A carregar resultados...</td></tr>
+                                <tr><td colspan="6" style="padding: 20px; text-align: center;">A carregar resultados...</td></tr>
                             </tbody>
                         </table>
                     </div>
@@ -2490,6 +2564,6 @@
 
     <!-- Scripts -->
     <script src="js/config.js"></script>
-    <script src="js/admin.js?v=20260925_1"></script>
+    <script src="js/admin.js?v=20260925_6"></script>
 </body>
 </html>

@@ -7,19 +7,23 @@
 -- 1. Garantir colunas necessárias na tabela agenda_bcv
 ALTER TABLE IF EXISTS public.agenda_bcv 
     ADD COLUMN IF NOT EXISTS fpb_id TEXT,
-    ADD COLUMN IF NOT EXISTS competicao TEXT;
+    ADD COLUMN IF NOT EXISTS competicao TEXT,
+    ADD COLUMN IF NOT EXISTS publicado BOOLEAN DEFAULT true;
 
 CREATE INDEX IF NOT EXISTS idx_agenda_bcv_fpb_id ON public.agenda_bcv(fpb_id);
 CREATE INDEX IF NOT EXISTS idx_agenda_bcv_data ON public.agenda_bcv(data_jogo);
+CREATE INDEX IF NOT EXISTS idx_agenda_bcv_publicado ON public.agenda_bcv(publicado);
 
 -- 2. Garantir colunas necessárias na tabela resultados_bcv
 ALTER TABLE IF EXISTS public.resultados_bcv 
     ADD COLUMN IF NOT EXISTS fpb_id TEXT,
     ADD COLUMN IF NOT EXISTS local TEXT,
-    ADD COLUMN IF NOT EXISTS competicao TEXT;
+    ADD COLUMN IF NOT EXISTS competicao TEXT,
+    ADD COLUMN IF NOT EXISTS publicado BOOLEAN DEFAULT true;
 
 CREATE INDEX IF NOT EXISTS idx_resultados_bcv_fpb_id ON public.resultados_bcv(fpb_id);
 CREATE INDEX IF NOT EXISTS idx_resultados_bcv_data ON public.resultados_bcv(data_jogo);
+CREATE INDEX IF NOT EXISTS idx_resultados_bcv_publicado ON public.resultados_bcv(publicado);
 
 -- 3. Função RPC inteligente para sincronizar jogos da FPB
 CREATE OR REPLACE FUNCTION public.sincronizar_jogos_fpb(jogos_payload JSONB)
