@@ -354,14 +354,19 @@
                 </div>
                 <!-- Tab: Agenda -->
                 <div id="tab-agenda" class="tab-pane hidden">
-                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; flex-wrap: wrap; gap: 10px;">
                         <h2>Gestão de Agenda (Próximos Jogos)</h2>
-                        <button id="btn-refresh-agenda" class="btn-secondary" style="width: auto; padding: 5px 15px;">🔄 Atualizar</button>
+                        <div style="display: flex; gap: 10px; align-items: center;">
+                            <button id="btn-sync-fpb-agenda" class="btn-primary" style="background: linear-gradient(135deg, #7e22ce, #9333ea); width: auto; padding: 7px 16px; display: flex; align-items: center; gap: 8px; font-weight: 600; box-shadow: 0 4px 12px rgba(126, 34, 206, 0.25);">
+                                🔄 Sincronizar com FPB
+                            </button>
+                            <button id="btn-refresh-agenda" class="btn-secondary" style="width: auto; padding: 7px 15px;">🔄 Atualizar</button>
+                        </div>
                     </div>
 
                     <!-- Formulário de Jogo -->
                     <div class="welcome-box" style="margin-bottom: 30px;">
-                        <h3 id="form-agenda-title" style="margin-top: 0;">Adicionar Novo Jogo</h3>
+                        <h3 id="form-agenda-title" style="margin-top: 0;">Adicionar Novo Jogo Manual</h3>
                         <form id="form-agenda" style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-top: 15px;">
                             <input type="hidden" id="agenda-id">
                             
@@ -405,7 +410,10 @@
 
                     <!-- Tabela de Agenda -->
                     <div class="admin-table-container">
-                        <h3>Jogos Agendados</h3>
+                        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
+                            <h3 style="margin: 0;">Jogos Agendados</h3>
+                            <small style="color: var(--text-secondary);">Os jogos oficiais são importados automaticamente da Federação Portuguesa de Basquetebol.</small>
+                        </div>
                         <table class="admin-table" style="width: 100%;">
                             <thead>
                                 <tr>
@@ -425,7 +433,66 @@
 
                 <!-- Tab: Resultados -->
                 <div id="tab-resultados" class="tab-pane hidden">
-                    <h2 style="margin-bottom: 20px;">Gestão de Resultados</h2>
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; flex-wrap: wrap; gap: 10px;">
+                        <h2 style="margin: 0;">Gestão de Resultados</h2>
+                        <div style="display: flex; gap: 10px; align-items: center;">
+                            <button id="btn-toggle-form-resultado" class="btn-secondary" style="width: auto; padding: 7px 15px;">➕ Novo Resultado</button>
+                            <button id="btn-sync-fpb-resultados" class="btn-primary" style="background: linear-gradient(135deg, #7e22ce, #9333ea); width: auto; padding: 7px 16px; display: flex; align-items: center; gap: 8px; font-weight: 600; box-shadow: 0 4px 12px rgba(126, 34, 206, 0.25);">
+                                🔄 Sincronizar com FPB
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Formulário Manual de Resultado (Opcional/Expansível) -->
+                    <div id="container-form-resultado" class="welcome-box hidden" style="margin-bottom: 30px;">
+                        <h3 id="form-resultado-title" style="margin-top: 0;">Registar Resultado de Jogo</h3>
+                        <form id="form-resultado" style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-top: 15px;">
+                            <input type="hidden" id="resultado-id">
+                            
+                            <input type="text" id="resultado-casa" placeholder="Equipa Casa (Ex: BC Valença)" required class="admin-input">
+                            <input type="text" id="resultado-fora" placeholder="Equipa Fora (Ex: Monção BC)" required class="admin-input">
+                            
+                            <div style="display: flex; gap: 10px;">
+                                <div style="flex: 1;">
+                                    <label style="font-size: 0.8rem; color: #a0a0ab;">Pontos Casa</label>
+                                    <input type="number" id="resultado-pontos-casa" placeholder="Ex: 72" required min="0" class="admin-input">
+                                </div>
+                                <div style="flex: 1;">
+                                    <label style="font-size: 0.8rem; color: #a0a0ab;">Pontos Fora</label>
+                                    <input type="number" id="resultado-pontos-fora" placeholder="Ex: 68" required min="0" class="admin-input">
+                                </div>
+                            </div>
+
+                            <div style="display: flex; gap: 10px;">
+                                <div style="flex: 1;">
+                                    <label style="font-size: 0.8rem; color: #a0a0ab;">Data do Jogo</label>
+                                    <input type="date" id="resultado-data" required class="admin-input">
+                                </div>
+                                <div style="flex: 1;">
+                                    <label style="font-size: 0.8rem; color: #a0a0ab;">Escalão</label>
+                                    <select id="resultado-escalao" required class="admin-input">
+                                        <option value="" disabled selected>Selecionar Escalão</option>
+                                        <option value="BabyBasket">BabyBasket</option>
+                                        <option value="Mini 8">Mini 8</option>
+                                        <option value="Mini 10">Mini 10</option>
+                                        <option value="Mini 12">Mini 12</option>
+                                        <option value="Sub 14">Sub 14</option>
+                                        <option value="Sub 16">Sub 16</option>
+                                        <option value="Sub 18">Sub 18</option>
+                                        <option value="Sub 20">Sub 20</option>
+                                        <option value="Seniores">Seniores</option>
+                                        <option value="Veteranos">Veteranos</option>
+                                    </select>
+                                </div>
+                            </div>
+
+                            <div style="grid-column: span 2; display: flex; gap: 10px;">
+                                <button type="submit" id="btn-save-resultado" class="btn-primary" style="flex: 2;">Guardar Resultado</button>
+                                <button type="button" id="btn-cancel-resultado" class="btn-secondary" style="flex: 1;">Fechar</button>
+                            </div>
+                            <p id="resultado-form-msg" class="hidden"></p>
+                        </form>
+                    </div>
                     
                     <!-- Tabela de Resultados -->
                     <div class="admin-table-container">
@@ -433,7 +500,7 @@
                             <thead>
                                 <tr>
                                     <th>Data</th>
-                                    <th>Jogo</th>
+                                    <th>Jogo (Casa vs Fora)</th>
                                     <th>Resultado</th>
                                     <th>Escalão</th>
                                     <th style="text-align: center;">Ações</th>
@@ -2094,12 +2161,118 @@
                         </form>
                     </div>
                 </div>
+
+                <!-- Modal Popup de Sincronização FPB -->
+                <div id="modal-sync-fpb" class="admin-modal-overlay hidden">
+                    <div class="admin-modal-content" style="max-width: 900px; width: 95%; max-height: 90vh; display: flex; flex-direction: column;">
+                        <div class="admin-modal-header" style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 12px; padding-bottom: 12px; border-bottom: 1px solid var(--border-color);">
+                            <div>
+                                <h3 style="margin: 0; font-size: 1.35rem; color: var(--accent-primary); display: flex; align-items: center; gap: 8px;">
+                                    <span>🏀</span> Sincronização Oficial FPB
+                                </h3>
+                                <p style="font-size: 0.85rem; color: var(--text-secondary); margin: 4px 0 0 0;">
+                                    Basket Clube de Valença (ID: 656) • Federação Portuguesa de Basquetebol
+                                </p>
+                            </div>
+                            <button type="button" id="btn-close-modal-sync-fpb" class="admin-modal-close" title="Fechar">&times;</button>
+                        </div>
+
+                        <!-- Estado do Carregamento / Feedback -->
+                        <div id="sync-fpb-loading" style="display: none; text-align: center; padding: 40px 20px;">
+                            <div class="loading-spinner" style="margin: 0 auto 15px auto; width: 44px; height: 44px; border: 4px solid rgba(126, 34, 206, 0.2); border-top-color: var(--accent-primary); border-radius: 50%; animation: spin 1s linear infinite;"></div>
+                            <h4 style="margin: 0 0 6px 0; color: var(--text-primary);">A ligar aos servidores da FPB...</h4>
+                            <p style="margin: 0; font-size: 0.85rem; color: var(--text-secondary);">A consultar o calendário oficial de jogos e resultados do BC Valença.</p>
+                        </div>
+
+                        <!-- Resumo dos Jogos Encontrados -->
+                        <div id="sync-fpb-summary" style="display: none;">
+                            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)); gap: 12px; margin-bottom: 16px;">
+                                <div style="background: rgba(126, 34, 206, 0.08); border: 1px solid rgba(126, 34, 206, 0.25); border-radius: 8px; padding: 12px; text-align: center;">
+                                    <div style="font-size: 0.78rem; text-transform: uppercase; font-weight: 700; color: var(--accent-primary);">Total Encontrados</div>
+                                    <div id="sync-count-total" style="font-size: 1.6rem; font-weight: 800; color: var(--accent-primary); margin-top: 4px;">0</div>
+                                </div>
+                                <div style="background: rgba(37, 99, 235, 0.08); border: 1px solid rgba(37, 99, 235, 0.25); border-radius: 8px; padding: 12px; text-align: center;">
+                                    <div style="font-size: 0.78rem; text-transform: uppercase; font-weight: 700; color: #2563eb;">📅 Jogos Futuros (Agenda)</div>
+                                    <div id="sync-count-agenda" style="font-size: 1.6rem; font-weight: 800; color: #2563eb; margin-top: 4px;">0</div>
+                                </div>
+                                <div style="background: rgba(22, 163, 74, 0.08); border: 1px solid rgba(22, 163, 74, 0.25); border-radius: 8px; padding: 12px; text-align: center;">
+                                    <div style="font-size: 0.78rem; text-transform: uppercase; font-weight: 700; color: #16a34a;">🏆 Resultados Finais</div>
+                                    <div id="sync-count-resultados" style="font-size: 1.6rem; font-weight: 800; color: #16a34a; margin-top: 4px;">0</div>
+                                </div>
+                            </div>
+
+                            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
+                                <span style="font-weight: 700; font-size: 0.9rem; color: var(--text-primary);">Lista de Jogos Extraídos:</span>
+                                <span style="font-size: 0.78rem; color: var(--text-secondary);">Os jogos já existentes na BD serão atualizados sem duplicação.</span>
+                            </div>
+
+                            <div id="sync-fpb-jogos-list" style="max-height: 380px; overflow-y: auto; border: 1px solid var(--border-color); border-radius: 8px; background: #fff; padding: 8px; display: flex; flex-direction: column; gap: 8px;">
+                                <!-- Lista de jogos gerada por JS -->
+                            </div>
+
+                            <div style="display: flex; justify-content: flex-end; gap: 10px; margin-top: 16px; padding-top: 12px; border-top: 1px solid var(--border-color);">
+                                <button type="button" id="btn-cancel-sync-fpb" class="btn-secondary" style="width: auto; padding: 8px 18px;">Fechar</button>
+                                <button type="button" id="btn-confirm-import-fpb" class="btn-primary" style="background: linear-gradient(135deg, #16a34a, #15803d); width: auto; padding: 8px 24px; font-weight: 700; box-shadow: 0 4px 12px rgba(22, 163, 74, 0.3);">
+                                    📥 Importar e Atualizar no Site
+                                </button>
+                            </div>
+                        </div>
+
+                        <!-- Mensagem de Erro / Sucesso -->
+                        <div id="sync-fpb-status-box" style="display: none; padding: 16px; border-radius: 8px; margin-top: 15px; font-size: 0.9rem; text-align: center;"></div>
+                    </div>
+                </div>
+
+                <!-- Modal Popup de Finalizar Jogo (Registar Resultado a partir da Agenda) -->
+                <div id="modal-finalizar-jogo" class="admin-modal-overlay hidden">
+                    <div class="admin-modal-content" style="max-width: 500px; width: 95%;">
+                        <div class="admin-modal-header" style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
+                            <h3 style="margin: 0; color: var(--accent-primary);">🏁 Registar Resultado Final</h3>
+                            <button type="button" id="btn-close-modal-finalizar" class="admin-modal-close" title="Fechar">&times;</button>
+                        </div>
+                        <form id="form-finalizar-jogo">
+                            <input type="hidden" id="finalizar-agenda-id">
+                            <input type="hidden" id="finalizar-fpb-id">
+                            <input type="hidden" id="finalizar-data">
+                            <input type="hidden" id="finalizar-escalao">
+                            <input type="hidden" id="finalizar-local">
+
+                            <div style="background: #f8fafc; border: 1px solid var(--border-color); border-radius: 8px; padding: 14px; margin-bottom: 16px; text-align: center;">
+                                <div id="finalizar-info-escalao-data" style="font-size: 0.8rem; color: var(--text-secondary); margin-bottom: 6px;">Data • Escalão</div>
+                                <div style="display: flex; align-items: center; justify-content: center; gap: 10px; font-weight: 700; font-size: 1.05rem; color: var(--text-primary);">
+                                    <span id="finalizar-equipa-casa" style="flex: 1; text-align: right;">BC Valença</span>
+                                    <span style="color: var(--accent-primary); font-size: 0.9rem;">vs</span>
+                                    <span id="finalizar-equipa-fora" style="flex: 1; text-align: left;">Adversário</span>
+                                </div>
+                            </div>
+
+                            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-bottom: 20px;">
+                                <div style="text-align: center;">
+                                    <label style="display: block; font-size: 0.82rem; font-weight: 600; color: var(--text-primary); margin-bottom: 6px;">Pontos Casa</label>
+                                    <input type="number" id="finalizar-pontos-casa" required min="0" placeholder="0" class="admin-input" style="font-size: 1.5rem; text-align: center; font-weight: 800; padding: 10px;">
+                                </div>
+                                <div style="text-align: center;">
+                                    <label style="display: block; font-size: 0.82rem; font-weight: 600; color: var(--text-primary); margin-bottom: 6px;">Pontos Fora</label>
+                                    <input type="number" id="finalizar-pontos-fora" required min="0" placeholder="0" class="admin-input" style="font-size: 1.5rem; text-align: center; font-weight: 800; padding: 10px;">
+                                </div>
+                            </div>
+
+                            <div style="display: flex; gap: 10px;">
+                                <button type="button" id="btn-cancel-finalizar" class="btn-secondary" style="flex: 1;">Cancelar</button>
+                                <button type="submit" id="btn-submit-finalizar" class="btn-primary" style="flex: 2; background: linear-gradient(135deg, #16a34a, #15803d); font-weight: 700;">
+                                    ✅ Guardar Resultado
+                                </button>
+                            </div>
+                            <p id="finalizar-msg" class="hidden" style="margin-top: 12px; text-align: center; font-size: 0.9rem; font-weight: 600;"></p>
+                        </form>
+                    </div>
+                </div>
             </main>
         </div>
     </div>
 
     <!-- Scripts -->
     <script src="js/config.js"></script>
-    <script src="js/admin.js?v=20260908_4"></script>
+    <script src="js/admin.js?v=20260925_1"></script>
 </body>
 </html>

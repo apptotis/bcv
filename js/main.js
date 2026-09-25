@@ -109,6 +109,7 @@ document.addEventListener('DOMContentLoaded', () => {
     if (typeof window.supabase !== 'undefined' && typeof SUPABASE_URL !== 'undefined') {
         const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
         loadPortalHighlights(supabase);
+        loadCompeticoesSection(supabase);
         loadNoticiasIndex(supabase);
         loadEquipasMenu(supabase);
         loadGlobalClubConfig(supabase);
@@ -752,5 +753,152 @@ async function loadPatrocinadoresPublic(supabase) {
         console.warn("Aviso ao carregar patrocinadores públicos:", err);
     }
 }
+
+// 6. Carregar Competições Oficiais do BCV (#competicoes)
+async function loadCompeticoesSection(supabase) {
+    const grid = document.getElementById('competicoes-grid');
+    if (!grid) return;
+
+    // Competições Oficiais do BC Valença (Época 2026/2027)
+    const baseCompeticoes = [
+        {
+            sigla: "CN2",
+            nome: "Campeonato Nacional da 2.ª Divisão Masculina (CN2)",
+            escalao: "Seniores",
+            sexo: "Masculino",
+            equipa_label: "Seniores Masculinos",
+            tag: "FPB • Nacional",
+            tipo: "nacional",
+            detalhe: "Zona Norte • Federação Portuguesa de Basquetebol",
+            icon: "🏀"
+        },
+        {
+            sigla: "Taça de Portugal",
+            nome: "Taça de Portugal de Basquetebol",
+            escalao: "Seniores",
+            sexo: "Masculino",
+            equipa_label: "Seniores Masculinos",
+            tag: "FPB • Nacional",
+            tipo: "nacional",
+            detalhe: "Fases Eliminatórias Nacionais • Federação Portuguesa de Basquetebol",
+            icon: "🏆"
+        },
+        {
+            sigla: "Sub 18 Masc",
+            nome: "Campeonato Distrital Sub 18 Masculino",
+            escalao: "Sub 18",
+            sexo: "Masculino",
+            equipa_label: "Sub 18 Masculinos",
+            tag: "ABVC • Distrital",
+            tipo: "distrital",
+            detalhe: "Fase Regular e Taça Distrital • AB Viana do Castelo",
+            icon: "🏀"
+        },
+        {
+            sigla: "Sub 16 Fem",
+            nome: "Campeonato Distrital Sub 16 Feminino",
+            escalao: "Sub 16",
+            sexo: "Feminino",
+            equipa_label: "Sub 16 Femininos",
+            tag: "ABVC • Distrital",
+            tipo: "distrital",
+            detalhe: "Campeonato Inter-distrital • AB Viana do Castelo / FPB",
+            icon: "🏀"
+        },
+        {
+            sigla: "Sub 14 Masc",
+            nome: "Campeonato Distrital Sub 14 Masculino",
+            escalao: "Sub 14",
+            sexo: "Masculino",
+            equipa_label: "Sub 14 Masculinos",
+            tag: "ABVC • Distrital",
+            tipo: "distrital",
+            detalhe: "Campeonato Distrital de Formação • AB Viana do Castelo",
+            icon: "🏀"
+        },
+        {
+            sigla: "Sub 14 Fem",
+            nome: "Campeonato Distrital Sub 14 Feminino",
+            escalao: "Sub 14",
+            sexo: "Feminino",
+            equipa_label: "Sub 14 Femininos",
+            tag: "ABVC • Distrital",
+            tipo: "distrital",
+            detalhe: "Campeonato Distrital de Formação • AB Viana do Castelo",
+            icon: "🏀"
+        },
+        {
+            sigla: "Minibasquete",
+            nome: "Circuitos e Torneios de Minibasquete",
+            escalao: "Mini 12",
+            sexo: "Misto",
+            equipa_label: "Mini 12, Mini 10, Mini 8 & BabyBasket",
+            tag: "FPB / ABVC",
+            tipo: "distrital",
+            detalhe: "Festivais e Concentrações de Iniciação e Formação",
+            icon: "⭐"
+        }
+    ];
+
+    try {
+        let equipasMap = {};
+        if (supabase) {
+            const { data: equipas } = await supabase
+                .from('equipasbcv')
+                .select('id, nome, escalao, sexo');
+            
+            if (equipas && equipas.length > 0) {
+                equipas.forEach(eq => {
+                    const esc = (eq.escalao || '').toLowerCase().replace(/[^a-z0-9]/g, '');
+                    const sex = (eq.sexo || '').toLowerCase();
+                    equipasMap[`${esc}_${sex}`] = eq;
+                    if (!equipasMap[esc]) {
+                        equipasMap[esc] = eq;
+                    }
+                });
+            }
+        }
+
+        grid.innerHTML = '';
+        baseCompeticoes.forEach(comp => {
+            const card = document.createElement('div');
+            card.className = `competicao-card ${comp.tipo === 'nacional' ? 'nacional' : ''}`;
+
+            const esc = (comp.escalao || '').toLowerCase().replace(/[^a-z0-9]/g, '');
+            const sex = (comp.sexo || '').toLowerCase();
+            const eq = equipasMap[`${esc}_${sex}`] || equipasMap[esc];
+
+            const linkPlantel = eq 
+                ? `<a href="equipas.html?equipaId=${eq.id}" class="competicao-btn-link">👥 Ver Plantel →</a>`
+                : `<a href="equipas.html" class="competicao-btn-link">👥 Equipas →</a>`;
+
+            card.innerHTML = `
+                <div>
+                    <div class="competicao-card-header">
+                        <span class="competicao-tag">${comp.tag}</span>
+                        <span class="competicao-sigla">${comp.sigla}</span>
+                    </div>
+                    <h3 class="competicao-title">${comp.nome}</h3>
+                    <div class="competicao-equipa">
+                        <span>${comp.icon}</span>
+                        <strong>${comp.equipa_label}</strong>
+                    </div>
+                    <p style="font-size: 0.8rem; color: var(--text-secondary); margin: 0 0 14px 0; line-height: 1.4;">
+                        ${comp.detalhe}
+                    </p>
+                </div>
+                <div class="competicao-footer">
+                    <span style="font-size: 0.75rem; color: var(--text-secondary); font-weight: 600;">Época 2026/2027</span>
+                    ${linkPlantel}
+                </div>
+            `;
+            grid.appendChild(card);
+        });
+
+    } catch (err) {
+        console.warn("Aviso ao carregar secção de competições:", err);
+    }
+}
+
 
 

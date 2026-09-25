@@ -2044,3 +2044,128 @@ img {
 
 .drawer-dropdown-btn { width: 44px; height: 44px; padding: 0; }
 .drawer-dropdown-btn i { pointer-events: none; }
+
+/* ==========================================================================
+   SECÇÃO COMPETIÇÕES OFICIAIS (#competicoes)
+   ========================================================================== */
+.competicoes-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(290px, 1fr));
+    gap: 16px;
+    margin-top: 15px;
+}
+
+.competicao-card {
+    background: #ffffff;
+    border: 1px solid var(--border-color);
+    border-radius: 12px;
+    padding: 18px 20px;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+    position: relative;
+    overflow: hidden;
+    box-shadow: var(--shadow-sm);
+}
+
+.competicao-card::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 4px;
+    height: 100%;
+    background: var(--accent-primary);
+    border-radius: 4px 0 0 4px;
+    transition: width 0.2s ease;
+}
+
+.competicao-card.nacional::before {
+    background: linear-gradient(180deg, #f59e0b, #d97706);
+}
+
+.competicao-card:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 10px 25px rgba(126, 34, 206, 0.12);
+    border-color: rgba(126, 34, 206, 0.3);
+}
+
+.competicao-card:hover::before {
+    width: 6px;
+}
+
+.competicao-card-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 10px;
+    gap: 8px;
+}
+
+.competicao-tag {
+    font-size: 0.72rem;
+    font-weight: 800;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    padding: 3px 8px;
+    border-radius: 6px;
+    background: rgba(126, 34, 206, 0.1);
+    color: var(--accent-primary);
+}
+
+.competicao-card.nacional .competicao-tag {
+    background: rgba(245, 158, 11, 0.15);
+    color: #b45309;
+    border: 1px solid rgba(245, 158, 11, 0.3);
+}
+
+.competicao-sigla {
+    font-size: 0.82rem;
+    font-weight: 800;
+    color: var(--text-secondary);
+}
+
+.competicao-title {
+    font-family: var(--font-heading);
+    font-size: 1.15rem;
+    font-weight: 800;
+    color: var(--text-primary);
+    margin: 0 0 6px 0;
+    line-height: 1.25;
+}
+
+.competicao-equipa {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 0.88rem;
+    color: var(--text-secondary);
+    margin-bottom: 14px;
+}
+
+.competicao-footer {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding-top: 12px;
+    border-top: 1px dashed var(--border-color);
+    margin-top: auto;
+}
+
+.competicao-btn-link {
+    font-size: 0.82rem;
+    font-weight: 700;
+    color: var(--accent-primary);
+    text-decoration: none;
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    transition: color 0.2s ease;
+}
+
+.competicao-btn-link:hover {
+    color: #4c1d95;
+    text-decoration: underline;
+}
+

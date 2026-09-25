@@ -3550,6 +3550,11 @@ document.addEventListener('DOMContentLoaded', async () => {
     const btnSaveAgenda = document.getElementById('btn-save-agenda');
     const btnCancelAgenda = document.getElementById('btn-cancel-agenda');
     const btnRefreshAgenda = document.getElementById('btn-refresh-agenda');
+    const btnSyncFPBAgenda = document.getElementById('btn-sync-fpb-agenda');
+    const btnSyncFPBResultados = document.getElementById('btn-sync-fpb-resultados');
+
+    let currentAgendaGames = [];
+    let currentFPBGames = [];
 
     async function loadAgenda() {
         if (!agendaTableBody) return;
@@ -3563,23 +3568,28 @@ document.addEventListener('DOMContentLoaded', async () => {
 
             if (error) throw error;
 
+            currentAgendaGames = data || [];
             agendaTableBody.innerHTML = '';
-            if (data.length === 0) {
-                agendaTableBody.innerHTML = '<tr><td colspan="5" style="padding: 20px; text-align: center;">Nenhum jogo agendado.</td></tr>';
+            if (currentAgendaGames.length === 0) {
+                agendaTableBody.innerHTML = '<tr><td colspan="5" style="padding: 20px; text-align: center; color: var(--text-secondary);">Nenhum jogo agendado. Clique em <strong>Sincronizar com FPB</strong> para carregar o calendário oficial.</td></tr>';
                 return;
             }
 
-            data.forEach(jogo => {
+            currentAgendaGames.forEach(jogo => {
                 const tr = document.createElement('tr');
-                tr.style.borderBottom = "1px solid rgba(255,255,255,0.05)";
+                tr.style.borderBottom = "1px solid var(--border-color, rgba(255,255,255,0.05))";
                 tr.innerHTML = `
-                    <td style="padding: 12px;">${formatDate(jogo.data_jogo)}<br><small>${jogo.hora_jogo || '--:--'}</small></td>
-                    <td style="padding: 12px;"><strong>${jogo.equipa_casa}</strong> vs <strong>${jogo.equipa_fora}</strong></td>
+                    <td style="padding: 12px;"><strong>${formatDate(jogo.data_jogo)}</strong><br><small style="color:var(--text-secondary);">${jogo.hora_jogo || 'Hora a definir'}</small></td>
+                    <td style="padding: 12px;">
+                        <strong>${jogo.equipa_casa}</strong> vs <strong>${jogo.equipa_fora}</strong>
+                        ${jogo.competicao ? `<br><small style="color:var(--text-secondary);">${jogo.competicao}</small>` : ''}
+                    </td>
                     <td style="padding: 12px;">${jogo.local || '--'}</td>
-                    <td style="padding: 12px;"><span style="font-size:0.8rem; background:rgba(255,255,255,0.1); padding:2px 6px; border-radius:4px;">${jogo.escalao}</span></td>
-                    <td style="padding: 12px; text-align: center;">
-                        <button class="btn-action edit" onclick="editGame('${jogo.id}')">✏️</button>
-                        <button class="btn-action delete" onclick="deleteGame('${jogo.id}')">🗑️</button>
+                    <td style="padding: 12px;"><span style="font-size:0.8rem; background:rgba(126, 34, 206, 0.12); color:#7e22ce; padding:3px 8px; border-radius:4px; font-weight:600;">${jogo.escalao || 'BCV'}</span></td>
+                    <td style="padding: 12px; text-align: center; white-space: nowrap;">
+                        <button class="btn-action" onclick="abrirModalFinalizarJogo('${jogo.id}')" title="Registar Resultado e Finalizar Jogo" style="background: rgba(22, 163, 74, 0.15); color: #16a34a; border: 1px solid rgba(22, 163, 74, 0.3); font-weight: bold; margin-right: 4px; padding: 4px 8px;">🏁 Resultado</button>
+                        <button class="btn-action edit" onclick="editGame('${jogo.id}')" title="Editar">✏️</button>
+                        <button class="btn-action delete" onclick="deleteGame('${jogo.id}')" title="Eliminar">🗑️</button>
                     </td>
                 `;
                 agendaTableBody.appendChild(tr);
@@ -3641,7 +3651,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     function resetAgendaForm() {
         formAgenda.reset();
         document.getElementById('agenda-id').value = '';
-        document.getElementById('form-agenda-title').textContent = "Adicionar Novo Jogo";
+        document.getElementById('form-agenda-title').textContent = "Adicionar Novo Jogo Manual";
         btnSaveAgenda.textContent = "Guardar Jogo";
         btnCancelAgenda.classList.add('hidden');
     }
@@ -3675,17 +3685,185 @@ document.addEventListener('DOMContentLoaded', async () => {
         else loadAgenda();
     };
 
-    // Auxiliar: Formatar data DD-MM-YYYY
-    function formatDate(dateStr) {
-        if (!dateStr) return '--/--/----';
-        const [year, month, day] = dateStr.split('-');
-        return `${day}/${month}/${year}`;
+    // Modal de Finalizar Jogo (Registar Resultado a partir da Agenda)
+    const modalFinalizar = document.getElementById('modal-finalizar-jogo');
+    const formFinalizar = document.getElementById('form-finalizar-jogo');
+    const btnCloseModalFinalizar = document.getElementById('btn-close-modal-finalizar');
+    const btnCancelFinalizar = document.getElementById('btn-cancel-finalizar');
+    const finalizarMsg = document.getElementById('finalizar-msg');
+
+    window.abrirModalFinalizarJogo = (id) => {
+        const jogo = currentAgendaGames.find(g => String(g.id) === String(id));
+        if (!jogo) return;
+
+        document.getElementById('finalizar-agenda-id').value = jogo.id;
+        document.getElementById('finalizar-fpb-id').value = jogo.fpb_id || '';
+        document.getElementById('finalizar-data').value = jogo.data_jogo || '';
+        document.getElementById('finalizar-escalao').value = jogo.escalao || 'BCV';
+        document.getElementById('finalizar-local').value = jogo.local || '';
+        document.getElementById('finalizar-equipa-casa').textContent = jogo.equipa_casa || 'BC Valença';
+        document.getElementById('finalizar-equipa-fora').textContent = jogo.equipa_fora || 'Adversário';
+        document.getElementById('finalizar-info-escalao-data').textContent = `${formatDate(jogo.data_jogo)} • Escalão: ${jogo.escalao || 'Geral'}`;
+        document.getElementById('finalizar-pontos-casa').value = '';
+        document.getElementById('finalizar-pontos-fora').value = '';
+
+        finalizarMsg.classList.add('hidden');
+        modalFinalizar.classList.remove('hidden');
+    };
+
+    function fecharModalFinalizar() {
+        if (modalFinalizar) modalFinalizar.classList.add('hidden');
+    }
+
+    if (btnCloseModalFinalizar) btnCloseModalFinalizar.addEventListener('click', fecharModalFinalizar);
+    if (btnCancelFinalizar) btnCancelFinalizar.addEventListener('click', fecharModalFinalizar);
+
+    if (formFinalizar) {
+        formFinalizar.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const agendaId = document.getElementById('finalizar-agenda-id').value;
+            const fpbId = document.getElementById('finalizar-fpb-id').value || null;
+            const dataJogo = document.getElementById('finalizar-data').value;
+            const escalao = document.getElementById('finalizar-escalao').value;
+            const local = document.getElementById('finalizar-local').value;
+            const equipaCasa = document.getElementById('finalizar-equipa-casa').textContent.trim();
+            const equipaFora = document.getElementById('finalizar-equipa-fora').textContent.trim();
+            const pontosCasa = parseInt(document.getElementById('finalizar-pontos-casa').value, 10);
+            const pontosFora = parseInt(document.getElementById('finalizar-pontos-fora').value, 10);
+
+            const submitBtn = document.getElementById('btn-submit-finalizar');
+            submitBtn.disabled = true;
+            submitBtn.textContent = "A guardar resultado...";
+
+            try {
+                // 1. Inserir em resultados_bcv
+                const { error: insertError } = await supabase.from('resultados_bcv').insert([{
+                    equipa_casa: equipaCasa,
+                    equipa_fora: equipaFora,
+                    pontos_casa: pontosCasa,
+                    pontos_fora: pontosFora,
+                    data_jogo: dataJogo,
+                    escalao: escalao,
+                    local: local,
+                    fpb_id: fpbId
+                }]);
+
+                if (insertError) throw insertError;
+
+                // 2. Apagar da agenda_bcv
+                if (agendaId) {
+                    await supabase.from('agenda_bcv').delete().eq('id', agendaId);
+                }
+
+                finalizarMsg.textContent = "✅ Resultado registado e jogo arquivado com sucesso!";
+                finalizarMsg.style.color = "#16a34a";
+                finalizarMsg.classList.remove('hidden');
+
+                loadAgenda();
+                loadResultados();
+                setTimeout(() => {
+                    fecharModalFinalizar();
+                    finalizarMsg.classList.add('hidden');
+                }, 1200);
+
+            } catch (err) {
+                console.error("Erro ao finalizar jogo:", err);
+                finalizarMsg.textContent = "❌ Erro ao guardar: " + err.message;
+                finalizarMsg.style.color = "#ef4444";
+                finalizarMsg.classList.remove('hidden');
+            } finally {
+                submitBtn.disabled = false;
+                submitBtn.textContent = "✅ Guardar Resultado";
+            }
+        });
     }
 
     // ==========================================
-    // 13. Gestão Manual de Resultados (CRUD)
+    // 13. Gestão de Resultados (CRUD Completo)
     // ==========================================
     const resultadosTableBody = document.getElementById('resultados-table-body');
+    const containerFormResultado = document.getElementById('container-form-resultado');
+    const formResultado = document.getElementById('form-resultado');
+    const btnToggleFormResultado = document.getElementById('btn-toggle-form-resultado');
+    const btnCancelResultado = document.getElementById('btn-cancel-resultado');
+    const btnSaveResultado = document.getElementById('btn-save-resultado');
+    const resultadoMsg = document.getElementById('resultado-form-msg');
+
+    if (btnToggleFormResultado) {
+        btnToggleFormResultado.addEventListener('click', () => {
+            const isHidden = containerFormResultado.classList.contains('hidden');
+            if (isHidden) {
+                containerFormResultado.classList.remove('hidden');
+                formResultado.reset();
+                document.getElementById('resultado-id').value = '';
+                document.getElementById('form-resultado-title').textContent = "Registar Novo Resultado";
+                btnSaveResultado.textContent = "Guardar Resultado";
+                btnToggleFormResultado.textContent = "✕ Fechar Formulário";
+            } else {
+                containerFormResultado.classList.add('hidden');
+                btnToggleFormResultado.textContent = "➕ Novo Resultado";
+            }
+        });
+    }
+
+    if (btnCancelResultado) {
+        btnCancelResultado.addEventListener('click', () => {
+            containerFormResultado.classList.add('hidden');
+            if (btnToggleFormResultado) btnToggleFormResultado.textContent = "➕ Novo Resultado";
+        });
+    }
+
+    if (formResultado) {
+        formResultado.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const id = document.getElementById('resultado-id').value;
+            const resData = {
+                equipa_casa: document.getElementById('resultado-casa').value.trim(),
+                equipa_fora: document.getElementById('resultado-fora').value.trim(),
+                pontos_casa: parseInt(document.getElementById('resultado-pontos-casa').value, 10),
+                pontos_fora: parseInt(document.getElementById('resultado-pontos-fora').value, 10),
+                data_jogo: document.getElementById('resultado-data').value,
+                escalao: document.getElementById('resultado-escalao').value
+            };
+
+            btnSaveResultado.disabled = true;
+            btnSaveResultado.textContent = "A guardar...";
+
+            try {
+                let error;
+                if (id) {
+                    const { error: err } = await supabase.from('resultados_bcv').update(resData).eq('id', id);
+                    error = err;
+                } else {
+                    const { error: err } = await supabase.from('resultados_bcv').insert([resData]);
+                    error = err;
+                }
+
+                if (error) throw error;
+
+                resultadoMsg.textContent = "✅ Resultado guardado com sucesso!";
+                resultadoMsg.style.color = "#16a34a";
+                resultadoMsg.classList.remove('hidden');
+
+                formResultado.reset();
+                loadResultados();
+                setTimeout(() => {
+                    resultadoMsg.classList.add('hidden');
+                    containerFormResultado.classList.add('hidden');
+                    if (btnToggleFormResultado) btnToggleFormResultado.textContent = "➕ Novo Resultado";
+                }, 1500);
+
+            } catch (err) {
+                console.error("Erro ao guardar resultado:", err);
+                resultadoMsg.textContent = "❌ Erro: " + err.message;
+                resultadoMsg.style.color = "#ef4444";
+                resultadoMsg.classList.remove('hidden');
+            } finally {
+                btnSaveResultado.disabled = false;
+                btnSaveResultado.textContent = "Guardar Resultado";
+            }
+        });
+    }
 
     async function loadResultados() {
         if (!resultadosTableBody) return;
@@ -3700,27 +3878,31 @@ document.addEventListener('DOMContentLoaded', async () => {
             if (error) throw error;
 
             resultadosTableBody.innerHTML = '';
-            if (data.length === 0) {
-                resultadosTableBody.innerHTML = '<tr><td colspan="5" style="padding: 20px; text-align: center;">Nenhum resultado registado.</td></tr>';
+            if (!data || data.length === 0) {
+                resultadosTableBody.innerHTML = '<tr><td colspan="5" style="padding: 20px; text-align: center; color: var(--text-secondary);">Nenhum resultado registado. Clique em <strong>Sincronizar com FPB</strong> ou <strong>Novo Resultado</strong>.</td></tr>';
                 return;
             }
 
             data.forEach(jogo => {
                 const tr = document.createElement('tr');
-                tr.style.borderBottom = "1px solid rgba(255,255,255,0.05)";
+                tr.style.borderBottom = "1px solid var(--border-color, rgba(255,255,255,0.05))";
                 tr.innerHTML = `
-                    <td style="padding: 12px;">${formatDate(jogo.data_jogo)}</td>
-                    <td style="padding: 12px;"><strong>${jogo.equipa_casa}</strong> vs <strong>${jogo.equipa_fora}</strong></td>
-                    <td style="padding: 12px;"><span style="background:#e91e63; padding:2px 8px; border-radius:4px; font-weight:bold;">${jogo.pontos_casa} - ${jogo.pontos_fora}</span></td>
-                    <td style="padding: 12px;">${jogo.escalao}</td>
+                    <td style="padding: 12px;"><strong>${formatDate(jogo.data_jogo)}</strong></td>
+                    <td style="padding: 12px;">
+                        <strong>${jogo.equipa_casa}</strong> vs <strong>${jogo.equipa_fora}</strong>
+                        ${jogo.local ? `<br><small style="color:var(--text-secondary);">${jogo.local}</small>` : ''}
+                    </td>
+                    <td style="padding: 12px;"><span style="background:linear-gradient(135deg, #7e22ce, #a855f7); color:#fff; padding:4px 10px; border-radius:6px; font-weight:800; font-size:0.95rem; box-shadow:0 2px 6px rgba(126,34,206,0.3);">${jogo.pontos_casa} - ${jogo.pontos_fora}</span></td>
+                    <td style="padding: 12px;"><span style="font-size:0.8rem; background:rgba(22, 163, 74, 0.12); color:#16a34a; padding:3px 8px; border-radius:4px; font-weight:600;">${jogo.escalao || 'BCV'}</span></td>
                     <td style="padding: 12px; text-align: center;">
-                        <button class="btn-action delete" onclick="deleteResultado('${jogo.id}')">🗑️</button>
+                        <button class="btn-action delete" onclick="deleteResultado('${jogo.id}')" title="Eliminar Resultado">🗑️</button>
                     </td>
                 `;
                 resultadosTableBody.appendChild(tr);
             });
         } catch (err) {
             console.error("Erro ao carregar resultados:", err);
+            resultadosTableBody.innerHTML = '<tr><td colspan="5" style="padding: 20px; text-align: center; color: #ff5252;">Erro ao carregar resultados.</td></tr>';
         }
     }
 
@@ -3730,6 +3912,310 @@ document.addEventListener('DOMContentLoaded', async () => {
         if (error) alert("Erro ao eliminar: " + error.message);
         else loadResultados();
     };
+
+    // ==========================================
+    // 14. SISTEMA DE SINCRONIZAÇÃO OFICIAL FPB
+    // ==========================================
+    const modalSyncFPB = document.getElementById('modal-sync-fpb');
+    const btnCloseModalSyncFPB = document.getElementById('btn-close-modal-sync-fpb');
+    const btnCancelSyncFPB = document.getElementById('btn-cancel-sync-fpb');
+    const btnConfirmImportFPB = document.getElementById('btn-confirm-import-fpb');
+    const syncLoading = document.getElementById('sync-fpb-loading');
+    const syncSummary = document.getElementById('sync-fpb-summary');
+    const syncStatusBox = document.getElementById('sync-fpb-status-box');
+    const syncJogosList = document.getElementById('sync-fpb-jogos-list');
+
+    function fecharModalSyncFPB() {
+        if (modalSyncFPB) modalSyncFPB.classList.add('hidden');
+    }
+
+    if (btnCloseModalSyncFPB) btnCloseModalSyncFPB.addEventListener('click', fecharModalSyncFPB);
+    if (btnCancelSyncFPB) btnCancelSyncFPB.addEventListener('click', fecharModalSyncFPB);
+
+    // Parser nativo dos dados da FPB para fallback garantido
+    function parseFPBHtml(rawHtml) {
+        const games = [];
+        const monthsMap = {
+            'JAN': '01', 'FEV': '02', 'MAR': '03', 'ABR': '04', 'MAI': '05', 'JUN': '06',
+            'JUL': '07', 'AGO': '08', 'SET': '09', 'OUT': '10', 'NOV': '11', 'DEZ': '12'
+        };
+
+        const dayBlocks = rawHtml.split(/<div class="day-wrapper[^"]*">/i);
+        for (let i = 1; i < dayBlocks.length; i++) {
+            const block = dayBlocks[i];
+            const dateMatch = block.match(/<h3 class="date">([\s\S]*?)<\/h3>/i);
+            const rawDate = dateMatch ? dateMatch[1].trim() : '';
+            let formattedDate = '';
+
+            if (rawDate) {
+                const parts = rawDate.split(/\s+/);
+                if (parts.length >= 3) {
+                    const day = parts[0].padStart(2, '0');
+                    const month = monthsMap[parts[1].toUpperCase()] || '01';
+                    const year = parts[2];
+                    formattedDate = `${year}-${month}-${day}`;
+                }
+            }
+
+            const gameItems = block.split(/<a href="([^"]*ficha-de-jogo[^"]*)"/i);
+            for (let j = 1; j < gameItems.length; j += 2) {
+                const gameLink = gameItems[j];
+                const gameContent = gameItems[j + 1];
+
+                const internalIdMatch = gameLink.match(/internalID=(\d+)/i);
+                const internalId = internalIdMatch ? internalIdMatch[1] : null;
+
+                const team1Match = gameContent.match(/class="team-container align-self-center">[\s\S]*?class="fullName">([^<]+)<\/span>/i);
+                const team1 = team1Match ? team1Match[1].trim() : '';
+
+                const hourMatch = gameContent.match(/<div class="hour align-self-center">[\s\S]*?<h3>([\s\S]*?)<\/h3>/i);
+                const rawHour = hourMatch ? hourMatch[1].replace(/<[^>]+>/g, '').trim() : '';
+
+                const team2Match = gameContent.match(/class="team-container right align-self-center">[\s\S]*?class="fullName">([^<]+)<\/span>/i);
+                const team2 = team2Match ? team2Match[1].trim() : '';
+
+                const locMatch = gameContent.match(/<div class="location-wrapper[^"]*">[\s\S]*?<b>([\s\S]*?)<\/b>/i);
+                const local = locMatch ? locMatch[1].replace(/\s+/g, ' ').trim() : '';
+
+                const compMatch = gameContent.match(/<div class="competition">[\s\S]*?<span>([\s\S]*?)<\/span>/i);
+                const rawComp = compMatch ? compMatch[1].trim() : '';
+
+                let escalao = 'BCV';
+                if (/Sub\s*14/i.test(rawComp)) escalao = 'Sub 14';
+                else if (/Sub\s*16/i.test(rawComp)) escalao = 'Sub 16';
+                else if (/Sub\s*18/i.test(rawComp)) escalao = 'Sub 18';
+                else if (/Sub\s*20/i.test(rawComp)) escalao = 'Sub 20';
+                else if (/S[eé]nior|CN2|1ª Div/i.test(rawComp)) escalao = 'Seniores';
+                else if (/Mini\s*12/i.test(rawComp)) escalao = 'Mini 12';
+                else if (/Mini\s*10/i.test(rawComp)) escalao = 'Mini 10';
+                else if (/Mini\s*8/i.test(rawComp)) escalao = 'Mini 8';
+                else if (/Baby/i.test(rawComp)) escalao = 'BabyBasket';
+                else if (/Veterano/i.test(rawComp)) escalao = 'Veteranos';
+
+                const scoreMatch = rawHour.match(/(\d+)\s*[-:]\s*(\d+)/);
+                const isResult = !!scoreMatch;
+                let pontosCasa = null;
+                let pontosFora = null;
+                let horaJogo = null;
+
+                if (isResult) {
+                    pontosCasa = parseInt(scoreMatch[1], 10);
+                    pontosFora = parseInt(scoreMatch[2], 10);
+                } else {
+                    const hmMatch = rawHour.match(/(\d{1,2}:\d{2})/);
+                    horaJogo = hmMatch ? hmMatch[1] : (rawHour.toLowerCase().includes('definir') ? 'A definir' : rawHour);
+                }
+
+                games.push({
+                    fpb_id: internalId,
+                    data_jogo: formattedDate,
+                    raw_data: rawDate,
+                    equipa_casa: team1,
+                    equipa_fora: team2,
+                    hora_jogo: horaJogo,
+                    is_resultado: isResult,
+                    pontos_casa: pontosCasa,
+                    pontos_fora: pontosFora,
+                    local: local,
+                    competicao: rawComp,
+                    escalao: escalao
+                });
+            }
+        }
+        return games;
+    }
+
+    async function abrirModalSyncFPB() {
+        if (!modalSyncFPB) return;
+        modalSyncFPB.classList.remove('hidden');
+        syncLoading.style.display = 'block';
+        syncSummary.style.display = 'none';
+        syncStatusBox.style.display = 'none';
+        currentFPBGames = [];
+
+        try {
+            let jogos = [];
+
+            // 1. Tentar Edge Function Supabase primeiro
+            try {
+                const edgeRes = await fetch(`${SUPABASE_URL}/functions/v1/sync-fpb?preview=true`, {
+                    headers: {
+                        'apikey': SUPABASE_ANON_KEY,
+                        'Authorization': `Bearer ${SUPABASE_ANON_KEY}`
+                    }
+                });
+                if (edgeRes.ok) {
+                    const data = await edgeRes.json();
+                    if (data && data.jogos && data.jogos.length > 0) {
+                        jogos = data.jogos;
+                    }
+                }
+            } catch (eEdge) {
+                console.warn("Edge Function sync-fpb indisponível, a usar fallback de leitura direta...", eEdge);
+            }
+
+            // 2. Fallback: Leitura via Proxy CORS caso a Edge Function não esteja deployed
+            if (jogos.length === 0) {
+                const proxyUrl = `https://api.allorigins.win/raw?url=${encodeURIComponent('https://www.fpb.pt/calendario/clube_656')}`;
+                const res = await fetch(proxyUrl);
+                if (!res.ok) throw new Error("Não foi possível aceder à página da FPB.");
+                const html = await res.text();
+                jogos = parseFPBHtml(html);
+            }
+
+            if (!jogos || jogos.length === 0) {
+                throw new Error("Nenhum jogo encontrado no calendário oficial da FPB para o Basket Clube de Valença.");
+            }
+
+            currentFPBGames = jogos;
+
+            // Renderizar Resumo
+            const agendados = jogos.filter(j => !j.is_resultado);
+            const resultados = jogos.filter(j => j.is_resultado);
+
+            document.getElementById('sync-count-total').textContent = jogos.length;
+            document.getElementById('sync-count-agenda').textContent = agendados.length;
+            document.getElementById('sync-count-resultados').textContent = resultados.length;
+
+            syncJogosList.innerHTML = '';
+            jogos.forEach(jogo => {
+                const card = document.createElement('div');
+                card.style.cssText = "display: flex; justify-content: space-between; align-items: center; padding: 10px 14px; border-radius: 8px; background: #f8fafc; border: 1px solid var(--border-color); flex-wrap: wrap; gap: 8px;";
+                
+                const badge = jogo.is_resultado 
+                    ? `<span style="background: rgba(22, 163, 74, 0.15); color: #16a34a; font-weight: 700; font-size: 0.75rem; padding: 2px 8px; border-radius: 4px;">🏆 ${jogo.pontos_casa} - ${jogo.pontos_fora}</span>`
+                    : `<span style="background: rgba(37, 99, 235, 0.12); color: #2563eb; font-weight: 700; font-size: 0.75rem; padding: 2px 8px; border-radius: 4px;">📅 ${jogo.hora_jogo || 'A definir'}</span>`;
+
+                card.innerHTML = `
+                    <div style="flex: 1; min-width: 200px;">
+                        <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 2px;">
+                            ${badge}
+                            <span style="font-weight: 700; font-size: 0.88rem; color: var(--text-primary);">${jogo.equipa_casa} vs ${jogo.equipa_fora}</span>
+                            <span style="font-size: 0.75rem; background: rgba(126, 34, 206, 0.1); color: #7e22ce; padding: 1px 6px; border-radius: 4px; font-weight: 600;">${jogo.escalao}</span>
+                        </div>
+                        <div style="font-size: 0.76rem; color: var(--text-secondary);">
+                            <span>📍 ${jogo.local || 'Pavilhão'}</span> • <span>${jogo.competicao || 'Campeonato'}</span>
+                        </div>
+                    </div>
+                    <div style="font-weight: 700; font-size: 0.85rem; color: var(--text-primary); white-space: nowrap;">
+                        ${formatDate(jogo.data_jogo)}
+                    </div>
+                `;
+                syncJogosList.appendChild(card);
+            });
+
+            syncLoading.style.display = 'none';
+            syncSummary.style.display = 'block';
+
+        } catch (err) {
+            console.error("Erro na sincronização FPB:", err);
+            syncLoading.style.display = 'none';
+            syncStatusBox.style.display = 'block';
+            syncStatusBox.style.background = '#fef2f2';
+            syncStatusBox.style.color = '#b91c1c';
+            syncStatusBox.style.border = '1px solid #fecaca';
+            syncStatusBox.innerHTML = `<strong>Falha ao sincronizar com a FPB:</strong><br>${err.message}`;
+        }
+    }
+
+    if (btnSyncFPBAgenda) btnSyncFPBAgenda.addEventListener('click', abrirModalSyncFPB);
+    if (btnSyncFPBResultados) btnSyncFPBResultados.addEventListener('click', abrirModalSyncFPB);
+
+    // Confirmar e Executar Importação dos Jogos
+    if (btnConfirmImportFPB) {
+        btnConfirmImportFPB.addEventListener('click', async () => {
+            if (!currentFPBGames || currentFPBGames.length === 0) return;
+
+            btnConfirmImportFPB.disabled = true;
+            btnConfirmImportFPB.textContent = "A importar para a Base de Dados...";
+
+            try {
+                // 1. Tentar executar via RPC sincronizar_jogos_fpb
+                let rpcSucesso = false;
+                try {
+                    const { data, error } = await supabase.rpc('sincronizar_jogos_fpb', {
+                        jogos_payload: currentFPBGames
+                    });
+                    if (!error && data) {
+                        rpcSucesso = true;
+                    }
+                } catch (eRpc) {
+                    console.warn("RPC indisponível, a executar upsert manual de fallback...", eRpc);
+                }
+
+                // 2. Se a RPC não estiver disponível, faz upsert direto
+                if (!rpcSucesso) {
+                    for (const jogo of currentFPBGames) {
+                        if (jogo.is_resultado) {
+                            await supabase.from('resultados_bcv').upsert({
+                                data_jogo: jogo.data_jogo,
+                                equipa_casa: jogo.equipa_casa,
+                                equipa_fora: jogo.equipa_fora,
+                                pontos_casa: jogo.pontos_casa,
+                                pontos_fora: jogo.pontos_fora,
+                                escalao: jogo.escalao,
+                                local: jogo.local,
+                                competicao: jogo.competicao,
+                                fpb_id: jogo.fpb_id
+                            }, { onConflict: 'data_jogo,equipa_casa,equipa_fora' });
+
+                            // Limpar da agenda se existir
+                            await supabase.from('agenda_bcv')
+                                .delete()
+                                .eq('data_jogo', jogo.data_jogo)
+                                .ilike('equipa_casa', jogo.equipa_casa)
+                                .ilike('equipa_fora', jogo.equipa_fora);
+                        } else {
+                            await supabase.from('agenda_bcv').upsert({
+                                data_jogo: jogo.data_jogo,
+                                hora_jogo: jogo.hora_jogo,
+                                equipa_casa: jogo.equipa_casa,
+                                equipa_fora: jogo.equipa_fora,
+                                local: jogo.local,
+                                escalao: jogo.escalao,
+                                competicao: jogo.competicao,
+                                fpb_id: jogo.fpb_id
+                            }, { onConflict: 'data_jogo,equipa_casa,equipa_fora' });
+                        }
+                    }
+                }
+
+                // Feedback visual de sucesso
+                syncSummary.style.display = 'none';
+                syncStatusBox.style.display = 'block';
+                syncStatusBox.style.background = '#f0fdf4';
+                syncStatusBox.style.color = '#15803d';
+                syncStatusBox.style.border = '1px solid #bbf7d0';
+                syncStatusBox.innerHTML = `
+                    <div style="font-size: 1.5rem; margin-bottom: 6px;">🎉</div>
+                    <strong style="font-size: 1.1rem;">Sincronização Concluída com Sucesso!</strong><br>
+                    <span>${currentFPBGames.length} jogos foram processados e atualizados na base de dados do clube. O site público já reflete as marcações oficiais da FPB.</span>
+                `;
+
+                loadAgenda();
+                loadResultados();
+
+                setTimeout(() => {
+                    fecharModalSyncFPB();
+                    btnConfirmImportFPB.disabled = false;
+                    btnConfirmImportFPB.textContent = "📥 Importar e Atualizar no Site";
+                }, 2500);
+
+            } catch (err) {
+                console.error("Erro ao importar jogos:", err);
+                alert("Erro ao importar para a base de dados: " + err.message);
+                btnConfirmImportFPB.disabled = false;
+                btnConfirmImportFPB.textContent = "📥 Importar e Atualizar no Site";
+            }
+        });
+    }
+
+    // Auxiliar: Formatar data DD/MM/YYYY
+    function formatDate(dateStr) {
+        if (!dateStr) return '--/--/----';
+        const [year, month, day] = dateStr.split('-');
+        return `${day}/${month}/${year}`;
+    }
 
     // =========================================================================
     // 12. CONFIGURAÇÕES DINÂMICAS & ÓRGÃOS SOCIAIS
