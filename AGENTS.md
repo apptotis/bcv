@@ -91,4 +91,4 @@
 - [2026-09-09] Gemini: Substituição do tamanho de equipamento '14 anos' por 'XS' em inscricao.html, migração direta de dados legados no Supabase e atualização completa do Admin nos filtros, modal e mapas de produção.
 - [2026-09-21] Gemini: Exibição de Username/Alcunha para a Equipa Técnica em equipas.html, links diretos de partilha social e correção de submenus do Drawer em noticias e equipas.
 - [2026-09-25] Gemini: Implementação do Sistema de Sincronização Oficial FPB (ID 656) para Agenda/Resultados, página dedicada competicoes.html, e middleware Cloudflare Pages com Open Graph dinâmico (og:title, og:image) para partilha de notícias no Facebook/WhatsApp.
-
+- [2026-09-25] Gemini: Simplificação do cabeçalho de competicoes.html com a remoção do card Clube Oficial FPB nº 656 e do texto descritivo longo, mantendo apenas o título Competições Oficiais.
