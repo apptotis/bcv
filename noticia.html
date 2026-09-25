@@ -10,13 +10,21 @@
     <meta http-equiv="Expires" content="0">
     <title id="page-title">Notícia | Basket Clube de Valença</title>
     
-    <!-- Meta tags dinâmicas para partilha social -->
+    <!-- Meta tags dinâmicas para partilha social (Facebook, WhatsApp, Twitter, etc.) -->
     <meta name="description" id="meta-desc" content="Notícias e novidades oficiais do Basket Clube de Valença (BCV).">
+    <meta property="og:type" content="article">
+    <meta property="og:site_name" content="Basket Clube de Valença">
     <meta property="og:title" id="og-title" content="Basket Clube de Valença">
     <meta property="og:description" id="og-desc" content="Notícias e novidades oficiais do Basket Clube de Valença (BCV).">
     <meta property="og:image" id="og-image" content="https://bcvalenca.pt/assets/emblema_png.png">
-    <meta property="og:type" content="article">
+    <meta property="og:image:width" content="1200">
+    <meta property="og:image:height" content="630">
+    <meta property="og:url" id="og-url" content="https://bcvalenca.pt/noticia.html">
     <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:site" content="@bcvalenca">
+    <meta name="twitter:title" id="twitter-title" content="Basket Clube de Valença">
+    <meta name="twitter:description" id="twitter-desc" content="Notícias e novidades oficiais do Basket Clube de Valença (BCV).">
+    <meta name="twitter:image" id="twitter-image" content="https://bcvalenca.pt/assets/emblema_png.png">
     
     <!-- Google Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -382,10 +390,34 @@
 
                 if (error || !n) throw new Error('Notícia não encontrada.');
 
-                // Atualizar Título da Página e Meta tags
-                document.title = `${n.titulo} | Basket Clube de Valença`;
-                const metaDesc = document.getElementById('meta-desc');
-                if (metaDesc) metaDesc.setAttribute('content', n.subtitulo || n.titulo);
+                // Atualizar Título da Página e Meta tags dinâmicas no DOM
+                const fullTitle = `${n.titulo} | Basket Clube de Valença`;
+                document.title = fullTitle;
+                const descText = n.subtitulo || (n.conteudo ? n.conteudo.substring(0, 160).replace(/\r?\n/g, ' ') + '...' : n.titulo);
+                
+                const metaDesc = document.getElementById('meta-desc') || document.querySelector('meta[name="description"]');
+                if (metaDesc) metaDesc.setAttribute('content', descText);
+
+                const ogTitle = document.getElementById('og-title') || document.querySelector('meta[property="og:title"]');
+                if (ogTitle) ogTitle.setAttribute('content', fullTitle);
+
+                const ogDesc = document.getElementById('og-desc') || document.querySelector('meta[property="og:description"]');
+                if (ogDesc) ogDesc.setAttribute('content', descText);
+
+                const ogImg = document.getElementById('og-image') || document.querySelector('meta[property="og:image"]');
+                if (ogImg && n.imagem_url) ogImg.setAttribute('content', n.imagem_url);
+
+                const ogUrl = document.getElementById('og-url') || document.querySelector('meta[property="og:url"]');
+                if (ogUrl) ogUrl.setAttribute('content', window.location.href);
+
+                const twTitle = document.getElementById('twitter-title') || document.querySelector('meta[name="twitter:title"]');
+                if (twTitle) twTitle.setAttribute('content', fullTitle);
+
+                const twDesc = document.getElementById('twitter-desc') || document.querySelector('meta[name="twitter:description"]');
+                if (twDesc) twDesc.setAttribute('content', descText);
+
+                const twImg = document.getElementById('twitter-image') || document.querySelector('meta[name="twitter:image"]');
+                if (twImg && n.imagem_url) twImg.setAttribute('content', n.imagem_url);
 
                 // Imagem
                 const imgContainer = document.getElementById('article-image-container');

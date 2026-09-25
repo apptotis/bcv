@@ -90,5 +90,5 @@
 - [2026-09-08] Gemini: Sincronização segura de Staff/Diretores em atletasbcv, evolução de Presenças para Diário Desportivo com observações, e módulo Plantel nos portais Treinador/Diretor com Ficha Individual e KPIs.
 - [2026-09-09] Gemini: Substituição do tamanho de equipamento '14 anos' por 'XS' em inscricao.html, migração direta de dados legados no Supabase e atualização completa do Admin nos filtros, modal e mapas de produção.
 - [2026-09-21] Gemini: Exibição de Username/Alcunha para a Equipa Técnica em equipas.html, links diretos de partilha social e correção de submenus do Drawer em noticias e equipas.
-- [2026-09-25] Gemini: Implementação do Sistema de Sincronização Oficial FPB (ID 656) para Agenda e Resultados, página dedicada de Competições (competicoes.html) e remoção do cabeçalho introdutório estático de notícias em index.html.
+- [2026-09-25] Gemini: Implementação do Sistema de Sincronização Oficial FPB (ID 656) para Agenda/Resultados, página dedicada competicoes.html, e middleware Cloudflare Pages com Open Graph dinâmico (og:title, og:image) para partilha de notícias no Facebook/WhatsApp.
 
