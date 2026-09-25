@@ -1,0 +1,278 @@
+<!DOCTYPE html>
+<html lang="pt-PT">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Competições Oficiais | Basket Clube de Valença</title>
+    
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;800&family=Outfit:wght@400;700;900&display=swap" rel="stylesheet">
+    
+    <!-- Main Stylesheet -->
+    <link rel="stylesheet" href="css/style.css?v=20260925_2">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    
+    <!-- Favicon -->
+    <link rel="icon" type="image/png" href="assets/emblema_png.png">
+</head>
+
+<body>
+    <!-- Background Elements -->
+    <div class="bg-shape shape-1"></div>
+    <div class="bg-shape shape-2"></div>
+
+    <!-- Header / Navbar (Logo Centered, Hamburger Left) -->
+    <header class="navbar" id="navbar">
+        <div class="navbar-grid">
+            <!-- Left Side: Hamburger Trigger -->
+            <div class="nav-left">
+                <button class="hamburger-btn" id="hamburger-trigger" aria-label="Abrir Menu" aria-expanded="false" aria-controls="drawer-menu">
+                    <span class="hamburger-line"></span>
+                    <span class="hamburger-line"></span>
+                    <span class="hamburger-line"></span>
+                </button>
+            </div>
+            
+            <!-- Center: Club Logo and Name -->
+            <div class="nav-center">
+                <a href="index.html" class="brand-logo-container">
+                    <img src="assets/emblema_png.png" alt="BCV Logo" class="brand-logo">
+                    <span class="brand-title-nav">Basket Clube de Valença</span>
+                </a>
+            </div>
+            
+            <!-- Right Side: Social Media Icons -->
+            <div class="nav-right">
+                <div class="nav-social-btn">
+                    <a href="https://www.facebook.com/profile.php?id=100039859278453" target="_blank" aria-label="Facebook"><i class="fab fa-facebook"></i></a>
+                    <a href="https://www.instagram.com/bcvalenca" target="_blank" aria-label="Instagram"><i class="fab fa-instagram"></i></a>
+                    <a href="https://www.youtube.com/@BCValenca" target="_blank" aria-label="YouTube"><i class="fab fa-youtube"></i></a>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- Overlay Background (visible when menu is open) -->
+    <div class="drawer-overlay" id="drawer-overlay"></div>
+
+    <!-- Slide-in Drawer Navigation Menu -->
+    <nav class="drawer-menu" id="drawer-menu" aria-label="Menu Principal">
+        <div class="drawer-header">
+            <div class="drawer-header-row">
+                <div class="drawer-club-info">
+                    <img src="assets/emblema_png.png" alt="BCV Emblema" class="drawer-club-logo">
+                    <span class="drawer-club-name">BCV</span>
+                </div>
+                <button class="drawer-close-btn" id="drawer-close-btn" aria-label="Fechar Menu">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+        </div>
+
+        <ul class="drawer-links-list">
+            <li><a href="index.html" class="drawer-link">Início</a></li>
+            <li class="drawer-item">
+                <div style="display: flex; justify-content: space-between; align-items: center;">
+                    <a href="clube.html" class="drawer-link" style="flex: 1;">O Clube</a>
+                    <button class="drawer-dropdown-btn" id="dropdown-toggle" aria-label="Expandir submenu O Clube">
+                        <i class="fas fa-chevron-down"></i>
+                    </button>
+                </div>
+                <ul class="drawer-dropdown-content" id="dropdown-menu">
+                    <li><a href="clube.html#historia" class="drawer-dropdown-link">História</a></li>
+                    <li><a href="clube.html#orgaos-sociais" class="drawer-dropdown-link">Órgãos Sociais</a></li>
+                    <li><a href="clube.html#contactos" class="drawer-dropdown-link">Contactos</a></li>
+                </ul>
+            </li>
+            <li class="drawer-item">
+                <div style="display: flex; justify-content: space-between; align-items: center;">
+                    <a href="equipas.html" class="drawer-link" style="flex: 1;">Equipas</a>
+                    <button class="drawer-dropdown-btn" id="dropdown-equipas-toggle" aria-label="Expandir submenu Equipas">
+                        <i class="fas fa-chevron-down"></i>
+                    </button>
+                </div>
+                <ul class="drawer-dropdown-content" id="dropdown-equipas-menu">
+                    <!-- Preenchido via JS -->
+                </ul>
+            </li>
+            <li><a href="competicoes.html" class="drawer-link active">Competições</a></li>
+            <li><a href="index.html#noticias" class="drawer-link">Notícias</a></li>
+            <li><a href="index.html#agenda" class="drawer-link">Agenda</a></li>
+            <li><a href="index.html#galeria" class="drawer-link">Galeria</a></li>
+        </ul>
+
+        <div class="drawer-footer">
+            <p class="drawer-footer-text">
+                &copy; 2026 Basket Clube de Valença.<br>
+                Todos os direitos reservados.
+            </p>
+        </div>
+    </nav>
+
+    <main>
+        <!-- Anniversary Banner -->
+        <div class="anniversary-banner" style="position: relative; margin-top: 95px; width: 100%;">
+            Quadro Competitivo Oficial • Época 2026/2027 🏆
+        </div>
+
+        <div class="container section" style="padding-top: var(--spacing-xl);">
+            <div class="portal-container">
+                
+                <!-- Coluna Principal (70%) -->
+                <div class="portal-main">
+                    
+                    <div class="reveal">
+                        <div class="portal-section-header">
+                            <div class="header-badge-icon">🏆</div>
+                            <div>
+                                <h1 class="portal-section-title" style="font-size: 1.85rem; margin: 0 0 6px 0;">Competições Oficiais</h1>
+                                <p class="portal-section-desc">Quadros competitivos oficiais da Federação Portuguesa de Basquetebol (FPB) e da Associação de Basquetebol de Viana do Castelo (ABVC) em que o Basket Clube de Valença participa na Época 2026/2027.</p>
+                            </div>
+                        </div>
+
+                        <!-- Card Informativo FPB Oficial -->
+                        <div style="background: linear-gradient(135deg, rgba(126, 34, 206, 0.08) 0%, rgba(245, 158, 11, 0.08) 100%); border: 1px solid rgba(126, 34, 206, 0.2); border-radius: 14px; padding: 18px 20px; margin-bottom: 24px; display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 14px;">
+                            <div style="display: flex; align-items: center; gap: 14px;">
+                                <div style="width: 44px; height: 44px; border-radius: 10px; background: #7e22ce; color: #ffffff; display: flex; align-items: center; justify-content: center; font-size: 1.3rem; flex-shrink: 0;">
+                                    🏀
+                                </div>
+                                <div>
+                                    <div style="font-weight: 800; color: var(--text-primary); font-size: 0.95rem;">Clube Oficial FPB nº 656</div>
+                                    <div style="font-size: 0.82rem; color: var(--text-secondary); line-height: 1.4;">Resultados, classificações e calendários integrados com os quadros competitivos oficiais.</div>
+                                </div>
+                            </div>
+                            <a href="https://www.fpb.pt/calendario/clube_656" target="_blank" rel="noopener noreferrer" class="btn" style="background: #7e22ce; color: #ffffff; padding: 8px 18px; border-radius: 8px; font-size: 0.85rem; font-weight: 700; text-decoration: none; display: inline-flex; align-items: center; gap: 6px;">
+                                Ver no Portal FPB ↗
+                            </a>
+                        </div>
+
+                        <!-- Grelha de Competições (Preenchida dinamicamente via JS) -->
+                        <div id="competicoes-grid" class="competicoes-grid">
+                            <!-- Preenchido via loadCompeticoesSection em main.js -->
+                        </div>
+                    </div>
+
+                    <!-- Banner de Inscrições / Junte-se ao BCV -->
+                    <section class="reveal" style="padding-top: var(--spacing-xl); padding-bottom: var(--spacing-lg);">
+                        <div style="background: linear-gradient(135deg, #4c1d95 0%, #7e22ce 100%); color: #ffffff; border-radius: 16px; padding: 28px 20px; text-align: center; box-shadow: 0 12px 30px rgba(126,34,206,0.22); position: relative; overflow: hidden;">
+                            <div style="display: inline-flex; align-items: center; gap: 8px; background: rgba(255,255,255,0.18); padding: 5px 14px; border-radius: 20px; font-size: 0.78rem; font-weight: 800; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 12px;">
+                                🏀 Queres Competir Connosco?
+                            </div>
+                            <h2 style="font-size: 1.5rem; font-weight: 800; color: #ffffff; margin-bottom: 8px; line-height: 1.2;">Vem Jogar no Basket Clube de Valença!</h2>
+                            <p style="font-size: 0.92rem; color: rgba(255,255,255,0.92); max-width: 580px; margin: 0 auto 18px auto; line-height: 1.5;">
+                                Inscrições abertas para todos os escalões (BabyBasket a Seniores). Junta-te às nossas equipas e participa nos campeonatos oficiais!
+                            </p>
+                            <a href="inscricao.html" class="btn" style="background: #ffffff; color: #7e22ce; font-weight: 800; font-size: 0.95rem; padding: 12px 30px; border-radius: 8px; box-shadow: 0 4px 15px rgba(0,0,0,0.2); transition: transform 0.2s ease; display: inline-block; text-decoration: none;">
+                                📝 Iniciar Inscrição Online →
+                            </a>
+                        </div>
+                    </section>
+
+                </div>
+
+                <!-- Coluna Lateral (30%) -->
+                <aside class="portal-sidebar">
+                    
+                    <!-- Widget Pavilhões Oficiais -->
+                    <div class="portal-card" style="margin-bottom: var(--spacing-lg);">
+                        <div class="portal-card-header">
+                            <div class="card-icon-badge">📍</div>
+                            <div>
+                                <h3 class="card-title">Recintos de Jogo</h3>
+                                <div class="card-subtitle">Onde jogam as equipas do BCV</div>
+                            </div>
+                        </div>
+                        <div style="font-size: 0.88rem; line-height: 1.5; color: var(--text-primary); display: flex; flex-direction: column; gap: 14px;">
+                            <div style="padding: 10px; background: rgba(126, 34, 206, 0.04); border-left: 3px solid #7e22ce; border-radius: 6px;">
+                                <strong style="display: block; color: #7e22ce;">Pavilhão Municipal de Valença</strong>
+                                <span style="font-size: 0.8rem; color: var(--text-secondary);">Largo da Estação, Valença</span>
+                            </div>
+                            <div style="padding: 10px; background: rgba(126, 34, 206, 0.04); border-left: 3px solid #7e22ce; border-radius: 6px;">
+                                <strong style="display: block; color: #7e22ce;">Pavilhão de São Pedro da Torre</strong>
+                                <span style="font-size: 0.8rem; color: var(--text-secondary);">S. Pedro da Torre, Valença</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Widget Federação & Associação -->
+                    <div class="portal-card" style="margin-bottom: var(--spacing-lg);">
+                        <div class="portal-card-header">
+                            <div class="card-icon-badge">🌐</div>
+                            <div>
+                                <h3 class="card-title">Entidades Oficiais</h3>
+                                <div class="card-subtitle">Regulamentos e Federações</div>
+                            </div>
+                        </div>
+                        <div style="display: flex; flex-direction: column; gap: 10px;">
+                            <a href="https://www.fpb.pt" target="_blank" rel="noopener noreferrer" style="display: flex; align-items: center; justify-content: space-between; padding: 10px 12px; background: #ffffff; border: 1px solid var(--border-color); border-radius: 8px; text-decoration: none; color: var(--text-primary); font-size: 0.85rem; font-weight: 600; transition: border-color 0.2s ease;">
+                                <span>Federação Portuguesa (FPB)</span>
+                                <span style="color: #7e22ce;">↗</span>
+                            </a>
+                            <a href="https://www.abvcastelo.pt" target="_blank" rel="noopener noreferrer" style="display: flex; align-items: center; justify-content: space-between; padding: 10px 12px; background: #ffffff; border: 1px solid var(--border-color); border-radius: 8px; text-decoration: none; color: var(--text-primary); font-size: 0.85rem; font-weight: 600; transition: border-color 0.2s ease;">
+                                <span>AB Viana do Castelo (ABVC)</span>
+                                <span style="color: #7e22ce;">↗</span>
+                            </a>
+                        </div>
+                    </div>
+
+                    <!-- Widget Publicidade / Parceiro Principal -->
+                    <div class="ad-widget ad-square">
+                        <span class="ad-label">Parceiro Oficial</span>
+                        <div style="text-align: center;">
+                            <div class="placeholder-icon">🏀</div>
+                            <h3 style="font-size: 1.1rem; margin: 10px 0;">Apoio ao Basquetebol</h3>
+                            <p style="font-size: 0.8rem; color: var(--text-secondary);">Juntos pelo desporto e formação dos jovens de Valença.</p>
+                        </div>
+                    </div>
+
+                </aside>
+
+            </div>
+        </div>
+    </main>
+
+    <!-- Secção de Patrocinadores e Parceiros Oficiais -->
+    <section id="patrocinadores-section" class="sponsors-section" style="background: #ffffff; padding: 45px 0; border-top: 1px solid #e5e7eb; display: none;">
+        <div class="container">
+            <div style="text-align: center; margin-bottom: 25px;">
+                <span style="color: #7e22ce; font-weight: 700; font-size: 0.85rem; text-transform: uppercase; letter-spacing: 1px; display: block; margin-bottom: 6px;">Apoio & Parcerias</span>
+                <h2 style="font-size: 1.5rem; font-weight: 800; color: #1f2937; margin: 0;">Os Nossos Patrocinadores</h2>
+            </div>
+            <div id="patrocinadores-public-grid" style="display: flex; flex-wrap: wrap; justify-content: center; align-items: center; gap: 24px; max-width: 1100px; margin: 0 auto;">
+                <!-- Preenchido dinamicamente via JS -->
+            </div>
+        </div>
+    </section>
+
+    <!-- Rodapé Oficial -->
+    <footer id="contactos" class="footer" style="padding: 40px 0;">
+        <div class="container">
+            <div class="footer-content" style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 20px;">
+                <a href="index.html" class="brand" style="display: flex; align-items: center; gap: 15px;">
+                    <img src="assets/emblema_png.png" alt="BCV Logo" style="height: 60px; width: auto; border-radius: 8px;">
+                    <span class="brand-text" style="font-size: 1.2rem; color: #ffffff;">Basket Clube de Valença</span>
+                </a>
+                
+                <div class="social-links" style="display: flex; gap: 20px; font-size: 1.5rem;">
+                    <a href="https://www.facebook.com/profile.php?id=100039859278453" target="_blank" style="color: #ffffff; opacity: 0.8; transition: opacity 0.3s ease;"><i class="fab fa-facebook"></i></a>
+                    <a href="https://www.instagram.com/bcvalenca" target="_blank" style="color: #ffffff; opacity: 0.8; transition: opacity 0.3s ease;"><i class="fab fa-instagram"></i></a>
+                    <a href="https://www.youtube.com/@BCValenca" target="_blank" style="color: #ffffff; opacity: 0.8; transition: opacity 0.3s ease;"><i class="fab fa-youtube"></i></a>
+                    <a href="https://www.tiktok.com/@bcvalenca" target="_blank" style="color: #ffffff; opacity: 0.8; transition: opacity 0.3s ease;"><i class="fab fa-tiktok"></i></a>
+                </div>
+            </div>
+            
+            <div class="footer-bottom">
+                <p>&copy; 2026 Basket Clube de Valença. Todos os direitos reservados.</p>
+            </div>
+        </div>
+    </footer>
+
+    <!-- Scripts -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="js/config.js"></script>
+    <script src="js/main.js?v=20260925_2"></script>
+</body>
+</html>
