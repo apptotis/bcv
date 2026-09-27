@@ -15,6 +15,18 @@ document.addEventListener('DOMContentLoaded', async () => {
     const btnLogin = document.getElementById('btn-login');
     const adminNameSpan = document.getElementById('admin-name');
 
+    // Helper: Sanitização HTML segura
+    function escapeHtml(str) {
+        if (str === null || str === undefined) return '';
+        return String(str)
+            .replace(/&/g, '&amp;')
+            .replace(/</g, '&lt;')
+            .replace(/>/g, '&gt;')
+            .replace(/"/g, '&quot;')
+            .replace(/'/g, '&#39;');
+    }
+    window.escapeHtml = escapeHtml;
+
     // 3. Verificar Sessão Atual no arranque
     async function checkSession() {
         const { data: { session }, error } = await supabase.auth.getSession();
