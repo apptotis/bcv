@@ -60,3 +60,18 @@ CREATE POLICY "Permissao Total Itens Cobranca" ON public.itens_cobranca
 
 GRANT ALL ON public.itens_cobranca TO anon, authenticated;
 GRANT ALL ON public.mensalidades TO anon, authenticated;
+
+-- 6. Tabela de Quotas Padrão em clube_config (se ainda não existir)
+INSERT INTO public.clube_config (chave, dados)
+VALUES ('tabela_quotas', '{
+  "BabyBasket": {"mensal": 25.00, "bianual": 120.00, "anual": 230.00},
+  "Mini 8": {"mensal": 25.00, "bianual": 120.00, "anual": 230.00},
+  "Mini 10": {"mensal": 25.00, "bianual": 120.00, "anual": 230.00},
+  "Mini 12": {"mensal": 25.00, "bianual": 120.00, "anual": 230.00},
+  "Sub 14": {"mensal": 25.00, "bianual": 120.00, "anual": 230.00},
+  "Sub 16": {"mensal": 25.00, "bianual": 120.00, "anual": 230.00},
+  "Sub 18": {"mensal": 25.00, "bianual": 120.00, "anual": 230.00},
+  "Sub 20": {"mensal": 25.00, "bianual": 120.00, "anual": 230.00},
+  "Seniores": {"mensal": 25.00, "bianual": 120.00, "anual": 230.00}
+}'::jsonb)
+ON CONFLICT (chave) DO NOTHING;

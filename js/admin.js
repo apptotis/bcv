@@ -6201,14 +6201,16 @@ document.addEventListener('DOMContentLoaded', async () => {
     // Gestão da Tabela de Preços de Quotas por Escalão (Mensal, Bianual e Anual)
     async function loadTabelaPrecos() {
         try {
-            const { data: configRow } = await supabase
-                .from('configuracoes_clube')
+            const { data: configRow, error } = await supabase
+                .from('clube_config')
                 .select('*')
                 .eq('chave', 'tabela_quotas')
                 .maybeSingle();
 
-            if (configRow && configRow.valor) {
-                tabelaPrecosQuotas = typeof configRow.valor === 'string' ? JSON.parse(configRow.valor) : configRow.valor;
+            if (error) console.warn('Aviso ao consultar clube_config para tabela_quotas:', error);
+
+            if (configRow && configRow.dados) {
+                tabelaPrecosQuotas = typeof configRow.dados === 'string' ? JSON.parse(configRow.dados) : configRow.dados;
             } else {
                 // Valores padrão
                 tabelaPrecosQuotas = {};
@@ -6274,14 +6276,14 @@ document.addEventListener('DOMContentLoaded', async () => {
 
             try {
                 const { error } = await supabase
-                    .from('configuracoes_clube')
+                    .from('clube_config')
                     .upsert({
                         chave: 'tabela_quotas',
-                        valor: novaTabela,
-                        descricao: 'Valores padrão de mensalidades, bianual e anuidade por escalão'
+                        dados: novaTabela,
+                        updated_at: new Date()
                     }, { onConflict: 'chave' });
 
-                if (error && error.code !== '42P01') throw error;
+                if (error) throw error;
 
                 if (msgTabelaPrecos) {
                     msgTabelaPrecos.textContent = '✅ Tabela de preços guardada com sucesso!';

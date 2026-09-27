@@ -408,12 +408,12 @@ document.addEventListener('DOMContentLoaded', () => {
             // 3. Carregar Tabela de Preços configurada
             try {
                 const { data: cfgRow } = await supabase
-                    .from('configuracoes_clube')
-                    .select('valor')
+                    .from('clube_config')
+                    .select('dados')
                     .eq('chave', 'tabela_quotas')
                     .maybeSingle();
-                if (cfgRow && cfgRow.valor) {
-                    tabelaPrecosQuotas = typeof cfgRow.valor === 'string' ? JSON.parse(cfgRow.valor) : cfgRow.valor;
+                if (cfgRow && cfgRow.dados) {
+                    tabelaPrecosQuotas = typeof cfgRow.dados === 'string' ? JSON.parse(cfgRow.dados) : cfgRow.dados;
                 }
             } catch (e) { console.warn("Tabela de quotas:", e); }
 
