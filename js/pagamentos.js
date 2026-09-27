@@ -8,10 +8,10 @@ document.addEventListener('DOMContentLoaded', () => {
     let supabase = null;
     if (typeof window.supabaseClient !== 'undefined' && window.supabaseClient) {
         supabase = window.supabaseClient;
-    } else if (typeof window.supabase !== 'undefined' && typeof SUPABASE_CONFIG !== 'undefined') {
-        supabase = window.supabase.createClient(SUPABASE_CONFIG.url, SUPABASE_CONFIG.anonKey);
+    } else if (typeof window.supabase !== 'undefined' && typeof SUPABASE_URL !== 'undefined' && typeof SUPABASE_ANON_KEY !== 'undefined') {
+        supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
     } else {
-        console.error("Erro crítico: Biblioteca Supabase não encontrada.");
+        console.error("Erro crítico: Biblioteca Supabase ou credenciais não encontradas.");
         alert("Erro ao conectar à base de dados. Por favor recarregue a página.");
         return;
     }
