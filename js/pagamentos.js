@@ -492,8 +492,9 @@ document.addEventListener('DOMContentLoaded', () => {
         kpiTotalMovimentos.textContent = `${countMovs} recebimento${countMovs === 1 ? '' : 's'} registado${countMovs === 1 ? '' : 's'}`;
         kpiTotalAtletas.textContent = currentAtletas.length;
 
-        // Análise do Mês Selecionado no filtro
-        const mesSel = filtroMesCobranca.value || '2026-09';
+        // Análise do Mês Atual ou Selecionado
+        const curYm = new Date().toISOString().slice(0, 7);
+        const mesSel = filtroMesCobranca?.value || (curYm >= '2026-09' && curYm <= '2027-06' ? curYm : '2026-09');
         let pagosMes = 0;
         let pendentesMes = 0;
 

@@ -93,3 +93,4 @@
 - [2026-09-27] Gemini: Remoção dos botões/pills de escalão do topo no Portal de Pagamentos (pagamentos.html, pagamentos.js), mantendo a alternância de múltiplos escalões exclusivamente no Drawer para um layout limpo.
 - [2026-09-27] Gemini: Suporte a mensalidade 0€ (BabyBasket/isenções) sem fallback para valores padrão na tabela de quotas do Admin e Portal de Pagamentos (setup_pagamentos_itens.sql).
 - [2026-09-28] Gemini: Modal de cobrança no Portal de Pagamentos com 3 opções de quota (Mensal, Bianual e Anual), pointer-events: none nas checkboxes e soma em tempo real com produtos/encargos (pagamentos.js, pagamentos.css, pagamentos.html).
+- [2026-09-28] Gemini: Remoção do card de filtros (pesquisa, mês e estado) na lista de atletas de pagamentos.html para um layout limpo e direto.
