@@ -315,15 +315,8 @@
                                 <span class="cobranca-section-title">Quotas & Mensalidades (2026/2027)</span>
                             </div>
                             
-                            <!-- Alternância de Modalidade: Meses | Bianual | Anual -->
-                            <div style="display: flex; gap: 6px; margin-bottom: 10px;">
-                                <button type="button" class="tab-quota-mode-btn active" data-mode="meses">Mensal</button>
-                                <button type="button" class="tab-quota-mode-btn" data-mode="bianual">Bianual (2x)</button>
-                                <button type="button" class="tab-quota-mode-btn" data-mode="anual">⭐ Anual</button>
-                            </div>
-
                             <div id="cobranca-quotas-container" style="display: flex; flex-direction: column; gap: 8px;">
-                                <!-- Preenchido dinamicamente via JS -->
+                                <!-- Preenchido dinamicamente via JS com mensalidades pendentes e opção anual -->
                             </div>
                         </div>
 
@@ -331,11 +324,23 @@
                         <div class="cobranca-section-card">
                             <div class="cobranca-section-header">
                                 <span class="cobranca-section-icon">🛍️</span>
-                                <span class="cobranca-section-title">Produtos & Outros Encargos</span>
+                                <span class="cobranca-section-title">Produtos & Encargos Pendentes</span>
                             </div>
                             <div id="cobranca-produtos-container" style="display: flex; flex-direction: column; gap: 8px;">
                                 <!-- Preenchido dinamicamente via JS com Exames, Equipamentos, etc. -->
                             </div>
+                        </div>
+
+                        <!-- SECÇÃO C: ITENS JÁ LIQUIDADOS (Recolhível) -->
+                        <div id="cobranca-liquidados-wrapper" style="display: none;">
+                            <details style="background: #f8fafc; border: 1px solid var(--border); border-radius: 8px; padding: 10px 12px; font-size: 0.82rem;">
+                                <summary style="cursor: pointer; font-weight: 600; color: var(--text-muted); user-select: none;">
+                                    <span>✓ Ver pagamentos já liquidados (<span id="contagem-liquidados">0</span>)</span>
+                                </summary>
+                                <div id="cobranca-liquidados-container" style="display: flex; flex-direction: column; gap: 6px; margin-top: 10px;">
+                                    <!-- Lista de itens já pagos -->
+                                </div>
+                            </details>
                         </div>
 
                     </div>
@@ -405,6 +410,6 @@
 
     <!-- Scripts -->
     <script src="js/config.js"></script>
-    <script src="js/pagamentos.js?v=20260928_0020"></script>
+    <script src="js/pagamentos.js?v=20260928_0035"></script>
 </body>
 </html>
