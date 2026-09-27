@@ -11,7 +11,6 @@ document.addEventListener('DOMContentLoaded', async () => {
     let currentAtletas = [];
     let presencasState = {}; // atleta_id -> estado ('Presente', 'Falta', 'Justificado', 'Lesionado')
     let observacoesState = {}; // atleta_id -> texto de observações do diário desportivo
-    let mensalidadesMap = {}; // atleta_id -> objeto mensalidade
 
     // Helper para escapar HTML seguro em inputs
     function escapeHtml(str) {
@@ -63,25 +62,6 @@ document.addEventListener('DOMContentLoaded', async () => {
     const btnMarcarTodos = document.getElementById('btn-marcar-todos-presentes');
     const btnGuardarPresencas = document.getElementById('btn-guardar-presencas');
 
-    // Mensalidades
-    const mensalidadesMesSelect = document.getElementById('mensalidades-mes');
-    const statTotalPago = document.getElementById('stat-total-pago');
-    const statQtdPago = document.getElementById('stat-qtd-pago');
-    const statTotalPendente = document.getElementById('stat-total-pendente');
-    const statQtdPendente = document.getElementById('stat-qtd-pendente');
-    const listaMensalidadesContainer = document.getElementById('lista-mensalidades-container');
-
-    // Modal Pagamento
-    const modalPagamentoSheet = document.getElementById('modal-pagamento-sheet');
-    const formPagamentoRapido = document.getElementById('form-pagamento-rapido');
-    const modalAtletaNome = document.getElementById('modal-atleta-nome');
-    const pagamentoAtletaId = document.getElementById('pagamento-atleta-id');
-    const pagamentoTipoCobranca = document.getElementById('pagamento-tipo-cobranca');
-    const pagamentoValor = document.getElementById('pagamento-valor');
-    const pagamentoMetodo = document.getElementById('pagamento-metodo');
-    const pagamentoData = document.getElementById('pagamento-data');
-    const pagamentoNotas = document.getElementById('pagamento-notas');
-    const btnAnularPagamento = document.getElementById('btn-anular-pagamento');
 
     // Plantel & Fichas de Atleta
     const filtroPlantel = document.getElementById('filtro-plantel');
@@ -439,8 +419,6 @@ document.addEventListener('DOMContentLoaded', async () => {
                 loadPresencas();
             } else if (targetTabId === 'tab-plantel') {
                 renderPlantel();
-            } else if (targetTabId === 'tab-mensalidades') {
-                loadMensalidades();
             } else if (targetTabId === 'tab-sos') {
                 renderSos();
             }
@@ -464,7 +442,6 @@ document.addEventListener('DOMContentLoaded', async () => {
         `;
 
         if (listaPresencasContainer) listaPresencasContainer.innerHTML = msgHtml;
-        if (listaMensalidadesContainer) listaMensalidadesContainer.innerHTML = msgHtml;
         if (listaPlantelContainer) listaPlantelContainer.innerHTML = msgHtml;
         if (listaSosContainer) listaSosContainer.innerHTML = msgHtml;
 
@@ -473,10 +450,6 @@ document.addEventListener('DOMContentLoaded', async () => {
         if (btnMarcarTodos) btnMarcarTodos.style.display = 'none';
         const presencasControl = document.querySelector('#tab-presencas .control-card');
         if (presencasControl) presencasControl.style.display = 'none';
-        const mensalidadesControl = document.querySelector('#tab-mensalidades .control-card');
-        if (mensalidadesControl) mensalidadesControl.style.display = 'none';
-        const mensalidadesResumo = document.querySelector('.resumo-grid');
-        if (mensalidadesResumo) mensalidadesResumo.style.display = 'none';
         const plantelControl = document.querySelector('#tab-plantel .control-card');
         if (plantelControl) plantelControl.style.display = 'none';
         const sosControl = document.querySelector('#tab-sos .control-card');
@@ -498,10 +471,6 @@ document.addEventListener('DOMContentLoaded', async () => {
             if (btnMarcarTodos) btnMarcarTodos.style.display = '';
             const presencasControl = document.querySelector('#tab-presencas .control-card');
             if (presencasControl) presencasControl.style.display = '';
-            const mensalidadesControl = document.querySelector('#tab-mensalidades .control-card');
-            if (mensalidadesControl) mensalidadesControl.style.display = '';
-            const mensalidadesResumo = document.querySelector('.resumo-grid');
-            if (mensalidadesResumo) mensalidadesResumo.style.display = '';
             const plantelControl = document.querySelector('#tab-plantel .control-card');
             if (plantelControl) plantelControl.style.display = '';
 
@@ -564,7 +533,6 @@ document.addEventListener('DOMContentLoaded', async () => {
 
             // Iniciar abas
             await loadPresencas();
-            await loadMensalidades();
             renderPlantel();
             renderSos();
 
@@ -788,298 +756,6 @@ document.addEventListener('DOMContentLoaded', async () => {
                 alert("Erro ao guardar registos: " + err.message);
                 btnGuardarPresencas.textContent = "💾 Guardar Diário Desportivo";
                 btnGuardarPresencas.disabled = false;
-            }
-        });
-    }
-
-    // =======================================================
-    // 6. MÓDULO DE MENSALIDADES
-    // =======================================================
-    let currentTargetMes = '2026-09';
-
-    async function loadMensalidades() {
-        if (!listaMensalidadesContainer) return;
-        if (!activeEscalao || userEscaloes.length === 0) {
-            renderEmptyNoTeams();
-            return;
-        }
-        const mesSel = mensalidadesMesSelect.value || '2026-09';
-        const epoca = '2026/2027';
-
-        listaMensalidadesContainer.innerHTML = '<div style="text-align: center; padding: 20px; color: var(--text-muted);">A carregar estado das mensalidades...</div>';
-
-        try {
-            // Carregamos todos os registos da época para cruzar pagamentos mensais e quotas anuais
-            const { data: mensalidades, error } = await supabase
-                .from('mensalidades')
-                .select('*')
-                .eq('epoca', epoca);
-
-            if (error && error.code !== '42P01') {
-                console.warn("Aviso ao carregar mensalidades:", error);
-            }
-
-            // Mapa: atleta_id -> { '2026-09': m, 'ANUAL': m, ... }
-            mensalidadesMap = {};
-            (mensalidades || []).forEach(m => {
-                if (!mensalidadesMap[m.atleta_id]) {
-                    mensalidadesMap[m.atleta_id] = {};
-                }
-                mensalidadesMap[m.atleta_id][m.mes] = m;
-            });
-
-            renderMensalidadesList();
-
-        } catch (e) {
-            console.error("Erro ao consultar mensalidades:", e);
-            renderMensalidadesList();
-        }
-    }
-
-    function renderMensalidadesList() {
-        if (!listaMensalidadesContainer) return;
-
-        const mesSel = mensalidadesMesSelect.value || '2026-09';
-        const isFiltroAnual = mesSel === 'ANUAL';
-        let totalPago = 0;
-        let qtdPago = 0;
-        let qtdPendente = 0;
-        const VALOR_PADRAO_MENSAL = 25.00;
-        const VALOR_PADRAO_ANUAL = 250.00;
-
-        if (currentAtletas.length === 0) {
-            listaMensalidadesContainer.innerHTML = `
-                <div style="background: white; border-radius: 12px; padding: 30px 20px; text-align: center; border: 1px dashed var(--border);">
-                    <span style="font-size: 2rem;">💶</span>
-                    <h3 style="margin-top: 10px; font-size: 1rem; color: var(--text-main);">Nenhum atleta encontrado</h3>
-                    <p style="font-size: 0.82rem; color: var(--text-muted); margin-top: 4px;">Não há atletas associados à equipa ativa.</p>
-                </div>
-            `;
-            return;
-        }
-
-        let html = '';
-        currentAtletas.forEach(a => {
-            const atletaRegs = mensalidadesMap[a.id] || {};
-            const regAnual = atletaRegs['ANUAL'];
-            const isAnualPago = regAnual && regAnual.estado === 'Pago';
-            const regMes = atletaRegs[mesSel];
-            const isMesPago = regMes && regMes.estado === 'Pago';
-            const dorsal = a.equipamento_numero_1 || a.equipamento_numero_2 || a.dorsal || '-';
-
-            let statusTexto = '';
-            let badgeBtn = '';
-
-            if (isFiltroAnual) {
-                // Modo: Visualização da Quota Anual
-                if (isAnualPago) {
-                    totalPago += Number(regAnual.valor || VALOR_PADRAO_ANUAL);
-                    qtdPago++;
-                    statusTexto = `⭐ Quota Anual Liquidada • ${regAnual.metodo_pagamento || 'Dinheiro'}`;
-                    badgeBtn = `
-                        <button type="button" class="badge-status pago-anual" onclick="window.openPagamentoModal(${a.id}, 'ANUAL')">
-                            ⭐ Quota Anual Paga (${Number(regAnual.valor || VALOR_PADRAO_ANUAL).toFixed(0)}€)
-                        </button>
-                    `;
-                } else {
-                    qtdPendente++;
-                    statusTexto = `Pendente (Quota Anual Completa)`;
-                    badgeBtn = `
-                        <button type="button" class="badge-status pendente" onclick="window.openPagamentoModal(${a.id}, 'ANUAL')">
-                            + Registar Quota Anual (${VALOR_PADRAO_ANUAL}€)
-                        </button>
-                    `;
-                }
-            } else {
-                // Modo: Mês Regular (ex: 2026-09)
-                if (isAnualPago) {
-                    // Se pagou anuidade, o mês está automaticamente coberto
-                    totalPago += VALOR_PADRAO_MENSAL;
-                    qtdPago++;
-                    statusTexto = `⭐ Coberto por Quota Anual (${regAnual.metodo_pagamento || 'Dinheiro'})`;
-                    badgeBtn = `
-                        <button type="button" class="badge-status pago-anual" onclick="window.openPagamentoModal(${a.id}, 'ANUAL')">
-                            ⭐ Quota Anual Paga (${Number(regAnual.valor || VALOR_PADRAO_ANUAL).toFixed(0)}€)
-                        </button>
-                    `;
-                } else if (isMesPago) {
-                    totalPago += Number(regMes.valor || VALOR_PADRAO_MENSAL);
-                    qtdPago++;
-                    statusTexto = `📅 Pago em ${regMes.data_pagamento || 'Hoje'} • ${regMes.metodo_pagamento || 'Dinheiro'}`;
-                    badgeBtn = `
-                        <button type="button" class="badge-status pago" onclick="window.openPagamentoModal(${a.id}, '${mesSel}')">
-                            ✓ Pago (${Number(regMes.valor || VALOR_PADRAO_MENSAL).toFixed(0)}€)
-                        </button>
-                    `;
-                } else {
-                    qtdPendente++;
-                    statusTexto = `Pendente`;
-                    badgeBtn = `
-                        <button type="button" class="badge-status pendente" onclick="window.openPagamentoModal(${a.id}, '${mesSel}')">
-                            + Registar Mensalidade (${VALOR_PADRAO_MENSAL}€)
-                        </button>
-                    `;
-                }
-            }
-
-            const fotoHtml = a.foto_url 
-                ? `<img src="${a.foto_url}" class="atleta-avatar" alt="${a.nome}">`
-                : `<div class="atleta-avatar">${(a.nome || 'A').charAt(0).toUpperCase()}</div>`;
-
-            html += `
-                <div class="atleta-mensalidade-card">
-                    <div class="atleta-info-row">
-                        ${fotoHtml}
-                        <div class="atleta-details">
-                            <div class="atleta-nome">${a.nome}</div>
-                            <div class="atleta-meta">
-                                <span class="badge-numero">Nº ${dorsal}</span>
-                                <span>${statusTexto}</span>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="mensalidade-action-row">
-                        ${badgeBtn}
-                    </div>
-                </div>
-            `;
-        });
-
-        listaMensalidadesContainer.innerHTML = html;
-
-        // Atualizar Resumo Estatístico
-        const valorRefPendente = isFiltroAnual ? VALOR_PADRAO_ANUAL : VALOR_PADRAO_MENSAL;
-        if (statTotalPago) statTotalPago.textContent = `${totalPago.toFixed(0)} €`;
-        if (statQtdPago) statQtdPago.textContent = `${qtdPago} Pagos`;
-        if (statTotalPendente) statTotalPendente.textContent = `${(qtdPendente * valorRefPendente).toFixed(0)} €`;
-        if (statQtdPendente) statQtdPendente.textContent = `${qtdPendente} Pendentes`;
-    }
-
-    if (mensalidadesMesSelect) {
-        mensalidadesMesSelect.addEventListener('change', loadMensalidades);
-    }
-
-    // Modal de Pagamento Rápido
-    window.openPagamentoModal = function(atletaId, targetMes) {
-        const atleta = currentAtletas.find(a => a.id === atletaId);
-        if (!atleta) return;
-
-        const mesSel = targetMes || mensalidadesMesSelect.value || '2026-09';
-        currentTargetMes = mesSel;
-
-        const atletaRegs = mensalidadesMap[atletaId] || {};
-        const isAnual = mesSel === 'ANUAL';
-        const reg = atletaRegs[mesSel];
-        const isPago = reg && reg.estado === 'Pago';
-
-        modalAtletaNome.textContent = atleta.nome;
-        pagamentoAtletaId.value = atletaId;
-        
-        if (pagamentoTipoCobranca) {
-            pagamentoTipoCobranca.value = isAnual ? 'ANUAL' : 'MENSAL';
-        }
-
-        const valorPadrao = isAnual ? 250.00 : 25.00;
-        pagamentoValor.value = isPago ? (reg.valor || valorPadrao) : valorPadrao;
-        pagamentoMetodo.value = isPago ? (reg.metodo_pagamento || 'Dinheiro') : 'Dinheiro';
-        pagamentoData.value = isPago ? (reg.data_pagamento || hojeIso) : hojeIso;
-        pagamentoNotas.value = isPago ? (reg.notas || '') : '';
-
-        if (isPago) {
-            btnAnularPagamento.style.display = 'block';
-            document.getElementById('btn-confirmar-pagamento').textContent = 'Atualizar Registo';
-        } else {
-            btnAnularPagamento.style.display = 'none';
-            document.getElementById('btn-confirmar-pagamento').textContent = 'Confirmar Pagamento';
-        }
-
-        modalPagamentoSheet.classList.add('active');
-    };
-
-    if (pagamentoTipoCobranca) {
-        pagamentoTipoCobranca.addEventListener('change', () => {
-            if (pagamentoTipoCobranca.value === 'ANUAL') {
-                if (Number(pagamentoValor.value) === 25 || !pagamentoValor.value) {
-                    pagamentoValor.value = '250.00';
-                }
-            } else {
-                if (Number(pagamentoValor.value) === 250 || !pagamentoValor.value) {
-                    pagamentoValor.value = '25.00';
-                }
-            }
-        });
-    }
-
-    window.closePagamentoModal = function() {
-        modalPagamentoSheet.classList.remove('active');
-    };
-
-    if (formPagamentoRapido) {
-        formPagamentoRapido.addEventListener('submit', async (e) => {
-            e.preventDefault();
-            const atletaId = Number(pagamentoAtletaId.value);
-            const tipoCobranca = pagamentoTipoCobranca?.value || 'MENSAL';
-            
-            let mesFinal = (tipoCobranca === 'ANUAL') ? 'ANUAL' : currentTargetMes;
-            if (mesFinal === 'ANUAL' && tipoCobranca !== 'ANUAL') {
-                mesFinal = mensalidadesMesSelect.value !== 'ANUAL' ? mensalidadesMesSelect.value : '2026-09';
-            }
-
-            const epoca = '2026/2027';
-
-            const payload = {
-                atleta_id: atletaId,
-                epoca: epoca,
-                mes: mesFinal,
-                valor: Number(pagamentoValor.value) || (tipoCobranca === 'ANUAL' ? 250.00 : 25.00),
-                estado: 'Pago',
-                metodo_pagamento: pagamentoMetodo.value,
-                data_pagamento: pagamentoData.value || hojeIso,
-                notas: pagamentoNotas.value || '',
-                registado_por: userProfile.nome || currentUser.email
-            };
-
-            try {
-                const { error } = await supabase
-                    .from('mensalidades')
-                    .upsert(payload, { onConflict: 'atleta_id, epoca, mes' });
-
-                if (error) throw error;
-
-                closePagamentoModal();
-                await loadMensalidades();
-
-            } catch (err) {
-                console.error("Erro ao registar pagamento:", err);
-                alert("Erro ao registar pagamento: " + err.message);
-            }
-        });
-    }
-
-    if (btnAnularPagamento) {
-        btnAnularPagamento.addEventListener('click', async () => {
-            if (!confirm("Tem a certeza de que deseja anular este registo de pagamento?")) return;
-            const atletaId = Number(pagamentoAtletaId.value);
-            const tipoCobranca = pagamentoTipoCobranca?.value || 'MENSAL';
-            const mesFinal = (tipoCobranca === 'ANUAL') ? 'ANUAL' : currentTargetMes;
-            const epoca = '2026/2027';
-
-            try {
-                const { error } = await supabase
-                    .from('mensalidades')
-                    .delete()
-                    .eq('atleta_id', atletaId)
-                    .eq('epoca', epoca)
-                    .eq('mes', mesFinal);
-
-                if (error) throw error;
-
-                closePagamentoModal();
-                await loadMensalidades();
-
-            } catch (err) {
-                console.error("Erro ao anular pagamento:", err);
-                alert("Erro ao anular: " + err.message);
             }
         });
     }

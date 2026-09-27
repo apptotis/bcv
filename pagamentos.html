@@ -1,0 +1,456 @@
+<!DOCTYPE html>
+<html lang="pt">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <title>BCV Pagamentos | Gestão de Escalão</title>
+    
+    <!-- Favicon -->
+    <link rel="icon" type="image/png" href="assets/emblema_png.png">
+    
+    <!-- Google Fonts: Inter -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    
+    <!-- Supabase JS -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    
+    <!-- CSS Pagamentos Mobile -->
+    <link rel="stylesheet" href="css/pagamentos.css?v=20260927_1">
+</head>
+<body>
+
+    <!-- ======================================================= -->
+    <!-- ECRÃ DE LOGIN (Visível apenas se deslogado)             -->
+    <!-- ======================================================= -->
+    <div id="login-container" class="app-container">
+        <div class="login-screen">
+            <img src="assets/emblema_png.png" alt="Emblema BCV" class="login-logo">
+            <h2>Portal de Pagamentos</h2>
+            <p>Acesso exclusivo para registo de pagamentos e quotas de escalão</p>
+            
+            <form id="form-login-pagamentos" style="display: flex; flex-direction: column; gap: 12px; text-align: left;">
+                <div>
+                    <label class="form-label">Email de Acesso</label>
+                    <input type="email" id="login-email" class="form-input" placeholder="exemplo@bcvalenca.pt" required>
+                </div>
+                <div>
+                    <label class="form-label">Palavra-passe</label>
+                    <input type="password" id="login-password" class="form-input" placeholder="••••••••" required>
+                </div>
+                <div id="login-error-msg" style="color: #ef4444; font-size: 0.85rem; display: none; font-weight: 600;"></div>
+                <button type="submit" id="btn-login" class="btn-submit-payment" style="margin-top: 6px;">
+                    Entrar no Portal
+                </button>
+            </form>
+        </div>
+    </div>
+
+    <!-- ======================================================= -->
+    <!-- APLICAÇÃO PRINCIPAL (Pós-Login)                         -->
+    <!-- ======================================================= -->
+    <div id="app-main" style="display: none;">
+        
+        <!-- Cabeçalho Fixo -->
+        <header class="app-header">
+            <div class="header-brand">
+                <img src="assets/emblema_png.png" alt="BCV" class="header-logo">
+                <div class="header-info">
+                    <h1 id="header-user-name">Responsável BCV</h1>
+                    <div class="badge-escalao" id="header-escalao-badge">🏀 Carregando...</div>
+                </div>
+            </div>
+            <div class="header-actions">
+                <button type="button" id="btn-open-drawer" class="btn-menu-hamburguer" title="Menu Principal">
+                    ☰
+                </button>
+            </div>
+        </header>
+
+        <!-- Seletor de Múltiplos Escalões (Barra de Pills no Topo) -->
+        <div id="multi-escalao-bar" class="multi-escalao-bar" style="display: none;">
+            <span class="multi-escalao-label">🏀 Escalão Ativo:</span>
+            <div id="multi-escalao-pills" class="escalao-pills-container">
+                <!-- Pills geradas dinamicamente via JS -->
+            </div>
+        </div>
+
+        <!-- Menu Lateral (Drawer Mobile) -->
+        <div id="drawer-overlay" class="drawer-overlay">
+            <div class="drawer-menu">
+                <div class="drawer-header">
+                    <div class="drawer-profile">
+                        <img src="assets/emblema_png.png" alt="BCV" class="drawer-logo">
+                        <div>
+                            <div class="drawer-title" id="drawer-user-name">Responsável BCV</div>
+                            <div class="drawer-subtitle" id="drawer-escalao-name">Mini 8</div>
+                        </div>
+                    </div>
+                    <button type="button" id="btn-close-drawer" class="btn-close-drawer" title="Fechar Menu">✕</button>
+                </div>
+                
+                <div class="drawer-body">
+                    <!-- Secção de Troca de Escalão no Drawer (se tiver múltiplos) -->
+                    <div id="drawer-section-escaloes" style="display: none;">
+                        <div class="drawer-section-title">Trocar de Escalão</div>
+                        <div id="drawer-escaloes-list" style="display: flex; flex-direction: column; gap: 6px; margin-bottom: 12px;">
+                            <!-- Botões de escalão gerados via JS -->
+                        </div>
+                    </div>
+
+                    <div class="drawer-section-title">Funções do Portal</div>
+                    
+                    <button type="button" class="drawer-item active" data-tab="tab-atletas">
+                        <span class="item-icon">👥</span>
+                        <div class="item-text">
+                            <span class="item-label">Atletas & Cobrança</span>
+                            <span class="item-desc">Lista de atletas e registo rápido</span>
+                        </div>
+                    </button>
+                    
+                    <button type="button" class="drawer-item" data-tab="tab-extrato">
+                        <span class="item-icon">📋</span>
+                        <div class="item-text">
+                            <span class="item-label">Extrato do Escalão</span>
+                            <span class="item-desc">Histórico completo de movimentos</span>
+                        </div>
+                    </button>
+
+                    <button type="button" class="drawer-item" data-tab="tab-precos">
+                        <span class="item-icon">💰</span>
+                        <div class="item-text">
+                            <span class="item-label">Tabela de Quotas</span>
+                            <span class="item-desc">Valores e preçário de referência</span>
+                        </div>
+                    </button>
+                </div>
+                
+                <div class="drawer-footer">
+                    <button type="button" id="btn-drawer-logout" class="btn-drawer-logout">
+                        <span>🚪</span>
+                        <span>Terminar Sessão</span>
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Conteúdo Principal -->
+        <main class="app-container">
+
+            <!-- ======================================================= -->
+            <!-- ABA 1: ATLETAS & COBRANÇA                               -->
+            <!-- ======================================================= -->
+            <section id="tab-atletas" class="tab-content active">
+                
+                <!-- Resumo Estatístico em Grelha Compacta -->
+                <div class="stats-grid-compact">
+                    <div class="stat-box primary">
+                        <div class="stat-box-title">Total Arrecadado</div>
+                        <div class="stat-box-value" id="kpi-total-arrecadado">0 €</div>
+                        <div class="stat-box-sub" id="kpi-total-movimentos">0 pagamentos registados</div>
+                    </div>
+                    <div class="stat-box">
+                        <div class="stat-box-title">Atletas no Escalão</div>
+                        <div class="stat-box-value" id="kpi-total-atletas">0</div>
+                        <div class="stat-box-sub" id="kpi-escalao-label">Escalão Ativo</div>
+                    </div>
+                    <div class="stat-box">
+                        <div class="stat-box-title">Mês Pago</div>
+                        <div class="stat-box-value" id="kpi-mes-pagos" style="color: #059669;">0</div>
+                        <div class="stat-box-sub" id="kpi-mes-pagos-lbl">Mensalidades liquidadas</div>
+                    </div>
+                    <div class="stat-box">
+                        <div class="stat-box-title">Mês Pendente</div>
+                        <div class="stat-box-value" id="kpi-mes-pendentes" style="color: #dc2626;">0</div>
+                        <div class="stat-box-sub" id="kpi-mes-pendentes-lbl">A regularizar</div>
+                    </div>
+                </div>
+
+                <!-- Painel de Controlo / Filtros -->
+                <div class="control-card">
+                    <input type="text" id="filtro-pesquisa-atleta" class="search-input" placeholder="🔍 Pesquisar por nome ou alcunha...">
+                    
+                    <div class="filter-row">
+                        <select id="filtro-mes-cobranca" class="select-filter">
+                            <option value="2026-09">Setembro 2026</option>
+                            <option value="2026-10">Outubro 2026</option>
+                            <option value="2026-11">Novembro 2026</option>
+                            <option value="2026-12">Dezembro 2026</option>
+                            <option value="2027-01">Janeiro 2027</option>
+                            <option value="2027-02">Fevereiro 2027</option>
+                            <option value="2027-03">Março 2027</option>
+                            <option value="2027-04">Abril 2027</option>
+                            <option value="2027-05">Maio 2027</option>
+                            <option value="2027-06">Junho 2027</option>
+                            <option value="ANUAL">⭐ Quota Anual Completa</option>
+                        </select>
+                        <select id="filtro-estado-pagamento" class="select-filter">
+                            <option value="todos">Todos os Estados</option>
+                            <option value="pendente">Apenas Pendentes</option>
+                            <option value="pago">Apenas Pagos</option>
+                        </select>
+                    </div>
+                </div>
+
+                <!-- Lista de Atletas do Escalão -->
+                <div id="lista-atletas-container">
+                    <div style="text-align: center; padding: 30px 10px; color: var(--text-muted);">
+                        A carregar atletas do escalão...
+                    </div>
+                </div>
+
+            </section>
+
+            <!-- ======================================================= -->
+            <!-- ABA 2: EXTRATO DO ESCALÃO                               -->
+            <!-- ======================================================= -->
+            <section id="tab-extrato" class="tab-content">
+                
+                <!-- Resumo por Método de Pagamento -->
+                <div class="stats-grid-compact" style="margin-bottom: 12px;">
+                    <div class="stat-box">
+                        <div class="stat-box-title">💵 Dinheiro</div>
+                        <div class="stat-box-value" id="extrato-kpi-dinheiro" style="font-size: 1.15rem; color: #047857;">0 €</div>
+                    </div>
+                    <div class="stat-box">
+                        <div class="stat-box-title">📱 MBWay</div>
+                        <div class="stat-box-value" id="extrato-kpi-mbway" style="font-size: 1.15rem; color: #0284c7;">0 €</div>
+                    </div>
+                    <div class="stat-box">
+                        <div class="stat-box-title">🏦 Transferência</div>
+                        <div class="stat-box-value" id="extrato-kpi-banco" style="font-size: 1.15rem; color: #6b21a8;">0 €</div>
+                    </div>
+                    <div class="stat-box">
+                        <div class="stat-box-title">⭐ Total Geral</div>
+                        <div class="stat-box-value" id="extrato-kpi-total" style="font-size: 1.15rem; color: var(--primary);">0 €</div>
+                    </div>
+                </div>
+
+                <!-- Filtros do Extrato -->
+                <div class="control-card">
+                    <div class="filter-row">
+                        <select id="filtro-extrato-categoria" class="select-filter">
+                            <option value="todas">Todas as Categorias</option>
+                            <option value="Mensalidade">📅 Mensalidades</option>
+                            <option value="Equipamento">🎽 Equipamentos</option>
+                            <option value="Exame Médico">🩺 Exames Médicos</option>
+                            <option value="Outro">📦 Outros Produtos</option>
+                        </select>
+                        <select id="filtro-extrato-metodo" class="select-filter">
+                            <option value="todos">Todos os Métodos</option>
+                            <option value="Dinheiro">Dinheiro</option>
+                            <option value="MBWay">MBWay</option>
+                            <option value="Transferência">Transferência</option>
+                        </select>
+                    </div>
+                </div>
+
+                <!-- Lista de Movimentos -->
+                <div id="lista-movimentos-container">
+                    <div style="text-align: center; padding: 30px 10px; color: var(--text-muted);">
+                        A carregar extrato de pagamentos...
+                    </div>
+                </div>
+
+            </section>
+
+            <!-- ======================================================= -->
+            <!-- ABA 3: TABELA DE QUOTAS & PREÇOS OFICIAIS               -->
+            <!-- ======================================================= -->
+            <section id="tab-precos" class="tab-content">
+                <div style="background: #ffffff; border: 1px solid var(--border); border-radius: var(--radius-md); padding: 20px; box-shadow: var(--shadow-sm); line-height: 1.6;">
+                    <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 14px;">
+                        <span style="font-size: 1.8rem;">💰</span>
+                        <div>
+                            <h3 style="font-size: 1.05rem; font-weight: 800; color: var(--primary);">Tabela de Preços e Quotas</h3>
+                            <p style="font-size: 0.8rem; color: var(--text-muted);">Valores de referência oficiais do BCV para a época 2026/2027</p>
+                        </div>
+                    </div>
+
+                    <div style="display: flex; flex-direction: column; gap: 10px; margin-top: 14px;">
+                        <div style="background: #f8fafc; border: 1px solid var(--border); border-radius: var(--radius-sm); padding: 12px 14px; display: flex; justify-content: space-between; align-items: center;">
+                            <div>
+                                <strong style="font-size: 0.9rem; color: var(--text-main);">📅 Mensalidade Regular</strong>
+                                <div style="font-size: 0.78rem; color: var(--text-muted);">Setembro a Junho (10 mensalidades)</div>
+                            </div>
+                            <span style="font-size: 1.15rem; font-weight: 800; color: var(--primary);" id="preco-mensalidade-val">25.00 €</span>
+                        </div>
+
+                        <div style="background: #faf5ff; border: 1px solid #e9d5ff; border-radius: var(--radius-sm); padding: 12px 14px; display: flex; justify-content: space-between; align-items: center;">
+                            <div>
+                                <strong style="font-size: 0.9rem; color: #581c87;">⭐ Quota Anual Completa</strong>
+                                <div style="font-size: 0.78rem; color: #7e22ce;">Pagamento único integral da época</div>
+                            </div>
+                            <span style="font-size: 1.15rem; font-weight: 800; color: #6b21a8;" id="preco-anual-val">250.00 €</span>
+                        </div>
+
+                        <div style="background: #f8fafc; border: 1px solid var(--border); border-radius: var(--radius-sm); padding: 12px 14px; display: flex; justify-content: space-between; align-items: center;">
+                            <div>
+                                <strong style="font-size: 0.9rem; color: var(--text-main);">🩺 Exame Médico Desportivo (EMD)</strong>
+                                <div style="font-size: 0.78rem; color: var(--text-muted);">Consulta de certificação desportiva IPDJ</div>
+                            </div>
+                            <span style="font-size: 1.15rem; font-weight: 800; color: #047857;">Consulte</span>
+                        </div>
+
+                        <div style="background: #f8fafc; border: 1px solid var(--border); border-radius: var(--radius-sm); padding: 12px 14px; display: flex; justify-content: space-between; align-items: center;">
+                            <div>
+                                <strong style="font-size: 0.9rem; color: var(--text-main);">🎽 Equipamentos Oficiais</strong>
+                                <div style="font-size: 0.78rem; color: var(--text-muted);">Kits de jogo, fatos de treino e extras</div>
+                            </div>
+                            <span style="font-size: 1.15rem; font-weight: 800; color: #0284c7;">Por Artigo</span>
+                        </div>
+                    </div>
+
+                    <div style="margin-top: 20px; padding: 12px; background: #ecfdf5; border: 1px solid #a7f3d0; border-radius: var(--radius-sm); font-size: 0.8rem; color: #065f46;">
+                        ℹ️ <strong>Auditoria em Tempo Real:</strong> Todos os pagamentos registados nesta app ficam automaticamente sincronizados com a Direção e Secretaria no Painel Geral de Administração do BCV.
+                    </div>
+                </div>
+            </section>
+
+        </main>
+
+        <!-- ======================================================= -->
+        <!-- MODAL BOTTOM SHEET: REGISTAR PAGAMENTO                  -->
+        <!-- ======================================================= -->
+        <div id="modal-pagamento-sheet" class="modal-overlay">
+            <div class="modal-sheet">
+                <div class="sheet-handle"></div>
+                
+                <div class="modal-sheet-header">
+                    <div>
+                        <div style="font-size: 0.75rem; color: var(--text-muted); text-transform: uppercase; font-weight: 700;">Registar Recebimento</div>
+                        <h3 class="modal-sheet-title" id="modal-pagamento-atleta-nome">Nome do Atleta</h3>
+                    </div>
+                    <button type="button" class="btn-close-sheet" onclick="closeModalPagamento()">✕</button>
+                </div>
+
+                <form id="form-registar-pagamento">
+                    <input type="hidden" id="pagamento-atleta-id">
+                    <input type="hidden" id="pagamento-id">
+
+                    <!-- Tipo / Categoria de Pagamento -->
+                    <div class="form-group">
+                        <label class="form-label">Tipo de Movimento</label>
+                        <div class="category-pills">
+                            <button type="button" class="cat-pill active" data-cat="Mensalidade">
+                                <span>📅</span> Mensalidade
+                            </button>
+                            <button type="button" class="cat-pill" data-cat="Equipamento">
+                                <span>🎽</span> Equipamento
+                            </button>
+                            <button type="button" class="cat-pill" data-cat="Exame Médico">
+                                <span>🩺</span> Exame Médico
+                            </button>
+                            <button type="button" class="cat-pill" data-cat="Outro">
+                                <span>📦</span> Outro Produto
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Bloco Mensalidade (visível quando categoria = Mensalidade) -->
+                    <div id="bloco-mensalidade-mes" class="form-group">
+                        <label class="form-label">Mês / Tipo de Quota</label>
+                        <select id="pagamento-mes-select" class="form-select">
+                            <option value="2026-09">Setembro 2026</option>
+                            <option value="2026-10">Outubro 2026</option>
+                            <option value="2026-11">Novembro 2026</option>
+                            <option value="2026-12">Dezembro 2026</option>
+                            <option value="2027-01">Janeiro 2027</option>
+                            <option value="2027-02">Fevereiro 2027</option>
+                            <option value="2027-03">Março 2027</option>
+                            <option value="2027-04">Abril 2027</option>
+                            <option value="2027-05">Maio 2027</option>
+                            <option value="2027-06">Junho 2027</option>
+                            <option value="ANUAL">⭐ Quota Anual Completa (250 €)</option>
+                        </select>
+                    </div>
+
+                    <!-- Bloco Descrição Livre (visível para Equipamentos, Exames ou Outros) -->
+                    <div id="bloco-descricao" class="form-group" style="display: none;">
+                        <label class="form-label">Descrição do Item / Produto</label>
+                        <input type="text" id="pagamento-descricao" class="form-input" placeholder="Ex: Fato de Treino BCV, Exame Médico, Inscrição Torneio...">
+                    </div>
+
+                    <!-- Valor (€) -->
+                    <div class="form-group">
+                        <label class="form-label">Valor Recebido (€)</label>
+                        <input type="number" step="0.5" id="pagamento-valor" class="form-input" value="25.00" required>
+                        <div class="value-chips-row">
+                            <button type="button" class="chip-val" onclick="setValorPreset(25)">25 €</button>
+                            <button type="button" class="chip-val" onclick="setValorPreset(35)">35 €</button>
+                            <button type="button" class="chip-val" onclick="setValorPreset(50)">50 €</button>
+                            <button type="button" class="chip-val" onclick="setValorPreset(70)">70 €</button>
+                            <button type="button" class="chip-val" onclick="setValorPreset(250)">250 € (Anual)</button>
+                        </div>
+                    </div>
+
+                    <!-- Método de Pagamento -->
+                    <div class="form-group">
+                        <label class="form-label">Método de Pagamento</label>
+                        <select id="pagamento-metodo" class="form-select">
+                            <option value="Dinheiro" selected>💵 Dinheiro</option>
+                            <option value="MBWay">📱 MBWay</option>
+                            <option value="Transferência">🏦 Transferência Bancária</option>
+                            <option value="Outro">Outro</option>
+                        </select>
+                    </div>
+
+                    <!-- Data do Pagamento -->
+                    <div class="form-group">
+                        <label class="form-label">Data de Recebimento</label>
+                        <input type="date" id="pagamento-data" class="form-input">
+                    </div>
+
+                    <!-- Recibo / Comprovativo Opcional -->
+                    <div class="form-group">
+                        <label class="form-label">Nº de Recibo / Documento (Opcional)</label>
+                        <input type="text" id="pagamento-recibo" class="form-input" placeholder="Ex: REC-1024">
+                    </div>
+
+                    <!-- Notas Opcionais -->
+                    <div class="form-group">
+                        <label class="form-label">Observações / Notas</label>
+                        <input type="text" id="pagamento-notas" class="form-input" placeholder="Ex: Entregue pela mãe no pavilhão">
+                    </div>
+
+                    <div style="display: flex; gap: 10px; margin-top: 14px;">
+                        <button type="button" id="btn-anular-pagamento" class="btn-action-secondary" style="background: #fee2e2; color: #dc2626; border-color: #fca5a5; display: none;">
+                            Anular
+                        </button>
+                        <button type="submit" id="btn-confirmar-pagamento" class="btn-submit-payment" style="flex: 1; margin-top: 0;">
+                            Confirmar Pagamento
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+        <!-- ======================================================= -->
+        <!-- MODAL BOTTOM SHEET: EXTRATO INDIVIDUAL DO ATLETA        -->
+        <!-- ======================================================= -->
+        <div id="modal-extrato-sheet" class="modal-overlay">
+            <div class="modal-sheet">
+                <div class="sheet-handle"></div>
+                
+                <div class="modal-sheet-header">
+                    <div>
+                        <div style="font-size: 0.75rem; color: var(--text-muted); text-transform: uppercase; font-weight: 700;">Histórico do Atleta</div>
+                        <h3 class="modal-sheet-title" id="modal-extrato-atleta-nome">Extrato</h3>
+                    </div>
+                    <button type="button" class="btn-close-sheet" onclick="closeModalExtrato()">✕</button>
+                </div>
+
+                <div id="modal-extrato-content">
+                    <!-- Preenchido via JS -->
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+    <!-- Scripts -->
+    <script src="js/config.js"></script>
+    <script src="js/pagamentos.js?v=20260927_1"></script>
+</body>
+</html>

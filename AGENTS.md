@@ -17,8 +17,7 @@
 ## Histórico de Atualizações
 - [2026-05-07 a 2026-05-11] Gemini: Inicialização do projeto, stack, gestão de atletas/aniversariantes e reestruturação da home.
 - [2026-05-12] Gemini: Reformulação Radical para Tema Claro Institucional (Roxo Sólido, Base Branca).
-- [2026-05-12] Gemini: Implementação de Sub-menu (Dropdown) para a secção Clube.
-- [2026-05-12] Gemini: Simplificação do Hero da página Clube (apenas emblema).
+- [2026-05-12] Gemini: Implementação de Sub-menu (Dropdown) e simplificação do Hero da página Clube.
 - [2026-05-13] Gemini: Substituição global do logo (Logo_bcv.jpg -> emblema_png.png).
 - [2026-05-14] Gemini: Remoção de ícones decorativos (Agenda, Taça, Megafone) nos títulos dos cards.
 - [2026-05-24] Gemini: Protótipo e migração do cabeçalho centrado com drawer lateral interativo, alinhamento mobile e redes sociais.
@@ -96,3 +95,4 @@
 - [2026-09-25] Gemini: Módulo Gestão de Competições no Admin com controlo de visibilidade Sim/Não (1 toque), KPIs, CRUD completo, persistência em clube_config e sincronização dinâmica com competicoes.html.
 - [2026-09-25] Gemini: Otimização mobile de competicoes.html, e controlo de publicação Sim/Não (1 toque) com filtros e edição na Agenda e Resultados do Admin (setup_agenda_publicado.sql).
 - [2026-09-27] Gemini: Remoção do card banner de destaque de inscrições (#cta-inscricoes) da homepage (index.html).
+- [2026-09-27] Gemini: Anulação completa das mensalidades no Portal do Diretor (diretor.html/js) e criação do novo Portal Mobile de Pagamentos de Escalão (pagamentos.html, pagamentos.css, pagamentos.js, setup_pagamentos_escaloes.sql) com gestão por escalão (mensalidades, equipamentos, exames médicos e outros produtos), suporte multi-escalão, extrato e auditoria integrada no Admin.

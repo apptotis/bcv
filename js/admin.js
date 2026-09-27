@@ -68,12 +68,16 @@ document.addEventListener('DOMContentLoaded', async () => {
             }
 
             const role = (profile.role || 'admin').toLowerCase();
-            const allowedRoles = ['admin', 'editor', 'redator', 'treinador', 'diretor', 'seccionista', 'personalizado', 'user'];
+            const allowedRoles = ['admin', 'editor', 'redator', 'treinador', 'diretor', 'seccionista', 'pagamentos', 'tesoureiro', 'personalizado', 'user'];
             const userPerms = Array.isArray(profile.permissoes) ? profile.permissoes : [];
             const isAllowed = allowedRoles.includes(role) || userPerms.length > 0 || role === 'admin';
 
             if (isAllowed) {
                 // Redirecionamento automático para portais dedicados mobile
+                if (role === 'pagamentos' || role === 'tesoureiro') {
+                    window.location.href = 'pagamentos.html';
+                    return;
+                }
                 if (role === 'diretor' || role === 'seccionista') {
                     window.location.href = 'diretor.html';
                     return;
@@ -319,6 +323,12 @@ document.addEventListener('DOMContentLoaded', async () => {
             userRoleHelp.style.color = '#6b21a8';
             userRoleHelp.style.border = '1px solid #d8b4fe';
             userRoleHelp.innerHTML = '⭐ <strong>Administrador Total:</strong> Acesso ilimitado e completo a todas as páginas e menus do Painel Admin.';
+        } else if (r === 'pagamentos') {
+            userRoleHelp.style.display = 'block';
+            userRoleHelp.style.background = '#f0f9ff';
+            userRoleHelp.style.color = '#0369a1';
+            userRoleHelp.style.border = '1px solid #bae6fd';
+            userRoleHelp.innerHTML = '💶 <strong>Responsável de Pagamentos de Escalão (Mobile):</strong> Acede ao Portal de Pagamentos (<code>pagamentos.html</code>) para controlo de mensalidades, equipamentos e exames médicos dos escalões selecionados.';
         } else if (r === 'treinador') {
             userRoleHelp.style.display = 'block';
             userRoleHelp.style.background = '#eff6ff';
@@ -348,10 +358,28 @@ document.addEventListener('DOMContentLoaded', async () => {
         }
     }
 
+    const btnSelectAllEscPag = document.getElementById('btn-select-all-esc-pag');
+    if (btnSelectAllEscPag) {
+        btnSelectAllEscPag.addEventListener('click', () => {
+            const allCbs = document.querySelectorAll('input[name="user_escaloes_pagamentos"]');
+            const anyUnchecked = Array.from(allCbs).some(cb => !cb.checked);
+            allCbs.forEach(cb => cb.checked = anyUnchecked);
+            btnSelectAllEscPag.textContent = anyUnchecked ? '✕ Desmarcar' : '✓ Todos';
+        });
+    }
+
     if (roleSelect) {
         roleSelect.addEventListener('change', () => {
             const val = roleSelect.value;
             updateUserRoleHelp(val);
+            const containerEscaloesPag = document.getElementById('container-escaloes-pagamentos');
+            if (val === 'pagamentos') {
+                if (containerEscaloesPag) containerEscaloesPag.style.display = 'block';
+            } else {
+                if (containerEscaloesPag) containerEscaloesPag.style.display = 'none';
+                document.querySelectorAll('input[name="user_escaloes_pagamentos"]').forEach(cb => cb.checked = false);
+            }
+
             if (val === 'personalizado') {
                 if (containerPermissoes) containerPermissoes.style.display = 'block';
             } else {
@@ -400,6 +428,9 @@ document.addEventListener('DOMContentLoaded', async () => {
         passwordHint.style.display = 'none';
         passwordInput.required = true;
         document.getElementById('new-user-email').disabled = false;
+        const containerEscaloesPag = document.getElementById('container-escaloes-pagamentos');
+        if (containerEscaloesPag) containerEscaloesPag.style.display = 'none';
+        document.querySelectorAll('input[name="user_escaloes_pagamentos"]').forEach(cb => cb.checked = false);
         if (containerPermissoes) containerPermissoes.style.display = 'none';
         if (userRoleHelp) userRoleHelp.style.display = 'none';
         checkboxesPermissoes.forEach(cb => cb.checked = false);
@@ -633,6 +664,7 @@ document.addEventListener('DOMContentLoaded', async () => {
                 const userJson = JSON.stringify(user).replace(/'/g, "&apos;").replace(/"/g, "&quot;");
                 const uRole = (user.role || 'personalizado').toLowerCase();
                 const isAdmin = uRole === 'admin';
+                const isPagamentos = uRole === 'pagamentos' || uRole === 'tesoureiro';
                 const isDiretor = uRole === 'diretor' || uRole === 'seccionista';
                 const isTreinador = uRole === 'treinador';
                 const isRedator = uRole === 'redator' || uRole === 'editor';
@@ -644,6 +676,8 @@ document.addEventListener('DOMContentLoaded', async () => {
                 let roleBadgeHtml = '';
                 if (isAdmin) {
                     roleBadgeHtml = '<strong style="color: #7e22ce;">Admin Total</strong>';
+                } else if (isPagamentos) {
+                    roleBadgeHtml = '<span style="background: rgba(14, 165, 233, 0.15); color: #0284c7; font-weight: 700; padding: 2px 8px; border-radius: 6px; font-size: 0.8rem;">💶 Pagamentos</span>';
                 } else if (isDiretor) {
                     roleBadgeHtml = '<span style="background: rgba(16, 185, 129, 0.15); color: #059669; font-weight: 700; padding: 2px 8px; border-radius: 6px; font-size: 0.8rem;">📱 Diretor</span>';
                 } else if (isTreinador) {
@@ -657,6 +691,22 @@ document.addEventListener('DOMContentLoaded', async () => {
                 let permissoesBadgeHtml = '';
                 if (isAdmin) {
                     permissoesBadgeHtml = '<span style="background: rgba(126, 34, 206, 0.12); color: #7e22ce; padding: 4px 10px; border-radius: 6px; font-weight: 700; font-size: 0.8rem; border: 1px solid rgba(126, 34, 206, 0.25);">⭐ Painel Total (Todas as Páginas & Menus)</span>';
+                } else if (isPagamentos) {
+                    const escAfetos = (user.escalao_afeto || '').split(',').map(s => s.trim()).filter(Boolean);
+                    let escaloesHtml = '';
+                    if (escAfetos.length > 0) {
+                        escaloesHtml = escAfetos.map(e => `<span style="background: rgba(14, 165, 233, 0.12); color: #0369a1; font-weight: 700; padding: 2px 7px; border-radius: 4px; font-size: 0.75rem; border: 1px solid rgba(14, 165, 233, 0.3);">🏷️ ${e}</span>`).join(' ');
+                    } else {
+                        escaloesHtml = '<span style="background: #fef3c7; color: #b45309; padding: 2px 7px; border-radius: 4px; font-size: 0.75rem; border: 1px dashed #f59e0b;">⚠️ Sem escalões definidos</span>';
+                    }
+                    permissoesBadgeHtml = `
+                        <div style="display: flex; flex-direction: column; gap: 4px;">
+                            <div style="display: flex; align-items: center; gap: 6px;">
+                                <span style="background: rgba(14, 165, 233, 0.15); color: #0284c7; font-weight: 700; padding: 2px 8px; border-radius: 4px; font-size: 0.78rem;">📱 Portal Pagamentos de Escalão</span>
+                            </div>
+                            <div style="display: flex; flex-wrap: wrap; gap: 4px;">${escaloesHtml}</div>
+                        </div>
+                    `;
                 } else if (isDiretor) {
                     let equipasHtml = '';
                     if (realTeams.length > 0) {
@@ -760,6 +810,19 @@ document.addEventListener('DOMContentLoaded', async () => {
         updateUserRoleHelp(role);
         editUserIdInput.dataset.escalaoAfeto = user.escalao_afeto || '';
 
+        const containerEscaloesPag = document.getElementById('container-escaloes-pagamentos');
+        const checkboxesEscaloesPag = document.querySelectorAll('input[name="user_escaloes_pagamentos"]');
+        if (role === 'pagamentos') {
+            if (containerEscaloesPag) containerEscaloesPag.style.display = 'block';
+            const escList = (user.escalao_afeto || '').split(',').map(s => s.trim().toLowerCase());
+            checkboxesEscaloesPag.forEach(cb => {
+                cb.checked = escList.includes(cb.value.toLowerCase());
+            });
+        } else {
+            if (containerEscaloesPag) containerEscaloesPag.style.display = 'none';
+            checkboxesEscaloesPag.forEach(cb => cb.checked = false);
+        }
+
         if (role === 'personalizado') {
             if (containerPermissoes) containerPermissoes.style.display = 'block';
             setSelectedPermissions(user.permissoes || []);
@@ -818,16 +881,25 @@ document.addEventListener('DOMContentLoaded', async () => {
         const nickname = document.getElementById('new-user-nickname') ? document.getElementById('new-user-nickname').value.trim() : '';
         const telemovel = document.getElementById('new-user-phone').value;
         const roleVal = document.getElementById('new-user-role').value;
-        const escalaoAfeto = (isEditMode && editUserIdInput.dataset?.escalaoAfeto) ? editUserIdInput.dataset.escalaoAfeto : '';
-        
         const role = roleVal || 'personalizado';
+
+        let escalaoAfeto = '';
+        if (role === 'pagamentos') {
+            const checkedEscs = Array.from(document.querySelectorAll('input[name="user_escaloes_pagamentos"]:checked')).map(cb => cb.value);
+            escalaoAfeto = checkedEscs.join(', ');
+        } else if (isEditMode && editUserIdInput.dataset?.escalaoAfeto) {
+            escalaoAfeto = editUserIdInput.dataset.escalaoAfeto;
+        }
+        
         const allModules = ['noticias', 'agenda', 'resultados', 'galeria', 'equipas', 'atletas', 'equipamentos', 'desportiva', 'financeira', 'config'];
         
         let permissoes = [];
         if (role === 'admin') {
             permissoes = allModules;
+        } else if (role === 'pagamentos') {
+            permissoes = ['financeira'];
         } else if (role === 'diretor') {
-            permissoes = ['diretor_presencas', 'diretor_mensalidades'];
+            permissoes = ['diretor_presencas'];
         } else if (role === 'treinador') {
             permissoes = ['atletas', 'equipas'];
         } else {
@@ -6059,9 +6131,20 @@ document.addEventListener('DOMContentLoaded', async () => {
             const atl = atletaMap[p.atleta_id] || {};
             const escFinal = atl.escalao || '-';
             const isAnual = p.mes === 'ANUAL';
-            const conceitoHtml = isAnual 
-                ? '<span style="background: rgba(126, 34, 206, 0.12); color: #7e22ce; font-weight: 700; padding: 2px 8px; border-radius: 4px; font-size: 0.75rem; border: 1px solid rgba(126, 34, 206, 0.3);">⭐ Quota Anual Completa</span>'
-                : `<span style="background: #f1f5f9; padding: 2px 8px; border-radius: 4px; font-size: 0.78rem; font-weight: 600;">📅 ${p.mes}</span>`;
+            const cat = p.categoria || 'Mensalidade';
+
+            let conceitoHtml = '';
+            if (cat === 'Equipamento') {
+                conceitoHtml = `<span style="background: rgba(2, 132, 199, 0.12); color: #0284c7; font-weight: 700; padding: 2px 8px; border-radius: 4px; font-size: 0.75rem; border: 1px solid rgba(2, 132, 199, 0.3);">🎽 ${p.descricao || 'Equipamento'}</span>`;
+            } else if (cat === 'Exame Médico') {
+                conceitoHtml = `<span style="background: rgba(16, 185, 129, 0.12); color: #059669; font-weight: 700; padding: 2px 8px; border-radius: 4px; font-size: 0.75rem; border: 1px solid rgba(16, 185, 129, 0.3);">🩺 ${p.descricao || 'Exame Médico'}</span>`;
+            } else if (cat === 'Outro') {
+                conceitoHtml = `<span style="background: rgba(245, 158, 11, 0.12); color: #d97706; font-weight: 700; padding: 2px 8px; border-radius: 4px; font-size: 0.75rem; border: 1px solid rgba(245, 158, 11, 0.3);">📦 ${p.descricao || 'Outro'}</span>`;
+            } else if (isAnual) {
+                conceitoHtml = '<span style="background: rgba(126, 34, 206, 0.12); color: #7e22ce; font-weight: 700; padding: 2px 8px; border-radius: 4px; font-size: 0.75rem; border: 1px solid rgba(126, 34, 206, 0.3);">⭐ Quota Anual Completa</span>';
+            } else {
+                conceitoHtml = `<span style="background: #f1f5f9; padding: 2px 8px; border-radius: 4px; font-size: 0.78rem; font-weight: 600;">📅 ${p.mes || 'Mensalidade'}</span>`;
+            }
 
             const metHtml = p.metodo_pagamento === 'MBWay' ? '📱 MBWay' : (p.metodo_pagamento === 'Transferência' ? '🏦 Transf. Bancária' : '💵 Dinheiro');
 

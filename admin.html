@@ -111,7 +111,8 @@
                             <select id="new-user-role" required class="admin-input">
                                 <option value="" disabled selected>Selecionar Tipo de Acesso</option>
                                 <option value="admin">Administrador Total (Acesso a Tudo)</option>
-                                <option value="diretor">Diretor (App Mobile)</option>
+                                <option value="pagamentos">Responsável de Pagamentos de Escalão (App Mobile Pagamentos)</option>
+                                <option value="diretor">Diretor (App Mobile Presenças / SOS)</option>
                                 <option value="treinador">Treinador (App Mobile Presenças / Plantel)</option>
                                 <option value="redator">Redator de Notícias (App Mobile Notícias)</option>
                                 <option value="personalizado">Personalizado (Definir Menus)</option>
@@ -119,6 +120,60 @@
 
                             <!-- Caixa Informativa do Perfil Selecionado -->
                             <div id="user-role-help" style="display: none; padding: 10px 14px; border-radius: 8px; font-size: 0.82rem; line-height: 1.4; margin-top: -4px;"></div>
+
+                            <!-- Bloco de Escalões Afetos para Responsáveis de Pagamentos -->
+                            <div id="container-escaloes-pagamentos" style="display: none; background: #f0f9ff; border: 1px solid #bae6fd; border-radius: 8px; padding: 15px;">
+                                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px;">
+                                    <label style="font-weight: 700; font-size: 0.9rem; color: #0369a1; margin: 0;">
+                                        Selecione o(s) Escalão(ões) a Cargo deste Responsável:
+                                    </label>
+                                    <button type="button" id="btn-select-all-esc-pag" style="background: none; border: none; color: #0284c7; font-size: 0.78rem; font-weight: 700; cursor: pointer;">✓ Todos</button>
+                                </div>
+                                <p style="font-size: 0.8rem; color: #0284c7; margin-bottom: 12px; line-height: 1.4;">
+                                    Este utilizador terá acesso mobile à cobrança de quotas, equipamentos e exames médicos dos atletas do(s) escalão(ões) marcado(s).
+                                </p>
+                                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(130px, 1fr)); gap: 8px;">
+                                    <label style="display: flex; align-items: center; gap: 6px; cursor: pointer; font-size: 0.85rem; color: #0f172a;">
+                                        <input type="checkbox" name="user_escaloes_pagamentos" value="BabyBasket"> BabyBasket
+                                    </label>
+                                    <label style="display: flex; align-items: center; gap: 6px; cursor: pointer; font-size: 0.85rem; color: #0f172a;">
+                                        <input type="checkbox" name="user_escaloes_pagamentos" value="Mini 8"> Mini 8
+                                    </label>
+                                    <label style="display: flex; align-items: center; gap: 6px; cursor: pointer; font-size: 0.85rem; color: #0f172a;">
+                                        <input type="checkbox" name="user_escaloes_pagamentos" value="Mini 10"> Mini 10
+                                    </label>
+                                    <label style="display: flex; align-items: center; gap: 6px; cursor: pointer; font-size: 0.85rem; color: #0f172a;">
+                                        <input type="checkbox" name="user_escaloes_pagamentos" value="Mini 12"> Mini 12
+                                    </label>
+                                    <label style="display: flex; align-items: center; gap: 6px; cursor: pointer; font-size: 0.85rem; color: #0f172a;">
+                                        <input type="checkbox" name="user_escaloes_pagamentos" value="Sub 14 Masculino"> Sub 14 Masc.
+                                    </label>
+                                    <label style="display: flex; align-items: center; gap: 6px; cursor: pointer; font-size: 0.85rem; color: #0f172a;">
+                                        <input type="checkbox" name="user_escaloes_pagamentos" value="Sub 14 Feminino"> Sub 14 Fem.
+                                    </label>
+                                    <label style="display: flex; align-items: center; gap: 6px; cursor: pointer; font-size: 0.85rem; color: #0f172a;">
+                                        <input type="checkbox" name="user_escaloes_pagamentos" value="Sub 16 Masculino"> Sub 16 Masc.
+                                    </label>
+                                    <label style="display: flex; align-items: center; gap: 6px; cursor: pointer; font-size: 0.85rem; color: #0f172a;">
+                                        <input type="checkbox" name="user_escaloes_pagamentos" value="Sub 16 Feminino"> Sub 16 Fem.
+                                    </label>
+                                    <label style="display: flex; align-items: center; gap: 6px; cursor: pointer; font-size: 0.85rem; color: #0f172a;">
+                                        <input type="checkbox" name="user_escaloes_pagamentos" value="Sub 18 Masculino"> Sub 18 Masc.
+                                    </label>
+                                    <label style="display: flex; align-items: center; gap: 6px; cursor: pointer; font-size: 0.85rem; color: #0f172a;">
+                                        <input type="checkbox" name="user_escaloes_pagamentos" value="Sub 18 Feminino"> Sub 18 Fem.
+                                    </label>
+                                    <label style="display: flex; align-items: center; gap: 6px; cursor: pointer; font-size: 0.85rem; color: #0f172a;">
+                                        <input type="checkbox" name="user_escaloes_pagamentos" value="Sub 20"> Sub 20
+                                    </label>
+                                    <label style="display: flex; align-items: center; gap: 6px; cursor: pointer; font-size: 0.85rem; color: #0f172a;">
+                                        <input type="checkbox" name="user_escaloes_pagamentos" value="Seniores Masculinos"> Seniores Masc.
+                                    </label>
+                                    <label style="display: flex; align-items: center; gap: 6px; cursor: pointer; font-size: 0.85rem; color: #0f172a;">
+                                        <input type="checkbox" name="user_escaloes_pagamentos" value="Seniores Femininos"> Seniores Fem.
+                                    </label>
+                                </div>
+                            </div>
 
                             <!-- Bloco de Permissões Granulares por Menus -->
                             <div id="container-permissoes-custom" style="display: none; background: #f8fafc; border: 1px solid var(--border-color); border-radius: 8px; padding: 15px;">
