@@ -64,7 +64,7 @@ GRANT ALL ON public.mensalidades TO anon, authenticated;
 -- 6. Tabela de Quotas Padrão em clube_config (se ainda não existir)
 INSERT INTO public.clube_config (chave, dados)
 VALUES ('tabela_quotas', '{
-  "BabyBasket": {"mensal": 25.00, "bianual": 120.00, "anual": 230.00},
+  "BabyBasket": {"mensal": 0.00, "bianual": 0.00, "anual": 0.00},
   "Mini 8": {"mensal": 25.00, "bianual": 120.00, "anual": 230.00},
   "Mini 10": {"mensal": 25.00, "bianual": 120.00, "anual": 230.00},
   "Mini 12": {"mensal": 25.00, "bianual": 120.00, "anual": 230.00},

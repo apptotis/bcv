@@ -6229,7 +6229,9 @@ document.addEventListener('DOMContentLoaded', async () => {
                 // Valores padrão se não existir na BD nem na cache
                 tabelaPrecosQuotas = {};
                 ESCALOES_PADRAO.forEach(esc => {
-                    tabelaPrecosQuotas[esc] = { mensal: 25.00, bianual: 120.00, anual: 230.00 };
+                    tabelaPrecosQuotas[esc] = esc === 'BabyBasket' 
+                        ? { mensal: 0.00, bianual: 0.00, anual: 0.00 }
+                        : { mensal: 25.00, bianual: 120.00, anual: 230.00 };
                 });
             }
             renderTabelaPrecos();
@@ -6238,7 +6240,9 @@ document.addEventListener('DOMContentLoaded', async () => {
             if (!tabelaPrecosQuotas || Object.keys(tabelaPrecosQuotas).length === 0) {
                 tabelaPrecosQuotas = {};
                 ESCALOES_PADRAO.forEach(esc => {
-                    tabelaPrecosQuotas[esc] = { mensal: 25.00, bianual: 120.00, anual: 230.00 };
+                    tabelaPrecosQuotas[esc] = esc === 'BabyBasket' 
+                        ? { mensal: 0.00, bianual: 0.00, anual: 0.00 }
+                        : { mensal: 25.00, bianual: 120.00, anual: 230.00 };
                 });
             }
             renderTabelaPrecos();
@@ -6248,18 +6252,23 @@ document.addEventListener('DOMContentLoaded', async () => {
     function renderTabelaPrecos() {
         if (!tabelaPrecosTbody) return;
         tabelaPrecosTbody.innerHTML = ESCALOES_PADRAO.map(esc => {
-            const cfg = tabelaPrecosQuotas[esc] || { mensal: 25.00, bianual: 120.00, anual: 230.00 };
+            const cfg = tabelaPrecosQuotas[esc] || {};
+            const isBaby = esc === 'BabyBasket';
+            const mVal = (cfg.mensal !== undefined && cfg.mensal !== null) ? Number(cfg.mensal) : (isBaby ? 0.00 : 25.00);
+            const bVal = (cfg.bianual !== undefined && cfg.bianual !== null) ? Number(cfg.bianual) : (isBaby ? 0.00 : 120.00);
+            const aVal = (cfg.anual !== undefined && cfg.anual !== null) ? Number(cfg.anual) : (isBaby ? 0.00 : 230.00);
+
             return `
                 <tr style="border-bottom: 1px solid var(--border-color);">
                     <td style="padding: 10px; font-weight: 700;">🏀 ${esc}</td>
                     <td style="padding: 10px;">
-                        <input type="number" step="0.01" min="0" class="admin-input input-preco-mensal" data-escalao="${esc}" value="${Number(cfg.mensal || 25).toFixed(2)}" style="margin: 0; width: 130px;">
+                        <input type="number" step="0.01" min="0" class="admin-input input-preco-mensal" data-escalao="${esc}" value="${mVal.toFixed(2)}" style="margin: 0; width: 130px;">
                     </td>
                     <td style="padding: 10px;">
-                        <input type="number" step="0.01" min="0" class="admin-input input-preco-bianual" data-escalao="${esc}" value="${Number(cfg.bianual || 120).toFixed(2)}" style="margin: 0; width: 130px;">
+                        <input type="number" step="0.01" min="0" class="admin-input input-preco-bianual" data-escalao="${esc}" value="${bVal.toFixed(2)}" style="margin: 0; width: 130px;">
                     </td>
                     <td style="padding: 10px;">
-                        <input type="number" step="0.01" min="0" class="admin-input input-preco-anual" data-escalao="${esc}" value="${Number(cfg.anual || 230).toFixed(2)}" style="margin: 0; width: 130px;">
+                        <input type="number" step="0.01" min="0" class="admin-input input-preco-anual" data-escalao="${esc}" value="${aVal.toFixed(2)}" style="margin: 0; width: 130px;">
                     </td>
                 </tr>
             `;
@@ -6275,19 +6284,22 @@ document.addEventListener('DOMContentLoaded', async () => {
             document.querySelectorAll('.input-preco-mensal').forEach(inp => {
                 const esc = inp.getAttribute('data-escalao');
                 if (!novaTabela[esc]) novaTabela[esc] = {};
-                novaTabela[esc].mensal = Number(inp.value) || 25.00;
+                const val = parseFloat(inp.value);
+                novaTabela[esc].mensal = (!isNaN(val) && val >= 0) ? Number(val.toFixed(2)) : 0.00;
             });
 
             document.querySelectorAll('.input-preco-bianual').forEach(inp => {
                 const esc = inp.getAttribute('data-escalao');
                 if (!novaTabela[esc]) novaTabela[esc] = {};
-                novaTabela[esc].bianual = Number(inp.value) || 120.00;
+                const val = parseFloat(inp.value);
+                novaTabela[esc].bianual = (!isNaN(val) && val >= 0) ? Number(val.toFixed(2)) : 0.00;
             });
 
             document.querySelectorAll('.input-preco-anual').forEach(inp => {
                 const esc = inp.getAttribute('data-escalao');
                 if (!novaTabela[esc]) novaTabela[esc] = {};
-                novaTabela[esc].anual = Number(inp.value) || 230.00;
+                const val = parseFloat(inp.value);
+                novaTabela[esc].anual = (!isNaN(val) && val >= 0) ? Number(val.toFixed(2)) : 0.00;
             });
 
             tabelaPrecosQuotas = novaTabela;

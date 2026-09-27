@@ -559,7 +559,8 @@ document.addEventListener('DOMContentLoaded', () => {
             if (hasAnual) {
                 badgeHtml = `<span class="atleta-badge-status anual">⭐ Quota Anual Paga</span>`;
             } else if (regMes) {
-                badgeHtml = `<span class="atleta-badge-status pago">✓ Pago (${Number(regMes.valor || 25).toFixed(0)}€)</span>`;
+                const valPago = Number(regMes.valor !== undefined && regMes.valor !== null ? regMes.valor : 0);
+                badgeHtml = `<span class="atleta-badge-status pago">✓ Pago (${valPago.toFixed(0)}€)</span>`;
             } else {
                 badgeHtml = `<span class="atleta-badge-status pendente">⏳ Pendente</span>`;
             }
@@ -638,10 +639,15 @@ document.addEventListener('DOMContentLoaded', () => {
             match = tabelaPrecosQuotas[esc] || Object.values(tabelaPrecosQuotas).find(p => normalizeEscalao(p?.escalao) === normalizeEscalao(esc));
         }
 
+        const isBaby = normalizeEscalao(esc).includes('baby');
+        const defMensal = isBaby ? 0.00 : 25.00;
+        const defBianual = isBaby ? 0.00 : 120.00;
+        const defAnual = isBaby ? 0.00 : 230.00;
+
         return {
-            mensal: Number(match?.mensal) || 25.00,
-            bianual: Number(match?.bianual) || 120.00,
-            anual: Number(match?.anual) || 230.00
+            mensal: (match?.mensal !== undefined && match?.mensal !== null) ? Number(match.mensal) : defMensal,
+            bianual: (match?.bianual !== undefined && match?.bianual !== null) ? Number(match.bianual) : defBianual,
+            anual: (match?.anual !== undefined && match?.anual !== null) ? Number(match.anual) : defAnual
         };
     }
 
