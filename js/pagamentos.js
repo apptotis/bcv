@@ -375,6 +375,12 @@ document.addEventListener('DOMContentLoaded', () => {
 
             currentAtletas = (todosAtletas || []).filter(a => {
                 if (isStaffMember(a.funcao)) return false; // apenas atletas jogadores
+
+                // Apenas atletas inscritos na época 2026/2027
+                const ep = (a.epoca || '').trim();
+                const isEpocaAtiva = ep === '2026/2027' || ep.includes('2026/2027') || ep.includes('2026-2027');
+                if (!isEpocaAtiva) return false;
+
                 const cleanAtletaEsc = normalizeEscalao(a.escalao);
                 const cleanEq1 = normalizeEscalao(a.equipabcv1);
                 const cleanEq2 = normalizeEscalao(a.equipabcv2);
@@ -386,7 +392,7 @@ document.addEventListener('DOMContentLoaded', () => {
             });
 
             if (currentAtletas.length === 0) {
-                renderEmptyState(`Não foram encontrados atletas registados no escalão "${activeEscalao}".`);
+                renderEmptyState(`Não foram encontrados atletas inscritos na época 2026/2027 no escalão "${activeEscalao}".`);
                 currentPagamentos = [];
                 renderExtrato();
                 updateKpis();
