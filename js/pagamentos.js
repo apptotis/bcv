@@ -218,35 +218,14 @@ document.addEventListener('DOMContentLoaded', () => {
         if (kpiEscalaoLabel) kpiEscalaoLabel.textContent = escName;
     }
 
-    // Renderiza selector de múltiplos escalões se o utilizador tiver mais de 1 escalão
+    // Renderiza seletor de múltiplos escalões no Drawer se o utilizador tiver mais de 1 escalão
     function renderMultiEscalaoSelectors() {
         if (!userEscaloes || userEscaloes.length <= 1) {
-            if (multiEscalaoBar) multiEscalaoBar.style.display = 'none';
             if (drawerSectionEscaloes) drawerSectionEscaloes.style.display = 'none';
             return;
         }
 
-        // Barra de Pills no Topo
-        if (multiEscalaoBar && multiEscalaoPills) {
-            multiEscalaoBar.style.display = 'block';
-            multiEscalaoPills.innerHTML = userEscaloes.map(esc => `
-                <button type="button" class="pill-escalao ${esc === activeEscalao ? 'active' : ''}" data-esc="${escapeHtml(esc)}">
-                    <span>🏀</span>
-                    <span>${escapeHtml(esc)}</span>
-                </button>
-            `).join('');
-
-            multiEscalaoPills.querySelectorAll('.pill-escalao').forEach(btn => {
-                btn.addEventListener('click', () => {
-                    const esc = btn.getAttribute('data-esc');
-                    if (esc && esc !== activeEscalao) {
-                        switchEscalao(esc);
-                    }
-                });
-            });
-        }
-
-        // Lista no Drawer
+        // Lista de troca de escalão no Drawer Lateral
         if (drawerSectionEscaloes && drawerEscaloesList) {
             drawerSectionEscaloes.style.display = 'block';
             drawerEscaloesList.innerHTML = userEscaloes.map(esc => `
