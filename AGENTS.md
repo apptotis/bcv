@@ -95,3 +95,4 @@
 - [2026-09-25] Gemini: Implementação de abas dinâmicas nos cards de Competições (1 - Agenda, 2 - Resultados) com expansão interativa de jogos via Supabase e eliminação do link de plantel.
 - [2026-09-25] Gemini: Módulo Gestão de Competições no Admin com controlo de visibilidade Sim/Não (1 toque), KPIs, CRUD completo, persistência em clube_config e sincronização dinâmica com competicoes.html.
 - [2026-09-25] Gemini: Otimização mobile de competicoes.html, e controlo de publicação Sim/Não (1 toque) com filtros e edição na Agenda e Resultados do Admin (setup_agenda_publicado.sql).
+- [2026-09-27] Gemini: Remoção do card banner de destaque de inscrições (#cta-inscricoes) da homepage (index.html).
