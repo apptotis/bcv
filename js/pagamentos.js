@@ -24,7 +24,11 @@ document.addEventListener('DOMContentLoaded', () => {
     let currentAtletas = []; // Atletas do escalão ativo
     let currentPagamentos = []; // Todos os pagamentos dos atletas deste escalão
     let pagamentosAtletaMap = {}; // atleta_id -> [ pagamentos ]
-    let activeCategoriaModal = 'Mensalidade';
+    let tabelaPrecosQuotas = {}; // Configuração de preços por escalão { mensal, bianual, anual }
+    let currentItensCobranca = []; // Itens adicionais da época (ex: EMD, Equipamentos)
+    let currentAtletaModal = null; // Atleta aberto no modal
+    let activeQuotaMode = 'meses'; // 'meses' | 'bianual' | 'anual'
+    let selectedCobrancaItems = new Map(); // key -> item object
 
     const hojeIso = new Date().toISOString().split('T')[0];
 
@@ -77,24 +81,22 @@ document.addEventListener('DOMContentLoaded', () => {
     const filtroExtratoMetodo = document.getElementById('filtro-extrato-metodo');
     const listaMovimentosContainer = document.getElementById('lista-movimentos-container');
 
-    // Modal Registar Pagamento
+    // Modal Registar Pagamento Multi-Item
     const modalPagamentoSheet = document.getElementById('modal-pagamento-sheet');
     const formRegistarPagamento = document.getElementById('form-registar-pagamento');
     const modalPagamentoAtletaNome = document.getElementById('modal-pagamento-atleta-nome');
+    const modalPagamentoAtletaSub = document.getElementById('modal-pagamento-atleta-sub');
     const pagamentoAtletaIdInput = document.getElementById('pagamento-atleta-id');
-    const pagamentoIdInput = document.getElementById('pagamento-id');
-    const categoryPills = document.querySelectorAll('.cat-pill');
-    const blocoMensalidadeMes = document.getElementById('bloco-mensalidade-mes');
-    const blocoDescricao = document.getElementById('bloco-descricao');
-    const pagamentoMesSelect = document.getElementById('pagamento-mes-select');
-    const pagamentoDescricaoInput = document.getElementById('pagamento-descricao');
-    const pagamentoValorInput = document.getElementById('pagamento-valor');
+    const cobrancaQuotasContainer = document.getElementById('cobranca-quotas-container');
+    const cobrancaProdutosContainer = document.getElementById('cobranca-produtos-container');
+    const checkoutTotalDisplay = document.getElementById('checkout-total-display');
+    const checkoutItensContagem = document.getElementById('checkout-itens-contagem');
     const pagamentoMetodoSelect = document.getElementById('pagamento-metodo');
     const pagamentoDataInput = document.getElementById('pagamento-data');
-    const pagamentoReciboInput = document.getElementById('pagamento-recibo');
     const pagamentoNotasInput = document.getElementById('pagamento-notas');
-    const btnAnularPagamento = document.getElementById('btn-anular-pagamento');
     const btnConfirmarPagamento = document.getElementById('btn-confirmar-pagamento');
+    const btnConfirmarPagamentoTxt = document.getElementById('btn-confirmar-pagamento-txt');
+    const tabQuotaModeBtns = document.querySelectorAll('.tab-quota-mode-btn');
 
     // Modal Extrato Individual
     const modalExtratoSheet = document.getElementById('modal-extrato-sheet');
@@ -403,6 +405,31 @@ document.addEventListener('DOMContentLoaded', () => {
                 pagamentosAtletaMap[p.atleta_id].push(p);
             });
 
+            // 3. Carregar Tabela de Preços configurada
+            try {
+                const { data: cfgRow } = await supabase
+                    .from('configuracoes_clube')
+                    .select('valor')
+                    .eq('chave', 'tabela_quotas')
+                    .maybeSingle();
+                if (cfgRow && cfgRow.valor) {
+                    tabelaPrecosQuotas = typeof cfgRow.valor === 'string' ? JSON.parse(cfgRow.valor) : cfgRow.valor;
+                }
+            } catch (e) { console.warn("Tabela de quotas:", e); }
+
+            // 4. Carregar Itens de Cobrança ativos da época 2026/2027
+            try {
+                const { data: itens } = await supabase
+                    .from('itens_cobranca')
+                    .select('*')
+                    .eq('epoca', '2026/2027')
+                    .eq('ativo', true)
+                    .order('created_at', { ascending: true });
+                currentItensCobranca = itens || [];
+            } catch (e) { console.warn("Itens de cobrança:", e); }
+
+            updatePrecosTab();
+
             // Renderizar interface
             renderAtletas();
             renderExtrato();
@@ -578,63 +605,61 @@ document.addEventListener('DOMContentLoaded', () => {
     if (filtroEstadoPagamento) filtroEstadoPagamento.addEventListener('change', renderAtletas);
 
     // =======================================================
-    // 6. MODAL REGISTAR PAGAMENTO / MOVIMENTO
+    // 6. MODAL REGISTAR PAGAMENTO MULTI-ITEM / COBRANÇA
     // =======================================================
-    window.openModalPagamento = function(atletaId, existingPaymentId = null) {
+    const MESES_EPOCA = [
+        { key: '2026-09', label: 'Setembro 2026' },
+        { key: '2026-10', label: 'Outubro 2026' },
+        { key: '2026-11', label: 'Novembro 2026' },
+        { key: '2026-12', label: 'Dezembro 2026' },
+        { key: '2027-01', label: 'Janeiro 2027' },
+        { key: '2027-02', label: 'Fevereiro 2027' },
+        { key: '2027-03', label: 'Março 2027' },
+        { key: '2027-04', label: 'Abril 2027' },
+        { key: '2027-05', label: 'Maio 2027' },
+        { key: '2027-06', label: 'Junho 2027' }
+    ];
+
+    function getPrecosAtleta(atleta) {
+        const esc = atleta?.escalao || activeEscalao;
+        let match = null;
+        if (Array.isArray(tabelaPrecosQuotas)) {
+            match = tabelaPrecosQuotas.find(p => normalizeEscalao(p.escalao) === normalizeEscalao(esc));
+        } else if (typeof tabelaPrecosQuotas === 'object' && tabelaPrecosQuotas !== null) {
+            match = tabelaPrecosQuotas[esc] || Object.values(tabelaPrecosQuotas).find(p => normalizeEscalao(p?.escalao) === normalizeEscalao(esc));
+        }
+
+        return {
+            mensal: Number(match?.mensal) || 25.00,
+            bianual: Number(match?.bianual) || 120.00,
+            anual: Number(match?.anual) || 230.00
+        };
+    }
+
+    window.openModalPagamento = function(atletaId) {
         const atleta = currentAtletas.find(a => a.id === atletaId);
         if (!atleta) return;
 
+        currentAtletaModal = atleta;
         pagamentoAtletaIdInput.value = atletaId;
-        pagamentoIdInput.value = existingPaymentId || '';
-        modalPagamentoAtletaNome.textContent = atleta.nome;
+        modalPagamentoAtletaNome.textContent = atleta.nome || 'Atleta';
+        modalPagamentoAtletaSub.textContent = `${atleta.escalao || activeEscalao} ${atleta.nr_camisola ? '• Nº ' + atleta.nr_camisola : ''}`;
 
-        const mesSel = filtroMesCobranca.value || '2026-09';
-        pagamentoMesSelect.value = mesSel;
         pagamentoDataInput.value = hojeIso;
         pagamentoMetodoSelect.value = 'Dinheiro';
-        pagamentoReciboInput.value = '';
         pagamentoNotasInput.value = '';
-        pagamentoDescricaoInput.value = '';
 
-        // Definir categoria padrão
-        setCategory('Mensalidade');
+        selectedCobrancaItems.clear();
+        activeQuotaMode = 'meses';
 
-        // Se estiver a editar um pagamento existente
-        if (existingPaymentId) {
-            const p = currentPagamentos.find(item => item.id === existingPaymentId);
-            if (p) {
-                setCategory(p.categoria || 'Mensalidade');
-                if (p.mes) pagamentoMesSelect.value = p.mes;
-                pagamentoDescricaoInput.value = p.descricao || '';
-                pagamentoValorInput.value = p.valor || '25.00';
-                pagamentoMetodoSelect.value = p.metodo_pagamento || 'Dinheiro';
-                pagamentoDataInput.value = p.data_pagamento || hojeIso;
-                pagamentoReciboInput.value = p.recibo_num || '';
-                pagamentoNotasInput.value = p.notas || '';
-
-                btnAnularPagamento.style.display = 'block';
-                btnConfirmarPagamento.textContent = 'Atualizar Pagamento';
-            }
-        } else {
-            // Novo pagamento: verificar se este atleta já pagou a mensalidade do mês selecionado
-            const atletaPags = pagamentosAtletaMap[atletaId] || [];
-            const jaPago = atletaPags.find(p => p.mes === mesSel && p.estado === 'Pago');
-            if (jaPago) {
-                pagamentoIdInput.value = jaPago.id;
-                setCategory(jaPago.categoria || 'Mensalidade');
-                pagamentoValorInput.value = jaPago.valor;
-                pagamentoMetodoSelect.value = jaPago.metodo_pagamento || 'Dinheiro';
-                pagamentoDataInput.value = jaPago.data_pagamento || hojeIso;
-                pagamentoReciboInput.value = jaPago.recibo_num || '';
-                pagamentoNotasInput.value = jaPago.notas || '';
-                btnAnularPagamento.style.display = 'block';
-                btnConfirmarPagamento.textContent = 'Atualizar Pagamento';
-            } else {
-                btnAnularPagamento.style.display = 'none';
-                btnConfirmarPagamento.textContent = 'Confirmar Recebimento';
-                pagamentoValorInput.value = mesSel === 'ANUAL' ? '250.00' : '25.00';
-            }
+        if (tabQuotaModeBtns) {
+            tabQuotaModeBtns.forEach(btn => {
+                btn.classList.toggle('active', btn.getAttribute('data-mode') === activeQuotaMode);
+            });
         }
+
+        renderModalCobrancaItens();
+        updateCheckoutBar();
 
         modalPagamentoSheet.classList.add('active');
         document.body.style.overflow = 'hidden';
@@ -643,144 +668,364 @@ document.addEventListener('DOMContentLoaded', () => {
     window.closeModalPagamento = function() {
         modalPagamentoSheet.classList.remove('active');
         document.body.style.overflow = '';
+        currentAtletaModal = null;
+        selectedCobrancaItems.clear();
     };
 
-    // Alternar Categorias no Modal
-    function setCategory(cat) {
-        activeCategoriaModal = cat;
-        categoryPills.forEach(pill => {
-            if (pill.getAttribute('data-cat') === cat) {
-                pill.classList.add('active');
+    // Alternar modo de quota (Mensal / Bianual / Anual)
+    if (tabQuotaModeBtns) {
+        tabQuotaModeBtns.forEach(btn => {
+            btn.addEventListener('click', () => {
+                const mode = btn.getAttribute('data-mode');
+                if (!mode || mode === activeQuotaMode) return;
+                activeQuotaMode = mode;
+                tabQuotaModeBtns.forEach(b => b.classList.toggle('active', b === btn));
+
+                // Limpar seleções de quota anteriores para evitar conflito de planos
+                for (const [key, item] of selectedCobrancaItems.entries()) {
+                    if (item.tipo === 'quota') {
+                        selectedCobrancaItems.delete(key);
+                    }
+                }
+
+                renderModalCobrancaItens();
+                updateCheckoutBar();
+            });
+        });
+    }
+
+    function renderModalCobrancaItens() {
+        if (!currentAtletaModal) return;
+        const atleta = currentAtletaModal;
+        const precos = getPrecosAtleta(atleta);
+        const atletaPags = pagamentosAtletaMap[atleta.id] || [];
+
+        const hasAnual = atletaPags.some(p => (p.mes === 'ANUAL' || p.categoria === 'Quota Anual') && p.estado === 'Pago');
+
+        // 1. SECÇÃO QUOTAS / MENSALIDADES
+        let htmlQuotas = '';
+
+        if (activeQuotaMode === 'meses') {
+            MESES_EPOCA.forEach(m => {
+                const isPago = hasAnual || atletaPags.some(p => p.mes === m.key && p.estado === 'Pago');
+                const itemKey = `quota_${m.key}`;
+                const isSelected = selectedCobrancaItems.has(itemKey);
+
+                if (isPago) {
+                    htmlQuotas += `
+                        <div class="cobranca-item-row paid">
+                            <div class="cobranca-item-left">
+                                <span class="cobranca-item-check-icon">✓</span>
+                                <div>
+                                    <div class="cobranca-item-name">${m.label}</div>
+                                    <div class="cobranca-item-desc">${hasAnual ? 'Liquidado via Quota Anual' : 'Mensalidade Liquidada'}</div>
+                                </div>
+                            </div>
+                            <div class="cobranca-item-right">
+                                <span class="cobranca-item-badge-pago">Pago</span>
+                                <span class="cobranca-item-price">${precos.mensal.toFixed(2)} €</span>
+                            </div>
+                        </div>
+                    `;
+                } else {
+                    htmlQuotas += `
+                        <div class="cobranca-item-row selectable ${isSelected ? 'selected' : ''}" 
+                             data-key="${itemKey}" 
+                             data-tipo="quota" 
+                             data-mes="${m.key}" 
+                             data-cat="Mensalidade" 
+                             data-desc="Mensalidade ${m.label}" 
+                             data-valor="${precos.mensal}">
+                            <div class="cobranca-item-left">
+                                <input type="checkbox" class="cobranca-item-checkbox" ${isSelected ? 'checked' : ''} onclick="event.stopPropagation()">
+                                <div>
+                                    <div class="cobranca-item-name">${m.label}</div>
+                                    <div class="cobranca-item-desc">Mensalidade Regular</div>
+                                </div>
+                            </div>
+                            <div class="cobranca-item-right">
+                                <span class="cobranca-item-price">${precos.mensal.toFixed(2)} €</span>
+                            </div>
+                        </div>
+                    `;
+                }
+            });
+        } else if (activeQuotaMode === 'bianual') {
+            const planosBianual = [
+                {
+                    key: 'BIANUAL_1',
+                    nome: '1ª Prestação Bianual',
+                    desc: 'Setembro a Janeiro (5 meses)',
+                    valor: precos.bianual
+                },
+                {
+                    key: 'BIANUAL_2',
+                    nome: '2ª Prestação Bianual',
+                    desc: 'Fevereiro a Junho (5 meses)',
+                    valor: precos.bianual
+                }
+            ];
+
+            planosBianual.forEach(b => {
+                const isPago = hasAnual || atletaPags.some(p => p.mes === b.key && p.estado === 'Pago');
+                const itemKey = `quota_${b.key}`;
+                const isSelected = selectedCobrancaItems.has(itemKey);
+
+                if (isPago) {
+                    htmlQuotas += `
+                        <div class="cobranca-item-row paid">
+                            <div class="cobranca-item-left">
+                                <span class="cobranca-item-check-icon">✓</span>
+                                <div>
+                                    <div class="cobranca-item-name">${b.nome}</div>
+                                    <div class="cobranca-item-desc">${hasAnual ? 'Liquidado via Quota Anual' : b.desc}</div>
+                                </div>
+                            </div>
+                            <div class="cobranca-item-right">
+                                <span class="cobranca-item-badge-pago">Pago</span>
+                                <span class="cobranca-item-price">${b.valor.toFixed(2)} €</span>
+                            </div>
+                        </div>
+                    `;
+                } else {
+                    htmlQuotas += `
+                        <div class="cobranca-item-row selectable ${isSelected ? 'selected' : ''}" 
+                             data-key="${itemKey}" 
+                             data-tipo="quota" 
+                             data-mes="${b.key}" 
+                             data-cat="Quota Bianual" 
+                             data-desc="${b.nome} (2026/2027)" 
+                             data-valor="${b.valor}">
+                            <div class="cobranca-item-left">
+                                <input type="checkbox" class="cobranca-item-checkbox" ${isSelected ? 'checked' : ''} onclick="event.stopPropagation()">
+                                <div>
+                                    <div class="cobranca-item-name">${b.nome}</div>
+                                    <div class="cobranca-item-desc">${b.desc}</div>
+                                </div>
+                            </div>
+                            <div class="cobranca-item-right">
+                                <span class="cobranca-item-price">${b.valor.toFixed(2)} €</span>
+                            </div>
+                        </div>
+                    `;
+                }
+            });
+        } else if (activeQuotaMode === 'anual') {
+            const isPago = hasAnual;
+            const itemKey = `quota_ANUAL`;
+            const isSelected = selectedCobrancaItems.has(itemKey);
+
+            if (isPago) {
+                htmlQuotas += `
+                    <div class="cobranca-item-row paid">
+                        <div class="cobranca-item-left">
+                            <span class="cobranca-item-check-icon">✓</span>
+                            <div>
+                                <div class="cobranca-item-name">⭐ Quota Anual Integral</div>
+                                <div class="cobranca-item-desc">Época Completa 2026/2027</div>
+                            </div>
+                        </div>
+                        <div class="cobranca-item-right">
+                            <span class="cobranca-item-badge-pago">Liquidado</span>
+                            <span class="cobranca-item-price">${precos.anual.toFixed(2)} €</span>
+                        </div>
+                    </div>
+                `;
             } else {
-                pill.classList.remove('active');
+                htmlQuotas += `
+                    <div class="cobranca-item-row selectable ${isSelected ? 'selected' : ''}" 
+                         data-key="${itemKey}" 
+                         data-tipo="quota" 
+                         data-mes="ANUAL" 
+                         data-cat="Quota Anual" 
+                         data-desc="Quota Anual Integral (2026/2027)" 
+                         data-valor="${precos.anual}">
+                        <div class="cobranca-item-left">
+                            <input type="checkbox" class="cobranca-item-checkbox" ${isSelected ? 'checked' : ''} onclick="event.stopPropagation()">
+                            <div>
+                                <div class="cobranca-item-name">⭐ Quota Anual Integral</div>
+                                <div class="cobranca-item-desc">Pagamento único para toda a época 2026/2027</div>
+                            </div>
+                        </div>
+                        <div class="cobranca-item-right">
+                            <span class="cobranca-item-price">${precos.anual.toFixed(2)} €</span>
+                        </div>
+                    </div>
+                `;
             }
+        }
+
+        if (cobrancaQuotasContainer) cobrancaQuotasContainer.innerHTML = htmlQuotas;
+
+        // 2. SECÇÃO PRODUTOS / EXAMES / EQUIPAMENTOS
+        let htmlProdutos = '';
+        const escAtleta = normalizeEscalao(atleta.escalao || activeEscalao);
+
+        const prodsEscalao = currentItensCobranca.filter(item => {
+            if (item.ativo === false) return false;
+            const itemEsc = normalizeEscalao(item.escalao);
+            return itemEsc === 'todos' || itemEsc === escAtleta || !item.escalao;
         });
 
-        if (cat === 'Mensalidade') {
-            blocoMensalidadeMes.style.display = 'block';
-            blocoDescricao.style.display = 'none';
-            if (pagamentoMesSelect.value === 'ANUAL') {
-                pagamentoValorInput.value = '250.00';
-            } else {
-                pagamentoValorInput.value = '25.00';
-            }
+        if (prodsEscalao.length === 0) {
+            htmlProdutos = `
+                <div style="text-align: center; padding: 14px 10px; color: var(--text-muted); font-size: 0.82rem; background: #f8fafc; border-radius: 8px; border: 1px dashed var(--border);">
+                    Sem produtos ou encargos adicionais registados para este escalão.
+                </div>
+            `;
         } else {
-            blocoMensalidadeMes.style.display = 'none';
-            blocoDescricao.style.display = 'block';
-            if (cat === 'Equipamento') {
-                pagamentoDescricaoInput.placeholder = 'Ex: Kit de Jogo Oficial BCV (ou Fato de Treino)';
-                pagamentoValorInput.value = '35.00';
-            } else if (cat === 'Exame Médico') {
-                pagamentoDescricaoInput.placeholder = 'Ex: Exame Médico Desportivo IPDJ';
-                pagamentoValorInput.value = '20.00';
+            prodsEscalao.forEach(prod => {
+                const isPago = atletaPags.some(p => p.item_cobranca_id === prod.id && p.estado === 'Pago');
+                const itemKey = `prod_${prod.id}`;
+                const isSelected = selectedCobrancaItems.has(itemKey);
+                const valorProd = Number(prod.valor || 0);
+
+                if (isPago) {
+                    htmlProdutos += `
+                        <div class="cobranca-item-row paid">
+                            <div class="cobranca-item-left">
+                                <span class="cobranca-item-check-icon">✓</span>
+                                <div>
+                                    <div class="cobranca-item-name">${escapeHtml(prod.nome)}</div>
+                                    <div class="cobranca-item-desc">${escapeHtml(prod.categoria || 'Produto')} • Liquidado</div>
+                                </div>
+                            </div>
+                            <div class="cobranca-item-right">
+                                <span class="cobranca-item-badge-pago">Pago</span>
+                                <span class="cobranca-item-price">${valorProd.toFixed(2)} €</span>
+                            </div>
+                        </div>
+                    `;
+                } else {
+                    htmlProdutos += `
+                        <div class="cobranca-item-row selectable ${isSelected ? 'selected' : ''}" 
+                             data-key="${itemKey}" 
+                             data-tipo="produto" 
+                             data-prod-id="${prod.id}" 
+                             data-cat="${escapeHtml(prod.categoria || 'Produto')}" 
+                             data-desc="${escapeHtml(prod.nome)}" 
+                             data-valor="${valorProd}">
+                            <div class="cobranca-item-left">
+                                <input type="checkbox" class="cobranca-item-checkbox" ${isSelected ? 'checked' : ''} onclick="event.stopPropagation()">
+                                <div>
+                                    <div class="cobranca-item-name">${escapeHtml(prod.nome)}</div>
+                                    <div class="cobranca-item-desc">${escapeHtml(prod.descricao || prod.categoria || 'Artigo Oficial')}</div>
+                                </div>
+                            </div>
+                            <div class="cobranca-item-right">
+                                <span class="cobranca-item-price">${valorProd.toFixed(2)} €</span>
+                            </div>
+                        </div>
+                    `;
+                }
+            });
+        }
+
+        if (cobrancaProdutosContainer) cobrancaProdutosContainer.innerHTML = htmlProdutos;
+
+        // Associar eventos de clique às linhas interativas
+        bindCobrancaRowListeners();
+    }
+
+    function bindCobrancaRowListeners() {
+        const rows = document.querySelectorAll('.cobranca-item-row.selectable');
+        rows.forEach(row => {
+            row.onclick = () => {
+                const key = row.getAttribute('data-key');
+                const tipo = row.getAttribute('data-tipo');
+                const mes = row.getAttribute('data-mes') || 'PRODUTO';
+                const cat = row.getAttribute('data-cat') || 'Produto';
+                const desc = row.getAttribute('data-desc') || 'Item';
+                const valor = Number(row.getAttribute('data-valor')) || 0;
+                const prodId = row.getAttribute('data-prod-id') ? Number(row.getAttribute('data-prod-id')) : null;
+                const checkbox = row.querySelector('.cobranca-item-checkbox');
+
+                if (selectedCobrancaItems.has(key)) {
+                    selectedCobrancaItems.delete(key);
+                    row.classList.remove('selected');
+                    if (checkbox) checkbox.checked = false;
+                } else {
+                    selectedCobrancaItems.set(key, {
+                        key: key,
+                        tipo: tipo,
+                        mes: mes,
+                        categoria: cat,
+                        descricao: desc,
+                        valor: valor,
+                        item_cobranca_id: prodId
+                    });
+                    row.classList.add('selected');
+                    if (checkbox) checkbox.checked = true;
+                }
+
+                updateCheckoutBar();
+            };
+        });
+    }
+
+    function updateCheckoutBar() {
+        let total = 0;
+        let count = 0;
+
+        for (const item of selectedCobrancaItems.values()) {
+            total += Number(item.valor || 0);
+            count++;
+        }
+
+        if (checkoutTotalDisplay) checkoutTotalDisplay.textContent = `${total.toFixed(2)} €`;
+
+        if (checkoutItensContagem) {
+            checkoutItensContagem.textContent = count === 0 ? '0 itens selecionados' : (count === 1 ? '1 item selecionado' : `${count} itens selecionados`);
+        }
+
+        if (btnConfirmarPagamento && btnConfirmarPagamentoTxt) {
+            if (count === 0) {
+                btnConfirmarPagamento.disabled = true;
+                btnConfirmarPagamentoTxt.textContent = 'Selecione itens para receber';
             } else {
-                pagamentoDescricaoInput.placeholder = 'Ex: Inscrição Torneio, Merchandising, Seguro...';
-                pagamentoValorInput.value = '10.00';
+                btnConfirmarPagamento.disabled = false;
+                btnConfirmarPagamentoTxt.textContent = `Receber ${total.toFixed(2)} € (${count} ${count === 1 ? 'item' : 'itens'})`;
             }
         }
     }
 
-    categoryPills.forEach(pill => {
-        pill.addEventListener('click', () => {
-            const cat = pill.getAttribute('data-cat');
-            if (cat) setCategory(cat);
-        });
-    });
-
-    if (pagamentoMesSelect) {
-        pagamentoMesSelect.addEventListener('change', () => {
-            if (pagamentoMesSelect.value === 'ANUAL') {
-                pagamentoValorInput.value = '250.00';
-            } else if (Number(pagamentoValorInput.value) === 250) {
-                pagamentoValorInput.value = '25.00';
-            }
-        });
-    }
-
-    window.setValorPreset = function(val) {
-        pagamentoValorInput.value = Number(val).toFixed(2);
-    };
-
-    // Submissão do Formulário de Pagamento
+    // Submissão do Formulário de Pagamento Multi-Item
     if (formRegistarPagamento) {
         formRegistarPagamento.addEventListener('submit', async (e) => {
             e.preventDefault();
-            const atletaId = Number(pagamentoAtletaIdInput.value);
-            const paymentId = pagamentoIdInput.value ? Number(pagamentoIdInput.value) : null;
-            const categoria = activeCategoriaModal;
-            const isMensalidade = categoria === 'Mensalidade';
-            const mesFinal = isMensalidade ? pagamentoMesSelect.value : categoria.toUpperCase();
-            const descricaoFinal = isMensalidade ? (mesFinal === 'ANUAL' ? 'Quota Anual Completa' : `Mensalidade ${mesFinal}`) : (pagamentoDescricaoInput.value.trim() || categoria);
-            const valor = Number(pagamentoValorInput.value) || 25.00;
-            const metodo = pagamentoMetodoSelect.value;
+            if (!currentAtletaModal || selectedCobrancaItems.size === 0) {
+                alert("Por favor selecione pelo menos um item para receber.");
+                return;
+            }
+
+            const atleta = currentAtletaModal;
+            const metodo = pagamentoMetodoSelect.value || 'Dinheiro';
             const dataPag = pagamentoDataInput.value || hojeIso;
-            const recibo = pagamentoReciboInput.value.trim();
-            const notas = pagamentoNotasInput.value.trim();
+            const notas = pagamentoNotasInput.value.trim() || null;
             const registadoPor = userProfile?.nome || currentUser?.email || 'Responsável Escalão';
 
             btnConfirmarPagamento.disabled = true;
-            btnConfirmarPagamento.textContent = 'A guardar...';
+            if (btnConfirmarPagamentoTxt) btnConfirmarPagamentoTxt.textContent = 'A registar pagamentos...';
 
-            const payload = {
-                atleta_id: atletaId,
+            const batch = Array.from(selectedCobrancaItems.values()).map(item => ({
+                atleta_id: atleta.id,
                 epoca: '2026/2027',
-                categoria: categoria,
-                descricao: descricaoFinal,
-                mes: mesFinal,
-                valor: valor,
+                categoria: item.categoria,
+                descricao: item.descricao,
+                mes: item.mes,
+                valor: Number(item.valor),
+                item_cobranca_id: item.item_cobranca_id || null,
                 estado: 'Pago',
                 metodo_pagamento: metodo,
                 data_pagamento: dataPag,
-                recibo_num: recibo || null,
-                notas: notas || null,
+                notas: notas,
                 registado_por: registadoPor
-            };
-
-            try {
-                if (paymentId) {
-                    // Atualização
-                    const { error } = await supabase
-                        .from('mensalidades')
-                        .update(payload)
-                        .eq('id', paymentId);
-                    if (error) throw error;
-                } else {
-                    // Inserção nova
-                    const { error } = await supabase
-                        .from('mensalidades')
-                        .insert([payload]);
-                    if (error) throw error;
-                }
-
-                closeModalPagamento();
-                await loadData();
-
-            } catch (err) {
-                console.error("Erro ao guardar pagamento:", err);
-                alert("Erro ao registar pagamento: " + err.message);
-            } finally {
-                btnConfirmarPagamento.disabled = false;
-                btnConfirmarPagamento.textContent = 'Confirmar Recebimento';
-            }
-        });
-    }
-
-    // Anulação de Pagamento
-    if (btnAnularPagamento) {
-        btnAnularPagamento.addEventListener('click', async () => {
-            const paymentId = pagamentoIdInput.value;
-            if (!paymentId) return;
-
-            if (!confirm("Tem a certeza absoluta de que deseja anular este registo de pagamento?")) return;
-
-            btnAnularPagamento.disabled = true;
-            btnAnularPagamento.textContent = 'A anular...';
+            }));
 
             try {
                 const { error } = await supabase
                     .from('mensalidades')
-                    .delete()
-                    .eq('id', paymentId);
+                    .insert(batch);
 
                 if (error) throw error;
 
@@ -788,11 +1033,10 @@ document.addEventListener('DOMContentLoaded', () => {
                 await loadData();
 
             } catch (err) {
-                console.error("Erro ao anular pagamento:", err);
-                alert("Erro ao anular pagamento: " + err.message);
-            } finally {
-                btnAnularPagamento.disabled = false;
-                btnAnularPagamento.textContent = 'Anular';
+                console.error("Erro ao registar pagamentos:", err);
+                alert("Erro ao registar pagamento: " + err.message);
+                btnConfirmarPagamento.disabled = false;
+                updateCheckoutBar();
             }
         });
     }
@@ -874,7 +1118,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     <div class="movimento-right">
                         <div class="movimento-valor">${Number(p.valor || 0).toFixed(2)} €</div>
                         <div class="movimento-metodo">${p.metodo_pagamento || 'Dinheiro'}</div>
-                        <button type="button" class="btn-anular-mini" onclick="window.openModalPagamento(${p.atleta_id}, ${p.id})">Editar ✏️</button>
+                        <button type="button" class="btn-anular-mini" onclick="window.openModalExtrato(${p.atleta_id})">Ver Ficha 👁️</button>
                     </div>
                 </div>
             `;

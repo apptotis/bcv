@@ -6019,6 +6019,8 @@ document.addEventListener('DOMContentLoaded', async () => {
 
             if (targetSub === 'subfin-tabela-precos') {
                 renderTabelaPrecos();
+            } else if (targetSub === 'subfin-itens-cobranca') {
+                loadItensCobranca();
             }
         });
     });
@@ -6184,7 +6186,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         });
     }
 
-    // Gestão da Tabela de Preços de Quotas por Escalão
+    // Gestão da Tabela de Preços de Quotas por Escalão (Mensal, Bianual e Anual)
     async function loadTabelaPrecos() {
         try {
             const { data: configRow } = await supabase
@@ -6199,14 +6201,14 @@ document.addEventListener('DOMContentLoaded', async () => {
                 // Valores padrão
                 tabelaPrecosQuotas = {};
                 ESCALOES_PADRAO.forEach(esc => {
-                    tabelaPrecosQuotas[esc] = { mensal: 25.00, anual: 250.00 };
+                    tabelaPrecosQuotas[esc] = { mensal: 25.00, bianual: 120.00, anual: 230.00 };
                 });
             }
         } catch (e) {
             console.warn('Tabela de quotas não encontrada na BD, usando padrão:', e);
             tabelaPrecosQuotas = {};
             ESCALOES_PADRAO.forEach(esc => {
-                tabelaPrecosQuotas[esc] = { mensal: 25.00, anual: 250.00 };
+                tabelaPrecosQuotas[esc] = { mensal: 25.00, bianual: 120.00, anual: 230.00 };
             });
         }
     }
@@ -6214,15 +6216,18 @@ document.addEventListener('DOMContentLoaded', async () => {
     function renderTabelaPrecos() {
         if (!tabelaPrecosTbody) return;
         tabelaPrecosTbody.innerHTML = ESCALOES_PADRAO.map(esc => {
-            const cfg = tabelaPrecosQuotas[esc] || { mensal: 25.00, anual: 250.00 };
+            const cfg = tabelaPrecosQuotas[esc] || { mensal: 25.00, bianual: 120.00, anual: 230.00 };
             return `
                 <tr style="border-bottom: 1px solid var(--border-color);">
                     <td style="padding: 10px; font-weight: 700;">🏀 ${esc}</td>
                     <td style="padding: 10px;">
-                        <input type="number" step="0.5" class="admin-input input-preco-mensal" data-escalao="${esc}" value="${Number(cfg.mensal || 25).toFixed(2)}" style="margin: 0; width: 140px;">
+                        <input type="number" step="0.5" class="admin-input input-preco-mensal" data-escalao="${esc}" value="${Number(cfg.mensal || 25).toFixed(2)}" style="margin: 0; width: 130px;">
                     </td>
                     <td style="padding: 10px;">
-                        <input type="number" step="0.5" class="admin-input input-preco-anual" data-escalao="${esc}" value="${Number(cfg.anual || 250).toFixed(2)}" style="margin: 0; width: 140px;">
+                        <input type="number" step="0.5" class="admin-input input-preco-bianual" data-escalao="${esc}" value="${Number(cfg.bianual || 120).toFixed(2)}" style="margin: 0; width: 130px;">
+                    </td>
+                    <td style="padding: 10px;">
+                        <input type="number" step="0.5" class="admin-input input-preco-anual" data-escalao="${esc}" value="${Number(cfg.anual || 230).toFixed(2)}" style="margin: 0; width: 130px;">
                     </td>
                 </tr>
             `;
@@ -6241,10 +6246,16 @@ document.addEventListener('DOMContentLoaded', async () => {
                 novaTabela[esc].mensal = Number(inp.value) || 25.00;
             });
 
+            document.querySelectorAll('.input-preco-bianual').forEach(inp => {
+                const esc = inp.getAttribute('data-escalao');
+                if (!novaTabela[esc]) novaTabela[esc] = {};
+                novaTabela[esc].bianual = Number(inp.value) || 120.00;
+            });
+
             document.querySelectorAll('.input-preco-anual').forEach(inp => {
                 const esc = inp.getAttribute('data-escalao');
                 if (!novaTabela[esc]) novaTabela[esc] = {};
-                novaTabela[esc].anual = Number(inp.value) || 250.00;
+                novaTabela[esc].anual = Number(inp.value) || 230.00;
             });
 
             tabelaPrecosQuotas = novaTabela;
@@ -6255,7 +6266,7 @@ document.addEventListener('DOMContentLoaded', async () => {
                     .upsert({
                         chave: 'tabela_quotas',
                         valor: novaTabela,
-                        descricao: 'Valores padrão de mensalidades e anuidade por escalão'
+                        descricao: 'Valores padrão de mensalidades, bianual e anuidade por escalão'
                     }, { onConflict: 'chave' });
 
                 if (error && error.code !== '42P01') throw error;
@@ -6279,6 +6290,136 @@ document.addEventListener('DOMContentLoaded', async () => {
             }
         });
     }
+
+    // ====================================================================
+    // GESTÃO DE PRODUTOS & ITENS DE COBRANÇA (Admin)
+    // ====================================================================
+    let currentItensCobranca = [];
+    const itensCobrancaTbody = document.getElementById('itens-cobranca-tbody');
+    const btnToggleNovoItemCobranca = document.getElementById('btn-toggle-novo-item-cobranca');
+    const formNovoItemCobrancaContainer = document.getElementById('form-novo-item-cobranca-container');
+    const formNovoItemCobranca = document.getElementById('form-novo-item-cobranca');
+    const btnCancelNovoItem = document.getElementById('btn-cancel-novo-item');
+
+    if (btnToggleNovoItemCobranca) {
+        btnToggleNovoItemCobranca.addEventListener('click', () => {
+            const isHidden = formNovoItemCobrancaContainer.style.display === 'none';
+            formNovoItemCobrancaContainer.style.display = isHidden ? 'block' : 'none';
+        });
+    }
+    if (btnCancelNovoItem) {
+        btnCancelNovoItem.addEventListener('click', () => {
+            formNovoItemCobrancaContainer.style.display = 'none';
+            formNovoItemCobranca.reset();
+        });
+    }
+
+    async function loadItensCobranca() {
+        if (!itensCobrancaTbody) return;
+        itensCobrancaTbody.innerHTML = '<tr><td colspan="6" style="padding: 15px; text-align: center; color: var(--text-secondary);">A carregar itens de cobrança...</td></tr>';
+        try {
+            const { data, error } = await supabase
+                .from('itens_cobranca')
+                .select('*')
+                .eq('epoca', '2026/2027')
+                .order('created_at', { ascending: true });
+
+            if (error && error.code !== '42P01') throw error;
+            currentItensCobranca = data || [];
+            renderItensCobranca();
+        } catch (err) {
+            console.error('Erro ao carregar itens de cobrança:', err);
+            itensCobrancaTbody.innerHTML = `<tr><td colspan="6" style="padding: 15px; text-align: center; color: #ef4444;">Erro: ${err.message}</td></tr>`;
+        }
+    }
+
+    function renderItensCobranca() {
+        if (!itensCobrancaTbody) return;
+        if (currentItensCobranca.length === 0) {
+            itensCobrancaTbody.innerHTML = '<tr><td colspan="6" style="padding: 20px; text-align: center; color: var(--text-secondary);">Nenhum item ou produto de cobrança configurado. Clique em "➕ Novo Item" para criar.</td></tr>';
+            return;
+        }
+
+        const catIcons = {
+            'Equipamento': '🎽',
+            'Exame Médico': '🩺',
+            'Inscrição': '📋',
+            'Torneio': '🏆',
+            'Outro': '📦'
+        };
+
+        itensCobrancaTbody.innerHTML = currentItensCobranca.map(item => {
+            const icon = catIcons[item.categoria] || '📦';
+            const statusHtml = item.ativo !== false 
+                ? '<span style="background: rgba(22, 163, 74, 0.12); color: #16a34a; padding: 2px 8px; border-radius: 4px; font-weight: 700; font-size: 0.78rem;">Ativo</span>'
+                : '<span style="background: rgba(148, 163, 184, 0.2); color: #64748b; padding: 2px 8px; border-radius: 4px; font-weight: 600; font-size: 0.78rem;">Inativo</span>';
+
+            return `
+                <tr style="border-bottom: 1px solid var(--border-color);">
+                    <td style="padding: 10px;">
+                        <strong>${escapeHtml(item.titulo)}</strong>
+                        ${item.descricao ? `<div style="font-size: 0.78rem; color: var(--text-secondary); margin-top: 2px;">${escapeHtml(item.descricao)}</div>` : ''}
+                    </td>
+                    <td style="padding: 10px;">${icon} ${escapeHtml(item.categoria)}</td>
+                    <td style="padding: 10px;"><span style="background: #f1f5f9; padding: 2px 8px; border-radius: 4px; font-size: 0.8rem; font-weight: 600;">${escapeHtml(item.escalao || 'Todos')}</span></td>
+                    <td style="padding: 10px; text-align: right; font-weight: 700; color: #16a34a;">${Number(item.valor || 0).toFixed(2)} €</td>
+                    <td style="padding: 10px; text-align: center;">${statusHtml}</td>
+                    <td style="padding: 10px; text-align: center;">
+                        <button type="button" onclick="window.deleteItemCobranca(${item.id})" title="Eliminar" style="background: none; border: none; color: #ef4444; cursor: pointer; font-size: 1.05rem;">🗑️</button>
+                    </td>
+                </tr>
+            `;
+        }).join('');
+    }
+
+    if (formNovoItemCobranca) {
+        formNovoItemCobranca.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const titulo = document.getElementById('novo-item-titulo').value.trim();
+            const categoria = document.getElementById('novo-item-categoria').value;
+            const escalao = document.getElementById('novo-item-escalao').value;
+            const valor = parseFloat(document.getElementById('novo-item-valor').value) || 0;
+
+            if (!titulo || valor <= 0) {
+                alert("Por favor indique um título e valor válido.");
+                return;
+            }
+
+            try {
+                const { data, error } = await supabase
+                    .from('itens_cobranca')
+                    .insert([{
+                        titulo,
+                        categoria,
+                        escalao,
+                        valor,
+                        epoca: '2026/2027',
+                        ativo: true
+                    }])
+                    .select();
+
+                if (error) throw error;
+                if (data && data[0]) currentItensCobranca.push(data[0]);
+                renderItensCobranca();
+                formNovoItemCobranca.reset();
+                formNovoItemCobrancaContainer.style.display = 'none';
+            } catch (err) {
+                alert("Erro ao criar item de cobrança: " + err.message);
+            }
+        });
+    }
+
+    window.deleteItemCobranca = async function(id) {
+        if (!confirm("Tem a certeza que deseja eliminar este item de cobrança?")) return;
+        try {
+            const { error } = await supabase.from('itens_cobranca').delete().eq('id', id);
+            if (error) throw error;
+            currentItensCobranca = currentItensCobranca.filter(i => i.id !== id);
+            renderItensCobranca();
+        } catch (err) {
+            alert("Erro ao eliminar: " + err.message);
+        }
+    };
 
     // Modal de Pagamento no Admin
     function populateAtletasSelectInAdminPagamento() {

@@ -1415,6 +1415,7 @@
                     <div style="display: flex; gap: 10px; margin-bottom: 20px; border-bottom: 1px solid var(--border-color); padding-bottom: 12px; flex-wrap: wrap;">
                         <button type="button" class="btn-subfin active" data-sub="subfin-pagamentos" style="padding: 8px 16px; border-radius: 8px; border: 1px solid #7e22ce; background: #7e22ce; color: #fff; font-weight: 600; cursor: pointer;">📊 Registo Global de Pagamentos</button>
                         <button type="button" class="btn-subfin" data-sub="subfin-tabela-precos" style="padding: 8px 16px; border-radius: 8px; border: 1px solid var(--border-color); background: #f8fafc; color: var(--text-primary); font-weight: 600; cursor: pointer;">⚙️ Tabela de Preços por Escalão</button>
+                        <button type="button" class="btn-subfin" data-sub="subfin-itens-cobranca" style="padding: 8px 16px; border-radius: 8px; border: 1px solid var(--border-color); background: #f8fafc; color: var(--text-primary); font-weight: 600; cursor: pointer;">🛍️ Produtos & Encargos de Escalão</button>
                     </div>
 
                     <!-- SECÇÃO 1: REGISTO GLOBAL DE PAGAMENTOS -->
@@ -1548,8 +1549,9 @@
                                 <thead>
                                     <tr style="border-bottom: 1px solid rgba(255,255,255,0.1);">
                                         <th style="padding: 10px;">Escalão</th>
-                                        <th style="padding: 10px; width: 220px;">Mensalidade (€ / mês)</th>
-                                        <th style="padding: 10px; width: 220px;">Quota Anual Completa (€ / época)</th>
+                                        <th style="padding: 10px; width: 180px;">Mensalidade (€ / mês)</th>
+                                        <th style="padding: 10px; width: 190px;">Quota Bianual (€ / semestre)</th>
+                                        <th style="padding: 10px; width: 190px;">Quota Anual (€ / época)</th>
                                     </tr>
                                 </thead>
                                 <tbody id="tabela-precos-tbody">
@@ -1557,6 +1559,82 @@
                                 </tbody>
                             </table>
                             <p id="msg-tabela-precos" class="hidden" style="margin-top: 12px; font-weight: 600;"></p>
+                        </div>
+                    </div>
+
+                    <!-- SECÇÃO 3: PRODUTOS & ENCARGOS DE ESCALÃO -->
+                    <div id="subfin-itens-cobranca" class="subfin-content hidden">
+                        <div class="welcome-box" style="margin-bottom: 20px;">
+                            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; flex-wrap: wrap; gap: 10px;">
+                                <div>
+                                    <h3 style="margin: 0; color: var(--text-primary);">🛍️ Produtos & Itens de Cobrança do Clube</h3>
+                                    <p style="color: var(--text-secondary); font-size: 0.85rem; margin-top: 4px;">Defina os itens adicionais a pagar (ex: Exame Médico, Equipamento, Inscrição FPB) que surgirão na folha de cobrança dos diretores.</p>
+                                </div>
+                                <button type="button" id="btn-toggle-novo-item-cobranca" class="btn-primary" style="padding: 8px 16px; font-weight: 700; background: #7e22ce;">
+                                    ➕ Novo Item de Cobrança
+                                </button>
+                            </div>
+
+                            <!-- Formulário Adicionar Item (Recolhível) -->
+                            <div id="form-novo-item-cobranca-container" style="display: none; background: #faf5ff; border: 1px solid #e9d5ff; border-radius: 8px; padding: 16px; margin-bottom: 20px;">
+                                <h4 style="margin: 0 0 12px; color: #581c87; font-size: 0.95rem;">Adicionar Item de Cobrança</h4>
+                                <form id="form-novo-item-cobranca" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 12px; align-items: flex-end;">
+                                    <div style="grid-column: span 2;">
+                                        <label style="display: block; font-size: 0.8rem; font-weight: 600; margin-bottom: 4px;">Título do Item / Produto *</label>
+                                        <input type="text" id="novo-item-titulo" class="admin-input" placeholder="Ex: Equipamento Oficial, Exame Médico, Fato de Treino..." required style="margin: 0;">
+                                    </div>
+                                    <div>
+                                        <label style="display: block; font-size: 0.8rem; font-weight: 600; margin-bottom: 4px;">Categoria *</label>
+                                        <select id="novo-item-categoria" class="admin-input" required style="margin: 0;">
+                                            <option value="Equipamento">🎽 Equipamento</option>
+                                            <option value="Exame Médico">🩺 Exame Médico</option>
+                                            <option value="Inscrição">📋 Inscrição / Seguro</option>
+                                            <option value="Torneio">🏆 Torneio / Evento</option>
+                                            <option value="Outro">📦 Outro Produto</option>
+                                        </select>
+                                    </div>
+                                    <div>
+                                        <label style="display: block; font-size: 0.8rem; font-weight: 600; margin-bottom: 4px;">Escalão Aplicável *</label>
+                                        <select id="novo-item-escalao" class="admin-input" required style="margin: 0;">
+                                            <option value="Todos">🌐 Todos os Escalões</option>
+                                            <option value="BabyBasket">BabyBasket</option>
+                                            <option value="Mini 8">Mini 8</option>
+                                            <option value="Mini 10">Mini 10</option>
+                                            <option value="Mini 12">Mini 12</option>
+                                            <option value="Sub 14">Sub 14</option>
+                                            <option value="Sub 16">Sub 16</option>
+                                            <option value="Sub 18">Sub 18</option>
+                                            <option value="Sub 20">Sub 20</option>
+                                            <option value="Seniores">Seniores</option>
+                                        </select>
+                                    </div>
+                                    <div>
+                                        <label style="display: block; font-size: 0.8rem; font-weight: 600; margin-bottom: 4px;">Valor (€) *</label>
+                                        <input type="number" step="0.5" id="novo-item-valor" class="admin-input" placeholder="0.00" required style="margin: 0;">
+                                    </div>
+                                    <div style="display: flex; gap: 8px;">
+                                        <button type="submit" class="btn-primary" style="flex: 1; padding: 10px; margin: 0; background: #7e22ce;">Guardar Item</button>
+                                        <button type="button" id="btn-cancel-novo-item" class="btn-secondary" style="padding: 10px; margin: 0;">✕</button>
+                                    </div>
+                                </form>
+                            </div>
+
+                            <!-- Tabela de Itens de Cobrança -->
+                            <table class="admin-table" style="width: 100%; text-align: left; margin-top: 10px; border-collapse: collapse;">
+                                <thead>
+                                    <tr style="border-bottom: 1px solid rgba(255,255,255,0.1);">
+                                        <th style="padding: 10px;">Item / Produto</th>
+                                        <th style="padding: 10px; width: 140px;">Categoria</th>
+                                        <th style="padding: 10px; width: 140px;">Escalão</th>
+                                        <th style="padding: 10px; width: 100px; text-align: right;">Valor</th>
+                                        <th style="padding: 10px; width: 100px; text-align: center;">Estado</th>
+                                        <th style="padding: 10px; width: 80px; text-align: center;">Ações</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="itens-cobranca-tbody">
+                                    <tr><td colspan="6" style="padding: 15px; text-align: center; color: var(--text-secondary);">A carregar itens...</td></tr>
+                                </tbody>
+                            </table>
                         </div>
                     </div>
                 </div>

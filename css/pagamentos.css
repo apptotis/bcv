@@ -924,3 +924,137 @@ body {
     color: var(--text-muted);
     margin: 6px 0 20px 0;
 }
+
+/* =======================================================
+   9. INTERFACE DE COBRANÇA MULTI-ITEM
+   ======================================================= */
+.cobranca-section-card {
+    background: #ffffff;
+    border: 1px solid var(--border);
+    border-radius: var(--radius-md);
+    padding: 14px;
+    box-shadow: var(--shadow-sm);
+}
+
+.cobranca-section-header {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 10px;
+    padding-bottom: 8px;
+    border-bottom: 1px solid #f1f5f9;
+}
+
+.cobranca-section-icon {
+    font-size: 1.1rem;
+}
+
+.cobranca-section-title {
+    font-size: 0.88rem;
+    font-weight: 700;
+    color: var(--text-main);
+}
+
+.cobranca-item-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 10px 12px;
+    border-radius: var(--radius-sm);
+    border: 1px solid var(--border);
+    background: #f8fafc;
+    transition: all 0.15s ease;
+    cursor: pointer;
+    user-select: none;
+}
+
+.cobranca-item-row:hover {
+    background: #f1f5f9;
+}
+
+.cobranca-item-row.selected {
+    background: #faf5ff;
+    border-color: #c084fc;
+}
+
+.cobranca-item-row.paid {
+    background: #f0fdf4;
+    border-color: #bbf7d0;
+    cursor: default;
+}
+
+.cobranca-item-left {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    flex: 1;
+}
+
+.cobranca-item-left input[type="checkbox"] {
+    width: 18px;
+    height: 18px;
+    accent-color: var(--primary);
+    cursor: pointer;
+}
+
+.cobranca-item-title {
+    font-size: 0.85rem;
+    font-weight: 600;
+    color: var(--text-main);
+    line-height: 1.25;
+}
+
+.cobranca-item-sub {
+    font-size: 0.72rem;
+    color: var(--text-muted);
+    margin-top: 1px;
+}
+
+.cobranca-item-price {
+    font-size: 0.95rem;
+    font-weight: 800;
+    color: var(--primary);
+    white-space: nowrap;
+    margin-left: 8px;
+}
+
+.cobranca-item-badge-paid {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    background: #dcfce7;
+    color: #16a34a;
+    font-size: 0.75rem;
+    font-weight: 700;
+    padding: 3px 8px;
+    border-radius: var(--radius-full);
+    border: 1px solid #86efac;
+    white-space: nowrap;
+}
+
+.btn-submit-payment:disabled {
+    background: #cbd5e1;
+    color: #64748b;
+    cursor: not-allowed;
+    box-shadow: none;
+}
+
+.tab-quota-mode-btn {
+    flex: 1;
+    padding: 7px 10px;
+    border-radius: 6px;
+    border: 1px solid var(--border);
+    background: #f8fafc;
+    color: var(--text-muted);
+    font-size: 0.78rem;
+    font-weight: 700;
+    cursor: pointer;
+    transition: all 0.15s ease;
+}
+
+.tab-quota-mode-btn.active {
+    background: var(--primary);
+    color: #ffffff;
+    border-color: var(--primary);
+}
+
