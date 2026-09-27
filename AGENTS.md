@@ -95,3 +95,4 @@
 - [2026-09-27] Gemini: Anulação completa das mensalidades no Portal do Diretor (diretor.html/js) e criação do novo Portal Mobile de Pagamentos de Escalão (pagamentos.html, pagamentos.css, pagamentos.js, setup_pagamentos_escaloes.sql) com gestão por escalão (mensalidades, equipamentos, exames médicos e outros produtos), suporte multi-escalão, extrato e auditoria integrada no Admin.
 - [2026-09-27] Gemini: Filtragem estrita no Portal de Pagamentos (pagamentos.js) para listar exclusivamente atletas inscritos na época ativa 2026/2027.
 - [2026-09-27] Gemini: Remoção dos botões/pills de escalão do topo no Portal de Pagamentos (pagamentos.html, pagamentos.js), mantendo a alternância de múltiplos escalões exclusivamente no Drawer para um layout limpo.
+- [2026-09-27] Gemini: Remoção dos 4 cards de KPIs da aba Atletas em pagamentos.html e preparação do novo sistema de pagamentos por itens/produtos (setup_pagamentos_itens.sql) com preçário Mensal/Bianual/Anual.
