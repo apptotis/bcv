@@ -110,10 +110,10 @@
                     </button>
 
                     <button type="button" class="drawer-item" data-tab="tab-precos">
-                        <span class="item-icon">💰</span>
+                        <span class="item-icon">🏷️</span>
                         <div class="item-text">
-                            <span class="item-label">Tabela de Quotas</span>
-                            <span class="item-desc">Valores e preçário de referência</span>
+                            <span class="item-label">Tabela de Preços</span>
+                            <span class="item-desc">Preçário oficial do escalão</span>
                         </div>
                     </button>
                 </div>
@@ -198,62 +198,36 @@
             </section>
 
             <!-- ======================================================= -->
-            <!-- ABA 3: TABELA DE QUOTAS & PREÇOS OFICIAIS               -->
+            <!-- ABA 3: TABELA DE PREÇOS DO ESCALÃO                      -->
             <!-- ======================================================= -->
             <section id="tab-precos" class="tab-content">
                 <div style="background: #ffffff; border: 1px solid var(--border); border-radius: var(--radius-md); padding: 20px; box-shadow: var(--shadow-sm); line-height: 1.6;">
                     <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 14px;">
-                        <span style="font-size: 1.8rem;">💰</span>
+                        <span style="font-size: 1.8rem;">🏷️</span>
                         <div>
-                            <h3 style="font-size: 1.05rem; font-weight: 800; color: var(--primary);">Tabela de Preços e Quotas</h3>
-                            <p style="font-size: 0.8rem; color: var(--text-muted);">Valores de referência oficiais do BCV para a época 2026/2027</p>
+                            <h3 style="font-size: 1.05rem; font-weight: 800; color: var(--primary);">Tabela de Preços Oficiais</h3>
+                            <p id="tabela-precos-escalao-sub" style="font-size: 0.8rem; color: var(--text-muted);">Valores de referência para o escalão ativo • Época 2026/2027</p>
                         </div>
                     </div>
 
-                    <div style="display: flex; flex-direction: column; gap: 10px; margin-top: 14px;">
-                        <div style="background: #f8fafc; border: 1px solid var(--border); border-radius: var(--radius-sm); padding: 12px 14px; display: flex; justify-content: space-between; align-items: center;">
-                            <div>
-                                <strong style="font-size: 0.9rem; color: var(--text-main);">📅 Mensalidade Regular</strong>
-                                <div style="font-size: 0.78rem; color: var(--text-muted);">Setembro a Junho (10 mensalidades)</div>
-                            </div>
-                            <span style="font-size: 1.15rem; font-weight: 800; color: var(--primary);" id="preco-mensalidade-val">25.00 €</span>
-                        </div>
+                    <!-- Secção 1: Quotas e Mensalidades -->
+                    <div style="font-size: 0.75rem; font-weight: 700; color: var(--primary); text-transform: uppercase; letter-spacing: 0.5px; margin: 16px 0 8px 0;">
+                        🏀 Quotas & Mensalidades
+                    </div>
+                    <div id="tabela-precos-quotas-list" style="display: flex; flex-direction: column; gap: 8px;">
+                        <!-- Preenchido dinamicamente via JS com Mensal, Bianual e Anual -->
+                    </div>
 
-                        <div style="background: #f0fdf4; border: 1px solid #bbf7d0; border-radius: var(--radius-sm); padding: 12px 14px; display: flex; justify-content: space-between; align-items: center;">
-                            <div>
-                                <strong style="font-size: 0.9rem; color: #166534;">🌓 Quota Bianual (2 Prestações)</strong>
-                                <div style="font-size: 0.78rem; color: #15803d;">Pagamento semestral (Setembro e Fevereiro)</div>
-                            </div>
-                            <span style="font-size: 1.15rem; font-weight: 800; color: #16a34a;" id="preco-bianual-val">120.00 €</span>
-                        </div>
-
-                        <div style="background: #faf5ff; border: 1px solid #e9d5ff; border-radius: var(--radius-sm); padding: 12px 14px; display: flex; justify-content: space-between; align-items: center;">
-                            <div>
-                                <strong style="font-size: 0.9rem; color: #581c87;">⭐ Quota Anual Completa</strong>
-                                <div style="font-size: 0.78rem; color: #7e22ce;">Pagamento único integral da época</div>
-                            </div>
-                            <span style="font-size: 1.15rem; font-weight: 800; color: #6b21a8;" id="preco-anual-val">230.00 €</span>
-                        </div>
-
-                        <div style="background: #f8fafc; border: 1px solid var(--border); border-radius: var(--radius-sm); padding: 12px 14px; display: flex; justify-content: space-between; align-items: center;">
-                            <div>
-                                <strong style="font-size: 0.9rem; color: var(--text-main);">🩺 Exame Médico Desportivo (EMD)</strong>
-                                <div style="font-size: 0.78rem; color: var(--text-muted);">Consulta de certificação desportiva IPDJ</div>
-                            </div>
-                            <span style="font-size: 1.15rem; font-weight: 800; color: #047857;">Consulte</span>
-                        </div>
-
-                        <div style="background: #f8fafc; border: 1px solid var(--border); border-radius: var(--radius-sm); padding: 12px 14px; display: flex; justify-content: space-between; align-items: center;">
-                            <div>
-                                <strong style="font-size: 0.9rem; color: var(--text-main);">🎽 Equipamentos Oficiais</strong>
-                                <div style="font-size: 0.78rem; color: var(--text-muted);">Kits de jogo, fatos de treino e extras</div>
-                            </div>
-                            <span style="font-size: 1.15rem; font-weight: 800; color: #0284c7;">Por Artigo</span>
-                        </div>
+                    <!-- Secção 2: Produtos e Outros Encargos do Escalão -->
+                    <div style="font-size: 0.75rem; font-weight: 700; color: var(--primary); text-transform: uppercase; letter-spacing: 0.5px; margin: 20px 0 8px 0;">
+                        🛍️ Produtos & Encargos de Escalão
+                    </div>
+                    <div id="tabela-precos-produtos-list" style="display: flex; flex-direction: column; gap: 8px;">
+                        <!-- Preenchido dinamicamente via JS com os produtos do escalão configurados pelo Admin -->
                     </div>
 
                     <div style="margin-top: 20px; padding: 12px; background: #ecfdf5; border: 1px solid #a7f3d0; border-radius: var(--radius-sm); font-size: 0.8rem; color: #065f46;">
-                        ℹ️ <strong>Auditoria em Tempo Real:</strong> Todos os pagamentos registados nesta app ficam automaticamente sincronizados com a Direção e Secretaria no Painel Geral de Administração do BCV.
+                        ℹ️ <strong>Auditoria em Tempo Real:</strong> Todos os valores de referência são configurados pela Direção no Painel Geral de Administração do BCV.
                     </div>
                 </div>
             </section>
@@ -384,6 +358,6 @@
 
     <!-- Scripts -->
     <script src="js/config.js"></script>
-    <script src="js/pagamentos.js?v=20260928_0055"></script>
+    <script src="js/pagamentos.js?v=20260928_0100"></script>
 </body>
 </html>

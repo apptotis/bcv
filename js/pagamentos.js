@@ -329,6 +329,10 @@ document.addEventListener('DOMContentLoaded', () => {
             const activeSec = document.getElementById(targetTab);
             if (activeSec) activeSec.classList.add('active');
 
+            if (targetTab === 'tab-precos') {
+                updatePrecosTab();
+            }
+
             closeDrawer();
         });
     });
@@ -466,14 +470,111 @@ document.addEventListener('DOMContentLoaded', () => {
     // 3.1 ATUALIZAR TABELA DE PREÇOS OFICIAIS (TAB 3)
     // =======================================================
     function updatePrecosTab() {
-        const pMensal = document.getElementById('preco-mensalidade-val');
-        const pBianual = document.getElementById('preco-bianual-val');
-        const pAnual = document.getElementById('preco-anual-val');
+        const subLabel = document.getElementById('tabela-precos-escalao-sub');
+        const quotasContainer = document.getElementById('tabela-precos-quotas-list');
+        const produtosContainer = document.getElementById('tabela-precos-produtos-list');
+
+        if (subLabel) {
+            subLabel.textContent = `Escalão Ativo: ${activeEscalao || 'Geral'} • Época 2026/2027`;
+        }
 
         const precos = getPrecosAtleta({ escalao: activeEscalao });
-        if (pMensal) pMensal.textContent = `${precos.mensal.toFixed(2)} €`;
-        if (pBianual) pBianual.textContent = `${precos.bianual.toFixed(2)} €`;
-        if (pAnual) pAnual.textContent = `${precos.anual.toFixed(2)} €`;
+
+        // 1. Quotas Oficiais do Escalão
+        if (quotasContainer) {
+            quotasContainer.innerHTML = `
+                <div style="background: #f8fafc; border: 1px solid var(--border); border-radius: var(--radius-sm); padding: 12px 14px; display: flex; justify-content: space-between; align-items: center;">
+                    <div>
+                        <strong style="font-size: 0.9rem; color: var(--text-main);">📅 Mensalidade Regular</strong>
+                        <div style="font-size: 0.78rem; color: var(--text-muted);">Setembro a Junho (10 mensalidades)</div>
+                    </div>
+                    <span style="font-size: 1.15rem; font-weight: 800; color: var(--primary);">${precos.mensal.toFixed(2)} €</span>
+                </div>
+
+                <div style="background: #f0fdf4; border: 1px solid #bbf7d0; border-radius: var(--radius-sm); padding: 12px 14px; display: flex; justify-content: space-between; align-items: center;">
+                    <div>
+                        <strong style="font-size: 0.9rem; color: #166534;">🌓 Quota Bianual (2 Prestações)</strong>
+                        <div style="font-size: 0.78rem; color: #15803d;">Pagamento semestral (Setembro e Fevereiro)</div>
+                    </div>
+                    <span style="font-size: 1.15rem; font-weight: 800; color: #16a34a;">${precos.bianual.toFixed(2)} €</span>
+                </div>
+
+                <div style="background: #faf5ff; border: 1px solid #e9d5ff; border-radius: var(--radius-sm); padding: 12px 14px; display: flex; justify-content: space-between; align-items: center;">
+                    <div>
+                        <strong style="font-size: 0.9rem; color: #581c87;">⭐ Quota Anual Completa</strong>
+                        <div style="font-size: 0.78rem; color: #7e22ce;">Pagamento único integral de toda a época</div>
+                    </div>
+                    <span style="font-size: 1.15rem; font-weight: 800; color: #6b21a8;">${precos.anual.toFixed(2)} €</span>
+                </div>
+            `;
+        }
+
+        // 2. Produtos do escalão configurados pelo Admin
+        if (produtosContainer) {
+            const escNorm = normalizeEscalao(activeEscalao);
+            const prods = currentItensCobranca.filter(item => {
+                if (item.ativo === false) return false;
+                const itemEsc = normalizeEscalao(item.escalao);
+                return itemEsc === 'todos' || itemEsc === escNorm || !item.escalao;
+            });
+
+            if (prods.length === 0) {
+                produtosContainer.innerHTML = `
+                    <div style="text-align: center; padding: 16px; color: var(--text-muted); font-size: 0.82rem; background: #f8fafc; border-radius: 8px; border: 1px dashed var(--border);">
+                        Sem outros produtos ou encargos configurados para este escalão.
+                    </div>
+                `;
+            } else {
+                let htmlProds = '';
+                prods.forEach(prod => {
+                    const cat = prod.categoria || 'Geral';
+                    let catIcon = '📦';
+                    let catColor = '#0284c7';
+                    let catBg = '#f0f9ff';
+                    let catBorder = '#bae6fd';
+
+                    if (cat.toLowerCase().includes('exame') || cat.toLowerCase().includes('médico') || cat.toLowerCase().includes('emd')) {
+                        catIcon = '🩺';
+                        catColor = '#047857';
+                        catBg = '#ecfdf5';
+                        catBorder = '#a7f3d0';
+                    } else if (cat.toLowerCase().includes('equipamento')) {
+                        catIcon = '🎽';
+                        catColor = '#7c2d12';
+                        catBg = '#fff7ed';
+                        catBorder = '#fed7aa';
+                    } else if (cat.toLowerCase().includes('inscrição') || cat.toLowerCase().includes('seguro')) {
+                        catIcon = '📄';
+                        catColor = '#4338ca';
+                        catBg = '#eef2ff';
+                        catBorder = '#c7d2fe';
+                    }
+
+                    const obrigatorioBadge = prod.obrigatorio 
+                        ? `<span style="background: #fee2e2; color: #dc2626; font-size: 0.68rem; font-weight: 700; padding: 2px 6px; border-radius: 4px; margin-left: 6px;">Obrigatório</span>` 
+                        : '';
+
+                    htmlProds += `
+                        <div style="background: ${catBg}; border: 1px solid ${catBorder}; border-radius: var(--radius-sm); padding: 12px 14px; display: flex; justify-content: space-between; align-items: center;">
+                            <div style="flex: 1; padding-right: 12px;">
+                                <div style="display: flex; align-items: center; flex-wrap: wrap;">
+                                    <strong style="font-size: 0.9rem; color: var(--text-main);">${catIcon} ${escapeHtml(prod.titulo || prod.nome || 'Produto')}</strong>
+                                    ${obrigatorioBadge}
+                                </div>
+                                <div style="font-size: 0.78rem; color: var(--text-muted); margin-top: 2px;">
+                                    ${escapeHtml(prod.descricao || prod.categoria || 'Artigo Oficial')}
+                                    ${prod.escalao && prod.escalao.toLowerCase() !== 'todos' ? `• <em>${escapeHtml(prod.escalao)}</em>` : ''}
+                                </div>
+                            </div>
+                            <span style="font-size: 1.15rem; font-weight: 800; color: ${catColor}; white-space: nowrap;">
+                                ${Number(prod.valor || 0).toFixed(2)} €
+                            </span>
+                        </div>
+                    `;
+                });
+                produtosContainer.innerHTML = htmlProds;
+            }
+        }
     }
 
     // =======================================================
