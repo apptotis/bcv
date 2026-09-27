@@ -990,11 +990,12 @@ body {
     flex: 1;
 }
 
-.cobranca-item-left input[type="checkbox"] {
+.cobranca-item-left input[type="checkbox"],
+.cobranca-item-checkbox {
     width: 18px;
     height: 18px;
     accent-color: var(--primary);
-    cursor: pointer;
+    pointer-events: none;
 }
 
 .cobranca-item-title {

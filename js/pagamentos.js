@@ -634,16 +634,16 @@ document.addEventListener('DOMContentLoaded', () => {
     // 6. MODAL REGISTAR PAGAMENTO MULTI-ITEM / COBRANÇA
     // =======================================================
     const MESES_EPOCA = [
-        { key: '2026-09', label: 'Setembro 2026' },
-        { key: '2026-10', label: 'Outubro 2026' },
-        { key: '2026-11', label: 'Novembro 2026' },
-        { key: '2026-12', label: 'Dezembro 2026' },
-        { key: '2027-01', label: 'Janeiro 2027' },
-        { key: '2027-02', label: 'Fevereiro 2027' },
-        { key: '2027-03', label: 'Março 2027' },
-        { key: '2027-04', label: 'Abril 2027' },
-        { key: '2027-05', label: 'Maio 2027' },
-        { key: '2027-06', label: 'Junho 2027' }
+        { key: '2026-09', label: 'Setembro 2026', sem: '1' },
+        { key: '2026-10', label: 'Outubro 2026', sem: '1' },
+        { key: '2026-11', label: 'Novembro 2026', sem: '1' },
+        { key: '2026-12', label: 'Dezembro 2026', sem: '1' },
+        { key: '2027-01', label: 'Janeiro 2027', sem: '1' },
+        { key: '2027-02', label: 'Fevereiro 2027', sem: '2' },
+        { key: '2027-03', label: 'Março 2027', sem: '2' },
+        { key: '2027-04', label: 'Abril 2027', sem: '2' },
+        { key: '2027-05', label: 'Maio 2027', sem: '2' },
+        { key: '2027-06', label: 'Junho 2027', sem: '2' }
     ];
 
     function getPrecosAtleta(atleta) {
@@ -709,7 +709,7 @@ document.addEventListener('DOMContentLoaded', () => {
         // Itens liquidados para o histórico recolhível
         const itensLiquidados = [];
 
-        // 1. SECÇÃO QUOTAS & MENSALIDADES PENDENTES
+        // 1. SECÇÃO QUOTAS & MENSALIDADES PENDENTES (Suporte a Mensal, Bianual e Anual)
         let htmlQuotas = '';
 
         if (hasAnual) {
@@ -737,8 +737,7 @@ document.addEventListener('DOMContentLoaded', () => {
             const mesesPendentes = [];
             MESES_EPOCA.forEach(m => {
                 const mesPago = atletaPags.some(p => p.mes === m.key && p.estado === 'Pago');
-                const cobertoPorBianual = (hasBianual1 && ['2026-09','2026-10','2026-11','2026-12','2027-01'].includes(m.key)) ||
-                                          (hasBianual2 && ['2027-02','2027-03','2027-04','2027-05','2027-06'].includes(m.key));
+                const cobertoPorBianual = (hasBianual1 && m.sem === '1') || (hasBianual2 && m.sem === '2');
                 
                 if (mesPago || cobertoPorBianual) {
                     itensLiquidados.push({
@@ -750,6 +749,24 @@ document.addEventListener('DOMContentLoaded', () => {
                     mesesPendentes.push(m);
                 }
             });
+
+            if (hasBianual1) {
+                itensLiquidados.push({
+                    nome: '🌓 1ª Prestação Bianual (Set-Jan)',
+                    categoria: 'Quota Bianual',
+                    valor: precos.bianual
+                });
+            }
+            if (hasBianual2) {
+                itensLiquidados.push({
+                    nome: '🌓 2ª Prestação Bianual (Fev-Jun)',
+                    categoria: 'Quota Bianual',
+                    valor: precos.bianual
+                });
+            }
+
+            const pendentesS1 = mesesPendentes.filter(m => m.sem === '1');
+            const pendentesS2 = mesesPendentes.filter(m => m.sem === '2');
 
             if (mesesPendentes.length === 0) {
                 htmlQuotas = `
@@ -767,9 +784,12 @@ document.addEventListener('DOMContentLoaded', () => {
                     </div>
                 `;
             } else {
-                // Opção 1: Quota Anual Completa em destaque
+                // OPÇÃO A: QUOTA ANUAL COMPLETA
                 const isAnualSelected = selectedCobrancaItems.has('quota_ANUAL');
                 htmlQuotas += `
+                    <div style="font-size: 0.72rem; font-weight: 700; color: #6b21a8; text-transform: uppercase; margin-bottom: 4px; letter-spacing: 0.3px;">
+                        Opção A: Quota Anual Integral (10 meses)
+                    </div>
                     <div class="cobranca-item-row selectable quota-anual-row ${isAnualSelected ? 'selected' : ''}" 
                          data-key="quota_ANUAL" 
                          data-tipo="quota_anual" 
@@ -779,7 +799,7 @@ document.addEventListener('DOMContentLoaded', () => {
                          data-valor="${precos.anual}"
                          style="background: #faf5ff; border: 1.5px solid #d8b4fe;">
                         <div class="cobranca-item-left">
-                            <input type="checkbox" class="cobranca-item-checkbox" ${isAnualSelected ? 'checked' : ''} onclick="event.stopPropagation()">
+                            <input type="checkbox" class="cobranca-item-checkbox" ${isAnualSelected ? 'checked' : ''}>
                             <div>
                                 <div class="cobranca-item-name" style="color: #581c87; font-weight: 700;">⭐ Quota Anual Completa</div>
                                 <div class="cobranca-item-desc" style="color: #7e22ce;">Liquidar a época inteira num único pagamento</div>
@@ -791,14 +811,81 @@ document.addEventListener('DOMContentLoaded', () => {
                     </div>
                 `;
 
-                // Divisor sutil
+                // OPÇÃO B: QUOTA BIANUAL (2 Prestações Semestrais)
+                const showB1 = !hasBianual1 && pendentesS1.length > 0;
+                const showB2 = !hasBianual2 && pendentesS2.length > 0;
+
+                if (showB1 || showB2) {
+                    htmlQuotas += `
+                        <div style="font-size: 0.72rem; font-weight: 700; color: #166534; text-transform: uppercase; margin: 12px 0 4px 0; letter-spacing: 0.3px;">
+                            Opção B: Quota Bianual (Prestações Semestrais)
+                        </div>
+                        <div style="display: flex; flex-direction: column; gap: 6px;">
+                    `;
+
+                    if (showB1) {
+                        const isB1Sel = selectedCobrancaItems.has('quota_BIANUAL_1');
+                        htmlQuotas += `
+                            <div class="cobranca-item-row selectable ${isB1Sel ? 'selected' : ''}"
+                                 data-key="quota_BIANUAL_1"
+                                 data-tipo="quota_bianual"
+                                 data-semestre="1"
+                                 data-mes="BIANUAL_1"
+                                 data-cat="Quota Bianual"
+                                 data-desc="1ª Prestação Bianual (Setembro a Janeiro)"
+                                 data-valor="${precos.bianual}"
+                                 style="background: #f0fdf4; border: 1.5px solid #86efac;">
+                                <div class="cobranca-item-left">
+                                    <input type="checkbox" class="cobranca-item-checkbox" ${isB1Sel ? 'checked' : ''}>
+                                    <div>
+                                        <div class="cobranca-item-name" style="color: #166534; font-weight: 700;">🌓 1ª Prestação Bianual (5 meses)</div>
+                                        <div class="cobranca-item-desc" style="color: #15803d;">Cobre Setembro 2026 a Janeiro 2027</div>
+                                    </div>
+                                </div>
+                                <div class="cobranca-item-right">
+                                    <span class="cobranca-item-price" style="color: #16a34a; font-weight: 800;">${precos.bianual.toFixed(2)} €</span>
+                                </div>
+                            </div>
+                        `;
+                    }
+
+                    if (showB2) {
+                        const isB2Sel = selectedCobrancaItems.has('quota_BIANUAL_2');
+                        htmlQuotas += `
+                            <div class="cobranca-item-row selectable ${isB2Sel ? 'selected' : ''}"
+                                 data-key="quota_BIANUAL_2"
+                                 data-tipo="quota_bianual"
+                                 data-semestre="2"
+                                 data-mes="BIANUAL_2"
+                                 data-cat="Quota Bianual"
+                                 data-desc="2ª Prestação Bianual (Fevereiro a Junho)"
+                                 data-valor="${precos.bianual}"
+                                 style="background: #f0fdf4; border: 1.5px solid #86efac;">
+                                <div class="cobranca-item-left">
+                                    <input type="checkbox" class="cobranca-item-checkbox" ${isB2Sel ? 'checked' : ''}>
+                                    <div>
+                                        <div class="cobranca-item-name" style="color: #166534; font-weight: 700;">🌓 2ª Prestação Bianual (5 meses)</div>
+                                        <div class="cobranca-item-desc" style="color: #15803d;">Cobre Fevereiro 2027 a Junho 2027</div>
+                                    </div>
+                                </div>
+                                <div class="cobranca-item-right">
+                                    <span class="cobranca-item-price" style="color: #16a34a; font-weight: 800;">${precos.bianual.toFixed(2)} €</span>
+                                </div>
+                            </div>
+                        `;
+                    }
+
+                    htmlQuotas += `</div>`;
+                }
+
+                // OPÇÃO C: MENSALIDADES INDIVIDUAIS (Mês a Mês)
                 htmlQuotas += `
-                    <div style="font-size: 0.72rem; font-weight: 700; color: var(--text-muted); text-transform: uppercase; margin: 4px 0 2px 2px;">
-                        Ou selecionar mês(es) em dívida:
+                    <div style="font-size: 0.72rem; font-weight: 700; color: var(--text-muted); text-transform: uppercase; margin: 12px 0 4px 0; letter-spacing: 0.3px;">
+                        Opção C: Mensalidades Individuais (Mês a Mês)
                     </div>
+                    <div style="display: flex; flex-direction: column; gap: 6px;">
                 `;
 
-                // Opção 2: Meses individuais pendentes
                 mesesPendentes.forEach(m => {
                     const itemKey = `quota_${m.key}`;
                     const isSelected = selectedCobrancaItems.has(itemKey);
@@ -806,12 +893,13 @@ document.addEventListener('DOMContentLoaded', () => {
                         <div class="cobranca-item-row selectable ${isSelected ? 'selected' : ''}" 
                              data-key="${itemKey}" 
                              data-tipo="quota_mes" 
+                             data-semestre="${m.sem}"
                              data-mes="${m.key}" 
                              data-cat="Mensalidade" 
                              data-desc="Mensalidade ${m.label}" 
                              data-valor="${precos.mensal}">
                             <div class="cobranca-item-left">
-                                <input type="checkbox" class="cobranca-item-checkbox" ${isSelected ? 'checked' : ''} onclick="event.stopPropagation()">
+                                <input type="checkbox" class="cobranca-item-checkbox" ${isSelected ? 'checked' : ''}>
                                 <div>
                                     <div class="cobranca-item-name">${m.label}</div>
                                     <div class="cobranca-item-desc">Mensalidade Regular</div>
@@ -823,6 +911,8 @@ document.addEventListener('DOMContentLoaded', () => {
                         </div>
                     `;
                 });
+
+                htmlQuotas += `</div>`;
             }
         }
 
@@ -878,7 +968,7 @@ document.addEventListener('DOMContentLoaded', () => {
                          data-desc="${escapeHtml(itemNome)}" 
                          data-valor="${valorProd}">
                         <div class="cobranca-item-left">
-                            <input type="checkbox" class="cobranca-item-checkbox" ${isSelected ? 'checked' : ''} onclick="event.stopPropagation()">
+                            <input type="checkbox" class="cobranca-item-checkbox" ${isSelected ? 'checked' : ''}>
                             <div>
                                 <div class="cobranca-item-name">${escapeHtml(itemNome)}</div>
                                 <div class="cobranca-item-desc">${escapeHtml(prod.descricao || prod.categoria || 'Artigo Oficial')}</div>
@@ -938,33 +1028,34 @@ document.addEventListener('DOMContentLoaded', () => {
                 const mes = row.getAttribute('data-mes') || 'PRODUTO';
                 const cat = row.getAttribute('data-cat') || 'Produto';
                 const desc = row.getAttribute('data-desc') || 'Item';
-                const valor = Number(row.getAttribute('data-valor')) || 0;
+                const valor = parseFloat(row.getAttribute('data-valor')) || 0;
                 const prodId = row.getAttribute('data-prod-id') ? Number(row.getAttribute('data-prod-id')) : null;
                 const checkbox = row.querySelector('.cobranca-item-checkbox');
 
                 if (selectedCobrancaItems.has(key)) {
-                    // Desmarcar
+                    // Desmarcar este item
                     selectedCobrancaItems.delete(key);
                     row.classList.remove('selected');
                     if (checkbox) checkbox.checked = false;
                 } else {
-                    // Se marcou 'quota_anual', desmarcar todos os meses individuais
+                    // 1. Se marcou 'quota_anual', desmarcar todas as outras quotas (bianual e meses)
                     if (tipo === 'quota_anual') {
                         for (const [k, v] of selectedCobrancaItems.entries()) {
-                            if (v.tipo === 'quota_mes') {
+                            if (v.tipo === 'quota_mes' || v.tipo === 'quota_bianual') {
                                 selectedCobrancaItems.delete(k);
-                                const mesRow = document.querySelector(`.cobranca-item-row[data-key="${k}"]`);
-                                if (mesRow) {
-                                    mesRow.classList.remove('selected');
-                                    const mesCb = mesRow.querySelector('.cobranca-item-checkbox');
-                                    if (mesCb) mesCb.checked = false;
+                                const otherRow = document.querySelector(`.cobranca-item-row[data-key="${k}"]`);
+                                if (otherRow) {
+                                    otherRow.classList.remove('selected');
+                                    const otherCb = otherRow.querySelector('.cobranca-item-checkbox');
+                                    if (otherCb) otherCb.checked = false;
                                 }
                             }
                         }
                     }
 
-                    // Se marcou 'quota_mes', desmarcar a 'quota_anual' se estiver marcada
-                    if (tipo === 'quota_mes') {
+                    // 2. Se marcou 'quota_bianual', desmarcar quota_anual e meses do mesmo semestre
+                    if (tipo === 'quota_bianual') {
+                        const sem = row.getAttribute('data-semestre');
                         if (selectedCobrancaItems.has('quota_ANUAL')) {
                             selectedCobrancaItems.delete('quota_ANUAL');
                             const anualRow = document.querySelector('.cobranca-item-row[data-key="quota_ANUAL"]');
@@ -974,8 +1065,44 @@ document.addEventListener('DOMContentLoaded', () => {
                                 if (anualCb) anualCb.checked = false;
                             }
                         }
+                        for (const [k, v] of selectedCobrancaItems.entries()) {
+                            if (v.tipo === 'quota_mes') {
+                                const mesRow = document.querySelector(`.cobranca-item-row[data-key="${k}"]`);
+                                if (mesRow && mesRow.getAttribute('data-semestre') === sem) {
+                                    selectedCobrancaItems.delete(k);
+                                    mesRow.classList.remove('selected');
+                                    const mesCb = mesRow.querySelector('.cobranca-item-checkbox');
+                                    if (mesCb) mesCb.checked = false;
+                                }
+                            }
+                        }
                     }
 
+                    // 3. Se marcou 'quota_mes', desmarcar quota_anual e a quota_bianual do mesmo semestre
+                    if (tipo === 'quota_mes') {
+                        const sem = row.getAttribute('data-semestre');
+                        if (selectedCobrancaItems.has('quota_ANUAL')) {
+                            selectedCobrancaItems.delete('quota_ANUAL');
+                            const anualRow = document.querySelector('.cobranca-item-row[data-key="quota_ANUAL"]');
+                            if (anualRow) {
+                                anualRow.classList.remove('selected');
+                                const anualCb = anualRow.querySelector('.cobranca-item-checkbox');
+                                if (anualCb) anualCb.checked = false;
+                            }
+                        }
+                        const bianualKey = `quota_BIANUAL_${sem}`;
+                        if (selectedCobrancaItems.has(bianualKey)) {
+                            selectedCobrancaItems.delete(bianualKey);
+                            const bRow = document.querySelector(`.cobranca-item-row[data-key="${bianualKey}"]`);
+                            if (bRow) {
+                                bRow.classList.remove('selected');
+                                const bCb = bRow.querySelector('.cobranca-item-checkbox');
+                                if (bCb) bCb.checked = false;
+                            }
+                        }
+                    }
+
+                    // 4. Se for produto (Seguro, EMD, etc.), NUNCA mexe nas quotas! Ambas coexistem!
                     selectedCobrancaItems.set(key, {
                         key: key,
                         tipo: tipo,
