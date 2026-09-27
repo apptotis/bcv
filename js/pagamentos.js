@@ -879,6 +879,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 const itemKey = `prod_${prod.id}`;
                 const isSelected = selectedCobrancaItems.has(itemKey);
                 const valorProd = Number(prod.valor || 0);
+                const itemNome = prod.titulo || prod.nome || 'Produto';
 
                 if (isPago) {
                     htmlProdutos += `
@@ -886,7 +887,7 @@ document.addEventListener('DOMContentLoaded', () => {
                             <div class="cobranca-item-left">
                                 <span class="cobranca-item-check-icon">✓</span>
                                 <div>
-                                    <div class="cobranca-item-name">${escapeHtml(prod.nome)}</div>
+                                    <div class="cobranca-item-name">${escapeHtml(itemNome)}</div>
                                     <div class="cobranca-item-desc">${escapeHtml(prod.categoria || 'Produto')} • Liquidado</div>
                                 </div>
                             </div>
@@ -903,12 +904,12 @@ document.addEventListener('DOMContentLoaded', () => {
                              data-tipo="produto" 
                              data-prod-id="${prod.id}" 
                              data-cat="${escapeHtml(prod.categoria || 'Produto')}" 
-                             data-desc="${escapeHtml(prod.nome)}" 
+                             data-desc="${escapeHtml(itemNome)}" 
                              data-valor="${valorProd}">
                             <div class="cobranca-item-left">
                                 <input type="checkbox" class="cobranca-item-checkbox" ${isSelected ? 'checked' : ''} onclick="event.stopPropagation()">
                                 <div>
-                                    <div class="cobranca-item-name">${escapeHtml(prod.nome)}</div>
+                                    <div class="cobranca-item-name">${escapeHtml(itemNome)}</div>
                                     <div class="cobranca-item-desc">${escapeHtml(prod.descricao || prod.categoria || 'Artigo Oficial')}</div>
                                 </div>
                             </div>

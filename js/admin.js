@@ -6221,13 +6221,13 @@ document.addEventListener('DOMContentLoaded', async () => {
                 <tr style="border-bottom: 1px solid var(--border-color);">
                     <td style="padding: 10px; font-weight: 700;">🏀 ${esc}</td>
                     <td style="padding: 10px;">
-                        <input type="number" step="0.5" class="admin-input input-preco-mensal" data-escalao="${esc}" value="${Number(cfg.mensal || 25).toFixed(2)}" style="margin: 0; width: 130px;">
+                        <input type="number" step="0.01" min="0" class="admin-input input-preco-mensal" data-escalao="${esc}" value="${Number(cfg.mensal || 25).toFixed(2)}" style="margin: 0; width: 130px;">
                     </td>
                     <td style="padding: 10px;">
-                        <input type="number" step="0.5" class="admin-input input-preco-bianual" data-escalao="${esc}" value="${Number(cfg.bianual || 120).toFixed(2)}" style="margin: 0; width: 130px;">
+                        <input type="number" step="0.01" min="0" class="admin-input input-preco-bianual" data-escalao="${esc}" value="${Number(cfg.bianual || 120).toFixed(2)}" style="margin: 0; width: 130px;">
                     </td>
                     <td style="padding: 10px;">
-                        <input type="number" step="0.5" class="admin-input input-preco-anual" data-escalao="${esc}" value="${Number(cfg.anual || 230).toFixed(2)}" style="margin: 0; width: 130px;">
+                        <input type="number" step="0.01" min="0" class="admin-input input-preco-anual" data-escalao="${esc}" value="${Number(cfg.anual || 230).toFixed(2)}" style="margin: 0; width: 130px;">
                     </td>
                 </tr>
             `;
@@ -6324,12 +6324,18 @@ document.addEventListener('DOMContentLoaded', async () => {
                 .eq('epoca', '2026/2027')
                 .order('created_at', { ascending: true });
 
-            if (error && error.code !== '42P01') throw error;
+            if (error) {
+                if (error.code === '42P01' || error.code === 'PGRST205' || (error.message && error.message.includes('not find the table'))) {
+                    itensCobrancaTbody.innerHTML = `<tr><td colspan="6" style="padding: 20px; text-align: center; color: #b45309; background: #fffbeb;">⚠️ Tabela <strong>itens_cobranca</strong> pendente. Execute o script <code>setup_pagamentos_itens.sql</code> no SQL Editor do Supabase.</td></tr>`;
+                    return;
+                }
+                throw error;
+            }
             currentItensCobranca = data || [];
             renderItensCobranca();
         } catch (err) {
             console.error('Erro ao carregar itens de cobrança:', err);
-            itensCobrancaTbody.innerHTML = `<tr><td colspan="6" style="padding: 15px; text-align: center; color: #ef4444;">Erro: ${err.message}</td></tr>`;
+            itensCobrancaTbody.innerHTML = `<tr><td colspan="6" style="padding: 15px; text-align: center; color: #ef4444;">Erro ao carregar itens: ${err.message}</td></tr>`;
         }
     }
 
@@ -6378,12 +6384,14 @@ document.addEventListener('DOMContentLoaded', async () => {
             const titulo = document.getElementById('novo-item-titulo').value.trim();
             const categoria = document.getElementById('novo-item-categoria').value;
             const escalao = document.getElementById('novo-item-escalao').value;
-            const valor = parseFloat(document.getElementById('novo-item-valor').value) || 0;
+            const rawValor = parseFloat(document.getElementById('novo-item-valor').value);
 
-            if (!titulo || valor <= 0) {
-                alert("Por favor indique um título e valor válido.");
+            if (!titulo || isNaN(rawValor) || rawValor <= 0) {
+                alert("Por favor indique um título e um valor válido em euros (€).");
                 return;
             }
+
+            const valor = Number(rawValor.toFixed(2));
 
             try {
                 const { data, error } = await supabase
