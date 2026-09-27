@@ -75,3 +75,14 @@ VALUES ('tabela_quotas', '{
   "Seniores": {"mensal": 25.00, "bianual": 120.00, "anual": 230.00}
 }'::jsonb)
 ON CONFLICT (chave) DO NOTHING;
+
+-- 7. Compatibilidade para configuracoes_clube (para garantir resiliência caso qualquer cliente ainda consulte esta tabela)
+CREATE TABLE IF NOT EXISTS public.configuracoes_clube (
+    chave VARCHAR(50) PRIMARY KEY,
+    valor JSONB,
+    dados JSONB,
+    descricao TEXT,
+    updated_at TIMESTAMPTZ DEFAULT NOW()
+);
+GRANT ALL ON TABLE public.configuracoes_clube TO anon, authenticated;
+
