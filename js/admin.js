@@ -6030,7 +6030,7 @@ document.addEventListener('DOMContentLoaded', async () => {
             if (content) content.classList.remove('hidden');
 
             if (targetSub === 'subfin-tabela-precos') {
-                renderTabelaPrecos();
+                loadTabelaPrecos();
             } else if (targetSub === 'subfin-itens-cobranca') {
                 loadItensCobranca();
             }
@@ -6200,6 +6200,19 @@ document.addEventListener('DOMContentLoaded', async () => {
 
     // Gestão da Tabela de Preços de Quotas por Escalão (Mensal, Bianual e Anual)
     async function loadTabelaPrecos() {
+        // 1. Tentar carregar de cache local para exibição instantânea
+        try {
+            const localCached = localStorage.getItem('bcv_tabela_quotas');
+            if (localCached) {
+                const parsed = JSON.parse(localCached);
+                if (parsed && typeof parsed === 'object' && Object.keys(parsed).length > 0) {
+                    tabelaPrecosQuotas = parsed;
+                    renderTabelaPrecos();
+                }
+            }
+        } catch (_) {}
+
+        // 2. Consultar base de dados Supabase
         try {
             const { data: configRow, error } = await supabase
                 .from('clube_config')
@@ -6211,19 +6224,24 @@ document.addEventListener('DOMContentLoaded', async () => {
 
             if (configRow && configRow.dados) {
                 tabelaPrecosQuotas = typeof configRow.dados === 'string' ? JSON.parse(configRow.dados) : configRow.dados;
-            } else {
-                // Valores padrão
+                try { localStorage.setItem('bcv_tabela_quotas', JSON.stringify(tabelaPrecosQuotas)); } catch (_) {}
+            } else if (!tabelaPrecosQuotas || Object.keys(tabelaPrecosQuotas).length === 0) {
+                // Valores padrão se não existir na BD nem na cache
                 tabelaPrecosQuotas = {};
                 ESCALOES_PADRAO.forEach(esc => {
                     tabelaPrecosQuotas[esc] = { mensal: 25.00, bianual: 120.00, anual: 230.00 };
                 });
             }
+            renderTabelaPrecos();
         } catch (e) {
-            console.warn('Tabela de quotas não encontrada na BD, usando padrão:', e);
-            tabelaPrecosQuotas = {};
-            ESCALOES_PADRAO.forEach(esc => {
-                tabelaPrecosQuotas[esc] = { mensal: 25.00, bianual: 120.00, anual: 230.00 };
-            });
+            console.warn('Erro ao carregar tabela de quotas da BD:', e);
+            if (!tabelaPrecosQuotas || Object.keys(tabelaPrecosQuotas).length === 0) {
+                tabelaPrecosQuotas = {};
+                ESCALOES_PADRAO.forEach(esc => {
+                    tabelaPrecosQuotas[esc] = { mensal: 25.00, bianual: 120.00, anual: 230.00 };
+                });
+            }
+            renderTabelaPrecos();
         }
     }
 
@@ -6273,6 +6291,7 @@ document.addEventListener('DOMContentLoaded', async () => {
             });
 
             tabelaPrecosQuotas = novaTabela;
+            try { localStorage.setItem('bcv_tabela_quotas', JSON.stringify(novaTabela)); } catch (_) {}
 
             try {
                 const { error } = await supabase
@@ -6280,10 +6299,22 @@ document.addEventListener('DOMContentLoaded', async () => {
                     .upsert({
                         chave: 'tabela_quotas',
                         dados: novaTabela,
-                        updated_at: new Date()
+                        updated_at: new Date().toISOString()
                     }, { onConflict: 'chave' });
 
                 if (error) throw error;
+
+                // Tentar guardar em configuracoes_clube como salvaguarda
+                try {
+                    await supabase.from('configuracoes_clube').upsert({
+                        chave: 'tabela_quotas',
+                        dados: novaTabela,
+                        valor: novaTabela,
+                        updated_at: new Date().toISOString()
+                    }, { onConflict: 'chave' });
+                } catch (_) {}
+
+                renderTabelaPrecos();
 
                 if (msgTabelaPrecos) {
                     msgTabelaPrecos.textContent = '✅ Tabela de preços guardada com sucesso!';

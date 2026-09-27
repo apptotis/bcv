@@ -407,6 +407,14 @@ document.addEventListener('DOMContentLoaded', () => {
 
             // 3. Carregar Tabela de Preços configurada
             try {
+                const localQuotas = localStorage.getItem('bcv_tabela_quotas');
+                if (localQuotas) {
+                    const parsed = JSON.parse(localQuotas);
+                    if (parsed && typeof parsed === 'object') tabelaPrecosQuotas = parsed;
+                }
+            } catch (_) {}
+
+            try {
                 const { data: cfgRow } = await supabase
                     .from('clube_config')
                     .select('dados')
@@ -414,6 +422,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     .maybeSingle();
                 if (cfgRow && cfgRow.dados) {
                     tabelaPrecosQuotas = typeof cfgRow.dados === 'string' ? JSON.parse(cfgRow.dados) : cfgRow.dados;
+                    try { localStorage.setItem('bcv_tabela_quotas', JSON.stringify(tabelaPrecosQuotas)); } catch (_) {}
                 }
             } catch (e) { console.warn("Tabela de quotas:", e); }
 
