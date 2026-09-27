@@ -461,6 +461,20 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     // =======================================================
+    // 3.1 ATUALIZAR TABELA DE PREÇOS OFICIAIS (TAB 3)
+    // =======================================================
+    function updatePrecosTab() {
+        const pMensal = document.getElementById('preco-mensalidade-val');
+        const pBianual = document.getElementById('preco-bianual-val');
+        const pAnual = document.getElementById('preco-anual-val');
+
+        const precos = getPrecosAtleta({ escalao: activeEscalao });
+        if (pMensal) pMensal.textContent = `${precos.mensal.toFixed(2)} €`;
+        if (pBianual) pBianual.textContent = `${precos.bianual.toFixed(2)} €`;
+        if (pAnual) pAnual.textContent = `${precos.anual.toFixed(2)} €`;
+    }
+
+    // =======================================================
     // 4. ATUALIZAR KPIS E ESTATÍSTICAS
     // =======================================================
     function updateKpis() {
