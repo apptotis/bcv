@@ -158,7 +158,7 @@ document.addEventListener('DOMContentLoaded', () => {
             };
 
             const userRole = (userProfile.role || '').toLowerCase();
-            const allowedRoles = ['pagamentos', 'tesoureiro', 'admin', 'editor'];
+            const allowedRoles = ['pagamentos', 'tesoureiro', 'diretor_pagamentos', 'diretor', 'admin', 'editor'];
 
             if (!allowedRoles.includes(userRole) && userRole !== 'admin') {
                 alert("Acesso Restrito: A sua conta não tem perfil de Responsável de Pagamentos de Escalão.");
@@ -195,8 +195,33 @@ document.addEventListener('DOMContentLoaded', () => {
                     return esc;
                 });
             } else {
-                // Responsável sem escalão ainda definido pelo admin
+                // Tentar carregar escalões vinculados no plantel (equipas_atletas) se não houver escalao_afeto explícito
                 userEscaloes = [];
+                try {
+                    let staffAtletaIds = [];
+                    const uEmail = (currentUser?.email || '').trim().toLowerCase();
+                    const uName = (userProfile?.nome || '').trim().toLowerCase();
+                    if (uEmail) {
+                        const { data: byEmail } = await supabase.from('atletasbcv').select('id').ilike('email', uEmail);
+                        if (byEmail) byEmail.forEach(a => { if (!staffAtletaIds.includes(a.id)) staffAtletaIds.push(a.id); });
+                    }
+                    if (uName) {
+                        const { data: byName } = await supabase.from('atletasbcv').select('id').ilike('nome', uName);
+                        if (byName) byName.forEach(a => { if (!staffAtletaIds.includes(a.id)) staffAtletaIds.push(a.id); });
+                    }
+                    if (staffAtletaIds.length > 0) {
+                        const { data: vinculos } = await supabase.from('equipas_atletas').select('equipa_id').in('atleta_id', staffAtletaIds);
+                        if (vinculos && vinculos.length > 0) {
+                            const eqIds = vinculos.map(v => v.equipa_id);
+                            const { data: eqs } = await supabase.from('equipasbcv').select('escalao, nome').in('id', eqIds);
+                            if (eqs && eqs.length > 0) {
+                                userEscaloes = [...new Set(eqs.map(e => e.nome || e.escalao).filter(Boolean))];
+                            }
+                        }
+                    }
+                } catch (eFallback) {
+                    console.warn("Aviso ao carregar escalões vinculados em pagamentos:", eFallback);
+                }
             }
 
             // Definir escalão ativo inicial (lembrando seleção anterior se válida)
@@ -228,6 +253,17 @@ document.addEventListener('DOMContentLoaded', () => {
         const uNome = userProfile.nome || currentUser.email.split('@')[0];
         if (headerUserName) headerUserName.textContent = uNome;
         if (drawerUserName) drawerUserName.textContent = uNome;
+
+        // Exibir atalho para Portal do Diretor se tiver perfil de diretor ou admin
+        const uRole = (userProfile.role || '').toLowerCase();
+        const drawerLinkDir = document.getElementById('drawer-link-diretor-container');
+        if (drawerLinkDir) {
+            if (uRole === 'diretor_pagamentos' || uRole === 'diretor' || uRole === 'admin') {
+                drawerLinkDir.style.display = 'block';
+            } else {
+                drawerLinkDir.style.display = 'none';
+            }
+        }
 
         updateEscalaoDisplay();
         renderMultiEscalaoSelectors();

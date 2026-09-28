@@ -84,13 +84,13 @@ document.addEventListener('DOMContentLoaded', async () => {
             }
 
             const role = (profile.role || 'admin').toLowerCase();
-            const allowedRoles = ['admin', 'editor', 'redator', 'treinador', 'diretor', 'seccionista', 'pagamentos', 'tesoureiro', 'personalizado', 'user'];
+            const allowedRoles = ['admin', 'editor', 'redator', 'treinador', 'diretor', 'seccionista', 'pagamentos', 'diretor_pagamentos', 'tesoureiro', 'personalizado', 'user'];
             const userPerms = Array.isArray(profile.permissoes) ? profile.permissoes : [];
             const isAllowed = allowedRoles.includes(role) || userPerms.length > 0 || role === 'admin';
 
             if (isAllowed) {
                 // Redirecionamento automático para portais dedicados mobile
-                if (role === 'pagamentos' || role === 'tesoureiro') {
+                if (role === 'pagamentos' || role === 'tesoureiro' || role === 'diretor_pagamentos') {
                     window.location.href = 'pagamentos.html';
                     return;
                 }
@@ -339,6 +339,12 @@ document.addEventListener('DOMContentLoaded', async () => {
             userRoleHelp.style.color = '#6b21a8';
             userRoleHelp.style.border = '1px solid #d8b4fe';
             userRoleHelp.innerHTML = '⭐ <strong>Administrador Total:</strong> Acesso ilimitado e completo a todas as páginas e menus do Painel Admin.';
+        } else if (r === 'diretor_pagamentos') {
+            userRoleHelp.style.display = 'block';
+            userRoleHelp.style.background = '#f0fdf4';
+            userRoleHelp.style.color = '#166534';
+            userRoleHelp.style.border = '1px solid #bbf7d0';
+            userRoleHelp.innerHTML = '👔💳 <strong>Diretor & Pagamentos (Mobile):</strong> Acesso total ao <strong>Portal de Pagamentos</strong> (<code>pagamentos.html</code>) para cobrança de quotas e ao <strong>Portal do Diretor</strong> (<code>diretor.html</code>) para diário de presenças, plantel e SOS dos escalões selecionados abaixo.';
         } else if (r === 'pagamentos') {
             userRoleHelp.style.display = 'block';
             userRoleHelp.style.background = '#f0f9ff';
@@ -389,7 +395,7 @@ document.addEventListener('DOMContentLoaded', async () => {
             const val = roleSelect.value;
             updateUserRoleHelp(val);
             const containerEscaloesPag = document.getElementById('container-escaloes-pagamentos');
-            if (val === 'pagamentos') {
+            if (val === 'pagamentos' || val === 'diretor_pagamentos') {
                 if (containerEscaloesPag) containerEscaloesPag.style.display = 'block';
             } else {
                 if (containerEscaloesPag) containerEscaloesPag.style.display = 'none';
@@ -680,6 +686,7 @@ document.addEventListener('DOMContentLoaded', async () => {
                 const userJson = JSON.stringify(user).replace(/'/g, "&apos;").replace(/"/g, "&quot;");
                 const uRole = (user.role || 'personalizado').toLowerCase();
                 const isAdmin = uRole === 'admin';
+                const isDiretorPag = uRole === 'diretor_pagamentos';
                 const isPagamentos = uRole === 'pagamentos' || uRole === 'tesoureiro';
                 const isDiretor = uRole === 'diretor' || uRole === 'seccionista';
                 const isTreinador = uRole === 'treinador';
@@ -692,6 +699,8 @@ document.addEventListener('DOMContentLoaded', async () => {
                 let roleBadgeHtml = '';
                 if (isAdmin) {
                     roleBadgeHtml = '<strong style="color: #7e22ce;">Admin Total</strong>';
+                } else if (isDiretorPag) {
+                    roleBadgeHtml = '<span style="background: rgba(16, 185, 129, 0.15); color: #047857; font-weight: 700; padding: 2px 8px; border-radius: 6px; font-size: 0.8rem; border: 1px solid rgba(16, 185, 129, 0.3);">👔💳 Diretor & Pagamentos</span>';
                 } else if (isPagamentos) {
                     roleBadgeHtml = '<span style="background: rgba(14, 165, 233, 0.15); color: #0284c7; font-weight: 700; padding: 2px 8px; border-radius: 6px; font-size: 0.8rem;">💶 Pagamentos</span>';
                 } else if (isDiretor) {
@@ -707,6 +716,22 @@ document.addEventListener('DOMContentLoaded', async () => {
                 let permissoesBadgeHtml = '';
                 if (isAdmin) {
                     permissoesBadgeHtml = '<span style="background: rgba(126, 34, 206, 0.12); color: #7e22ce; padding: 4px 10px; border-radius: 6px; font-weight: 700; font-size: 0.8rem; border: 1px solid rgba(126, 34, 206, 0.25);">⭐ Painel Total (Todas as Páginas & Menus)</span>';
+                } else if (isDiretorPag) {
+                    const escAfetos = (user.escalao_afeto || '').split(',').map(s => s.trim()).filter(Boolean);
+                    let escaloesHtml = '';
+                    if (escAfetos.length > 0) {
+                        escaloesHtml = escAfetos.map(e => `<span style="background: rgba(16, 185, 129, 0.12); color: #047857; font-weight: 700; padding: 2px 7px; border-radius: 4px; font-size: 0.75rem; border: 1px solid rgba(16, 185, 129, 0.3);">🏷️ ${e}</span>`).join(' ');
+                    } else {
+                        escaloesHtml = '<span style="background: #fef3c7; color: #b45309; padding: 2px 7px; border-radius: 4px; font-size: 0.75rem; border: 1px dashed #f59e0b;">⚠️ Sem escalões definidos</span>';
+                    }
+                    permissoesBadgeHtml = `
+                        <div style="display: flex; flex-direction: column; gap: 4px;">
+                            <div style="display: flex; align-items: center; gap: 6px;">
+                                <span style="background: rgba(16, 185, 129, 0.15); color: #047857; font-weight: 700; padding: 2px 8px; border-radius: 4px; font-size: 0.78rem;">📱 Pagamentos + Diretor</span>
+                            </div>
+                            <div style="display: flex; flex-wrap: wrap; gap: 4px;">${escaloesHtml}</div>
+                        </div>
+                    `;
                 } else if (isPagamentos) {
                     const escAfetos = (user.escalao_afeto || '').split(',').map(s => s.trim()).filter(Boolean);
                     let escaloesHtml = '';
@@ -828,7 +853,7 @@ document.addEventListener('DOMContentLoaded', async () => {
 
         const containerEscaloesPag = document.getElementById('container-escaloes-pagamentos');
         const checkboxesEscaloesPag = document.querySelectorAll('input[name="user_escaloes_pagamentos"]');
-        if (role === 'pagamentos') {
+        if (role === 'pagamentos' || role === 'diretor_pagamentos') {
             if (containerEscaloesPag) containerEscaloesPag.style.display = 'block';
             const escList = (user.escalao_afeto || '').split(',').map(s => s.trim().toLowerCase());
             checkboxesEscaloesPag.forEach(cb => {
@@ -900,7 +925,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         const role = roleVal || 'personalizado';
 
         let escalaoAfeto = '';
-        if (role === 'pagamentos') {
+        if (role === 'pagamentos' || role === 'diretor_pagamentos') {
             const checkedEscs = Array.from(document.querySelectorAll('input[name="user_escaloes_pagamentos"]:checked')).map(cb => cb.value);
             escalaoAfeto = checkedEscs.join(', ');
         } else if (isEditMode && editUserIdInput.dataset?.escalaoAfeto) {
@@ -912,6 +937,8 @@ document.addEventListener('DOMContentLoaded', async () => {
         let permissoes = [];
         if (role === 'admin') {
             permissoes = allModules;
+        } else if (role === 'diretor_pagamentos') {
+            permissoes = ['financeira', 'diretor_presencas'];
         } else if (role === 'pagamentos') {
             permissoes = ['financeira'];
         } else if (role === 'diretor') {
@@ -969,8 +996,8 @@ document.addEventListener('DOMContentLoaded', async () => {
             createUserMsg.classList.remove('hidden');
             
             // Sincronizar treinadores e diretores com atletasbcv
-            if (role === 'treinador' || role === 'diretor' || role === 'seccionista') {
-                await sincronizarUserComAtletas({ nome, nickname, email, telemovel, role, escalao_afeto: escalaoAfeto });
+            if (role === 'treinador' || role === 'diretor' || role === 'seccionista' || role === 'diretor_pagamentos') {
+                await sincronizarUserComAtletas({ nome, nickname, email, telemovel, role: (role === 'treinador' ? 'treinador' : 'diretor'), escalao_afeto: escalaoAfeto });
             }
 
             resetUserForm();

@@ -217,6 +217,12 @@ document.addEventListener('DOMContentLoaded', async () => {
                 } catch (eAll) {
                     console.warn("Aviso ao carregar todas equipas para admin:", eAll);
                 }
+            } else if (userEscaloes.length === 0 && userProfile.escalao_afeto) {
+                // Suporte a escalões atribuídos diretamente no perfil (Diretor & Pagamentos / Diretor)
+                const rawEscs = (userProfile.escalao_afeto || '').split(',').map(s => s.trim()).filter(Boolean);
+                if (rawEscs.length > 0) {
+                    userEscaloes = [...new Set(rawEscs)];
+                }
             }
 
             // Definir escalão ativo inicial
@@ -257,6 +263,18 @@ document.addEventListener('DOMContentLoaded', async () => {
         if (drawerUserName) {
             drawerUserName.textContent = userProfile.nome || 'Diretor';
         }
+
+        // Exibir atalho para Portal de Pagamentos se tiver perfil com essa permissão
+        const uRole = (userProfile.role || '').toLowerCase();
+        const drawerLinkPag = document.getElementById('drawer-link-pagamentos-container');
+        if (drawerLinkPag) {
+            if (uRole === 'diretor_pagamentos' || uRole === 'pagamentos' || uRole === 'admin') {
+                drawerLinkPag.style.display = 'block';
+            } else {
+                drawerLinkPag.style.display = 'none';
+            }
+        }
+
         updateHeaderBadge();
     }
 

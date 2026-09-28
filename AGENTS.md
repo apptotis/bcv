@@ -17,11 +17,7 @@
 ## Histórico de Atualizações
 - [2026-05-07 a 2026-05-27] Gemini: Inicialização do projeto, tema institucional, aniversários, scroll-padding e melhorias de navegação.
 - [2026-06-04] Gemini: Módulo Gestão de Equipas BCV no Admin, página pública equipas.html com detalhe de plantel, novos campos de atletas e remoção de sync FPB.
-- [2026-08-22] Gemini: Criação da página mobile inscricao.html (Formulário por Passos / Wizard para época 2026/2027), criação do script update_atletas_fpb_schema.sql com campos do Modelo 1 da FPB, e adição de botão para exportação em PDF da ficha oficial FPB na Gestão de Atletas do Admin.
-- [2026-08-22] Gemini: Melhorias no inscricao.html (banner recto sem cantos arredondados, autocomplete ao pesquisar atleta em tempo real e validação nativa de campos obrigatórios ao avançar de passo no wizard).
-- [2026-08-22] Gemini: Correção de erro na submissão de inscrição enviando valores predefinidos para colunas com restrição NOT NULL (equipafpb, escalao, funcao).
-- [2026-08-22] Gemini: Ocultação por defeito do formulário/card 'Adicionar Novo Atleta' na aba Atletas do Admin e resolução da geração de PDF em branco no html2pdf anexando o container ao DOM.
-- [2026-08-22] Gemini: Implementação completa da exportação em PDF do Modelo 1 da FPB no Admin usando a biblioteca pdf-lib, preenchendo de forma vetorial e nativa os campos interativos oficiais (AcroForm) do ficheiro assets/Modelo_1_FPB.pdf com os dados do atleta.
+- [2026-08-22] Gemini: Criação do wizard de inscrição (inscricao.html), script update_atletas_fpb_schema.sql e exportação vetorial de PDF do Modelo 1 FPB com pdf-lib no Admin.
 - [2026-08-23] Gemini: Remoção do campo 'Alcunha / Nome de Camisola (Nickname)' do Passo 2 (Identificação do Atleta) e limpeza do preenchimento e payload no formulário inscricao.html.
 - [2026-08-23] Gemini: Implementação completa da Inscrição Integrada em 3 Fases (1. Federação FPB, 2. Exame Médico Desportivo IPDJ com 20 perguntas, 3. Equipamento Oficial BCV), cálculo automático de escalão por data de nascimento, script SQL update_atletas_emd_equipamento.sql e exportação vetorial de PDF do Exame Médico Desportivo (ipdj-exame-medico.pdf) e gestão de equipamentos no Admin.
 - [2026-08-23] Gemini: Otimização mobile do cabeçalho de inscricao.html (nome do clube e título em linha única, remoção do texto 'Processo Integrado' e redesenho das abas das 3 fases sem corte de texto).
@@ -94,3 +90,4 @@
 - [2026-09-28] Gemini: Correção da filtragem por escalão no Admin e reformulação do filtro de serviços/produtos (Quotas, Seguro, Equipamentos, Exames EMD e Outros) em admin.html e js/admin.js.
 - [2026-09-28] Gemini: Simplificação dos cartões de atleta no Portal de Pagamentos (apenas nome) e correção de atletaPags is not defined (pagamentos.js, pagamentos.html).
 - [2026-09-28] Gemini: Separação estrita de género (Masculino vs Feminino) no carregamento de atletas por escalão (js/pagamentos.js, js/admin.js, admin.html), resolvendo a mistura de atletas em Sub 14, Sub 16 e Sub 18.
+- [2026-09-28] Gemini: Implementação do perfil de utilizador 'Diretor & Pagamentos' no Admin (admin.html, js/admin.js), com afetação de múltiplos escalões, sincronização com staff, acesso integrado e atalhos cruzados nos menus drawer dos portais mobile (pagamentos.html, diretor.html, js/pagamentos.js, js/diretor.js).
