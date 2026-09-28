@@ -1,6 +1,12 @@
 /*
   X-Content-Type-Options: nosniff
 
+/css/*
+  Cache-Control: public, max-age=0, must-revalidate
+
+/js/*
+  Cache-Control: public, max-age=0, must-revalidate
+
 /noticia*
   Cache-Control: no-cache, no-store, must-revalidate
 
