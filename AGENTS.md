@@ -96,4 +96,4 @@
 - [2026-09-28] Gemini: Correções financeiras (descontosAtletasMap, KPI Outros Serviços/Produtos), dorsal limpo em presenças e Mini 8 a nascidos em 2020.
 - [2026-09-28] Gemini: Destaque do escalão completo na 1ª linha da Agenda Desportiva no index (ex: Sub 14 Feminino) e novo layout limpo dos jogos (index.html, style.css, main.js).
 - [2026-09-28] Gemini: Integração de emblemas oficiais das equipas da FPB na Agenda, Resultados e Competições, mapeamento automático, parsers de sync e setup_logos_equipas.sql.
-- [2026-09-28] Gemini: Redesign dos cards de Agenda/Resultados com logos centrados (LOGO 1 vs LOGO 2), nomes por baixo, correção de cascata CSS mobile e cache-busting (v=20260928_2345).
+- [2026-09-28] Gemini: Agrupamento compacto e centrado do bloco (LOGO 1 - VS - LOGO 2) com nomes por baixo em grelha 50/50 e cache-busting v=20260928_2350.
