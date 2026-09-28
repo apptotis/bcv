@@ -4293,12 +4293,16 @@ document.addEventListener('DOMContentLoaded', async () => {
 
                 const team1Match = gameContent.match(/class="team-container align-self-center">[\s\S]*?class="fullName">([^<]+)<\/span>/i);
                 const team1 = team1Match ? team1Match[1].trim() : '';
+                const logo1Match = gameContent.match(/class="team-container align-self-center">[\s\S]*?<img[^>]+src="([^">]+)"/i);
+                const logo1 = logo1Match ? logo1Match[1].trim() : null;
 
                 const hourMatch = gameContent.match(/<div class="hour align-self-center">[\s\S]*?<h3>([\s\S]*?)<\/h3>/i);
                 const rawHour = hourMatch ? hourMatch[1].replace(/<[^>]+>/g, '').trim() : '';
 
                 const team2Match = gameContent.match(/class="team-container right align-self-center">[\s\S]*?class="fullName">([^<]+)<\/span>/i);
                 const team2 = team2Match ? team2Match[1].trim() : '';
+                const logo2Match = gameContent.match(/class="team-container right align-self-center">[\s\S]*?<img[^>]+src="([^">]+)"/i);
+                const logo2 = logo2Match ? logo2Match[1].trim() : null;
 
                 const locMatch = gameContent.match(/<div class="location-wrapper[^"]*">[\s\S]*?<b>([\s\S]*?)<\/b>/i);
                 const local = locMatch ? locMatch[1].replace(/\s+/g, ' ').trim() : '';
@@ -4344,7 +4348,9 @@ document.addEventListener('DOMContentLoaded', async () => {
                     pontos_fora: pontosFora,
                     local: local,
                     competicao: rawComp,
-                    escalao: escalao
+                    escalao: escalao,
+                    logo_casa: logo1,
+                    logo_fora: logo2
                 });
             }
         }

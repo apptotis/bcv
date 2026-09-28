@@ -161,6 +161,41 @@ async function loadPortalHighlights(supabase) {
         }
     }
 
+    const FPB_CLUB_LOGOS = {
+        'bc valença': 'https://sav2.fpb.pt/uploads/clubes/logotipo/CLU_6561737484866.png',
+        'cb viana': 'https://sav2.fpb.pt/old_uploads/CLU/CLU_723_LOGO.jpg',
+        'monção bc': 'https://sav2.fpb.pt/uploads/clubes/logotipo/CLU_8801736270009.png',
+        'famalicense ac': 'https://sav2.fpb.pt/uploads/clubes/logotipo/CLU_691693656807.png',
+        'famalicense ac - b': 'https://sav2.fpb.pt/uploads/clubes/logotipo/CLU_691693656807.png',
+        'bc limiense': 'https://sav2.fpb.pt/old_uploads/CLU/CLU_2920_LOGO.png',
+        'bc limiense - b': 'https://sav2.fpb.pt/old_uploads/CLU/CLU_2920_LOGO.png',
+        'restauradores da granja': 'https://sav2.fpb.pt/uploads/clubes/logotipo/CLU_28191667463213.jpg',
+        'futebol clube de vizela': 'https://sav2.fpb.pt/uploads/clubes/logotipo/CLU_33981702573447.png',
+        'fc vizela': 'https://sav2.fpb.pt/uploads/clubes/logotipo/CLU_33981702573447.png',
+        'caas padaria ribeiro': 'https://sav2.fpb.pt/uploads/clubes/logotipo/Centro_dos_Antigos_Alunos_Salesianos1639227568.png',
+        'sc braga b': 'https://sav2.fpb.pt/uploads/clubes/logotipo/CLU_24041710324824.png',
+        'sc braga': 'https://sav2.fpb.pt/uploads/clubes/logotipo/CLU_24041710324824.png',
+        'barca bc': 'https://sav2.fpb.pt/uploads/clubes/logotipo/Barca_Basket_Clube1639920613.png',
+        'sc maria da fonte': 'https://sav2.fpb.pt/uploads/clubes/logotipo/Sport_Clube_Maria_da_Fonte1639174733.png',
+        'cdj régio': 'https://sav2.fpb.pt/uploads/clubes/logotipo/CLU_3041717586387.png'
+    };
+
+    function obterLogoEquipa(nomeEquipa, dbLogo) {
+        if (dbLogo && typeof dbLogo === 'string' && dbLogo.trim().startsWith('http')) {
+            return dbLogo.trim();
+        }
+        if (!nomeEquipa) return '';
+        const norm = nomeEquipa.toLowerCase().trim();
+        if (FPB_CLUB_LOGOS[norm]) return FPB_CLUB_LOGOS[norm];
+
+        for (const [chave, url] of Object.entries(FPB_CLUB_LOGOS)) {
+            if (norm.includes(chave) || chave.includes(norm)) {
+                return url;
+            }
+        }
+        return '';
+    }
+
     // 1. CARREGAR AGENDA (Próximos Jogos)
     if (agendaContainer) {
         try {
@@ -186,6 +221,8 @@ async function loadPortalHighlights(supabase) {
                     const horaJogo = jogo.hora_jogo ? jogo.hora_jogo.trim() : '';
                     const isCasaBCV = (jogo.equipa_casa || '').toLowerCase().includes('valença') || (jogo.equipa_casa || '').toLowerCase().includes('bcv');
                     const isForaBCV = (jogo.equipa_fora || '').toLowerCase().includes('valença') || (jogo.equipa_fora || '').toLowerCase().includes('bcv');
+                    const logoCasa = obterLogoEquipa(jogo.equipa_casa, jogo.logo_casa);
+                    const logoFora = obterLogoEquipa(jogo.equipa_fora, jogo.logo_fora);
 
                     const item = document.createElement('div');
                     item.className = 'game-schedule-item';
@@ -195,9 +232,15 @@ async function loadPortalHighlights(supabase) {
                             <span class="game-date-badge">📅 ${dataJogo} ${horaJogo ? '• ' + horaJogo : ''}</span>
                         </div>
                         <div class="game-schedule-teams">
-                            <span class="team-name ${isCasaBCV ? 'team-bcv' : ''}">${jogo.equipa_casa}</span>
+                            <div class="team-item ${isCasaBCV ? 'team-bcv' : ''}">
+                                ${logoCasa ? `<img src="${logoCasa}" alt="${jogo.equipa_casa}" class="team-logo-icon" onerror="this.style.display='none'">` : ''}
+                                <span class="team-name">${jogo.equipa_casa}</span>
+                            </div>
                             <span class="game-vs-tag">vs</span>
-                            <span class="team-name ${isForaBCV ? 'team-bcv' : ''}">${jogo.equipa_fora}</span>
+                            <div class="team-item ${isForaBCV ? 'team-bcv' : ''}">
+                                ${logoFora ? `<img src="${logoFora}" alt="${jogo.equipa_fora}" class="team-logo-icon" onerror="this.style.display='none'">` : ''}
+                                <span class="team-name">${jogo.equipa_fora}</span>
+                            </div>
                         </div>
                         <div class="game-schedule-venue">
                             <span>📍 ${jogo.local || 'Pavilhão Municipal de Valença'}</span>
@@ -231,8 +274,11 @@ async function loadPortalHighlights(supabase) {
                     const dataJogo = formatDataAgenda(resultado.data_jogo);
                     const ptsCasa = Number(resultado.pontos_casa) || 0;
                     const ptsFora = Number(resultado.pontos_fora) || 0;
-                    
                     const scoreFormatted = `${ptsCasa} - ${ptsFora}`;
+                    const isCasaBCV = (resultado.equipa_casa || '').toLowerCase().includes('valença') || (resultado.equipa_casa || '').toLowerCase().includes('bcv');
+                    const isForaBCV = (resultado.equipa_fora || '').toLowerCase().includes('valença') || (resultado.equipa_fora || '').toLowerCase().includes('bcv');
+                    const logoCasa = obterLogoEquipa(resultado.equipa_casa, resultado.logo_casa);
+                    const logoFora = obterLogoEquipa(resultado.equipa_fora, resultado.logo_fora);
 
                     const item = document.createElement('div');
                     item.className = 'game-result-item';
@@ -242,9 +288,15 @@ async function loadPortalHighlights(supabase) {
                             <span style="font-size: 0.76rem; color: var(--text-secondary); font-weight: 600;">📅 ${dataJogo}</span>
                         </div>
                         <div class="game-result-teams">
-                            <span style="flex: 1; min-width: 80px;">${resultado.equipa_casa}</span>
+                            <div class="team-item ${isCasaBCV ? 'team-bcv' : ''}" style="flex: 1; min-width: 80px;">
+                                ${logoCasa ? `<img src="${logoCasa}" alt="${resultado.equipa_casa}" class="team-logo-icon" onerror="this.style.display='none'">` : ''}
+                                <span class="team-name">${resultado.equipa_casa}</span>
+                            </div>
                             <span class="game-result-score">${scoreFormatted}</span>
-                            <span style="flex: 1; text-align: right; min-width: 80px;">${resultado.equipa_fora}</span>
+                            <div class="team-item ${isForaBCV ? 'team-bcv' : ''}" style="flex: 1; justify-content: flex-end; min-width: 80px;">
+                                <span class="team-name" style="text-align: right;">${resultado.equipa_fora}</span>
+                                ${logoFora ? `<img src="${logoFora}" alt="${resultado.equipa_fora}" class="team-logo-icon" onerror="this.style.display='none'">` : ''}
+                            </div>
                         </div>
                     `;
                     resultadosContainer.appendChild(item);

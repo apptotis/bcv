@@ -93,7 +93,6 @@
 - [2026-09-28] Gemini: Implementação do módulo Movimentos de Tesouraria em substituição do Extrato de Escalão no Portal de Pagamentos (pagamentos.html, js/pagamentos.js, pagamentos.css) com apuramento de numerário em posse, registo de entrega à tesouraria, emissão de recibo/comprovativo oficial e auditoria central no Admin (admin.html, js/admin.js, setup_movimentos_tesouraria.sql).
 - [2026-09-28] Gemini: Simplificação global dos fluxos de pagamento para Dinheiro (numerário) exclusivo: eliminação dos métodos MBWay/Transferência/Outro e filtros associados nos modais e tabelas (pagamentos.html, pagamentos.js, admin.html, admin.js).
 - [2026-09-28] Gemini: Implementação do sistema de desconto de mensalidades (50% e personalizado) com gestão no Admin (subfin-descontos, modal de atribuição e KPIs), cálculo e abatimento automático na cobrança mobile (pagamentos.html/js) e admin, badges visuais e setup_atletas_descontos.sql.
-- [2026-09-28] Gemini: Declaração de descontosAtletasMap no escopo financeiro de js/admin.js resolvendo erro de referência no carregamento de pagamentos.
-- [2026-09-28] Gemini: Criação do KPI 'Outros Serviços/Produtos' na Gestão Financeira (admin.html, js/admin.js) e separação estrita nos cálculos entre Quotas Anuais, Mensalidades e Encargos/Serviços.
-- [2026-09-28] Gemini: Simplificação do badge de número do atleta no histórico de presenças e atribuição de Mini 8 aos nascidos em 2020 (inscricao.html e BD).
+- [2026-09-28] Gemini: Correções financeiras (descontosAtletasMap, KPI Outros Serviços/Produtos), dorsal limpo em presenças e Mini 8 a nascidos em 2020.
 - [2026-09-28] Gemini: Destaque do escalão completo na 1ª linha da Agenda Desportiva no index (ex: Sub 14 Feminino) e novo layout limpo dos jogos (index.html, style.css, main.js).
+- [2026-09-28] Gemini: Integração de emblemas oficiais das equipas da FPB na Agenda e Resultados, mapeamento automático, parsers de sync e setup_logos_equipas.sql.
