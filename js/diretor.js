@@ -348,30 +348,14 @@ document.addEventListener('DOMContentLoaded', async () => {
         }
     }
 
-    // Renderizar seletores de equipa quando o diretor tem 2 ou mais escalões
+    // Renderizar seletores de equipa quando o diretor tem 2 ou mais escalões (no Menu Drawer)
     function renderEscalaoSelectors() {
         if (userEscaloes.length <= 1) {
-            if (multiEscalaoBar) multiEscalaoBar.style.display = 'none';
             if (drawerSectionEscaloes) drawerSectionEscaloes.style.display = 'none';
             return;
         }
 
-        // 1. Renderizar Barra Horizontal no Topo
-        if (multiEscalaoBar && multiEscalaoPills) {
-            multiEscalaoBar.style.display = 'flex';
-            multiEscalaoPills.innerHTML = userEscaloes.map(esc => {
-                const isActive = esc.toLowerCase() === activeEscalao.toLowerCase();
-                return `
-                    <button type="button" class="pill-escalao ${isActive ? 'active' : ''}" onclick="window.switchEscalao('${esc}')">
-                        <span>🏀</span>
-                        <span>${esc}</span>
-                        ${isActive ? '<span>✓</span>' : ''}
-                    </button>
-                `;
-            }).join('');
-        }
-
-        // 2. Renderizar no Drawer Menu
+        // Renderizar no Drawer Menu
         if (drawerSectionEscaloes && drawerEscaloesList) {
             drawerSectionEscaloes.style.display = 'block';
             drawerEscaloesList.innerHTML = userEscaloes.map(esc => {
@@ -418,6 +402,14 @@ document.addEventListener('DOMContentLoaded', async () => {
 
     if (btnOpenDrawer) btnOpenDrawer.addEventListener('click', openDrawer);
     if (btnCloseDrawer) btnCloseDrawer.addEventListener('click', closeDrawer);
+    if (headerEscalaoBadge) {
+        headerEscalaoBadge.style.cursor = 'pointer';
+        headerEscalaoBadge.addEventListener('click', () => {
+            if (userEscaloes && userEscaloes.length > 1) {
+                openDrawer();
+            }
+        });
+    }
     if (drawerOverlay) {
         drawerOverlay.addEventListener('click', (e) => {
             if (e.target === drawerOverlay) closeDrawer();
