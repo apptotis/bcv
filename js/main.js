@@ -233,14 +233,20 @@ async function loadPortalHighlights(supabase) {
                             <span class="game-escalao-badge">🏀 ${escalaoCompleto}</span>
                             <span class="game-date-badge">📅 ${dataJogo} ${horaJogo ? '• ' + horaJogo : ''}</span>
                         </div>
-                        <div class="game-schedule-teams">
-                            <div class="team-item ${isCasaBCV ? 'team-bcv' : ''}">
-                                ${logoCasa ? `<img src="${logoCasa}" alt="${jogo.equipa_casa}" class="team-logo-icon" onerror="this.style.display='none'">` : ''}
+                        <div class="game-matchup-container">
+                            <div class="team-match-box team-casa ${isCasaBCV ? 'team-bcv' : ''}">
+                                <div class="team-logo-wrap">
+                                    ${logoCasa ? `<img src="${logoCasa}" alt="${jogo.equipa_casa}" class="team-logo-large" onerror="this.parentElement.innerHTML='🏀'">` : '<span class="team-logo-placeholder">🏀</span>'}
+                                </div>
                                 <span class="team-name">${jogo.equipa_casa}</span>
                             </div>
-                            <span class="game-vs-tag">vs</span>
-                            <div class="team-item ${isForaBCV ? 'team-bcv' : ''}">
-                                ${logoFora ? `<img src="${logoFora}" alt="${jogo.equipa_fora}" class="team-logo-icon" onerror="this.style.display='none'">` : ''}
+                            <div class="match-vs-wrap">
+                                <span class="game-vs-tag">vs</span>
+                            </div>
+                            <div class="team-match-box team-fora ${isForaBCV ? 'team-bcv' : ''}">
+                                <div class="team-logo-wrap">
+                                    ${logoFora ? `<img src="${logoFora}" alt="${jogo.equipa_fora}" class="team-logo-large" onerror="this.parentElement.innerHTML='🏀'">` : '<span class="team-logo-placeholder">🏀</span>'}
+                                </div>
                                 <span class="team-name">${jogo.equipa_fora}</span>
                             </div>
                         </div>
@@ -285,19 +291,25 @@ async function loadPortalHighlights(supabase) {
                     const item = document.createElement('div');
                     item.className = 'game-result-item';
                     item.innerHTML = `
-                        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px;">
-                            <span class="game-escalao-badge" style="font-size: 0.76rem;">🏀 ${escalaoCompleto}</span>
-                            <span style="font-size: 0.76rem; color: var(--text-secondary); font-weight: 600;">📅 ${dataJogo}</span>
+                        <div class="game-result-top">
+                            <span class="game-escalao-badge">🏀 ${escalaoCompleto}</span>
+                            <span class="game-date-badge">📅 ${dataJogo}</span>
                         </div>
-                        <div class="game-result-teams">
-                            <div class="team-item ${isCasaBCV ? 'team-bcv' : ''}" style="flex: 1; min-width: 80px;">
-                                ${logoCasa ? `<img src="${logoCasa}" alt="${resultado.equipa_casa}" class="team-logo-icon" onerror="this.style.display='none'">` : ''}
+                        <div class="game-matchup-container">
+                            <div class="team-match-box team-casa ${isCasaBCV ? 'team-bcv' : ''}">
+                                <div class="team-logo-wrap">
+                                    ${logoCasa ? `<img src="${logoCasa}" alt="${resultado.equipa_casa}" class="team-logo-large" onerror="this.parentElement.innerHTML='🏀'">` : '<span class="team-logo-placeholder">🏀</span>'}
+                                </div>
                                 <span class="team-name">${resultado.equipa_casa}</span>
                             </div>
-                            <span class="game-result-score">${scoreFormatted}</span>
-                            <div class="team-item ${isForaBCV ? 'team-bcv' : ''}" style="flex: 1; justify-content: flex-end; min-width: 80px;">
-                                <span class="team-name" style="text-align: right;">${resultado.equipa_fora}</span>
-                                ${logoFora ? `<img src="${logoFora}" alt="${resultado.equipa_fora}" class="team-logo-icon" onerror="this.style.display='none'">` : ''}
+                            <div class="match-vs-wrap">
+                                <span class="game-result-score">${scoreFormatted}</span>
+                            </div>
+                            <div class="team-match-box team-fora ${isForaBCV ? 'team-bcv' : ''}">
+                                <div class="team-logo-wrap">
+                                    ${logoFora ? `<img src="${logoFora}" alt="${resultado.equipa_fora}" class="team-logo-large" onerror="this.parentElement.innerHTML='🏀'">` : '<span class="team-logo-placeholder">🏀</span>'}
+                                </div>
+                                <span class="team-name">${resultado.equipa_fora}</span>
                             </div>
                         </div>
                     `;

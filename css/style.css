@@ -719,9 +719,16 @@ img {
     gap: 20px;
 }
 
+.portal-games-list {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
 @media (max-width: 768px) {
     .portal-highlights-grid {
         grid-template-columns: 1fr;
+        gap: 12px;
     }
 }
 
@@ -736,6 +743,108 @@ img {
     display: flex;
     flex-direction: column;
     position: relative;
+}
+
+@media (max-width: 768px) {
+    .portal-card {
+        padding: 12px 10px;
+    }
+
+    .portal-card-header {
+        margin-bottom: 10px;
+        gap: 8px;
+    }
+
+    .portal-card-header .card-icon-badge {
+        width: 32px;
+        height: 32px;
+        font-size: 1rem;
+    }
+
+    .portal-card-header .card-title {
+        font-size: 1.02rem;
+    }
+
+    .portal-card-header .card-subtitle {
+        font-size: 0.74rem;
+    }
+
+    .portal-games-list {
+        gap: 6px;
+    }
+
+    .game-schedule-item,
+    .game-result-item {
+        padding: 8px 8px;
+        margin-bottom: 0;
+        gap: 4px;
+    }
+
+    .game-schedule-top,
+    .game-result-top {
+        gap: 4px;
+    }
+
+    .game-escalao-badge {
+        font-size: 0.72rem;
+        padding: 2px 6px;
+    }
+
+    .game-date-badge {
+        font-size: 0.72rem;
+        padding: 2px 6px;
+    }
+
+    .game-matchup-container {
+        gap: 6px;
+        padding: 2px 0;
+    }
+
+    .team-logo-wrap {
+        width: 36px;
+        height: 36px;
+        border-radius: 8px;
+        padding: 2px;
+    }
+
+    .match-vs-wrap {
+        height: 36px;
+    }
+
+    .team-match-box .team-name {
+        font-size: 0.82rem;
+        margin-top: 4px;
+        line-height: 1.2;
+    }
+
+    .game-schedule-venue {
+        font-size: 0.72rem;
+        margin-top: 2px;
+    }
+}
+
+@media (max-width: 420px) {
+    .portal-card {
+        padding: 10px 8px;
+    }
+
+    .game-schedule-item,
+    .game-result-item {
+        padding: 7px 6px;
+    }
+
+    .team-logo-wrap {
+        width: 32px;
+        height: 32px;
+    }
+
+    .match-vs-wrap {
+        height: 32px;
+    }
+
+    .team-match-box .team-name {
+        font-size: 0.78rem;
+    }
 }
 
 .portal-card:hover {
@@ -778,32 +887,36 @@ img {
     margin-top: 1px;
 }
 
-/* Itens de Agenda */
-.game-schedule-item {
-    padding: 12px 14px;
+/* Itens de Agenda e Resultados */
+.game-schedule-item,
+.game-result-item {
+    padding: 10px 12px;
     background: #f8fafc;
     border: 1px solid var(--border-color);
     border-radius: 8px;
-    margin-bottom: 10px;
+    margin-bottom: 8px;
     transition: all 0.2s ease;
     display: flex;
     flex-direction: column;
     gap: 6px;
 }
 
-.game-schedule-item:last-child {
+.game-schedule-item:last-child,
+.game-result-item:last-child {
     margin-bottom: 0;
 }
 
-.game-schedule-item:hover {
+.game-schedule-item:hover,
+.game-result-item:hover {
     background: #ffffff;
     border-color: var(--accent-primary);
     transform: translateY(-2px);
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.04);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
 }
 
 /* 1ª Linha: Escalão da Competição + Data e Horário */
-.game-schedule-top {
+.game-schedule-top,
+.game-result-top {
     display: flex;
     justify-content: space-between;
     align-items: center;
@@ -812,11 +925,11 @@ img {
 }
 
 .game-escalao-badge {
-    font-size: 0.8rem;
+    font-size: 0.78rem;
     font-weight: 800;
     color: #7e22ce;
     background: rgba(126, 34, 206, 0.1);
-    padding: 3px 9px;
+    padding: 3px 8px;
     border-radius: 6px;
     letter-spacing: 0.2px;
     display: inline-flex;
@@ -825,7 +938,7 @@ img {
 }
 
 .game-date-badge {
-    font-size: 0.78rem;
+    font-size: 0.76rem;
     font-weight: 700;
     color: #0f172a;
     background: #e2e8f0;
@@ -834,45 +947,106 @@ img {
     white-space: nowrap;
 }
 
-/* 2ª Linha: Confronto das Equipas */
-.game-schedule-teams {
-    display: flex;
-    align-items: center;
+/* 2ª Linha: Confronto Centrado (Logo Grande + Nome por baixo) */
+.game-matchup-container {
+    display: grid;
+    grid-template-columns: 1fr auto 1fr;
+    align-items: start;
     gap: 8px;
-    font-size: 0.95rem;
-    font-weight: 700;
-    color: var(--text-primary);
-    padding: 3px 0;
+    padding: 4px 0 2px;
 }
 
-.team-item {
+.team-match-box {
     display: flex;
-    align-items: center;
-    gap: 7px;
-    flex: 1;
+    flex-direction: column;
     min-width: 0;
+    cursor: default;
 }
 
-.team-logo-icon {
-    width: 22px;
-    height: 22px;
-    object-fit: contain;
-    border-radius: 4px;
-    background: #ffffff;
-    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
-    flex-shrink: 0;
-    padding: 1px;
+/* Equipa 1 (Casa): Logo centrado na coluna, Nome alinhado à direita */
+.team-match-box.team-casa {
+    align-items: center;
 }
 
-.team-name {
-    flex: 1;
-    word-break: break-word;
+.team-match-box.team-casa .team-name {
+    width: 100%;
+    text-align: right;
+    font-size: 0.88rem;
+    font-weight: 700;
     line-height: 1.25;
+    margin-top: 6px;
+    color: var(--text-primary);
+    word-break: break-word;
 }
 
-.team-name.team-bcv, .team-item.team-bcv .team-name {
+/* Equipa 2 (Fora): Logo centrado na coluna, Nome alinhado à esquerda */
+.team-match-box.team-fora {
+    align-items: center;
+}
+
+.team-match-box.team-fora .team-name {
+    width: 100%;
+    text-align: left;
+    font-size: 0.88rem;
+    font-weight: 700;
+    line-height: 1.25;
+    margin-top: 6px;
+    color: var(--text-primary);
+    word-break: break-word;
+}
+
+/* Destaque para o BC Valença */
+.team-match-box.team-bcv .team-name {
     color: #7e22ce;
     font-weight: 800;
+}
+
+/* Caixa do Logotipo Grande */
+.team-logo-wrap {
+    width: 42px;
+    height: 42px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: #ffffff;
+    border-radius: 10px;
+    padding: 3px;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.08);
+    border: 1px solid rgba(0, 0, 0, 0.06);
+    flex-shrink: 0;
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.team-match-box:hover .team-logo-wrap {
+    transform: scale(1.08);
+    box-shadow: 0 3px 8px rgba(0, 0, 0, 0.12);
+}
+
+.team-match-box.team-bcv .team-logo-wrap {
+    border-color: rgba(126, 34, 206, 0.25);
+    box-shadow: 0 2px 8px rgba(126, 34, 206, 0.15);
+}
+
+.team-logo-large {
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+    border-radius: 4px;
+}
+
+.team-logo-placeholder {
+    font-size: 1.2rem;
+    line-height: 1;
+}
+
+/* Elemento Central: VS ou Placar alinhado com a altura dos logos */
+.match-vs-wrap {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    height: 42px;
+    flex-shrink: 0;
+    padding: 0 4px;
 }
 
 .game-vs-tag {
@@ -881,59 +1055,32 @@ img {
     text-transform: uppercase;
     color: var(--text-secondary);
     background: #f1f5f9;
-    padding: 1px 6px;
-    border-radius: 4px;
-    border: 1px solid rgba(0, 0, 0, 0.06);
-    flex-shrink: 0;
-}
-
-/* 3ª Linha: Localização */
-.game-schedule-venue {
-    font-size: 0.78rem;
-    color: var(--text-secondary);
-    display: flex;
-    align-items: center;
-    gap: 4px;
-}
-
-/* Itens de Resultados */
-.game-result-item {
-    padding: 12px 14px;
-    background: #f8fafc;
-    border: 1px solid var(--border-color);
-    border-radius: 8px;
-    margin-bottom: 10px;
-    transition: all 0.2s ease;
-}
-
-.game-result-item:last-child {
-    margin-bottom: 0;
-}
-
-.game-result-item:hover {
-    background: #ffffff;
-    border-color: var(--accent-primary);
-    transform: translateX(3px);
-}
-
-.game-result-teams {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    font-size: 0.95rem;
-    font-weight: 700;
-    color: var(--text-primary);
-    margin-bottom: 4px;
+    padding: 2px 8px;
+    border-radius: 12px;
+    border: 1px solid #e2e8f0;
+    letter-spacing: 0.5px;
 }
 
 .game-result-score {
     font-family: var(--font-heading);
-    font-size: 1rem;
+    font-size: 0.92rem;
     font-weight: 800;
-    color: var(--accent-primary);
-    background: rgba(126, 34, 206, 0.08);
-    padding: 2px 8px;
-    border-radius: 6px;
+    color: #ffffff;
+    background: linear-gradient(135deg, #15803d, #16a34a);
+    padding: 3px 10px;
+    border-radius: 12px;
+    letter-spacing: 0.5px;
+    white-space: nowrap;
+    box-shadow: 0 2px 4px rgba(22, 163, 74, 0.25);
+}
+
+/* 3ª Linha: Localização */
+.game-schedule-venue {
+    font-size: 0.76rem;
+    color: var(--text-secondary);
+    display: flex;
+    align-items: center;
+    gap: 4px;
 }
 
 
