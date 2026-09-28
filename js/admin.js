@@ -6030,7 +6030,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     // 16. GESTÃO FINANCEIRA & TABELA DE PREÇOS
     // ====================================================================
     let currentFinanceiraPagamentos = [];
-    const ESCALOES_PADRAO = ['BabyBasket', 'Mini 8', 'Mini 10', 'Mini 12', 'Sub 14', 'Sub 16', 'Sub 18', 'Sub 20', 'Seniores', 'Veteranos'];
+    const ESCALOES_PADRAO = ['BabyBasket', 'Mini 8', 'Mini 10', 'Mini 12', 'Sub 14', 'Sub 16', 'Sub 18'];
     let tabelaPrecosQuotas = {};
 
     const btnSubfins = document.querySelectorAll('.btn-subfin');

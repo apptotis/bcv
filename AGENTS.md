@@ -96,3 +96,4 @@
 - [2026-09-28] Gemini: Remoção do card de equipa ativa no topo do Portal do Diretor (diretor.html, js/diretor.js), mantendo a alternância de múltiplos escalões de forma limpa no Menu Lateral (Drawer) e badge do cabeçalho.
 - [2026-09-28] Gemini: Limpeza e reinicialização completa dos registos de pagamento de teste na tabela mensalidades do Supabase.
 - [2026-09-28] Gemini: Correção da Tabela de Preços e cobrança (pagamentos.html, js/pagamentos.js): correspondência normalizada de escalões (eliminando divergência de género em Sub 14/16/18/Seniores), seletor dinâmico de escalão na aba e exibição correta de quotas e produtos.
+- [2026-09-28] Gemini: Remoção dos escalões Sub 20, Seniores Masculinos e Seniores Femininos dos módulos de pagamentos, preçários e afetação de utilizadores (admin.html, js/admin.js, pagamentos.html, js/pagamentos.js).

@@ -208,7 +208,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 return;
             }
 
-            // Lista completa de todos os escalões padrão do clube
+            // Lista completa de todos os escalões padrão do clube para pagamentos
             const ESCALOES_PADRAO_BCV = [
                 'BabyBasket',
                 'Mini 8',
@@ -219,13 +219,17 @@ document.addEventListener('DOMContentLoaded', () => {
                 'Sub 16 Masculino',
                 'Sub 16 Feminino',
                 'Sub 18 Masculino',
-                'Sub 18 Feminino',
-                'Sub 20',
-                'Seniores'
+                'Sub 18 Feminino'
             ];
 
+            const ESCALOES_REMOVIDOS = ['sub20', 'sub-20', 'seniores', 'senioresmasculinos', 'senioresfemininos', 'veteranos'];
+
             // Processar escalões atribuídos (separados por vírgula em escalao_afeto)
-            const rawEscaloes = (userProfile.escalao_afeto || '').split(',').map(s => s.trim()).filter(Boolean);
+            const rawEscaloes = (userProfile.escalao_afeto || '')
+                .split(',')
+                .map(s => s.trim())
+                .filter(Boolean)
+                .filter(esc => !ESCALOES_REMOVIDOS.includes(normalizeEscalao(esc)));
             
             if (userRole === 'admin') {
                 // Administrador tem sempre acesso total e irrestrito a todos os escalões do clube
@@ -605,8 +609,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     'BabyBasket', 'Mini 8', 'Mini 10', 'Mini 12',
                     'Sub 14 Masculino', 'Sub 14 Feminino',
                     'Sub 16 Masculino', 'Sub 16 Feminino',
-                    'Sub 18 Masculino', 'Sub 18 Feminino',
-                    'Sub 20', 'Seniores Masculinos', 'Seniores Femininos'
+                    'Sub 18 Masculino', 'Sub 18 Feminino'
                 ];
                 selectEscalao.innerHTML = listToUse.map(e => `
                     <option value="${e}" ${matchesEscalao(e, currentTarget) ? 'selected' : ''}>${e}</option>
