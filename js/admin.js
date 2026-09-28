@@ -15,6 +15,10 @@ document.addEventListener('DOMContentLoaded', async () => {
     const btnLogin = document.getElementById('btn-login');
     const adminNameSpan = document.getElementById('admin-name');
 
+    // Estado Global de Atletas
+    let currentAtletas = [];
+    window.currentAtletas = currentAtletas;
+
     // Helper: Sanitização HTML segura
     function escapeHtml(str) {
         if (str === null || str === undefined) return '';
@@ -5728,9 +5732,10 @@ document.addEventListener('DOMContentLoaded', async () => {
 
         try {
             // 1. Carregar atletas para cruzar nomes e fotos
-            if (currentAtletas.length === 0) {
+            if (!currentAtletas || currentAtletas.length === 0) {
                 const { data: atls } = await supabase.from('atletasbcv').select('*');
                 currentAtletas = atls || [];
+                window.currentAtletas = currentAtletas;
             }
 
             // 2. Carregar presenças
@@ -6043,9 +6048,10 @@ document.addEventListener('DOMContentLoaded', async () => {
 
         try {
             // 1. Carregar atletas se necessário
-            if (currentAtletas.length === 0) {
+            if (!currentAtletas || currentAtletas.length === 0) {
                 const { data: atls } = await supabase.from('atletasbcv').select('*');
                 currentAtletas = atls || [];
+                window.currentAtletas = currentAtletas;
             }
 
             // 2. Carregar Tabela de Preços configurada
@@ -6086,7 +6092,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         const fSearch = (finFilterSearch?.value || '').toLowerCase().trim();
 
         const atletaMap = {};
-        currentAtletas.forEach(a => { atletaMap[a.id] = a; });
+        (currentAtletas || []).forEach(a => { atletaMap[a.id] = a; });
 
         let filtrados = currentFinanceiraPagamentos.filter(p => {
             const atleta = atletaMap[p.atleta_id] || {};
@@ -6152,10 +6158,16 @@ document.addEventListener('DOMContentLoaded', async () => {
                 conceitoHtml = `<span style="background: rgba(2, 132, 199, 0.12); color: #0284c7; font-weight: 700; padding: 2px 8px; border-radius: 4px; font-size: 0.75rem; border: 1px solid rgba(2, 132, 199, 0.3);">🎽 ${p.descricao || 'Equipamento'}</span>`;
             } else if (cat === 'Exame Médico') {
                 conceitoHtml = `<span style="background: rgba(16, 185, 129, 0.12); color: #059669; font-weight: 700; padding: 2px 8px; border-radius: 4px; font-size: 0.75rem; border: 1px solid rgba(16, 185, 129, 0.3);">🩺 ${p.descricao || 'Exame Médico'}</span>`;
+            } else if (cat === 'Inscrição' || cat === 'Seguro') {
+                conceitoHtml = `<span style="background: rgba(14, 165, 233, 0.12); color: #0284c7; font-weight: 700; padding: 2px 8px; border-radius: 4px; font-size: 0.75rem; border: 1px solid rgba(14, 165, 233, 0.3);">🛡️ ${p.descricao || 'Inscrição / Seguro'}</span>`;
             } else if (cat === 'Outro') {
                 conceitoHtml = `<span style="background: rgba(245, 158, 11, 0.12); color: #d97706; font-weight: 700; padding: 2px 8px; border-radius: 4px; font-size: 0.75rem; border: 1px solid rgba(245, 158, 11, 0.3);">📦 ${p.descricao || 'Outro'}</span>`;
             } else if (isAnual) {
                 conceitoHtml = '<span style="background: rgba(126, 34, 206, 0.12); color: #7e22ce; font-weight: 700; padding: 2px 8px; border-radius: 4px; font-size: 0.75rem; border: 1px solid rgba(126, 34, 206, 0.3);">⭐ Quota Anual Completa</span>';
+            } else if (p.mes === 'BIANUAL') {
+                conceitoHtml = '<span style="background: rgba(22, 163, 74, 0.12); color: #16a34a; font-weight: 700; padding: 2px 8px; border-radius: 4px; font-size: 0.75rem; border: 1px solid rgba(22, 163, 74, 0.3);">🌿 Quota Bianual</span>';
+            } else if (p.descricao) {
+                conceitoHtml = `<span style="background: #f1f5f9; padding: 2px 8px; border-radius: 4px; font-size: 0.78rem; font-weight: 600;">🏷️ ${p.descricao}</span>`;
             } else {
                 conceitoHtml = `<span style="background: #f1f5f9; padding: 2px 8px; border-radius: 4px; font-size: 0.78rem; font-weight: 600;">📅 ${p.mes || 'Mensalidade'}</span>`;
             }
