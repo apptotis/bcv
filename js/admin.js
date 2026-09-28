@@ -5829,7 +5829,7 @@ document.addEventListener('DOMContentLoaded', async () => {
                 <tr style="border-bottom: 1px solid var(--border-color);">
                     <td style="padding: 10px; font-weight: 600;">${p.data || '-'}</td>
                     <td style="padding: 10px;"><span style="background: #f1f5f9; padding: 2px 6px; border-radius: 4px; font-size: 0.75rem; font-weight: 700;">${p.tipo || 'Treino'}</span></td>
-                    <td style="padding: 10px;"><span style="background: rgba(126, 34, 206, 0.08); color: #7e22ce; padding: 2px 6px; border-radius: 4px; font-size: 0.75rem; font-weight: 700;">🏀 ${escFinal}</span></td>
+                    <td style="padding: 10px;"><span style="background: rgba(126, 34, 206, 0.08); color: #7e22ce; padding: 3px 8px; border-radius: 4px; font-size: 0.8rem; font-weight: 700; white-space: nowrap;">${escFinal}</span></td>
                     <td style="padding: 10px; font-weight: 600;">${atl.nome || `Atleta #${p.atleta_id}`}</td>
                     <td style="padding: 10px; text-align: center;"><span style="background: #0f172a; color: #fff; padding: 1px 6px; border-radius: 4px; font-size: 0.75rem; font-weight: 700;">Nº ${dorsal}</span></td>
                     <td style="padding: 10px; text-align: center;">${badgeHtml}</td>
@@ -6178,7 +6178,7 @@ document.addEventListener('DOMContentLoaded', async () => {
                 <tr style="border-bottom: 1px solid var(--border-color);">
                     <td style="padding: 10px; font-weight: 600;">${p.data_pagamento || '-'}</td>
                     <td style="padding: 10px; font-weight: 700;">${atl.nome || `Atleta #${p.atleta_id}`}</td>
-                    <td style="padding: 10px;"><span style="background: rgba(126, 34, 206, 0.08); color: #7e22ce; padding: 2px 6px; border-radius: 4px; font-size: 0.75rem; font-weight: 700;">🏀 ${escFinal}</span></td>
+                    <td style="padding: 10px;"><span style="background: rgba(126, 34, 206, 0.08); color: #7e22ce; padding: 3px 8px; border-radius: 4px; font-size: 0.8rem; font-weight: 700; white-space: nowrap;">${escFinal}</span></td>
                     <td style="padding: 10px;">${conceitoHtml}</td>
                     <td style="padding: 10px; text-align: right; font-weight: 800; color: #059669;">${Number(p.valor || 0).toFixed(2)} €</td>
                     <td style="padding: 10px; font-size: 0.85rem;">${metHtml}</td>
@@ -6272,7 +6272,7 @@ document.addEventListener('DOMContentLoaded', async () => {
 
             return `
                 <tr style="border-bottom: 1px solid var(--border-color);">
-                    <td style="padding: 10px; font-weight: 700;">🏀 ${esc}</td>
+                    <td style="padding: 10px; font-weight: 700;">${esc}</td>
                     <td style="padding: 10px;">
                         <input type="number" step="0.01" min="0" class="admin-input input-preco-mensal" data-escalao="${esc}" value="${mVal.toFixed(2)}" style="margin: 0; width: 130px;">
                     </td>
