@@ -6095,6 +6095,8 @@ document.addEventListener('DOMContentLoaded', async () => {
                 loadTabelaPrecos();
             } else if (targetSub === 'subfin-itens-cobranca') {
                 loadItensCobranca();
+            } else if (targetSub === 'subfin-entregas-tesouraria') {
+                loadEntregasTesourariaAdmin();
             }
         });
     });
@@ -6609,6 +6611,127 @@ document.addEventListener('DOMContentLoaded', async () => {
             alert("Erro ao eliminar: " + err.message);
         }
     };
+
+    // ====================================================================
+    // AUDITORIA DE ENTREGAS À TESOURARIA (ADMIN)
+    // ====================================================================
+    let currentAdminEntregas = [];
+    const adminTesKpiTotalEntregue = document.getElementById('admin-tes-kpi-total-entregue');
+    const adminTesKpiTotalCobrado = document.getElementById('admin-tes-kpi-total-cobrado');
+    const adminTesKpiSaldoPendente = document.getElementById('admin-tes-kpi-saldo-pendente');
+    const adminTesKpiContagem = document.getElementById('admin-tes-kpi-contagem');
+    const adminTesFilterEscalao = document.getElementById('admin-tes-filter-escalao');
+    const adminTesFilterSearch = document.getElementById('admin-tes-filter-search');
+    const btnAdminTesRefresh = document.getElementById('btn-admin-tes-refresh');
+    const adminTesourariaTbody = document.getElementById('admin-tesouraria-tbody');
+
+    async function loadEntregasTesourariaAdmin() {
+        if (!adminTesourariaTbody) return;
+        adminTesourariaTbody.innerHTML = '<tr><td colspan="7" style="padding: 20px; text-align: center; color: var(--text-secondary);">A carregar movimentos de tesouraria...</td></tr>';
+
+        try {
+            // 1. Carregar entregas da época 2026/2027
+            const { data: entregas, error: eErr } = await supabase
+                .from('entregas_tesouraria')
+                .select('*')
+                .eq('epoca', '2026/2027')
+                .order('data_entrega', { ascending: false })
+                .order('id', { ascending: false });
+
+            if (eErr) {
+                if (eErr.code === '42P01' || eErr.code === 'PGRST205' || (eErr.message && eErr.message.includes('not find the table'))) {
+                    adminTesourariaTbody.innerHTML = `<tr><td colspan="7" style="padding: 25px; text-align: center; color: #b45309; background: #fffbeb;">⚠️ Tabela <strong>entregas_tesouraria</strong> pendente no Supabase.<br>Por favor execute o script <code>setup_movimentos_tesouraria.sql</code> no SQL Editor.</td></tr>`;
+                    return;
+                }
+                throw eErr;
+            }
+
+            currentAdminEntregas = entregas || [];
+
+            // 2. Carregar total de pagamentos em dinheiro cobrados na época para calcular saldo em posse global
+            const { data: pagsDinheiro } = await supabase
+                .from('mensalidades')
+                .select('valor, metodo_pagamento')
+                .eq('epoca', '2026/2027');
+
+            let totalDinheiroCobrado = 0;
+            (pagsDinheiro || []).forEach(p => {
+                const met = (p.metodo_pagamento || '').toLowerCase();
+                if (met.includes('dinheiro')) {
+                    totalDinheiroCobrado += Number(p.valor || 0);
+                }
+            });
+
+            let totalEntregue = 0;
+            currentAdminEntregas.forEach(ent => {
+                totalEntregue += Number(ent.valor || 0);
+            });
+
+            const saldoPendente = Math.max(0, totalDinheiroCobrado - totalEntregue);
+
+            if (adminTesKpiTotalEntregue) adminTesKpiTotalEntregue.textContent = `${totalEntregue.toFixed(2)} €`;
+            if (adminTesKpiTotalCobrado) adminTesKpiTotalCobrado.textContent = `${totalDinheiroCobrado.toFixed(2)} €`;
+            if (adminTesKpiSaldoPendente) adminTesKpiSaldoPendente.textContent = `${saldoPendente.toFixed(2)} €`;
+            if (adminTesKpiContagem) adminTesKpiContagem.textContent = currentAdminEntregas.length;
+
+            renderEntregasTesourariaAdmin();
+
+        } catch (err) {
+            console.error("Erro ao carregar entregas tesouraria:", err);
+            adminTesourariaTbody.innerHTML = `<tr><td colspan="7" style="padding: 15px; text-align: center; color: #ef4444;">Erro ao carregar: ${err.message}</td></tr>`;
+        }
+    }
+
+    function renderEntregasTesourariaAdmin() {
+        if (!adminTesourariaTbody) return;
+
+        const escFiltro = adminTesFilterEscalao?.value || 'todos';
+        const searchFiltro = (adminTesFilterSearch?.value || '').toLowerCase().trim();
+
+        const filtradas = currentAdminEntregas.filter(ent => {
+            if (escFiltro !== 'todos') {
+                const entEsc = ent.escalao || '';
+                if (!entEsc.toLowerCase().includes(escFiltro.toLowerCase())) return false;
+            }
+            if (searchFiltro) {
+                const haystack = `${ent.responsavel_nome || ''} ${ent.entregue_a || ''} ${ent.recibo_codigo || ''} ${ent.notas || ''} ${ent.escalao || ''}`.toLowerCase();
+                if (!haystack.includes(searchFiltro)) return false;
+            }
+            return true;
+        });
+
+        if (filtradas.length === 0) {
+            adminTesourariaTbody.innerHTML = `<tr><td colspan="7" style="padding: 25px; text-align: center; color: var(--text-secondary);">Nenhuma entrega encontrada para os filtros selecionados.</td></tr>`;
+            return;
+        }
+
+        adminTesourariaTbody.innerHTML = filtradas.map(ent => {
+            const dataFmt = ent.data_entrega || '-';
+            const valorFmt = Number(ent.valor || 0).toFixed(2);
+            const recibo = ent.recibo_codigo || `REC-${ent.id}`;
+            const responsavel = ent.responsavel_nome || ent.responsavel_email || 'Responsável';
+            const destinatario = ent.entregue_a || 'Tesouraria BCV';
+            const notas = ent.notas ? escapeHtml(ent.notas) : '-';
+
+            return `
+                <tr style="border-bottom: 1px solid var(--border-color);">
+                    <td style="padding: 10px; font-weight: 600;">${dataFmt}</td>
+                    <td style="padding: 10px;"><span style="background: #f1f5f9; padding: 2px 8px; border-radius: 4px; font-size: 0.8rem; font-weight: 600;">${escapeHtml(ent.escalao || '-')}</span></td>
+                    <td style="padding: 10px; font-weight: 600; color: var(--text-primary);">${escapeHtml(responsavel)}</td>
+                    <td style="padding: 10px; color: #047857; font-weight: 600;">${escapeHtml(destinatario)}</td>
+                    <td style="padding: 10px; font-weight: 800; color: #059669;">${valorFmt} €</td>
+                    <td style="padding: 10px;">
+                        <span style="font-family: monospace; font-size: 0.78rem; color: #059669; background: #ecfdf5; padding: 2px 6px; border-radius: 4px; border: 1px solid #a7f3d0;">${escapeHtml(recibo)}</span>
+                    </td>
+                    <td style="padding: 10px; font-size: 0.82rem; color: var(--text-secondary); max-width: 220px;">${notas}</td>
+                </tr>
+            `;
+        }).join('');
+    }
+
+    if (adminTesFilterEscalao) adminTesFilterEscalao.addEventListener('change', renderEntregasTesourariaAdmin);
+    if (adminTesFilterSearch) adminTesFilterSearch.addEventListener('input', renderEntregasTesourariaAdmin);
+    if (btnAdminTesRefresh) btnAdminTesRefresh.addEventListener('click', loadEntregasTesourariaAdmin);
 
     // Modal de Pagamento no Admin
     function populateAtletasSelectInAdminPagamento() {

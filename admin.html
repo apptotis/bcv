@@ -1408,6 +1408,7 @@
                         <button type="button" class="btn-subfin active" data-sub="subfin-pagamentos" style="padding: 8px 16px; border-radius: 8px; border: 1px solid #7e22ce; background: #7e22ce; color: #fff; font-weight: 600; cursor: pointer;">📊 Registo Global de Pagamentos</button>
                         <button type="button" class="btn-subfin" data-sub="subfin-tabela-precos" style="padding: 8px 16px; border-radius: 8px; border: 1px solid var(--border-color); background: #f8fafc; color: var(--text-primary); font-weight: 600; cursor: pointer;">⚙️ Tabela de Preços por Escalão</button>
                         <button type="button" class="btn-subfin" data-sub="subfin-itens-cobranca" style="padding: 8px 16px; border-radius: 8px; border: 1px solid var(--border-color); background: #f8fafc; color: var(--text-primary); font-weight: 600; cursor: pointer;">🛍️ Produtos & Encargos de Escalão</button>
+                        <button type="button" class="btn-subfin" data-sub="subfin-entregas-tesouraria" style="padding: 8px 16px; border-radius: 8px; border: 1px solid var(--border-color); background: #f8fafc; color: var(--text-primary); font-weight: 600; cursor: pointer;">🏛️ Entregas à Tesouraria</button>
                     </div>
 
                     <!-- SECÇÃO 1: REGISTO GLOBAL DE PAGAMENTOS -->
@@ -1640,6 +1641,75 @@
                                 </thead>
                                 <tbody id="itens-cobranca-tbody">
                                     <tr><td colspan="6" style="padding: 15px; text-align: center; color: var(--text-secondary);">A carregar itens...</td></tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+
+                    <!-- SECÇÃO 4: AUDITORIA DE ENTREGAS À TESOURARIA -->
+                    <div id="subfin-entregas-tesouraria" class="subfin-content hidden">
+                        <!-- KPIs de Entregas -->
+                        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px; margin-bottom: 20px;">
+                            <div class="welcome-box" style="margin: 0; padding: 16px; border-left: 4px solid #059669;">
+                                <span style="font-size: 0.75rem; color: var(--text-secondary); font-weight: 700; text-transform: uppercase;">Total Entregue à Tesouraria</span>
+                                <h3 id="admin-tes-kpi-total-entregue" style="font-size: 1.8rem; margin: 4px 0 0; color: #059669;">0.00 €</h3>
+                            </div>
+                            <div class="welcome-box" style="margin: 0; padding: 16px; border-left: 4px solid #0284c7;">
+                                <span style="font-size: 0.75rem; color: var(--text-secondary); font-weight: 700; text-transform: uppercase;">Total Dinheiro Cobrado</span>
+                                <h3 id="admin-tes-kpi-total-cobrado" style="font-size: 1.8rem; margin: 4px 0 0; color: #0284c7;">0.00 €</h3>
+                            </div>
+                            <div class="welcome-box" style="margin: 0; padding: 16px; border-left: 4px solid #d97706;">
+                                <span style="font-size: 0.75rem; color: var(--text-secondary); font-weight: 700; text-transform: uppercase;">Saldo Pendente em Posse</span>
+                                <h3 id="admin-tes-kpi-saldo-pendente" style="font-size: 1.8rem; margin: 4px 0 0; color: #d97706;">0.00 €</h3>
+                            </div>
+                            <div class="welcome-box" style="margin: 0; padding: 16px; border-left: 4px solid #7e22ce;">
+                                <span style="font-size: 0.75rem; color: var(--text-secondary); font-weight: 700; text-transform: uppercase;">Nº de Entregas Registadas</span>
+                                <h3 id="admin-tes-kpi-contagem" style="font-size: 1.8rem; margin: 4px 0 0; color: #7e22ce;">0</h3>
+                            </div>
+                        </div>
+
+                        <!-- Filtros de Auditoria de Entregas -->
+                        <div class="welcome-box" style="margin-bottom: 20px; padding: 15px; background: rgba(0,0,0,0.02); border: 1px solid var(--border-color);">
+                            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 12px; align-items: flex-end;">
+                                <div>
+                                    <label style="display: block; font-size: 0.8rem; font-weight: 600; margin-bottom: 4px;">Filtrar por Escalão:</label>
+                                    <select id="admin-tes-filter-escalao" class="admin-input" style="margin: 0;">
+                                        <option value="todos">Todos os Escalões</option>
+                                        <option value="BabyBasket">BabyBasket</option>
+                                        <option value="Mini 8">Mini 8</option>
+                                        <option value="Mini 10">Mini 10</option>
+                                        <option value="Mini 12">Mini 12</option>
+                                        <option value="Sub 14">Sub 14</option>
+                                        <option value="Sub 16">Sub 16</option>
+                                        <option value="Sub 18">Sub 18</option>
+                                    </select>
+                                </div>
+                                <div>
+                                    <label style="display: block; font-size: 0.8rem; font-weight: 600; margin-bottom: 4px;">Pesquisar (Responsável / Recibo):</label>
+                                    <input type="text" id="admin-tes-filter-search" class="admin-input" placeholder="Pesquisar..." style="margin: 0;">
+                                </div>
+                                <div>
+                                    <button type="button" id="btn-admin-tes-refresh" class="btn-secondary" style="padding: 10px 16px; width: 100%; font-weight: 600;">🔄 Atualizar Lista</button>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Tabela de Entregas à Tesouraria -->
+                        <div class="welcome-box" style="overflow-x: auto;">
+                            <table class="admin-table" style="width: 100%; text-align: left; border-collapse: collapse;">
+                                <thead>
+                                    <tr style="border-bottom: 2px solid var(--border-color); background: rgba(0,0,0,0.02);">
+                                        <th style="padding: 10px;">Data</th>
+                                        <th style="padding: 10px;">Escalão</th>
+                                        <th style="padding: 10px;">Responsável (Entregou)</th>
+                                        <th style="padding: 10px;">Recebido por</th>
+                                        <th style="padding: 10px;">Valor</th>
+                                        <th style="padding: 10px;">Recibo</th>
+                                        <th style="padding: 10px;">Notas</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="admin-tesouraria-tbody">
+                                    <tr><td colspan="7" style="padding: 20px; text-align: center; color: var(--text-secondary);">A carregar movimentos de tesouraria...</td></tr>
                                 </tbody>
                             </table>
                         </div>
@@ -2704,6 +2774,6 @@
 
     <!-- Scripts -->
     <script src="js/config.js"></script>
-    <script src="js/admin.js?v=20260928_1110"></script>
+    <script src="js/admin.js?v=20260928_1200"></script>
 </body>
 </html>

@@ -20,10 +20,7 @@
 - [2026-08-22] Gemini: Criação do wizard de inscrição (inscricao.html), script update_atletas_fpb_schema.sql e exportação vetorial de PDF do Modelo 1 FPB com pdf-lib no Admin.
 - [2026-08-23] Gemini: Remoção do campo 'Alcunha / Nome de Camisola (Nickname)' do Passo 2 (Identificação do Atleta) e limpeza do preenchimento e payload no formulário inscricao.html.
 - [2026-08-23] Gemini: Implementação completa da Inscrição Integrada em 3 Fases (1. Federação FPB, 2. Exame Médico Desportivo IPDJ com 20 perguntas, 3. Equipamento Oficial BCV), cálculo automático de escalão por data de nascimento, script SQL update_atletas_emd_equipamento.sql e exportação vetorial de PDF do Exame Médico Desportivo (ipdj-exame-medico.pdf) e gestão de equipamentos no Admin.
-- [2026-08-23] Gemini: Otimização mobile do cabeçalho de inscricao.html (nome do clube e título em linha única, remoção do texto 'Processo Integrado' e redesenho das abas das 3 fases sem corte de texto).
-- [2026-08-23] Gemini: Aumento do espaçamento e margem superior (respiro visual) entre o banner cabeçalho e as abas das fases em inscricao.html.
-- [2026-08-23] Gemini: Remoção dos ícones nas abas das 3 fases em inscricao.html para garantir espaço horizontal perfeito e leitura integral dos títulos (Federação FPB, Exame Médico, Equipamento).
-- [2026-08-23] Gemini: Correção da tabela de anos de nascimento para escalões (2015/2016 -> Mini 12) e implementação da barra horizontal de largura total para feedback de escalão no Passo 2.
+- [2026-08-23] Gemini: Otimizações de layout no formulário de inscrição (cabeçalhos, abas sem ícones, tabela de anos e escalões).
 - [2026-08-23] Gemini: Criação de script SQL unificado (setup_completo_atletasbcv_inscricoes.sql) com permissões públicas RLS (anon/auth) e suporte no inscricao.html para atualizar atletas existentes em revalidação ou criar novos.
 - [2026-08-24] Gemini: Remoção do bloco de aniversariantes do dia do Dashboard no Admin (admin.html) e eliminação de toda a lógica e funções associadas em js/admin.js.
 - [2026-08-24] Gemini: Implementação do sistema de permissões granulares por checkboxes de menus na Gestão de Utilizadores do Admin, criação de setup_users_permissoes.sql e adaptação da visibilidade dinâmica da sidebar em js/admin.js.
@@ -97,3 +94,4 @@
 - [2026-09-28] Gemini: Limpeza e reinicialização completa dos registos de pagamento de teste na tabela mensalidades do Supabase.
 - [2026-09-28] Gemini: Correção da Tabela de Preços e cobrança (pagamentos.html, js/pagamentos.js): correspondência normalizada de escalões (eliminando divergência de género em Sub 14/16/18/Seniores), seletor dinâmico de escalão na aba e exibição correta de quotas e produtos.
 - [2026-09-28] Gemini: Remoção dos escalões Sub 20, Seniores Masculinos e Seniores Femininos dos módulos de pagamentos, preçários e afetação de utilizadores (admin.html, js/admin.js, pagamentos.html, js/pagamentos.js).
+- [2026-09-28] Gemini: Implementação do módulo Movimentos de Tesouraria em substituição do Extrato de Escalão no Portal de Pagamentos (pagamentos.html, js/pagamentos.js, pagamentos.css) com apuramento de numerário em posse, registo de entrega à tesouraria, emissão de recibo/comprovativo oficial e auditoria central no Admin (admin.html, js/admin.js, setup_movimentos_tesouraria.sql).

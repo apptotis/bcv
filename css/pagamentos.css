@@ -1058,3 +1058,199 @@ body {
     border-color: var(--primary);
 }
 
+/* ====================================================================
+   10. MOVIMENTOS DE TESOURARIA & COMPROVATIVOS OFICIAIS
+   ==================================================================== */
+.entrega-item {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-md);
+    padding: 12px 14px;
+    margin-bottom: 8px;
+    box-shadow: var(--shadow-sm);
+    gap: 10px;
+    transition: transform 0.15s ease, border-color 0.15s ease;
+}
+
+.entrega-item:hover {
+    border-color: #86efac;
+}
+
+.entrega-left {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    flex: 1;
+    min-width: 0;
+}
+
+.entrega-icon {
+    width: 40px;
+    height: 40px;
+    border-radius: 10px;
+    background: #ecfdf5;
+    color: #059669;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.25rem;
+    flex-shrink: 0;
+}
+
+.entrega-info {
+    flex: 1;
+    min-width: 0;
+}
+
+.entrega-title {
+    font-size: 0.88rem;
+    font-weight: 700;
+    color: var(--text-main);
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    flex-wrap: wrap;
+}
+
+.entrega-meta {
+    font-size: 0.75rem;
+    color: var(--text-muted);
+    margin-top: 2px;
+}
+
+.entrega-right {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+    gap: 4px;
+    flex-shrink: 0;
+}
+
+.entrega-valor {
+    font-size: 1.05rem;
+    font-weight: 800;
+    color: #047857;
+}
+
+.badge-recibo-tes {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    font-size: 0.68rem;
+    font-weight: 700;
+    padding: 2px 6px;
+    border-radius: 4px;
+    background: #dcfce7;
+    color: #15803d;
+    border: 1px solid #bbf7d0;
+}
+
+.btn-recibo-view {
+    background: #f1f5f9;
+    border: 1px solid var(--border);
+    color: var(--text-main);
+    padding: 4px 8px;
+    border-radius: 6px;
+    font-size: 0.72rem;
+    font-weight: 600;
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+}
+
+.btn-recibo-view:hover {
+    background: #e2e8f0;
+}
+
+/* Recibo / Comprovativo Visual */
+.recibo-card {
+    background: #ffffff;
+    border: 2px dashed #059669;
+    border-radius: 12px;
+    padding: 18px;
+    position: relative;
+    box-shadow: var(--shadow-sm);
+}
+
+.recibo-card-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    border-bottom: 1px solid #e2e8f0;
+    padding-bottom: 12px;
+    margin-bottom: 14px;
+}
+
+.recibo-card-logo {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.recibo-card-logo img {
+    width: 38px;
+    height: 38px;
+    object-fit: contain;
+}
+
+.recibo-num-code {
+    font-family: monospace;
+    font-size: 0.78rem;
+    font-weight: 700;
+    color: #059669;
+    background: #ecfdf5;
+    padding: 3px 8px;
+    border-radius: 6px;
+    border: 1px solid #a7f3d0;
+}
+
+.recibo-detail-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 6px 0;
+    font-size: 0.82rem;
+    border-bottom: 1px solid #f1f5f9;
+}
+
+.recibo-detail-label {
+    color: var(--text-muted);
+}
+
+.recibo-detail-val {
+    font-weight: 600;
+    color: var(--text-main);
+}
+
+.recibo-highlight-valor {
+    background: #f0fdf4;
+    border: 1px solid #bbf7d0;
+    border-radius: 8px;
+    padding: 12px;
+    text-align: center;
+    margin: 12px 0;
+}
+
+.recibo-highlight-num {
+    font-size: 1.8rem;
+    font-weight: 900;
+    color: #15803d;
+}
+
+.recibo-carimbo-box {
+    margin-top: 14px;
+    padding: 10px;
+    border: 1px solid #cbd5e1;
+    border-radius: 8px;
+    background: #f8fafc;
+    text-align: center;
+    font-size: 0.72rem;
+    color: #475569;
+    line-height: 1.4;
+}
+
+

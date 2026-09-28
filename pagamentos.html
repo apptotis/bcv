@@ -101,11 +101,11 @@
                         </div>
                     </button>
                     
-                    <button type="button" class="drawer-item" data-tab="tab-extrato">
-                        <span class="item-icon">📋</span>
+                    <button type="button" class="drawer-item" data-tab="tab-tesouraria">
+                        <span class="item-icon">🏛️</span>
                         <div class="item-text">
-                            <span class="item-label">Extrato do Escalão</span>
-                            <span class="item-desc">Histórico completo de movimentos</span>
+                            <span class="item-label">Movimentos de Tesouraria</span>
+                            <span class="item-desc">Entregas de valores e saldo em posse</span>
                         </div>
                     </button>
 
@@ -156,53 +156,62 @@
             </section>
 
             <!-- ======================================================= -->
-            <!-- ABA 2: EXTRATO DO ESCALÃO                               -->
+            <!-- ABA 2: MOVIMENTOS DE TESOURARIA                         -->
             <!-- ======================================================= -->
-            <section id="tab-extrato" class="tab-content">
+            <section id="tab-tesouraria" class="tab-content">
                 
-                <!-- Resumo por Método de Pagamento -->
-                <div class="stats-grid-compact" style="margin-bottom: 12px;">
-                    <div class="stat-box">
-                        <div class="stat-box-title">💵 Dinheiro</div>
-                        <div class="stat-box-value" id="extrato-kpi-dinheiro" style="font-size: 1.15rem; color: #047857;">0 €</div>
+                <!-- Card Hero: Balanço em Posse -->
+                <div class="tesouraria-hero-card" style="background: linear-gradient(135deg, #065f46 0%, #047857 100%); color: white; border-radius: var(--radius-md); padding: 18px; box-shadow: var(--shadow-md); margin-bottom: 14px;">
+                    <div style="display: flex; justify-content: space-between; align-items: flex-start; gap: 10px;">
+                        <div>
+                            <div style="font-size: 0.75rem; text-transform: uppercase; font-weight: 700; opacity: 0.9; letter-spacing: 0.5px;">💵 Em Posse (A Entregar à Tesouraria)</div>
+                            <div id="tesouraria-saldo-em-posse" style="font-size: 2.1rem; font-weight: 800; line-height: 1.15; margin: 6px 0;">0.00 €</div>
+                            <div id="tesouraria-hero-desc" style="font-size: 0.75rem; opacity: 0.85;">Numerário recebido em dinheiro pendente de entrega</div>
+                        </div>
+                        <div style="font-size: 2rem; background: rgba(255,255,255,0.18); border-radius: 12px; width: 46px; height: 46px; display: flex; align-items: center; justify-content: center; flex-shrink: 0;">
+                            🏛️
+                        </div>
                     </div>
-                    <div class="stat-box">
-                        <div class="stat-box-title">📱 MBWay</div>
-                        <div class="stat-box-value" id="extrato-kpi-mbway" style="font-size: 1.15rem; color: #0284c7;">0 €</div>
-                    </div>
-                    <div class="stat-box">
-                        <div class="stat-box-title">🏦 Transferência</div>
-                        <div class="stat-box-value" id="extrato-kpi-banco" style="font-size: 1.15rem; color: #6b21a8;">0 €</div>
-                    </div>
-                    <div class="stat-box">
-                        <div class="stat-box-title">⭐ Total Geral</div>
-                        <div class="stat-box-value" id="extrato-kpi-total" style="font-size: 1.15rem; color: var(--primary);">0 €</div>
+
+                    <!-- Botão de Ação Rápida de Entrega -->
+                    <div style="margin-top: 14px; padding-top: 12px; border-top: 1px solid rgba(255,255,255,0.2);">
+                        <button type="button" id="btn-abrir-modal-entrega" style="width: 100%; background: #ffffff; color: #065f46; font-weight: 800; border: none; padding: 11px 14px; border-radius: var(--radius-sm); display: flex; align-items: center; justify-content: center; gap: 8px; font-size: 0.88rem; box-shadow: 0 2px 6px rgba(0,0,0,0.15); cursor: pointer; transition: transform 0.15s ease;">
+                            <span>🤝</span>
+                            <span>Registar Entrega à Tesouraria</span>
+                        </button>
                     </div>
                 </div>
 
-                <!-- Filtros do Extrato -->
-                <div class="control-card">
-                    <div class="filter-row">
-                        <select id="filtro-extrato-categoria" class="select-filter">
-                            <option value="todas">Todas as Categorias</option>
-                            <option value="Mensalidade">📅 Mensalidades</option>
-                            <option value="Equipamento">🎽 Equipamentos</option>
-                            <option value="Exame Médico">🩺 Exames Médicos</option>
-                            <option value="Outro">📦 Outros Produtos</option>
-                        </select>
-                        <select id="filtro-extrato-metodo" class="select-filter">
-                            <option value="todos">Todos os Métodos</option>
-                            <option value="Dinheiro">Dinheiro</option>
-                            <option value="MBWay">MBWay</option>
-                            <option value="Transferência">Transferência</option>
-                        </select>
+                <!-- KPIs Resumo de Tesouraria -->
+                <div class="stats-grid-compact" style="margin-bottom: 14px;">
+                    <div class="stat-box">
+                        <div class="stat-box-title">🏛️ Já Entregue</div>
+                        <div class="stat-box-value" id="tesouraria-total-entregue" style="font-size: 1.15rem; color: #047857;">0.00 €</div>
+                    </div>
+                    <div class="stat-box">
+                        <div class="stat-box-title">💰 Total Cobrado</div>
+                        <div class="stat-box-value" id="tesouraria-total-cobrado" style="font-size: 1.15rem; color: #0f172a;">0.00 €</div>
+                    </div>
+                    <div class="stat-box">
+                        <div class="stat-box-title">🧾 Entregas</div>
+                        <div class="stat-box-value" id="tesouraria-contagem-entregas" style="font-size: 1.15rem; color: var(--primary);">0</div>
                     </div>
                 </div>
 
-                <!-- Lista de Movimentos -->
-                <div id="lista-movimentos-container">
-                    <div style="text-align: center; padding: 30px 10px; color: var(--text-muted);">
-                        A carregar extrato de pagamentos...
+                <!-- Cabeçalho do Histórico de Entregas -->
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; padding: 0 2px;">
+                    <div style="font-size: 0.9rem; font-weight: 700; color: var(--text-main); display: flex; align-items: center; gap: 6px;">
+                        <span>📜</span> Histórico de Entregas
+                    </div>
+                    <button type="button" id="btn-recarregar-tesouraria" style="background: none; border: none; font-size: 0.78rem; color: var(--primary); font-weight: 700; cursor: pointer; display: flex; align-items: center; gap: 4px;">
+                        🔄 Atualizar
+                    </button>
+                </div>
+
+                <!-- Lista de Movimentos / Entregas -->
+                <div id="lista-entregas-container">
+                    <div style="text-align: center; padding: 30px 10px; color: var(--text-muted); font-size: 0.85rem;">
+                        A carregar movimentos de tesouraria...
                     </div>
                 </div>
 
@@ -372,10 +381,115 @@
             </div>
         </div>
 
+        <!-- ======================================================= -->
+        <!-- MODAL BOTTOM SHEET: REGISTO DE ENTREGA À TESOURARIA    -->
+        <!-- ======================================================= -->
+        <div id="modal-entrega-sheet" class="modal-overlay">
+            <div class="modal-sheet">
+                <div class="sheet-handle"></div>
+                
+                <div class="modal-sheet-header">
+                    <div>
+                        <div style="font-size: 0.72rem; color: var(--text-muted); text-transform: uppercase; font-weight: 700;">Movimentos de Tesouraria</div>
+                        <h3 class="modal-sheet-title">Registar Entrega ao Clube</h3>
+                        <div id="modal-entrega-sub" style="font-size: 0.8rem; color: #047857; font-weight: 600; margin-top: 2px;">Escalão • Dinheiro em Posse</div>
+                    </div>
+                    <button type="button" class="btn-close-sheet" onclick="closeModalEntrega()">✕</button>
+                </div>
+
+                <form id="form-registar-entrega">
+                    <div style="display: flex; flex-direction: column; gap: 12px; margin-top: 8px;">
+                        
+                        <!-- Card informativo de saldo disponível em posse -->
+                        <div style="background: #f0fdf4; border: 1px solid #bbf7d0; border-radius: 10px; padding: 12px;">
+                            <div style="display: flex; justify-content: space-between; align-items: center;">
+                                <span style="font-size: 0.8rem; color: #166534; font-weight: 600;">Saldo atual em numerário:</span>
+                                <span id="modal-entrega-saldo-disponivel" style="font-size: 1.15rem; font-weight: 800; color: #15803d;">0.00 €</span>
+                            </div>
+                        </div>
+
+                        <!-- Valor a entregar -->
+                        <div>
+                            <label class="form-label" style="font-size: 0.78rem; font-weight: 700;">Valor a Entregar (€) *</label>
+                            <div style="display: flex; gap: 8px;">
+                                <input type="number" id="entrega-valor" class="form-input" step="0.01" min="0.01" required placeholder="0.00" style="font-size: 1.15rem; font-weight: 800; color: #065f46;">
+                                <button type="button" id="btn-preencher-total-posse" style="background: #e0f2fe; color: #0369a1; border: 1px solid #bae6fd; border-radius: 8px; font-size: 0.75rem; font-weight: 700; padding: 0 12px; white-space: nowrap; cursor: pointer;">
+                                    Entregar Tudo
+                                </button>
+                            </div>
+                        </div>
+
+                        <!-- Data e Método -->
+                        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
+                            <div>
+                                <label class="form-label" style="font-size: 0.78rem; font-weight: 700;">Data da Entrega *</label>
+                                <input type="date" id="entrega-data" class="form-input" required style="padding: 8px 10px; font-size: 0.85rem;">
+                            </div>
+                            <div>
+                                <label class="form-label" style="font-size: 0.78rem; font-weight: 700;">Método</label>
+                                <select id="entrega-metodo" class="form-select" style="padding: 8px 10px; font-size: 0.85rem;">
+                                    <option value="Dinheiro" selected>💵 Dinheiro / Numerário</option>
+                                    <option value="Transferência">🏦 Transferência p/ Clube</option>
+                                    <option value="Outro">Outro</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <!-- Entregue a -->
+                        <div>
+                            <label class="form-label" style="font-size: 0.78rem; font-weight: 700;">Entregue a (Tesouraria / Direção) *</label>
+                            <input type="text" id="entrega-destinatario" class="form-input" list="lista-destinatarios-tesouraria" required placeholder="Ex: Tesoureiro do Clube, Diretor(a)..." style="padding: 8px 10px; font-size: 0.85rem;">
+                            <datalist id="lista-destinatarios-tesouraria">
+                                <option value="Tesouraria BCV">
+                                <option value="Presidente / Direção BCV">
+                                <option value="Secretaria do Clube">
+                            </datalist>
+                        </div>
+
+                        <!-- Observações -->
+                        <div>
+                            <label class="form-label" style="font-size: 0.78rem; font-weight: 700;">Notas / Observações</label>
+                            <input type="text" id="entrega-notas" class="form-input" placeholder="Opcional (ex: entregue no final do treino)..." style="padding: 8px 10px; font-size: 0.82rem;">
+                        </div>
+
+                        <div style="padding: 8px 10px; background: #f8fafc; border: 1px solid var(--border); border-radius: 8px; font-size: 0.75rem; color: var(--text-muted); line-height: 1.4;">
+                            🛡️ <strong>Registo Oficial:</strong> Ao confirmar, o valor é debitado do saldo em posse do responsável e fica arquivado no histórico de tesouraria do clube.
+                        </div>
+
+                        <button type="submit" id="btn-submeter-entrega" class="btn-submit-payment" style="width: 100%; margin-top: 4px; background: #059669; display: flex; align-items: center; justify-content: center; gap: 8px;">
+                            <span>🤝</span>
+                            <span id="btn-submeter-entrega-txt">Confirmar Entrega à Tesouraria</span>
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+        <!-- ======================================================= -->
+        <!-- MODAL BOTTOM SHEET: COMPROVATIVO DE ENTREGA À TESOURARIA -->
+        <!-- ======================================================= -->
+        <div id="modal-comprovativo-sheet" class="modal-overlay">
+            <div class="modal-sheet">
+                <div class="sheet-handle"></div>
+                
+                <div class="modal-sheet-header">
+                    <div>
+                        <div style="font-size: 0.72rem; color: var(--text-muted); text-transform: uppercase; font-weight: 700;">Comprovativo Oficial</div>
+                        <h3 class="modal-sheet-title">Recibo de Entrega</h3>
+                    </div>
+                    <button type="button" class="btn-close-sheet" onclick="closeModalComprovativo()">✕</button>
+                </div>
+
+                <div id="modal-comprovativo-content" style="padding: 8px 0;">
+                    <!-- Renderizado dinamicamente via JS -->
+                </div>
+            </div>
+        </div>
+
     </div>
 
     <!-- Scripts -->
     <script src="js/config.js"></script>
-    <script src="js/pagamentos.js?v=20260928_1100"></script>
+    <script src="js/pagamentos.js?v=20260928_1200"></script>
 </body>
 </html>

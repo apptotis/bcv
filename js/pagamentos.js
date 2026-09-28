@@ -29,6 +29,8 @@ document.addEventListener('DOMContentLoaded', () => {
     let currentAtletaModal = null; // Atleta aberto no modal
     let activeQuotaMode = 'meses'; // 'meses' | 'bianual' | 'anual'
     let selectedCobrancaItems = new Map(); // key -> item object
+    let currentEntregasTesouraria = []; // Histórico de entregas de tesouraria do escalão ativo
+    let saldoNumerarioEmPosse = 0; // Saldo em numerário pendente de entrega
 
     const hojeIso = new Date().toISOString().split('T')[0];
 
@@ -72,14 +74,32 @@ document.addEventListener('DOMContentLoaded', () => {
     const filtroEstadoPagamento = document.getElementById('filtro-estado-pagamento');
     const listaAtletasContainer = document.getElementById('lista-atletas-container');
 
-    // Tab Extrato
-    const extratoKpiDinheiro = document.getElementById('extrato-kpi-dinheiro');
-    const extratoKpiMbway = document.getElementById('extrato-kpi-mbway');
-    const extratoKpiBanco = document.getElementById('extrato-kpi-banco');
-    const extratoKpiTotal = document.getElementById('extrato-kpi-total');
-    const filtroExtratoCategoria = document.getElementById('filtro-extrato-categoria');
-    const filtroExtratoMetodo = document.getElementById('filtro-extrato-metodo');
-    const listaMovimentosContainer = document.getElementById('lista-movimentos-container');
+    // Tab Movimentos de Tesouraria
+    const tesourariaSaldoEmPosse = document.getElementById('tesouraria-saldo-em-posse');
+    const tesourariaHeroDesc = document.getElementById('tesouraria-hero-desc');
+    const btnAbrirModalEntrega = document.getElementById('btn-abrir-modal-entrega');
+    const tesourariaTotalEntregue = document.getElementById('tesouraria-total-entregue');
+    const tesourariaTotalCobrado = document.getElementById('tesouraria-total-cobrado');
+    const tesourariaContagemEntregas = document.getElementById('tesouraria-contagem-entregas');
+    const btnRecarregarTesouraria = document.getElementById('btn-recarregar-tesouraria');
+    const listaEntregasContainer = document.getElementById('lista-entregas-container');
+
+    // Modais de Entrega à Tesouraria & Comprovativo
+    const modalEntregaSheet = document.getElementById('modal-entrega-sheet');
+    const formRegistarEntrega = document.getElementById('form-registar-entrega');
+    const modalEntregaSub = document.getElementById('modal-entrega-sub');
+    const modalEntregaSaldoDisponivel = document.getElementById('modal-entrega-saldo-disponivel');
+    const entregaValorInput = document.getElementById('entrega-valor');
+    const btnPreencherTotalPosse = document.getElementById('btn-preencher-total-posse');
+    const entregaDataInput = document.getElementById('entrega-data');
+    const entregaMetodoSelect = document.getElementById('entrega-metodo');
+    const entregaDestinatarioInput = document.getElementById('entrega-destinatario');
+    const entregaNotasInput = document.getElementById('entrega-notas');
+    const btnSubmeterEntrega = document.getElementById('btn-submeter-entrega');
+    const btnSubmeterEntregaTxt = document.getElementById('btn-submeter-entrega-txt');
+
+    const modalComprovativoSheet = document.getElementById('modal-comprovativo-sheet');
+    const modalComprovativoContent = document.getElementById('modal-comprovativo-content');
 
     // Modal Registar Pagamento Multi-Item
     const modalPagamentoSheet = document.getElementById('modal-pagamento-sheet');
@@ -446,6 +466,8 @@ document.addEventListener('DOMContentLoaded', () => {
 
             if (targetTab === 'tab-precos') {
                 updatePrecosTab();
+            } else if (targetTab === 'tab-tesouraria') {
+                renderTesouraria();
             }
 
             closeDrawer();
@@ -461,8 +483,8 @@ document.addEventListener('DOMContentLoaded', () => {
             return;
         }
 
-        listaAtletasContainer.innerHTML = '<div style="text-align: center; padding: 30px; color: var(--text-muted);">A carregar atletas do escalão...</div>';
-        listaMovimentosContainer.innerHTML = '<div style="text-align: center; padding: 30px; color: var(--text-muted);">A carregar extrato...</div>';
+        if (listaAtletasContainer) listaAtletasContainer.innerHTML = '<div style="text-align: center; padding: 30px; color: var(--text-muted);">A carregar atletas do escalão...</div>';
+        if (listaEntregasContainer) listaEntregasContainer.innerHTML = '<div style="text-align: center; padding: 30px; color: var(--text-muted); font-size: 0.85rem;">A carregar movimentos de tesouraria...</div>';
 
         try {
             // 1. Carregar atletas cujo escalão coincide com o escalão ativo
@@ -506,7 +528,7 @@ document.addEventListener('DOMContentLoaded', () => {
             if (currentAtletas.length === 0) {
                 renderEmptyState(`Não foram encontrados atletas inscritos na época 2026/2027 no escalão "${activeEscalao}".`);
                 currentPagamentos = [];
-                renderExtrato();
+                renderTesouraria();
                 updateKpis();
                 return;
             }
@@ -568,11 +590,33 @@ document.addEventListener('DOMContentLoaded', () => {
                 currentItensCobranca = itens || [];
             } catch (e) { console.warn("Itens de cobrança:", e); }
 
+            // 5. Carregar Entregas de Tesouraria do escalão ativo (época 2026/2027)
+            try {
+                const { data: entregas, error: eError } = await supabase
+                    .from('entregas_tesouraria')
+                    .select('*')
+                    .eq('epoca', '2026/2027')
+                    .eq('escalao', activeEscalao)
+                    .order('data_entrega', { ascending: false })
+                    .order('id', { ascending: false });
+                
+                if (!eError) {
+                    currentEntregasTesouraria = entregas || [];
+                } else if (eError.code !== '42P01' && eError.code !== 'PGRST205') {
+                    console.warn("Aviso ao carregar entregas tesouraria:", eError);
+                } else {
+                    currentEntregasTesouraria = [];
+                }
+            } catch (e) {
+                console.warn("entregas_tesouraria:", e);
+                currentEntregasTesouraria = [];
+            }
+
             updatePrecosTab();
 
             // Renderizar interface
             renderAtletas();
-            renderExtrato();
+            renderTesouraria();
             updateKpis();
 
         } catch (err) {
@@ -1425,93 +1469,332 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     // =======================================================
-    // 7. RENDERIZAÇÃO DO EXTRATO DO ESCALÃO (TAB 2)
+    // 7. MOVIMENTOS DE TESOURARIA & ENTREGAS DE VALORES (TAB 2)
     // =======================================================
-    function renderExtrato() {
-        if (!listaMovimentosContainer) return;
+    function renderTesouraria() {
+        if (!listaEntregasContainer) return;
 
-        let totalDinheiro = 0;
-        let totalMbway = 0;
-        let totalBanco = 0;
-        let totalGeral = 0;
-
+        // 1. Somar todo o dinheiro recebido dos atletas deste escalão na época ativa
+        let totalDinheiroCobrado = 0;
         currentPagamentos.forEach(p => {
-            const val = Number(p.valor || 0);
-            totalGeral += val;
             const met = (p.metodo_pagamento || '').toLowerCase();
-            if (met.includes('dinheiro')) totalDinheiro += val;
-            else if (met.includes('mbway')) totalMbway += val;
-            else if (met.includes('transf')) totalBanco += val;
+            if (met.includes('dinheiro')) {
+                totalDinheiroCobrado += Number(p.valor || 0);
+            }
         });
 
-        if (extratoKpiDinheiro) extratoKpiDinheiro.textContent = `${totalDinheiro.toFixed(0)} €`;
-        if (extratoKpiMbway) extratoKpiMbway.textContent = `${totalMbway.toFixed(0)} €`;
-        if (extratoKpiBanco) extratoKpiBanco.textContent = `${totalBanco.toFixed(0)} €`;
-        if (extratoKpiTotal) extratoKpiTotal.textContent = `${totalGeral.toFixed(2)} €`;
-
-        const catFiltro = filtroExtratoCategoria?.value || 'todas';
-        const metFiltro = filtroExtratoMetodo?.value || 'todos';
-
-        const filtrados = currentPagamentos.filter(p => {
-            if (catFiltro !== 'todas') {
-                const pCat = p.categoria || 'Mensalidade';
-                if (pCat !== catFiltro) return false;
-            }
-            if (metFiltro !== 'todos') {
-                const pMet = (p.metodo_pagamento || '').toLowerCase();
-                if (!pMet.includes(metFiltro.toLowerCase())) return false;
-            }
-            return true;
+        // 2. Somar todas as entregas já registadas à tesouraria para este escalão
+        let totalJaEntregue = 0;
+        currentEntregasTesouraria.forEach(ent => {
+            totalJaEntregue += Number(ent.valor || 0);
         });
 
-        if (filtrados.length === 0) {
-            listaMovimentosContainer.innerHTML = `
-                <div style="background: white; border-radius: 12px; padding: 30px 20px; text-align: center; border: 1px dashed var(--border);">
-                    <p style="color: var(--text-muted); font-size: 0.88rem;">Nenhum movimento encontrado para os filtros selecionados.</p>
+        // 3. Saldo em numerário pendente de entrega
+        saldoNumerarioEmPosse = Math.max(0, totalDinheiroCobrado - totalJaEntregue);
+
+        // 4. Atualizar KPIs do cabeçalho de tesouraria
+        if (tesourariaSaldoEmPosse) {
+            tesourariaSaldoEmPosse.textContent = `${saldoNumerarioEmPosse.toFixed(2)} €`;
+        }
+        if (tesourariaTotalEntregue) {
+            tesourariaTotalEntregue.textContent = `${totalJaEntregue.toFixed(2)} €`;
+        }
+        if (tesourariaTotalCobrado) {
+            tesourariaTotalCobrado.textContent = `${totalDinheiroCobrado.toFixed(2)} €`;
+        }
+        if (tesourariaContagemEntregas) {
+            tesourariaContagemEntregas.textContent = currentEntregasTesouraria.length;
+        }
+
+        if (tesourariaHeroDesc) {
+            if (saldoNumerarioEmPosse > 0) {
+                tesourariaHeroDesc.innerHTML = `<span style="color: #fef08a; font-weight: 700;">⚠️ Valores em numerário aguardando entrega ao clube.</span>`;
+            } else if (totalDinheiroCobrado > 0) {
+                tesourariaHeroDesc.innerHTML = `<span style="color: #bbf7d0; font-weight: 700;">✓ Todas as cobranças em dinheiro já foram entregues à tesouraria!</span>`;
+            } else {
+                tesourariaHeroDesc.textContent = "Nenhuma cobrança em numerário registada até ao momento.";
+            }
+        }
+
+        // 5. Renderizar Lista de Movimentos / Histórico de Entregas
+        if (currentEntregasTesouraria.length === 0) {
+            listaEntregasContainer.innerHTML = `
+                <div style="background: white; border-radius: 12px; padding: 36px 20px; text-align: center; border: 1px dashed var(--border);">
+                    <div style="font-size: 2.2rem; margin-bottom: 8px;">🏛️</div>
+                    <h4 style="margin: 0 0 4px 0; font-size: 0.95rem; color: var(--text-main); font-weight: 700;">Nenhuma entrega registada</h4>
+                    <p style="color: var(--text-muted); font-size: 0.8rem; max-width: 320px; margin: 0 auto;">
+                        Quando entregar valores em dinheiro à tesouraria do clube, clique no botão acima para registar a entrega e gerar o comprovativo oficial.
+                    </p>
                 </div>
             `;
             return;
         }
 
         let html = '';
-        filtrados.forEach(p => {
-            const atleta = currentAtletas.find(a => a.id === p.atleta_id) || { nome: 'Atleta' };
-            const cat = p.categoria || 'Mensalidade';
-            
-            let iconClass = 'mensalidade';
-            let iconSymbol = '📅';
-            if (cat === 'Equipamento') { iconClass = 'equipamento'; iconSymbol = '🎽'; }
-            else if (cat === 'Exame Médico') { iconClass = 'exame'; iconSymbol = '🩺'; }
-            else if (cat === 'Outro') { iconClass = 'outro'; iconSymbol = '📦'; }
-
-            const descText = p.descricao || p.mes || cat;
-            const dataFmt = p.data_pagamento || 'Data N/D';
+        currentEntregasTesouraria.forEach(ent => {
+            const dataFmt = ent.data_entrega || '-';
+            const valorFmt = Number(ent.valor || 0).toFixed(2);
+            const destinatario = ent.entregue_a || 'Tesouraria BCV';
+            const recibo = ent.recibo_codigo || `REC-${ent.id}`;
+            const responsavel = ent.responsavel_nome || 'Responsável';
 
             html += `
-                <div class="movimento-item">
-                    <div class="movimento-left">
-                        <div class="movimento-icon ${iconClass}">${iconSymbol}</div>
-                        <div class="movimento-info">
-                            <div class="movimento-atleta">${escapeHtml(atleta.nome)}</div>
-                            <div class="movimento-desc">
-                                <span>${escapeHtml(descText)}</span> • <span style="color: var(--text-light);">${dataFmt}</span>
+                <div class="entrega-item">
+                    <div class="entrega-left">
+                        <div class="entrega-icon">🤝</div>
+                        <div class="entrega-info">
+                            <div class="entrega-title">
+                                <span>Entregue a: ${escapeHtml(destinatario)}</span>
+                                <span class="badge-recibo-tes">✓ Entregue ao Clube</span>
+                            </div>
+                            <div class="entrega-meta">
+                                <span>📅 ${dataFmt}</span> • <span>👤 ${escapeHtml(responsavel)}</span>
+                                <div style="margin-top: 2px;">
+                                    <span style="font-family: monospace; font-size: 0.72rem; color: #059669; background: #ecfdf5; padding: 1px 5px; border-radius: 4px; border: 1px solid #a7f3d0;">${escapeHtml(recibo)}</span>
+                                    ${ent.notas ? ` • <span style="font-style: italic; color: #475569;">"${escapeHtml(ent.notas)}"</span>` : ''}
+                                </div>
                             </div>
                         </div>
                     </div>
-                    <div class="movimento-right">
-                        <div class="movimento-valor">${Number(p.valor || 0).toFixed(2)} €</div>
-                        <div class="movimento-metodo">${p.metodo_pagamento || 'Dinheiro'}</div>
-                        <button type="button" class="btn-anular-mini" onclick="window.openModalExtrato(${p.atleta_id})">Ver Ficha 👁️</button>
+                    <div class="entrega-right">
+                        <div class="entrega-valor">${valorFmt} €</div>
+                        <button type="button" class="btn-recibo-view" onclick="window.openModalComprovativo(${ent.id})">
+                            <span>📄 Recibo</span>
+                        </button>
                     </div>
                 </div>
             `;
         });
 
-        listaMovimentosContainer.innerHTML = html;
+        listaEntregasContainer.innerHTML = html;
     }
 
-    if (filtroExtratoCategoria) filtroExtratoCategoria.addEventListener('change', renderExtrato);
-    if (filtroExtratoMetodo) filtroExtratoMetodo.addEventListener('change', renderExtrato);
+    // Modal de Registo de Entrega
+    window.openModalEntrega = function() {
+        if (!modalEntregaSheet) return;
+
+        if (modalEntregaSub) {
+            modalEntregaSub.textContent = `${activeEscalao} • Saldo em posse: ${saldoNumerarioEmPosse.toFixed(2)} €`;
+        }
+        if (modalEntregaSaldoDisponivel) {
+            modalEntregaSaldoDisponivel.textContent = `${saldoNumerarioEmPosse.toFixed(2)} €`;
+        }
+        if (entregaValorInput) {
+            entregaValorInput.value = saldoNumerarioEmPosse > 0 ? saldoNumerarioEmPosse.toFixed(2) : '';
+        }
+        if (entregaDataInput) {
+            entregaDataInput.value = hojeIso;
+        }
+        if (entregaDestinatarioInput && !entregaDestinatarioInput.value) {
+            entregaDestinatarioInput.value = 'Tesouraria BCV';
+        }
+        if (entregaNotasInput) {
+            entregaNotasInput.value = '';
+        }
+
+        modalEntregaSheet.classList.add('active');
+        document.body.style.overflow = 'hidden';
+    };
+
+    window.closeModalEntrega = function() {
+        if (modalEntregaSheet) modalEntregaSheet.classList.remove('active');
+        document.body.style.overflow = '';
+    };
+
+    if (btnAbrirModalEntrega) {
+        btnAbrirModalEntrega.addEventListener('click', window.openModalEntrega);
+    }
+
+    if (btnPreencherTotalPosse) {
+        btnPreencherTotalPosse.addEventListener('click', () => {
+            if (entregaValorInput) {
+                entregaValorInput.value = saldoNumerarioEmPosse.toFixed(2);
+            }
+        });
+    }
+
+    if (btnRecarregarTesouraria) {
+        btnRecarregarTesouraria.addEventListener('click', async () => {
+            btnRecarregarTesouraria.disabled = true;
+            btnRecarregarTesouraria.textContent = '⏳ A carregar...';
+            await loadData();
+            btnRecarregarTesouraria.disabled = false;
+            btnRecarregarTesouraria.textContent = '🔄 Atualizar';
+        });
+    }
+
+    // Submissão do Registo de Entrega à Tesouraria
+    if (formRegistarEntrega) {
+        formRegistarEntrega.addEventListener('submit', async (e) => {
+            e.preventDefault();
+
+            const valorNum = parseFloat(entregaValorInput?.value || '0');
+            if (isNaN(valorNum) || valorNum <= 0) {
+                alert("Por favor indique um valor válido a entregar.");
+                return;
+            }
+
+            if (valorNum > saldoNumerarioEmPosse && saldoNumerarioEmPosse > 0) {
+                const conf = confirm(`Atenção: O valor de ${valorNum.toFixed(2)} € é superior ao saldo registado em posse (${saldoNumerarioEmPosse.toFixed(2)} €).\nDeseja continuar mesmo assim?`);
+                if (!conf) return;
+            }
+
+            const dataEntrega = entregaDataInput?.value || hojeIso;
+            const destinatario = (entregaDestinatarioInput?.value || 'Tesouraria BCV').trim();
+            const metodo = entregaMetodoSelect?.value || 'Dinheiro';
+            const notas = (entregaNotasInput?.value || '').trim();
+
+            // Gerar código único de auditoria do recibo
+            const siglaEscalao = (activeEscalao || 'BCV').replace(/[^a-zA-Z0-9]/g, '').toUpperCase();
+            const randomSuffix = Math.floor(1000 + Math.random() * 9000);
+            const codigoRecibo = `REC-TES-${siglaEscalao}-${Date.now().toString().slice(-4)}${randomSuffix}`;
+
+            const responsavelNome = (userProfile && userProfile.nome) || (currentUser && currentUser.email) || 'Responsável de Escalão';
+            const responsavelEmail = (currentUser && currentUser.email) || '';
+            const responsavelId = currentUser ? currentUser.id : null;
+
+            if (btnSubmeterEntrega) btnSubmeterEntrega.disabled = true;
+            if (btnSubmeterEntregaTxt) btnSubmeterEntregaTxt.textContent = 'A registar entrega...';
+
+            try {
+                const payload = {
+                    responsavel_id: responsavelId,
+                    responsavel_nome: responsavelNome,
+                    responsavel_email: responsavelEmail,
+                    escalao: activeEscalao,
+                    epoca: '2026/2027',
+                    valor: valorNum,
+                    data_entrega: dataEntrega,
+                    entregue_a: destinatario,
+                    metodo: metodo,
+                    recibo_codigo: codigoRecibo,
+                    notas: notas
+                };
+
+                const { data: inserted, error: iErr } = await supabase
+                    .from('entregas_tesouraria')
+                    .insert([payload])
+                    .select();
+
+                if (iErr) {
+                    if (iErr.code === '42P01' || iErr.code === 'PGRST205') {
+                        throw new Error("A tabela 'entregas_tesouraria' ainda não foi criada no Supabase. Por favor execute o script setup_movimentos_tesouraria.sql.");
+                    }
+                    throw iErr;
+                }
+
+                closeModalEntrega();
+                await loadData();
+
+                // Abrir o comprovativo oficial do registo efetuado
+                const novaEntregaId = (inserted && inserted[0] && inserted[0].id) ? inserted[0].id : null;
+                if (novaEntregaId) {
+                    window.openModalComprovativo(novaEntregaId);
+                } else {
+                    alert(`✓ Entrega de ${valorNum.toFixed(2)} € registada com sucesso à tesouraria!\nCódigo: ${codigoRecibo}`);
+                }
+
+            } catch (err) {
+                console.error("Erro ao registar entrega:", err);
+                alert("Erro ao registar entrega à tesouraria: " + err.message);
+            } finally {
+                if (btnSubmeterEntrega) btnSubmeterEntrega.disabled = false;
+                if (btnSubmeterEntregaTxt) btnSubmeterEntregaTxt.textContent = 'Confirmar Entrega à Tesouraria';
+            }
+        });
+    }
+
+    // Modal de Comprovativo / Recibo Oficial de Entrega
+    window.openModalComprovativo = function(entregaId) {
+        if (!modalComprovativoSheet || !modalComprovativoContent) return;
+
+        const entrega = currentEntregasTesouraria.find(e => e.id === entregaId);
+        if (!entrega) {
+            alert("Registo de entrega não encontrado.");
+            return;
+        }
+
+        const dataFmt = entrega.data_entrega || '-';
+        const valorFmt = Number(entrega.valor || 0).toFixed(2);
+        const reciboCodigo = entrega.recibo_codigo || `REC-${entrega.id}`;
+        const responsavel = entrega.responsavel_nome || 'Responsável';
+        const destinatario = entrega.entregue_a || 'Tesouraria BCV';
+        const escalao = entrega.escalao || activeEscalao;
+        const notas = entrega.notas ? escapeHtml(entrega.notas) : 'Sem observações adicionais.';
+
+        modalComprovativoContent.innerHTML = `
+            <div class="recibo-card">
+                <div class="recibo-card-header">
+                    <div class="recibo-card-logo">
+                        <img src="assets/emblema_png.png" alt="BCV">
+                        <div>
+                            <div style="font-weight: 800; font-size: 0.95rem; color: var(--text-main);">Basket Clube de Valença</div>
+                            <div style="font-size: 0.72rem; color: var(--text-muted); text-transform: uppercase;">Comprovativo de Tesouraria</div>
+                        </div>
+                    </div>
+                    <div class="recibo-num-code">${escapeHtml(reciboCodigo)}</div>
+                </div>
+
+                <div class="recibo-highlight-valor">
+                    <div style="font-size: 0.75rem; text-transform: uppercase; font-weight: 700; color: #166534;">Montante Entregue</div>
+                    <div class="recibo-highlight-num">${valorFmt} €</div>
+                    <div style="font-size: 0.75rem; color: #15803d; font-weight: 600;">✓ Entregue & Confirmado no Clube</div>
+                </div>
+
+                <div style="margin-top: 10px;">
+                    <div class="recibo-detail-row">
+                        <span class="recibo-detail-label">Escalão:</span>
+                        <span class="recibo-detail-val">${escapeHtml(escalao)}</span>
+                    </div>
+                    <div class="recibo-detail-row">
+                        <span class="recibo-detail-label">Data da Entrega:</span>
+                        <span class="recibo-detail-val">${dataFmt}</span>
+                    </div>
+                    <div class="recibo-detail-row">
+                        <span class="recibo-detail-label">Entregue por:</span>
+                        <span class="recibo-detail-val">${escapeHtml(responsavel)}</span>
+                    </div>
+                    <div class="recibo-detail-row">
+                        <span class="recibo-detail-label">Recebido por:</span>
+                        <span class="recibo-detail-val">${escapeHtml(destinatario)}</span>
+                    </div>
+                    <div class="recibo-detail-row">
+                        <span class="recibo-detail-label">Método:</span>
+                        <span class="recibo-detail-val">${escapeHtml(entrega.metodo || 'Dinheiro')}</span>
+                    </div>
+                    <div class="recibo-detail-row" style="border-bottom: none;">
+                        <span class="recibo-detail-label">Observações:</span>
+                        <span class="recibo-detail-val" style="font-style: italic;">${notas}</span>
+                    </div>
+                </div>
+
+                <div class="recibo-carimbo-box">
+                    <div>🏛️ <strong>Basket Clube de Valença • Tesouraria Central</strong></div>
+                    <div style="font-size: 0.68rem; margin-top: 2px; color: #64748b;">
+                        Registado no sistema BCV em ${entrega.created_at ? new Date(entrega.created_at).toLocaleString('pt-PT') : dataFmt} • Época 2026/2027
+                    </div>
+                </div>
+
+                <div style="display: flex; gap: 8px; margin-top: 16px;">
+                    <button type="button" class="btn-primary" onclick="window.print()" style="flex: 1; padding: 10px; font-size: 0.85rem; font-weight: 700; background: #059669; border: none; border-radius: 8px; color: white; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 6px;">
+                        <span>🖨️</span>
+                        <span>Imprimir / Guardar</span>
+                    </button>
+                    <button type="button" class="btn-secondary" onclick="window.closeModalComprovativo()" style="padding: 10px 16px; font-size: 0.85rem; font-weight: 700; border-radius: 8px; cursor: pointer;">
+                        Fechar
+                    </button>
+                </div>
+            </div>
+        `;
+
+        modalComprovativoSheet.classList.add('active');
+        document.body.style.overflow = 'hidden';
+    };
+
+    window.closeModalComprovativo = function() {
+        if (modalComprovativoSheet) modalComprovativoSheet.classList.remove('active');
+        document.body.style.overflow = '';
+    };
 
     // =======================================================
     // 8. MODAL EXTRATO INDIVIDUAL DO ATLETA
@@ -1577,6 +1860,16 @@ document.addEventListener('DOMContentLoaded', () => {
     if (modalExtratoSheet) {
         modalExtratoSheet.addEventListener('click', (e) => {
             if (e.target === modalExtratoSheet) closeModalExtrato();
+        });
+    }
+    if (modalEntregaSheet) {
+        modalEntregaSheet.addEventListener('click', (e) => {
+            if (e.target === modalEntregaSheet) closeModalEntrega();
+        });
+    }
+    if (modalComprovativoSheet) {
+        modalComprovativoSheet.addEventListener('click', (e) => {
+            if (e.target === modalComprovativoSheet) closeModalComprovativo();
         });
     }
 
