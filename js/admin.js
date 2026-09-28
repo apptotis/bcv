@@ -356,13 +356,13 @@ document.addEventListener('DOMContentLoaded', async () => {
             userRoleHelp.style.background = '#eff6ff';
             userRoleHelp.style.color = '#1e40af';
             userRoleHelp.style.border = '1px solid #bfdbfe';
-            userRoleHelp.innerHTML = '🏀 <strong>Treinador (Mobile):</strong> Acede ao Portal do Treinador (<code>treinador.html</code>). As equipas e atletas que gere são geridos no menu <strong>Equipas ➔ Plantel</strong>.';
+            userRoleHelp.innerHTML = '🏀 <strong>Treinador (Mobile):</strong> Acede ao Portal do Treinador (<code>treinador.html</code>). Selecione o(s) escalão(ões) abaixo para acesso imediato.';
         } else if (r === 'diretor') {
             userRoleHelp.style.display = 'block';
             userRoleHelp.style.background = '#ecfdf5';
             userRoleHelp.style.color = '#065f46';
             userRoleHelp.style.border = '1px solid #a7f3d0';
-            userRoleHelp.innerHTML = '📱 <strong>Diretor (Mobile):</strong> Acede ao Portal do Diretor (<code>diretor.html</code>). As equipas que gere são geridas no menu <strong>Equipas ➔ Plantel</strong>.';
+            userRoleHelp.innerHTML = '📱 <strong>Diretor (Mobile):</strong> Acede ao Portal do Diretor (<code>diretor.html</code>). Selecione o(s) escalão(ões) abaixo para acesso imediato.';
         } else if (r === 'redator') {
             userRoleHelp.style.display = 'block';
             userRoleHelp.style.background = '#fff7ed';
@@ -395,7 +395,8 @@ document.addEventListener('DOMContentLoaded', async () => {
             const val = roleSelect.value;
             updateUserRoleHelp(val);
             const containerEscaloesPag = document.getElementById('container-escaloes-pagamentos');
-            if (val === 'pagamentos' || val === 'diretor_pagamentos') {
+            const rolesWithEscaloes = ['pagamentos', 'diretor_pagamentos', 'diretor', 'treinador'];
+            if (rolesWithEscaloes.includes(val)) {
                 if (containerEscaloesPag) containerEscaloesPag.style.display = 'block';
             } else {
                 if (containerEscaloesPag) containerEscaloesPag.style.display = 'none';
@@ -750,7 +751,10 @@ document.addEventListener('DOMContentLoaded', async () => {
                     `;
                 } else if (isDiretor) {
                     let equipasHtml = '';
-                    if (realTeams.length > 0) {
+                    const escAfetos = (user.escalao_afeto || '').split(',').map(s => s.trim()).filter(Boolean);
+                    if (escAfetos.length > 0) {
+                        equipasHtml = escAfetos.map(e => `<span style="background: rgba(16, 185, 129, 0.12); color: #047857; font-weight: 700; padding: 2px 7px; border-radius: 4px; font-size: 0.75rem; border: 1px solid rgba(16, 185, 129, 0.3);">🏷️ ${e}</span>`).join(' ');
+                    } else if (realTeams.length > 0) {
                         equipasHtml = realTeams.map(t => `<span style="background: rgba(16, 185, 129, 0.12); color: #047857; font-weight: 700; padding: 2px 7px; border-radius: 4px; font-size: 0.75rem; border: 1px solid rgba(16, 185, 129, 0.3);">🏀 ${t}</span>`).join(' ');
                     } else {
                         equipasHtml = '<span style="background: rgba(16, 185, 129, 0.08); color: #047857; padding: 2px 7px; border-radius: 4px; font-size: 0.75rem;">Todas as Equipas</span>';
@@ -765,10 +769,13 @@ document.addEventListener('DOMContentLoaded', async () => {
                     `;
                 } else if (isTreinador) {
                     let equipasHtml = '';
-                    if (realTeams.length > 0) {
+                    const escAfetos = (user.escalao_afeto || '').split(',').map(s => s.trim()).filter(Boolean);
+                    if (escAfetos.length > 0) {
+                        equipasHtml = escAfetos.map(e => `<span style="background: rgba(59, 130, 246, 0.12); color: #1d4ed8; font-weight: 700; padding: 2px 7px; border-radius: 4px; font-size: 0.75rem; border: 1px solid rgba(59, 130, 246, 0.3);">🏷️ ${e}</span>`).join(' ');
+                    } else if (realTeams.length > 0) {
                         equipasHtml = realTeams.map(t => `<span style="background: rgba(59, 130, 246, 0.12); color: #1d4ed8; font-weight: 700; padding: 2px 7px; border-radius: 4px; font-size: 0.75rem; border: 1px solid rgba(59, 130, 246, 0.3);">🏀 ${t}</span>`).join(' ');
                     } else {
-                        equipasHtml = '<span style="background: #fef3c7; color: #b45309; padding: 2px 7px; border-radius: 4px; font-size: 0.75rem; border: 1px dashed #f59e0b;">⚠️ Sem equipas atribuídas (definir no Plantel)</span>';
+                        equipasHtml = '<span style="background: #fef3c7; color: #b45309; padding: 2px 7px; border-radius: 4px; font-size: 0.75rem; border: 1px dashed #f59e0b;">⚠️ Sem equipas atribuídas</span>';
                     }
                     permissoesBadgeHtml = `
                         <div style="display: flex; flex-direction: column; gap: 4px;">
@@ -853,7 +860,8 @@ document.addEventListener('DOMContentLoaded', async () => {
 
         const containerEscaloesPag = document.getElementById('container-escaloes-pagamentos');
         const checkboxesEscaloesPag = document.querySelectorAll('input[name="user_escaloes_pagamentos"]');
-        if (role === 'pagamentos' || role === 'diretor_pagamentos') {
+        const rolesWithEscaloes = ['pagamentos', 'diretor_pagamentos', 'diretor', 'treinador'];
+        if (rolesWithEscaloes.includes(role)) {
             if (containerEscaloesPag) containerEscaloesPag.style.display = 'block';
             const escList = (user.escalao_afeto || '').split(',').map(s => s.trim().toLowerCase());
             checkboxesEscaloesPag.forEach(cb => {
@@ -925,7 +933,8 @@ document.addEventListener('DOMContentLoaded', async () => {
         const role = roleVal || 'personalizado';
 
         let escalaoAfeto = '';
-        if (role === 'pagamentos' || role === 'diretor_pagamentos') {
+        const rolesWithEscaloes = ['pagamentos', 'diretor_pagamentos', 'diretor', 'treinador'];
+        if (rolesWithEscaloes.includes(role)) {
             const checkedEscs = Array.from(document.querySelectorAll('input[name="user_escaloes_pagamentos"]:checked')).map(cb => cb.value);
             escalaoAfeto = checkedEscs.join(', ');
         } else if (isEditMode && editUserIdInput.dataset?.escalaoAfeto) {

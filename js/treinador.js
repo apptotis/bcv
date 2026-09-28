@@ -234,6 +234,13 @@ document.addEventListener('DOMContentLoaded', async () => {
             // - Admin: Se tiver equipas vinculadas usa-as; caso contrário, tem acesso a todas para supervisão.
             if (matchedTeams.length > 0) {
                 userTeams = matchedTeams;
+            } else if (userProfile?.escalao_afeto && allTeams && allTeams.length > 0) {
+                const rawEscs = (userProfile.escalao_afeto || '').split(',').map(s => s.trim().toLowerCase()).filter(Boolean);
+                userTeams = allTeams.filter(t => {
+                    const tNome = (t.nome || '').toLowerCase();
+                    const tEscalao = (t.escalao || '').toLowerCase();
+                    return rawEscs.some(re => tNome.includes(re) || tEscalao.includes(re));
+                });
             } else if (isAdmin && allTeams && allTeams.length > 0) {
                 userTeams = allTeams;
             } else {
