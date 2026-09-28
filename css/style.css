@@ -1046,27 +1046,35 @@ img {
         padding: 12px 10px !important;
     }
 
+    .portal-section-header,
     .portal-card-header {
-        margin-bottom: 10px !important;
-        gap: 8px !important;
-        padding-bottom: 8px !important;
+        margin-bottom: 12px !important;
+        gap: 10px !important;
+        padding-bottom: 10px !important;
     }
 
+    .portal-section-header .header-badge-icon,
     .portal-card-header .card-icon-badge {
-        width: 34px !important;
-        height: 34px !important;
-        font-size: 1.05rem !important;
-        border-radius: 8px !important;
+        width: 38px !important;
+        height: 38px !important;
+        font-size: 1.15rem !important;
+        border-radius: 10px !important;
     }
 
+    .portal-section-header .portal-section-title,
     .portal-card-header .card-title {
-        font-size: 1.15rem !important;
-        letter-spacing: 0.3px !important;
+        font-size: 1.35rem !important;
+        font-weight: 800 !important;
+        color: var(--accent-primary) !important;
+        text-transform: uppercase !important;
+        letter-spacing: 0.5px !important;
         line-height: 1.2 !important;
     }
 
+    .portal-section-header .portal-section-desc,
     .portal-card-header .card-subtitle {
-        font-size: 0.74rem !important;
+        font-size: 0.78rem !important;
+        margin-top: 2px !important;
     }
 
     .portal-games-list {
@@ -1143,10 +1151,6 @@ img {
 @media (max-width: 420px) {
     .portal-card {
         padding: 10px 8px !important;
-    }
-
-    .portal-card-header .card-title {
-        font-size: 1.05rem !important;
     }
 
     .game-schedule-item,
