@@ -689,28 +689,6 @@ document.addEventListener('DOMContentLoaded', () => {
 
         let html = '';
         filtrados.forEach(a => {
-            const atletaPags = pagamentosAtletaMap[a.id] || [];
-            const hasAnual = atletaPags.some(p => p.mes === 'ANUAL' && p.estado === 'Pago');
-            const regMes = atletaPags.find(p => p.mes === mesSel && p.estado === 'Pago');
-
-            // Total acumulado pago por este atleta na época
-            let totalPagoAtleta = 0;
-            atletaPags.forEach(p => totalPagoAtleta += Number(p.valor || 0));
-
-            // Status badge do mês selecionado
-            let badgeHtml = '';
-            if (hasAnual) {
-                badgeHtml = `<span class="atleta-badge-status anual">⭐ Quota Anual Paga</span>`;
-            } else if (regMes) {
-                const valPago = Number(regMes.valor !== undefined && regMes.valor !== null ? regMes.valor : 0);
-                badgeHtml = `<span class="atleta-badge-status pago">✓ Pago (${valPago.toFixed(0)}€)</span>`;
-            } else {
-                badgeHtml = `<span class="atleta-badge-status pendente">⏳ Pendente</span>`;
-            }
-
-            const dorsal = a.equipamento_numero_1 || a.equipamento_numero_2 || a.dorsal || '-';
-            const nickDisplay = a.nickname ? `"${escapeHtml(a.nickname)}"` : '';
-
             const avatarHtml = a.foto_url 
                 ? `<img src="${a.foto_url}" class="atleta-avatar" alt="${escapeHtml(a.nome)}">`
                 : `<div class="atleta-avatar">${(a.nome || 'A').charAt(0).toUpperCase()}</div>`;
@@ -720,15 +698,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     <div class="atleta-top-row">
                         ${avatarHtml}
                         <div class="atleta-info">
-                            <div class="atleta-nome">
-                                ${escapeHtml(a.nome)}
-                                ${nickDisplay ? `<span style="font-size: 0.8rem; color: var(--primary); font-weight: 600;"> ${nickDisplay}</span>` : ''}
-                            </div>
-                            <div class="atleta-meta">
-                                <span style="background: #f1f5f9; padding: 1px 6px; border-radius: 4px; font-weight: 700;">Nº ${dorsal}</span>
-                                <span>Total Pago: <strong>${totalPagoAtleta.toFixed(0)} €</strong></span>
-                                ${badgeHtml}
-                            </div>
+                            <div class="atleta-nome">${escapeHtml(a.nome)}</div>
                         </div>
                     </div>
                     <div class="atleta-actions-row">

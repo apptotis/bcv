@@ -533,12 +533,11 @@ body {
 }
 
 .atleta-nome {
-    font-size: 0.95rem;
+    font-size: 1rem;
     font-weight: 700;
     color: var(--text-main);
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
+    line-height: 1.35;
+    word-break: break-word;
 }
 
 .atleta-meta {
