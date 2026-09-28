@@ -786,6 +786,9 @@ img {
     border-radius: 8px;
     margin-bottom: 10px;
     transition: all 0.2s ease;
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
 }
 
 .game-schedule-item:last-child {
@@ -795,38 +798,81 @@ img {
 .game-schedule-item:hover {
     background: #ffffff;
     border-color: var(--accent-primary);
-    transform: translateX(3px);
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.04);
 }
 
-.game-schedule-header {
+/* 1ª Linha: Escalão da Competição + Data e Horário */
+.game-schedule-top {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    margin-bottom: 6px;
+    gap: 8px;
     flex-wrap: wrap;
-    gap: 6px;
 }
 
-.game-teams {
-    font-size: 0.95rem;
-    font-weight: 700;
-    color: var(--text-primary);
+.game-escalao-badge {
+    font-size: 0.8rem;
+    font-weight: 800;
+    color: #7e22ce;
+    background: rgba(126, 34, 206, 0.1);
+    padding: 3px 9px;
+    border-radius: 6px;
+    letter-spacing: 0.2px;
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
 }
 
 .game-date-badge {
     font-size: 0.78rem;
     font-weight: 700;
-    color: var(--accent-primary);
-    background: rgba(126, 34, 206, 0.08);
+    color: #0f172a;
+    background: #e2e8f0;
     padding: 3px 8px;
-    border-radius: 4px;
+    border-radius: 6px;
+    white-space: nowrap;
 }
 
-.game-meta {
+/* 2ª Linha: Confronto das Equipas */
+.game-schedule-teams {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 0.95rem;
+    font-weight: 700;
+    color: var(--text-primary);
+    padding: 2px 0;
+}
+
+.team-name {
+    flex: 1;
+    word-break: break-word;
+}
+
+.team-name.team-bcv {
+    color: #7e22ce;
+    font-weight: 800;
+}
+
+.game-vs-tag {
+    font-size: 0.72rem;
+    font-weight: 800;
+    text-transform: uppercase;
+    color: var(--text-secondary);
+    background: #f1f5f9;
+    padding: 1px 6px;
+    border-radius: 4px;
+    border: 1px solid rgba(0, 0, 0, 0.06);
+}
+
+/* 3ª Linha: Localização */
+.game-schedule-venue {
     font-size: 0.78rem;
     color: var(--text-secondary);
     display: flex;
-    gap: 10px;
+    align-items: center;
+    gap: 4px;
 }
 
 /* Itens de Resultados */

@@ -128,43 +128,79 @@ async function loadPortalHighlights(supabase) {
     let hasAgenda = false;
     let hasResultados = false;
 
-    // 1. CARREGAR AGENDA (Próximos 7 dias)
+    function extrairEscalaoCompleto(jogo) {
+        if (!jogo) return 'BCV';
+        if (jogo.competicao && typeof jogo.competicao === 'string') {
+            const compTrim = jogo.competicao.trim();
+            if (compTrim.includes('|')) {
+                const primeiraParte = compTrim.split('|')[0].trim();
+                if (primeiraParte) return primeiraParte;
+            }
+        }
+        let esc = (jogo.escalao || '').trim();
+        if (!esc) esc = 'BCV';
+        const compLower = (jogo.competicao || '').toLowerCase();
+        const isFem = compLower.includes('fem') || compLower.includes('feminino');
+        const isMasc = compLower.includes('masc') || compLower.includes('masculino');
+        if (isFem && !esc.toLowerCase().includes('fem')) return esc + ' Feminino';
+        if (isMasc && !esc.toLowerCase().includes('masc')) return esc + ' Masculino';
+        return esc;
+    }
+
+    function formatDataAgenda(dateStr) {
+        if (!dateStr) return '';
+        try {
+            const parts = dateStr.split('-');
+            if (parts.length === 3) {
+                const d = new Date(parseInt(parts[0], 10), parseInt(parts[1], 10) - 1, parseInt(parts[2], 10));
+                return d.toLocaleDateString('pt-PT', { weekday: 'short', day: 'numeric', month: 'short' });
+            }
+            return new Date(dateStr).toLocaleDateString('pt-PT', { weekday: 'short', day: 'numeric', month: 'short' });
+        } catch (e) {
+            return dateStr;
+        }
+    }
+
+    // 1. CARREGAR AGENDA (Próximos Jogos)
     if (agendaContainer) {
         try {
             const hoje = new Date();
-            const daquiA7Dias = new Date();
-            daquiA7Dias.setDate(hoje.getDate() + 7);
-            
-            const todayStr = hoje.toISOString().split('T')[0];
-            const nextWeekStr = daquiA7Dias.toISOString().split('T')[0];
+            const hojeStr = hoje.toISOString().split('T')[0];
 
             const { data: agenda, error } = await supabase
                 .from('agenda_bcv')
                 .select('*')
-                .gte('data_jogo', todayStr)
-                .lte('data_jogo', nextWeekStr)
-                .order('data_jogo', { ascending: true });
+                .gte('data_jogo', hojeStr)
+                .order('data_jogo', { ascending: true })
+                .limit(8);
 
-            const agendaPublicada = (agenda || []).filter(j => j.publicado !== false);
+            const agendaPublicada = (agenda || []).filter(j => j.publicado !== false).slice(0, 5);
 
             if (!error && agendaPublicada.length > 0) {
                 hasAgenda = true;
                 agendaContainer.innerHTML = '';
                 
                 agendaPublicada.forEach(jogo => {
-                    const dataJogo = new Date(jogo.data_jogo).toLocaleDateString('pt-PT', { weekday: 'short', day: 'numeric', month: 'short' });
-                    const horaJogo = jogo.hora_jogo ? jogo.hora_jogo.substring(0, 5) : '';
+                    const escalaoCompleto = extrairEscalaoCompleto(jogo);
+                    const dataJogo = formatDataAgenda(jogo.data_jogo);
+                    const horaJogo = jogo.hora_jogo ? jogo.hora_jogo.trim() : '';
+                    const isCasaBCV = (jogo.equipa_casa || '').toLowerCase().includes('valença') || (jogo.equipa_casa || '').toLowerCase().includes('bcv');
+                    const isForaBCV = (jogo.equipa_fora || '').toLowerCase().includes('valença') || (jogo.equipa_fora || '').toLowerCase().includes('bcv');
 
                     const item = document.createElement('div');
                     item.className = 'game-schedule-item';
                     item.innerHTML = `
-                        <div class="game-schedule-header">
-                            <span class="game-teams">${jogo.equipa_casa} vs ${jogo.equipa_fora}</span>
-                            <span class="game-date-badge">${dataJogo} ${horaJogo}</span>
+                        <div class="game-schedule-top">
+                            <span class="game-escalao-badge">🏀 ${escalaoCompleto}</span>
+                            <span class="game-date-badge">📅 ${dataJogo} ${horaJogo ? '• ' + horaJogo : ''}</span>
                         </div>
-                        <div class="game-meta">
-                            <span>📍 ${jogo.local || 'Pavilhão Municipal'}</span>
-                            <span>🏀 ${jogo.escalao || 'BCV'}</span>
+                        <div class="game-schedule-teams">
+                            <span class="team-name ${isCasaBCV ? 'team-bcv' : ''}">${jogo.equipa_casa}</span>
+                            <span class="game-vs-tag">vs</span>
+                            <span class="team-name ${isForaBCV ? 'team-bcv' : ''}">${jogo.equipa_fora}</span>
+                        </div>
+                        <div class="game-schedule-venue">
+                            <span>📍 ${jogo.local || 'Pavilhão Municipal de Valença'}</span>
                         </div>
                     `;
                     agendaContainer.appendChild(item);
@@ -191,7 +227,8 @@ async function loadPortalHighlights(supabase) {
                 resultadosContainer.innerHTML = '';
 
                 resultadosPublicados.forEach(resultado => {
-                    const dataJogo = new Date(resultado.data_jogo).toLocaleDateString('pt-PT', { day: 'numeric', month: 'short' });
+                    const escalaoCompleto = extrairEscalaoCompleto(resultado);
+                    const dataJogo = formatDataAgenda(resultado.data_jogo);
                     const ptsCasa = Number(resultado.pontos_casa) || 0;
                     const ptsFora = Number(resultado.pontos_fora) || 0;
                     
@@ -200,14 +237,14 @@ async function loadPortalHighlights(supabase) {
                     const item = document.createElement('div');
                     item.className = 'game-result-item';
                     item.innerHTML = `
+                        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px;">
+                            <span class="game-escalao-badge" style="font-size: 0.76rem;">🏀 ${escalaoCompleto}</span>
+                            <span style="font-size: 0.76rem; color: var(--text-secondary); font-weight: 600;">📅 ${dataJogo}</span>
+                        </div>
                         <div class="game-result-teams">
                             <span style="flex: 1; min-width: 80px;">${resultado.equipa_casa}</span>
                             <span class="game-result-score">${scoreFormatted}</span>
                             <span style="flex: 1; text-align: right; min-width: 80px;">${resultado.equipa_fora}</span>
-                        </div>
-                        <div style="font-size: 0.76rem; color: var(--text-secondary); display: flex; justify-content: space-between; margin-top: 4px;">
-                            <span>📅 ${dataJogo}</span>
-                            <span>🏀 ${resultado.escalao || 'BCV'}</span>
                         </div>
                     `;
                     resultadosContainer.appendChild(item);
