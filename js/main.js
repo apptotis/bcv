@@ -195,6 +195,8 @@ async function loadPortalHighlights(supabase) {
         }
         return '';
     }
+    window.obterLogoEquipa = obterLogoEquipa;
+    window.FPB_CLUB_LOGOS = FPB_CLUB_LOGOS;
 
     // 1. CARREGAR AGENDA (Próximos Jogos)
     if (agendaContainer) {
@@ -1059,6 +1061,8 @@ async function loadCompeticoesSection(supabase) {
                         const horaFmt = j.hora_jogo ? j.hora_jogo.substring(0, 5) : 'Hora a def.';
                         const isCasaBCV = (j.equipa_casa || '').toLowerCase().includes('valença') || (j.equipa_casa || '').toLowerCase().includes('bcv');
                         const isForaBCV = (j.equipa_fora || '').toLowerCase().includes('valença') || (j.equipa_fora || '').toLowerCase().includes('bcv');
+                        const logoCasa = window.obterLogoEquipa ? window.obterLogoEquipa(j.equipa_casa, j.logo_casa) : '';
+                        const logoFora = window.obterLogoEquipa ? window.obterLogoEquipa(j.equipa_fora, j.logo_fora) : '';
                         return `
                             <div class="comp-game-card">
                                 <div class="comp-game-date-row">
@@ -1066,9 +1070,15 @@ async function loadCompeticoesSection(supabase) {
                                     <span class="game-hour">${horaFmt}</span>
                                 </div>
                                 <div class="comp-game-match-row">
-                                    <span class="comp-game-team ${isCasaBCV ? 'is-bcv' : ''}" title="${j.equipa_casa}">${j.equipa_casa}</span>
+                                    <span class="comp-game-team ${isCasaBCV ? 'is-bcv' : ''}" title="${j.equipa_casa}">
+                                        ${logoCasa ? `<img src="${logoCasa}" alt="" class="team-logo-icon" style="width: 17px; height: 17px;" onerror="this.style.display='none'">` : ''}
+                                        <span>${j.equipa_casa}</span>
+                                    </span>
                                     <span class="comp-game-vs">vs</span>
-                                    <span class="comp-game-team ${isForaBCV ? 'is-bcv' : ''}" title="${j.equipa_fora}">${j.equipa_fora}</span>
+                                    <span class="comp-game-team ${isForaBCV ? 'is-bcv' : ''}" title="${j.equipa_fora}">
+                                        ${logoFora ? `<img src="${logoFora}" alt="" class="team-logo-icon" style="width: 17px; height: 17px;" onerror="this.style.display='none'">` : ''}
+                                        <span>${j.equipa_fora}</span>
+                                    </span>
                                 </div>
                                 ${j.local ? `<div class="comp-game-venue">📍 ${j.local}</div>` : ''}
                             </div>
@@ -1095,6 +1105,8 @@ async function loadCompeticoesSection(supabase) {
                         const isForaBCV = (j.equipa_fora || '').toLowerCase().includes('valença') || (j.equipa_fora || '').toLowerCase().includes('bcv');
                         const ptsCasa = Number(j.pontos_casa) || 0;
                         const ptsFora = Number(j.pontos_fora) || 0;
+                        const logoCasa = window.obterLogoEquipa ? window.obterLogoEquipa(j.equipa_casa, j.logo_casa) : '';
+                        const logoFora = window.obterLogoEquipa ? window.obterLogoEquipa(j.equipa_fora, j.logo_fora) : '';
                         return `
                             <div class="comp-game-card">
                                 <div class="comp-game-date-row">
@@ -1102,9 +1114,15 @@ async function loadCompeticoesSection(supabase) {
                                     <span class="game-hour">${j.competicao || ''}</span>
                                 </div>
                                 <div class="comp-game-match-row">
-                                    <span class="comp-game-team ${isCasaBCV ? 'is-bcv' : ''}" title="${j.equipa_casa}">${j.equipa_casa}</span>
+                                    <span class="comp-game-team ${isCasaBCV ? 'is-bcv' : ''}" title="${j.equipa_casa}">
+                                        ${logoCasa ? `<img src="${logoCasa}" alt="" class="team-logo-icon" style="width: 17px; height: 17px;" onerror="this.style.display='none'">` : ''}
+                                        <span>${j.equipa_casa}</span>
+                                    </span>
                                     <span class="comp-game-score">${ptsCasa} - ${ptsFora}</span>
-                                    <span class="comp-game-team ${isForaBCV ? 'is-bcv' : ''}" title="${j.equipa_fora}">${j.equipa_fora}</span>
+                                    <span class="comp-game-team ${isForaBCV ? 'is-bcv' : ''}" title="${j.equipa_fora}">
+                                        ${logoFora ? `<img src="${logoFora}" alt="" class="team-logo-icon" style="width: 17px; height: 17px;" onerror="this.style.display='none'">` : ''}
+                                        <span>${j.equipa_fora}</span>
+                                    </span>
                                 </div>
                             </div>
                         `;

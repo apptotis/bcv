@@ -95,4 +95,4 @@
 - [2026-09-28] Gemini: Implementação do sistema de desconto de mensalidades (50% e personalizado) com gestão no Admin (subfin-descontos, modal de atribuição e KPIs), cálculo e abatimento automático na cobrança mobile (pagamentos.html/js) e admin, badges visuais e setup_atletas_descontos.sql.
 - [2026-09-28] Gemini: Correções financeiras (descontosAtletasMap, KPI Outros Serviços/Produtos), dorsal limpo em presenças e Mini 8 a nascidos em 2020.
 - [2026-09-28] Gemini: Destaque do escalão completo na 1ª linha da Agenda Desportiva no index (ex: Sub 14 Feminino) e novo layout limpo dos jogos (index.html, style.css, main.js).
-- [2026-09-28] Gemini: Integração de emblemas oficiais das equipas da FPB na Agenda e Resultados, mapeamento automático, parsers de sync e setup_logos_equipas.sql.
+- [2026-09-28] Gemini: Integração de emblemas oficiais das equipas da FPB na Agenda, Resultados e Competições, mapeamento automático, parsers de sync e setup_logos_equipas.sql.

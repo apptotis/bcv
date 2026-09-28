@@ -4732,13 +4732,25 @@ document.addEventListener('DOMContentLoaded', async () => {
                                     local: jogo.local,
                                     competicao: jogo.competicao,
                                     fpb_id: jogo.fpb_id,
+                                    logo_casa: jogo.logo_casa || null,
+                                    logo_fora: jogo.logo_fora || null,
                                     publicado: true
                                 };
 
                                 if (existRes && existRes.length > 0) {
-                                    await supabase.from('resultados_bcv').update(resData).eq('id', existRes[0].id);
+                                    const { error: upErr } = await supabase.from('resultados_bcv').update(resData).eq('id', existRes[0].id);
+                                    if (upErr && upErr.message && upErr.message.includes('logo_')) {
+                                        delete resData.logo_casa;
+                                        delete resData.logo_fora;
+                                        await supabase.from('resultados_bcv').update(resData).eq('id', existRes[0].id);
+                                    }
                                 } else {
-                                    await supabase.from('resultados_bcv').insert(resData);
+                                    const { error: inErr } = await supabase.from('resultados_bcv').insert(resData);
+                                    if (inErr && inErr.message && inErr.message.includes('logo_')) {
+                                        delete resData.logo_casa;
+                                        delete resData.logo_fora;
+                                        await supabase.from('resultados_bcv').insert(resData);
+                                    }
                                 }
 
                                 // Remover da agenda se ainda constava como jogo futuro
@@ -4769,13 +4781,25 @@ document.addEventListener('DOMContentLoaded', async () => {
                                     escalao: jogo.escalao,
                                     competicao: jogo.competicao,
                                     fpb_id: jogo.fpb_id,
+                                    logo_casa: jogo.logo_casa || null,
+                                    logo_fora: jogo.logo_fora || null,
                                     publicado: true
                                 };
 
                                 if (existAg && existAg.length > 0) {
-                                    await supabase.from('agenda_bcv').update(agData).eq('id', existAg[0].id);
+                                    const { error: upErr } = await supabase.from('agenda_bcv').update(agData).eq('id', existAg[0].id);
+                                    if (upErr && upErr.message && upErr.message.includes('logo_')) {
+                                        delete agData.logo_casa;
+                                        delete agData.logo_fora;
+                                        await supabase.from('agenda_bcv').update(agData).eq('id', existAg[0].id);
+                                    }
                                 } else {
-                                    await supabase.from('agenda_bcv').insert(agData);
+                                    const { error: inErr } = await supabase.from('agenda_bcv').insert(agData);
+                                    if (inErr && inErr.message && inErr.message.includes('logo_')) {
+                                        delete agData.logo_casa;
+                                        delete agData.logo_fora;
+                                        await supabase.from('agenda_bcv').insert(agData);
+                                    }
                                 }
                             }
                         } catch (errJogo) {
