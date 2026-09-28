@@ -6085,8 +6085,8 @@ document.addEventListener('DOMContentLoaded', async () => {
     function renderFinanceiraTable() {
         if (!financeiraTableBody) return;
 
-        const fEsc = (finFilterEscalao?.value || '').toLowerCase().trim();
-        const fMes = (finFilterMes?.value || '').trim();
+        const cleanFilterEsc = (finFilterEscalao?.value || '').toLowerCase().replace(/[-\s]/g, '').trim();
+        const fServico = (finFilterMes?.value || '').trim();
         const fMet = (finFilterMetodo?.value || '').trim();
         const fRec = (finFilterRecebedor?.value || '').trim();
         const fSearch = (finFilterSearch?.value || '').toLowerCase().trim();
@@ -6096,16 +6096,57 @@ document.addEventListener('DOMContentLoaded', async () => {
 
         let filtrados = currentFinanceiraPagamentos.filter(p => {
             const atleta = atletaMap[p.atleta_id] || {};
-            const esc = (atleta.escalao || '').toLowerCase();
+            const cleanAtletaEsc = (atleta.escalao || p.escalao || '').toLowerCase().replace(/[-\s]/g, '').trim();
+            const cleanEq1 = (atleta.equipabcv1 || '').toLowerCase().replace(/[-\s]/g, '').trim();
+            const cleanEq2 = (atleta.equipabcv2 || '').toLowerCase().replace(/[-\s]/g, '').trim();
+            const cleanFpb = (atleta.equipafpb || '').toLowerCase().replace(/[-\s]/g, '').trim();
             const atlNome = (atleta.nome || '').toLowerCase();
 
-            if (fEsc && !esc.includes(fEsc.replace(/[-\s]/g, ''))) return false;
-            if (fMes) {
-                if (fMes === 'ANUAL' && p.mes !== 'ANUAL') return false;
-                if (fMes !== 'ANUAL' && p.mes !== fMes) return false;
+            // 1. Filtro de Escalão (resiliente e bidirecional a variações de grafia)
+            if (cleanFilterEsc) {
+                const matchEsc = cleanAtletaEsc.includes(cleanFilterEsc) || cleanFilterEsc.includes(cleanAtletaEsc) ||
+                                 cleanEq1.includes(cleanFilterEsc) || cleanEq2.includes(cleanFilterEsc) || cleanFpb.includes(cleanFilterEsc);
+                if (!matchEsc) return false;
             }
+
+            // 2. Filtro de Serviço / Quota / Produto
+            if (fServico) {
+                const cat = (p.categoria || '').toLowerCase();
+                const desc = (p.descricao || '').toLowerCase();
+                const mes = (p.mes || '').toUpperCase();
+
+                if (fServico === 'QUOTAS_TODAS') {
+                    if (cat !== 'mensalidade' && mes === 'PRODUTO') return false;
+                } else if (fServico === 'ANUAL') {
+                    if (mes !== 'ANUAL' && !desc.includes('anual')) return false;
+                } else if (fServico === 'BIANUAL') {
+                    if (mes !== 'BIANUAL' && !desc.includes('bianual')) return false;
+                } else if (fServico === 'MENSAL_REGULAR') {
+                    if (mes === 'ANUAL' || mes === 'BIANUAL' || mes === 'PRODUTO' || cat !== 'mensalidade') return false;
+                } else if (fServico === 'PRODUTOS_TODOS') {
+                    if (cat === 'mensalidade' && mes !== 'PRODUTO') return false;
+                } else if (fServico === 'SEGURO') {
+                    if (!cat.includes('inscri') && !cat.includes('seguro') && !desc.includes('seguro') && !desc.includes('inscri')) return false;
+                } else if (fServico === 'EQUIPAMENTO') {
+                    if (!cat.includes('equip') && !desc.includes('equip')) return false;
+                } else if (fServico === 'EXAME') {
+                    if (!cat.includes('exame') && !cat.includes('médic') && !cat.includes('medic') && !desc.includes('exame') && !desc.includes('emd')) return false;
+                } else if (fServico === 'OUTRO') {
+                    const isKnownProduct = cat.includes('inscri') || cat.includes('seguro') || cat.includes('equip') || cat.includes('exame') || cat.includes('médic') || cat.includes('medic') || cat === 'mensalidade';
+                    if (!cat.includes('outro') && isKnownProduct) return false;
+                } else {
+                    // Mês específico (ex: '2026-09')
+                    if (p.mes !== fServico) return false;
+                }
+            }
+
+            // 3. Filtro de Método de Pagamento
             if (fMet && p.metodo_pagamento !== fMet) return false;
+
+            // 4. Filtro de Quem Recebeu
             if (fRec && p.registado_por !== fRec) return false;
+
+            // 5. Pesquisa por Nome do Atleta
             if (fSearch && !atlNome.includes(fSearch)) return false;
 
             return true;
