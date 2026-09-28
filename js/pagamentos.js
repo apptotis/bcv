@@ -384,6 +384,9 @@ document.addEventListener('DOMContentLoaded', () => {
             if (aError) throw aError;
 
             const cleanActive = normalizeEscalao(activeEscalao);
+            const activeIsMasc = cleanActive.includes('masc');
+            const activeIsFem = cleanActive.includes('fem');
+            const baseActive = cleanActive.replace(/masculin[oa]|feminin[oa]|masc|fem/gi, '').trim();
 
             currentAtletas = (todosAtletas || []).filter(a => {
                 if (isStaffMember(a.funcao)) return false; // apenas atletas jogadores
@@ -393,14 +396,21 @@ document.addEventListener('DOMContentLoaded', () => {
                 const isEpocaAtiva = ep === '2026/2027' || ep.includes('2026/2027') || ep.includes('2026-2027');
                 if (!isEpocaAtiva) return false;
 
-                const cleanAtletaEsc = normalizeEscalao(a.escalao);
-                const cleanEq1 = normalizeEscalao(a.equipabcv1);
-                const cleanEq2 = normalizeEscalao(a.equipabcv2);
-                const cleanFpb = normalizeEscalao(a.equipafpb);
+                // Validação estrita de género quando o escalão selecionado especifica Masculino ou Feminino
+                const atletaSexo = (a.sexo || '').toUpperCase();
+                const isAtletaMasc = atletaSexo === 'M' || atletaSexo.startsWith('MASC');
+                const isAtletaFem = atletaSexo === 'F' || atletaSexo.startsWith('FEM');
 
-                // Correspondência normalizada pelo escalão direto do atleta
-                return cleanAtletaEsc.includes(cleanActive) || cleanActive.includes(cleanAtletaEsc) ||
-                       cleanEq1.includes(cleanActive) || cleanEq2.includes(cleanActive) || cleanFpb.includes(cleanActive);
+                if (activeIsMasc && !isAtletaMasc) return false;
+                if (activeIsFem && !isAtletaFem) return false;
+
+                const cleanAtletaEsc = normalizeEscalao(a.escalao);
+                const baseAtletaEsc = cleanAtletaEsc.replace(/masculin[oa]|feminin[oa]|masc|fem/gi, '').trim();
+                const cleanFpb = normalizeEscalao(a.equipafpb).replace(/masculin[oa]|feminin[oa]|masc|fem/gi, '').trim();
+
+                // Correspondência pelo escalão etário base (ex: sub14, sub16, sub18, etc.)
+                return baseAtletaEsc.includes(baseActive) || baseActive.includes(baseAtletaEsc) ||
+                       cleanFpb.includes(baseActive);
             });
 
             if (currentAtletas.length === 0) {

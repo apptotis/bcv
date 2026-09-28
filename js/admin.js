@@ -6102,10 +6102,24 @@ document.addEventListener('DOMContentLoaded', async () => {
             const cleanFpb = (atleta.equipafpb || '').toLowerCase().replace(/[-\s]/g, '').trim();
             const atlNome = (atleta.nome || '').toLowerCase();
 
-            // 1. Filtro de Escalão (resiliente e bidirecional a variações de grafia)
+            // 1. Filtro de Escalão (resiliente e bidirecional a variações de grafia e sensível ao género quando especificado)
             if (cleanFilterEsc) {
-                const matchEsc = cleanAtletaEsc.includes(cleanFilterEsc) || cleanFilterEsc.includes(cleanAtletaEsc) ||
-                                 cleanEq1.includes(cleanFilterEsc) || cleanEq2.includes(cleanFilterEsc) || cleanFpb.includes(cleanFilterEsc);
+                const filterIsMasc = cleanFilterEsc.includes('masc');
+                const filterIsFem = cleanFilterEsc.includes('fem');
+                const baseFilter = cleanFilterEsc.replace(/masculin[oa]|feminin[oa]|masc|fem/gi, '').trim();
+
+                const atletaSexo = (atleta.sexo || '').toUpperCase();
+                const isAtletaMasc = atletaSexo === 'M' || atletaSexo.startsWith('MASC');
+                const isAtletaFem = atletaSexo === 'F' || atletaSexo.startsWith('FEM');
+
+                if (filterIsMasc && !isAtletaMasc) return false;
+                if (filterIsFem && !isAtletaFem) return false;
+
+                const baseAtletaEsc = cleanAtletaEsc.replace(/masculin[oa]|feminin[oa]|masc|fem/gi, '').trim();
+                const baseFpb = cleanFpb.replace(/masculin[oa]|feminin[oa]|masc|fem/gi, '').trim();
+
+                const matchEsc = baseAtletaEsc.includes(baseFilter) || baseFilter.includes(baseAtletaEsc) ||
+                                 baseFpb.includes(baseFilter);
                 if (!matchEsc) return false;
             }
 
