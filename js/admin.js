@@ -3724,6 +3724,35 @@ document.addEventListener('DOMContentLoaded', async () => {
         }
     }
 
+    function obterLinkGoogleMapsAdmin(local, customUrl) {
+        if (customUrl && typeof customUrl === 'string' && customUrl.trim().startsWith('http')) {
+            return customUrl.trim();
+        }
+        const localLimpo = (local || '').trim();
+        if (!localLimpo) {
+            return 'https://www.google.com/maps/search/?api=1&query=Pavilh%C3%A3o+Municipal+de+Valen%C3%A7a';
+        }
+        let queryBusca = localLimpo;
+        const lower = localLimpo.toLowerCase();
+        if (!lower.includes('valença') && !lower.includes('portugal') && !lower.includes('espanha')) {
+            queryBusca += ', Portugal';
+        }
+        return `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(queryBusca)}`;
+    }
+
+    function atualizarBtnTesteMapsAdmin() {
+        const btnTeste = document.getElementById('btn-test-agenda-maps');
+        if (!btnTeste) return;
+        const localVal = document.getElementById('agenda-local')?.value || '';
+        const mapsVal = document.getElementById('agenda-local-maps')?.value || '';
+        btnTeste.href = obterLinkGoogleMapsAdmin(localVal, mapsVal);
+    }
+
+    const inputAgendaLocal = document.getElementById('agenda-local');
+    const inputAgendaMaps = document.getElementById('agenda-local-maps');
+    if (inputAgendaLocal) inputAgendaLocal.addEventListener('input', atualizarBtnTesteMapsAdmin);
+    if (inputAgendaMaps) inputAgendaMaps.addEventListener('input', atualizarBtnTesteMapsAdmin);
+
     function renderAgendaTable() {
         if (!agendaTableBody) return;
 
@@ -3765,6 +3794,15 @@ document.addEventListener('DOMContentLoaded', async () => {
                        🔴 NÃO (Oculto)
                    </button>`;
 
+            const localNome = (jogo.local || '').trim();
+            const linkMaps = obterLinkGoogleMapsAdmin(localNome, jogo.local_maps_url);
+            const localHtml = localNome ? `
+                <a href="${linkMaps}" target="_blank" rel="noopener noreferrer" style="color: var(--accent-primary); text-decoration: none; font-weight: 600; display: inline-flex; align-items: center; gap: 4px;" title="Abrir localização no Google Maps">
+                    <span>📍 ${localNome}</span>
+                    <span style="font-size: 0.72rem; opacity: 0.8;">↗</span>
+                </a>
+            ` : '<span style="color:var(--text-secondary);">--</span>';
+
             tr.innerHTML = `
                 <td style="padding: 12px; text-align: center; white-space: nowrap;">
                     ${btnVisibilidade}
@@ -3774,7 +3812,7 @@ document.addEventListener('DOMContentLoaded', async () => {
                     <strong>${jogo.equipa_casa}</strong> vs <strong>${jogo.equipa_fora}</strong>
                     ${jogo.competicao ? `<br><small style="color:var(--text-secondary);">${jogo.competicao}</small>` : ''}
                 </td>
-                <td style="padding: 12px;">${jogo.local || '--'}</td>
+                <td style="padding: 12px;">${localHtml}</td>
                 <td style="padding: 12px;"><span style="font-size:0.8rem; background:rgba(126, 34, 206, 0.12); color:#7e22ce; padding:3px 8px; border-radius:4px; font-weight:600;">${jogo.escalao || 'BCV'}</span></td>
                 <td style="padding: 12px; text-align: center; white-space: nowrap;">
                     <button class="btn-action" onclick="abrirModalFinalizarJogo('${jogo.id}')" title="Registar Resultado e Finalizar Jogo" style="background: rgba(22, 163, 74, 0.15); color: #16a34a; border: 1px solid rgba(22, 163, 74, 0.3); font-weight: bold; margin-right: 4px; padding: 4px 8px;">🏁 Resultado</button>
@@ -3822,12 +3860,16 @@ document.addEventListener('DOMContentLoaded', async () => {
             e.preventDefault();
             const id = document.getElementById('agenda-id').value;
             const publicadoCb = document.getElementById('agenda-publicado');
+            const localVal = document.getElementById('agenda-local')?.value?.trim() || '';
+            const localMapsVal = document.getElementById('agenda-local-maps')?.value?.trim() || null;
+
             const gameData = {
                 equipa_casa: document.getElementById('agenda-casa').value,
                 equipa_fora: document.getElementById('agenda-fora').value,
                 data_jogo: document.getElementById('agenda-data').value,
                 hora_jogo: document.getElementById('agenda-hora').value,
-                local: document.getElementById('agenda-local').value,
+                local: localVal,
+                local_maps_url: localMapsVal,
                 escalao: document.getElementById('agenda-escalao').value,
                 publicado: publicadoCb ? publicadoCb.checked : true
             };
@@ -3839,10 +3881,22 @@ document.addEventListener('DOMContentLoaded', async () => {
                 let error;
                 if (id) {
                     const { error: err } = await supabase.from('agenda_bcv').update(gameData).eq('id', id);
-                    error = err;
+                    if (err && err.message && (err.message.includes('local_maps_url') || err.code === '42703')) {
+                        delete gameData.local_maps_url;
+                        const { error: retryErr } = await supabase.from('agenda_bcv').update(gameData).eq('id', id);
+                        error = retryErr;
+                    } else {
+                        error = err;
+                    }
                 } else {
                     const { error: err } = await supabase.from('agenda_bcv').insert([gameData]);
-                    error = err;
+                    if (err && err.message && (err.message.includes('local_maps_url') || err.code === '42703')) {
+                        delete gameData.local_maps_url;
+                        const { error: retryErr } = await supabase.from('agenda_bcv').insert([gameData]);
+                        error = retryErr;
+                    } else {
+                        error = err;
+                    }
                 }
 
                 if (error) throw error;
@@ -3870,12 +3924,16 @@ document.addEventListener('DOMContentLoaded', async () => {
     function resetAgendaForm() {
         formAgenda.reset();
         document.getElementById('agenda-id').value = '';
+        if (document.getElementById('agenda-local-maps')) {
+            document.getElementById('agenda-local-maps').value = '';
+        }
         if (document.getElementById('agenda-publicado')) {
             document.getElementById('agenda-publicado').checked = true;
         }
         document.getElementById('form-agenda-title').textContent = "Adicionar Novo Jogo Manual";
         btnSaveAgenda.textContent = "Guardar Jogo";
         btnCancelAgenda.classList.add('hidden');
+        atualizarBtnTesteMapsAdmin();
     }
 
     if (btnCancelAgenda) btnCancelAgenda.addEventListener('click', resetAgendaForm);
@@ -3890,12 +3948,16 @@ document.addEventListener('DOMContentLoaded', async () => {
             document.getElementById('agenda-fora').value = data.equipa_fora;
             document.getElementById('agenda-data').value = data.data_jogo;
             document.getElementById('agenda-hora').value = data.hora_jogo;
-            document.getElementById('agenda-local').value = data.local;
+            document.getElementById('agenda-local').value = data.local || '';
+            if (document.getElementById('agenda-local-maps')) {
+                document.getElementById('agenda-local-maps').value = data.local_maps_url || '';
+            }
             document.getElementById('agenda-escalao').value = data.escalao;
             if (document.getElementById('agenda-publicado')) {
                 document.getElementById('agenda-publicado').checked = (data.publicado !== false);
             }
 
+            atualizarBtnTesteMapsAdmin();
             document.getElementById('form-agenda-title').textContent = "Editar Jogo";
             btnSaveAgenda.textContent = "Guardar Alterações";
             btnCancelAgenda.classList.remove('hidden');

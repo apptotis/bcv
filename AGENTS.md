@@ -96,3 +96,4 @@
 - [2026-09-28] Gemini: Correções financeiras (descontosAtletasMap, KPI Outros Serviços/Produtos), dorsal limpo em presenças e Mini 8 a nascidos em 2020.
 - [2026-09-28] Gemini: Logos oficiais FPB na Agenda/Resultados, alinhamento visual exato conforme mockup (Casa/Fora/VS).
 - [2026-09-28] Gemini: Uniformização dos títulos de Agenda Desportiva e Resultados Recentes com o estilo da Galeria de Fotos (tamanho, cor, uppercase e peso 800).
+- [2026-09-29] Gemini: Abertura e gestão de localização no Google Maps na Agenda do site (index e competições) e edição de local/link no Admin (admin.html/js, setup_agenda_local_maps.sql).

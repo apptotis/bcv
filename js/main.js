@@ -161,6 +161,23 @@ async function loadPortalHighlights(supabase) {
         }
     }
 
+    function gerarLinkGoogleMaps(local, customUrl) {
+        if (customUrl && typeof customUrl === 'string' && customUrl.trim().startsWith('http')) {
+            return customUrl.trim();
+        }
+        const localLimpo = (local || '').trim();
+        if (!localLimpo) {
+            return 'https://www.google.com/maps/search/?api=1&query=Pavilh%C3%A3o+Municipal+de+Valen%C3%A7a';
+        }
+        let queryBusca = localLimpo;
+        const lower = localLimpo.toLowerCase();
+        if (!lower.includes('valença') && !lower.includes('portugal') && !lower.includes('espanha')) {
+            queryBusca += ', Portugal';
+        }
+        return `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(queryBusca)}`;
+    }
+    window.gerarLinkGoogleMaps = gerarLinkGoogleMaps;
+
     const FPB_CLUB_LOGOS = {
         'bc valença': 'https://sav2.fpb.pt/uploads/clubes/logotipo/CLU_6561737484866.png',
         'cb viana': 'https://sav2.fpb.pt/old_uploads/CLU/CLU_723_LOGO.jpg',
@@ -226,6 +243,9 @@ async function loadPortalHighlights(supabase) {
                     const logoCasa = obterLogoEquipa(jogo.equipa_casa, jogo.logo_casa);
                     const logoFora = obterLogoEquipa(jogo.equipa_fora, jogo.logo_fora);
 
+                    const localNome = (jogo.local && jogo.local.trim()) ? jogo.local.trim() : 'Pavilhão Municipal de Valença';
+                    const linkMaps = gerarLinkGoogleMaps(localNome, jogo.local_maps_url);
+
                     const item = document.createElement('div');
                     item.className = 'game-schedule-item';
                     item.innerHTML = `
@@ -251,7 +271,11 @@ async function loadPortalHighlights(supabase) {
                             </div>
                         </div>
                         <div class="game-schedule-venue">
-                            <span>📍 ${jogo.local || 'Pavilhão Municipal de Valença'}</span>
+                            <a href="${linkMaps}" target="_blank" rel="noopener noreferrer" class="venue-maps-link" title="Abrir localização no Google Maps">
+                                <span class="venue-pin">📍</span>
+                                <span class="venue-name">${localNome}</span>
+                                <span class="venue-external-icon">↗</span>
+                            </a>
                         </div>
                     `;
                     agendaContainer.appendChild(item);
@@ -1092,7 +1116,15 @@ async function loadCompeticoesSection(supabase) {
                                         <span>${j.equipa_fora}</span>
                                     </span>
                                 </div>
-                                ${j.local ? `<div class="comp-game-venue">📍 ${j.local}</div>` : ''}
+                                ${j.local ? `
+                                    <div class="comp-game-venue">
+                                        <a href="${gerarLinkGoogleMaps(j.local, j.local_maps_url)}" target="_blank" rel="noopener noreferrer" class="venue-maps-link" title="Abrir localização no Google Maps">
+                                            <span class="venue-pin">📍</span>
+                                            <span class="venue-name">${j.local}</span>
+                                            <span class="venue-external-icon">↗</span>
+                                        </a>
+                                    </div>
+                                ` : ''}
                             </div>
                         `;
                     }).join('')}
