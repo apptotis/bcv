@@ -96,3 +96,4 @@
 - [2026-09-28] Gemini: Declaração de descontosAtletasMap no escopo financeiro de js/admin.js resolvendo erro de referência no carregamento de pagamentos.
 - [2026-09-28] Gemini: Criação do KPI 'Outros Serviços/Produtos' na Gestão Financeira (admin.html, js/admin.js) e separação estrita nos cálculos entre Quotas Anuais, Mensalidades e Encargos/Serviços.
 - [2026-09-28] Gemini: Simplificação do badge de número/dorsal do atleta no histórico de presenças do Admin (js/admin.js), removendo o prefixo 'Nº ' redundante e prevenindo quebras de linha em números de dois dígitos.
+- [2026-09-28] Gemini: Ajuste do cálculo de escalões para atribuir Mini 8 aos nascidos em 2020 (BabyBasket a partir de 2021) em inscricao.html e migração direta na BD de Rodrigo Silva e Dinis Pereira para Mini 8.
