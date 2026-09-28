@@ -94,3 +94,4 @@
 - [2026-09-28] Gemini: Simplificação global dos fluxos de pagamento para Dinheiro (numerário) exclusivo: eliminação dos métodos MBWay/Transferência/Outro e filtros associados nos modais e tabelas (pagamentos.html, pagamentos.js, admin.html, admin.js).
 - [2026-09-28] Gemini: Implementação do sistema de desconto de mensalidades (50% e personalizado) com gestão no Admin (subfin-descontos, modal de atribuição e KPIs), cálculo e abatimento automático na cobrança mobile (pagamentos.html/js) e admin, badges visuais e setup_atletas_descontos.sql.
 - [2026-09-28] Gemini: Declaração de descontosAtletasMap no escopo financeiro de js/admin.js resolvendo erro de referência no carregamento de pagamentos.
+- [2026-09-28] Gemini: Criação do KPI 'Outros Serviços/Produtos' na Gestão Financeira (admin.html, js/admin.js) e separação estrita nos cálculos entre Quotas Anuais, Mensalidades e Encargos/Serviços.

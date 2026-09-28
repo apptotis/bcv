@@ -6050,6 +6050,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     const finKpiTotalArrecadado = document.getElementById('fin-kpi-total-arrecadado');
     const finKpiTotalAnuais = document.getElementById('fin-kpi-total-anuais');
     const finKpiTotalMensalidades = document.getElementById('fin-kpi-total-mensalidades');
+    const finKpiTotalProdutos = document.getElementById('fin-kpi-total-produtos');
     const finKpiMetodos = document.getElementById('fin-kpi-metodos');
 
     const btnOpenModalPagamentoAdmin = document.getElementById('btn-open-modal-pagamento-admin');
@@ -6259,11 +6260,25 @@ document.addEventListener('DOMContentLoaded', async () => {
         let totalArrecadado = 0;
         let totalAnuais = 0;
         let totalMensalidades = 0;
+        let totalProdutos = 0;
 
         filtrados.forEach(p => {
             const val = Number(p.valor || 0);
             totalArrecadado += val;
-            if (p.mes === 'ANUAL') {
+
+            const cat = (p.categoria || '').toLowerCase();
+            const mes = (p.mes || '').toUpperCase();
+            const desc = (p.descricao || '').toLowerCase();
+
+            const isProduto = mes === 'PRODUTO' || 
+                              cat.includes('exame') || cat.includes('médic') || cat.includes('medic') ||
+                              cat.includes('seguro') || cat.includes('inscri') ||
+                              cat.includes('equip') || cat.includes('outro') ||
+                              cat === 'produto';
+
+            if (isProduto) {
+                totalProdutos += val;
+            } else if (mes === 'ANUAL' || cat === 'quota anual' || desc.includes('anual')) {
                 totalAnuais += val;
             } else {
                 totalMensalidades += val;
@@ -6273,6 +6288,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         if (finKpiTotalArrecadado) finKpiTotalArrecadado.textContent = `${totalArrecadado.toFixed(2)} €`;
         if (finKpiTotalAnuais) finKpiTotalAnuais.textContent = `${totalAnuais.toFixed(2)} €`;
         if (finKpiTotalMensalidades) finKpiTotalMensalidades.textContent = `${totalMensalidades.toFixed(2)} €`;
+        if (finKpiTotalProdutos) finKpiTotalProdutos.textContent = `${totalProdutos.toFixed(2)} €`;
         if (finKpiMetodos) {
             finKpiMetodos.innerHTML = `💵 100% Dinheiro (${totalArrecadado.toFixed(0)}€)`;
         }
