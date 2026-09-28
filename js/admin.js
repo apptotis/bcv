@@ -6097,6 +6097,8 @@ document.addEventListener('DOMContentLoaded', async () => {
                 loadItensCobranca();
             } else if (targetSub === 'subfin-entregas-tesouraria') {
                 loadEntregasTesourariaAdmin();
+            } else if (targetSub === 'subfin-descontos') {
+                loadAtletasDescontosAdmin();
             }
         });
     });
@@ -6112,6 +6114,32 @@ document.addEventListener('DOMContentLoaded', async () => {
                 currentAtletas = atls || [];
                 window.currentAtletas = currentAtletas;
             }
+
+            // 1.1 Sincronizar descontos de atletas a partir de clube_config e atletasbcv
+            try {
+                const { data: dRow } = await supabase.from('clube_config').select('dados').eq('chave', 'descontos_atletas').maybeSingle();
+                if (dRow && dRow.dados) {
+                    descontosAtletasMap = typeof dRow.dados === 'string' ? JSON.parse(dRow.dados) : dRow.dados;
+                }
+            } catch (_) {}
+
+            (currentAtletas || []).forEach(a => {
+                const dConfig = descontosAtletasMap[a.id];
+                const dCol = Number(a.desconto_mensalidade || 0);
+                if (dCol > 0) {
+                    a.desconto_mensalidade = dCol;
+                    a.desconto_motivo = a.desconto_motivo || 'Desconto 50%';
+                    if (!descontosAtletasMap[a.id]) {
+                        descontosAtletasMap[a.id] = { atleta_id: a.id, percentagem: dCol, motivo: a.desconto_motivo };
+                    }
+                } else if (dConfig && Number(dConfig.percentagem) > 0) {
+                    a.desconto_mensalidade = Number(dConfig.percentagem);
+                    a.desconto_motivo = dConfig.motivo || 'Desconto 50%';
+                } else {
+                    a.desconto_mensalidade = 0;
+                    a.desconto_motivo = null;
+                }
+            });
 
             // 2. Carregar Tabela de Preços configurada
             await loadTabelaPrecos();
@@ -6722,12 +6750,389 @@ document.addEventListener('DOMContentLoaded', async () => {
     if (adminTesFilterSearch) adminTesFilterSearch.addEventListener('input', renderEntregasTesourariaAdmin);
     if (btnAdminTesRefresh) btnAdminTesRefresh.addEventListener('click', loadEntregasTesourariaAdmin);
 
+    // ====================================================================
+    // GESTÃO DE ATLETAS COM DESCONTO EM MENSALIDADES (ADMIN)
+    // ====================================================================
+    const adminDescKpiTotal = document.getElementById('admin-desc-kpi-total');
+    const adminDescKpiPoupanca = document.getElementById('admin-desc-kpi-poupanca');
+    const adminDescFilterEscalao = document.getElementById('admin-desc-filter-escalao');
+    const adminDescFilterSearch = document.getElementById('admin-desc-filter-search');
+    const btnAdminDescRefresh = document.getElementById('btn-admin-desc-refresh');
+    const adminDescontosTbody = document.getElementById('admin-descontos-tbody');
+    const btnAbrirModalAtribuirDesconto = document.getElementById('btn-abrir-modal-atribuir-desconto');
+    const modalAtribuirDesconto = document.getElementById('modal-atribuir-desconto');
+    const formAtribuirDesconto = document.getElementById('form-atribuir-desconto');
+    const descontoEditAtletaId = document.getElementById('desconto-edit-atleta-id');
+    const descontoSelectAtleta = document.getElementById('desconto-select-atleta');
+    const descontoSelectPercentagem = document.getElementById('desconto-select-percentagem');
+    const descontoSelectMotivoPadrao = document.getElementById('desconto-select-motivo-padrao');
+    const descontoInputMotivo = document.getElementById('desconto-input-motivo');
+
+    async function loadAtletasDescontosAdmin() {
+        if (!adminDescontosTbody) return;
+        adminDescontosTbody.innerHTML = '<tr><td colspan="6" style="padding: 20px; text-align: center; color: var(--text-secondary);">A carregar atletas com desconto...</td></tr>';
+
+        try {
+            // 1. Carregar atletas se necessário
+            if (!currentAtletas || currentAtletas.length === 0) {
+                const { data: atls } = await supabase.from('atletasbcv').select('*');
+                currentAtletas = atls || [];
+                window.currentAtletas = currentAtletas;
+            }
+
+            // 2. Carregar descontos de clube_config
+            try {
+                const { data: dRow } = await supabase.from('clube_config').select('dados').eq('chave', 'descontos_atletas').maybeSingle();
+                if (dRow && dRow.dados) {
+                    descontosAtletasMap = typeof dRow.dados === 'string' ? JSON.parse(dRow.dados) : dRow.dados;
+                }
+            } catch (e) {
+                console.warn("Aviso ao carregar descontos_atletas:", e);
+            }
+
+            // 3. Mesclar dados de atletasbcv com clube_config
+            (currentAtletas || []).forEach(a => {
+                const dConfig = descontosAtletasMap[a.id];
+                const dCol = Number(a.desconto_mensalidade || 0);
+                if (dCol > 0) {
+                    a.desconto_mensalidade = dCol;
+                    a.desconto_motivo = a.desconto_motivo || 'Desconto 50%';
+                    if (!descontosAtletasMap[a.id]) {
+                        descontosAtletasMap[a.id] = { atleta_id: a.id, percentagem: dCol, motivo: a.desconto_motivo };
+                    }
+                } else if (dConfig && Number(dConfig.percentagem) > 0) {
+                    a.desconto_mensalidade = Number(dConfig.percentagem);
+                    a.desconto_motivo = dConfig.motivo || 'Desconto 50%';
+                } else {
+                    a.desconto_mensalidade = 0;
+                    a.desconto_motivo = null;
+                }
+            });
+
+            renderAtletasDescontosAdmin();
+
+        } catch (err) {
+            console.error("Erro ao carregar descontos:", err);
+            adminDescontosTbody.innerHTML = `<tr><td colspan="6" style="padding: 20px; text-align: center; color: #ef4444;">Erro ao carregar: ${err.message}</td></tr>`;
+        }
+    }
+
+    function renderAtletasDescontosAdmin() {
+        if (!adminDescontosTbody) return;
+
+        const fEsc = (adminDescFilterEscalao?.value || 'todos').toLowerCase();
+        const fSearch = (adminDescFilterSearch?.value || '').toLowerCase().trim();
+
+        // Atletas com desconto ativo
+        const atletasComDesconto = (currentAtletas || []).filter(a => {
+            const pct = Number(a.desconto_mensalidade || 0);
+            if (pct <= 0) return false;
+
+            if (fEsc !== 'todos') {
+                const aEsc = (a.escalao || '').toLowerCase();
+                if (!aEsc.includes(fEsc)) return false;
+            }
+
+            if (fSearch) {
+                const haystack = `${a.nome || ''} ${a.escalao || ''} ${a.desconto_motivo || ''} ${a.nickname || ''}`.toLowerCase();
+                if (!haystack.includes(fSearch)) return false;
+            }
+
+            return true;
+        });
+
+        // Totais e KPIs
+        let totalPoupancaMensal = 0;
+        atletasComDesconto.forEach(a => {
+            const esc = a.escalao || 'Sub 14';
+            const cfg = tabelaPrecosQuotas[esc] || { mensal: 25.00 };
+            const base = Number(cfg.mensal !== undefined ? cfg.mensal : 25.00);
+            const pct = Number(a.desconto_mensalidade || 50);
+            totalPoupancaMensal += base * (pct / 100);
+        });
+
+        if (adminDescKpiTotal) adminDescKpiTotal.textContent = atletasComDesconto.length;
+        if (adminDescKpiPoupanca) adminDescKpiPoupanca.textContent = `${totalPoupancaMensal.toFixed(2)} €`;
+
+        if (atletasComDesconto.length === 0) {
+            adminDescontosTbody.innerHTML = `
+                <tr>
+                    <td colspan="6" style="padding: 30px; text-align: center; color: var(--text-secondary);">
+                        Nenhum atleta com desconto registado para os filtros selecionados.<br>
+                        <small style="color: var(--text-muted);">Clique no botão <strong>"➕ Atribuir Desconto a Atleta"</strong> para adicionar.</small>
+                    </td>
+                </tr>
+            `;
+            return;
+        }
+
+        adminDescontosTbody.innerHTML = atletasComDesconto.map(a => {
+            const esc = a.escalao || 'Sem Escalão';
+            const cfg = tabelaPrecosQuotas[esc] || { mensal: 25.00 };
+            const baseVal = Number(cfg.mensal !== undefined ? cfg.mensal : 25.00);
+            const pct = Number(a.desconto_mensalidade || 50);
+            const fator = Math.max(0, (100 - pct) / 100);
+            const valDesc = baseVal * fator;
+            const motivo = a.desconto_motivo || 'Desconto 50%';
+
+            const avatarHtml = a.foto_url
+                ? `<img src="${a.foto_url}" style="width: 34px; height: 34px; border-radius: 50%; object-fit: cover; flex-shrink: 0;" alt="${escapeHtml(a.nome)}">`
+                : `<div style="width: 34px; height: 34px; border-radius: 50%; background: #fef3c7; color: #b45309; display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 0.85rem; flex-shrink: 0;">${(a.nome || 'A').charAt(0).toUpperCase()}</div>`;
+
+            return `
+                <tr style="border-bottom: 1px solid var(--border-color);">
+                    <td style="padding: 10px;">
+                        <div style="display: flex; align-items: center; gap: 10px;">
+                            ${avatarHtml}
+                            <div>
+                                <strong style="color: var(--text-primary); font-size: 0.9rem;">${escapeHtml(a.nome)}</strong>
+                                ${a.numero_camisola ? `<div style="font-size: 0.75rem; color: var(--text-secondary);">Nº ${a.numero_camisola}</div>` : ''}
+                            </div>
+                        </div>
+                    </td>
+                    <td style="padding: 10px;">
+                        <span style="background: #f1f5f9; padding: 3px 8px; border-radius: 4px; font-size: 0.82rem; font-weight: 600; color: #334155;">
+                            ${escapeHtml(esc)}
+                        </span>
+                    </td>
+                    <td style="padding: 10px; text-align: center;">
+                        <span style="background: #fef3c7; color: #b45309; border: 1px solid #fde68a; padding: 3px 10px; border-radius: 999px; font-weight: 800; font-size: 0.82rem; display: inline-flex; align-items: center; gap: 4px;">
+                            🏷️ ${pct}%
+                        </span>
+                    </td>
+                    <td style="padding: 10px;">
+                        <span style="text-decoration: line-through; color: #94a3b8; font-size: 0.82rem; margin-right: 4px;">${baseVal.toFixed(2)}€</span>
+                        <strong style="color: #059669; font-size: 0.95rem;">${valDesc.toFixed(2)} €</strong>
+                        <span style="font-size: 0.75rem; color: var(--text-secondary);">/mês</span>
+                    </td>
+                    <td style="padding: 10px; font-size: 0.85rem; color: var(--text-primary);">
+                        ${escapeHtml(motivo)}
+                    </td>
+                    <td style="padding: 10px; text-align: center;">
+                        <div style="display: flex; gap: 6px; justify-content: center;">
+                            <button type="button" class="btn-secondary" onclick="window.openModalAtribuirDesconto(${a.id})" title="Editar Desconto" style="padding: 4px 8px; font-size: 0.8rem; cursor: pointer;">
+                                ✏️
+                            </button>
+                            <button type="button" class="btn-secondary" onclick="window.removerDescontoAtleta(${a.id})" title="Remover Desconto" style="padding: 4px 8px; font-size: 0.8rem; cursor: pointer; color: #ef4444; border-color: #fecaca; background: #fef2f2;">
+                                🗑️
+                            </button>
+                        </div>
+                    </td>
+                </tr>
+            `;
+        }).join('');
+    }
+
+    window.openModalAtribuirDesconto = function(atletaId = null) {
+        if (!modalAtribuirDesconto) return;
+
+        // Povoar lista de atletas
+        if (descontoSelectAtleta) {
+            const sorted = [...(currentAtletas || [])].sort((a, b) => (a.nome || '').localeCompare(b.nome || ''));
+            descontoSelectAtleta.innerHTML = '<option value="" disabled selected>Selecionar Atleta</option>' +
+                sorted.map(a => {
+                    const descInfo = Number(a.desconto_mensalidade || 0) > 0 ? ` (Já tem ${a.desconto_mensalidade}%)` : '';
+                    return `<option value="${a.id}">🏀 ${escapeHtml(a.nome)} - ${escapeHtml(a.escalao || 'Sem Escalão')}${descInfo}</option>`;
+                }).join('');
+        }
+
+        if (atletaId) {
+            const a = (currentAtletas || []).find(x => x.id === atletaId);
+            if (!a) return;
+            const titleEl = document.getElementById('modal-atribuir-desconto-title');
+            if (titleEl) titleEl.innerHTML = `<span>🏷️</span> Editar Desconto: ${escapeHtml(a.nome)}`;
+            if (descontoEditAtletaId) descontoEditAtletaId.value = a.id;
+            if (descontoSelectAtleta) {
+                descontoSelectAtleta.value = a.id;
+                descontoSelectAtleta.disabled = true;
+            }
+            if (descontoSelectPercentagem) descontoSelectPercentagem.value = String(a.desconto_mensalidade || '50');
+            if (descontoInputMotivo) descontoInputMotivo.value = a.desconto_motivo || 'Irmão(ã) no Clube (2º Atleta)';
+            if (descontoSelectMotivoPadrao) {
+                descontoSelectMotivoPadrao.value = ['Irmão(ã) no Clube (2º Atleta)', 'Filho de Treinador / Dirigente', 'Apoio Social / Bolseiro', 'Acordo Especial da Direção'].includes(a.desconto_motivo) ? a.desconto_motivo : 'Outro';
+            }
+        } else {
+            const titleEl = document.getElementById('modal-atribuir-desconto-title');
+            if (titleEl) titleEl.innerHTML = `<span>🏷️</span> Atribuir Desconto a Atleta`;
+            if (descontoEditAtletaId) descontoEditAtletaId.value = '';
+            if (descontoSelectAtleta) {
+                descontoSelectAtleta.value = '';
+                descontoSelectAtleta.disabled = false;
+            }
+            if (descontoSelectPercentagem) descontoSelectPercentagem.value = '50';
+            if (descontoSelectMotivoPadrao) descontoSelectMotivoPadrao.value = 'Irmão(ã) no Clube (2º Atleta)';
+            if (descontoInputMotivo) descontoInputMotivo.value = 'Irmão(ã) no Clube (2º Atleta)';
+        }
+
+        modalAtribuirDesconto.classList.remove('hidden');
+    };
+
+    window.closeModalAtribuirDesconto = function() {
+        if (modalAtribuirDesconto) modalAtribuirDesconto.classList.add('hidden');
+    };
+
+    if (btnAbrirModalAtribuirDesconto) {
+        btnAbrirModalAtribuirDesconto.addEventListener('click', () => {
+            window.openModalAtribuirDesconto();
+        });
+    }
+
+    if (descontoSelectMotivoPadrao) {
+        descontoSelectMotivoPadrao.addEventListener('change', () => {
+            if (descontoSelectMotivoPadrao.value !== 'Outro') {
+                descontoInputMotivo.value = descontoSelectMotivoPadrao.value;
+            } else {
+                descontoInputMotivo.value = '';
+                descontoInputMotivo.focus();
+            }
+        });
+    }
+
+    if (adminDescFilterEscalao) adminDescFilterEscalao.addEventListener('change', renderAtletasDescontosAdmin);
+    if (adminDescFilterSearch) adminDescFilterSearch.addEventListener('input', renderAtletasDescontosAdmin);
+    if (btnAdminDescRefresh) btnAdminDescRefresh.addEventListener('click', loadAtletasDescontosAdmin);
+
+    if (formAtribuirDesconto) {
+        formAtribuirDesconto.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const atlId = Number(descontoSelectAtleta?.value || descontoEditAtletaId?.value);
+            if (!atlId) {
+                alert("Por favor selecione um atleta.");
+                return;
+            }
+
+            const pct = Number(descontoSelectPercentagem?.value) || 50;
+            const motivo = (descontoInputMotivo?.value || 'Desconto 50%').trim();
+
+            const btnSave = document.getElementById('btn-save-atribuir-desconto');
+            if (btnSave) {
+                btnSave.textContent = 'A guardar...';
+                btnSave.disabled = true;
+            }
+
+            try {
+                // 1. Atualizar mapa de descontos
+                descontosAtletasMap[atlId] = {
+                    atleta_id: atlId,
+                    percentagem: pct,
+                    motivo: motivo,
+                    updated_at: new Date().toISOString()
+                };
+
+                // 2. Guardar em clube_config para persistência imediata
+                await supabase.from('clube_config').upsert({
+                    chave: 'descontos_atletas',
+                    dados: descontosAtletasMap,
+                    updated_at: new Date().toISOString()
+                }, { onConflict: 'chave' });
+
+                // 3. Tentar atualizar colunas na tabela atletasbcv
+                try {
+                    await supabase.from('atletasbcv').update({
+                        desconto_mensalidade: pct,
+                        desconto_motivo: motivo
+                    }).eq('id', atlId);
+                } catch (colErr) {
+                    console.warn("Aviso ao atualizar coluna desconto_mensalidade em atletasbcv:", colErr);
+                }
+
+                // 4. Atualizar objeto do atleta em memória
+                const atl = (currentAtletas || []).find(x => x.id === atlId);
+                if (atl) {
+                    atl.desconto_mensalidade = pct;
+                    atl.desconto_motivo = motivo;
+                }
+
+                window.closeModalAtribuirDesconto();
+                renderAtletasDescontosAdmin();
+
+            } catch (err) {
+                console.error("Erro ao guardar desconto:", err);
+                alert("Erro ao guardar desconto: " + err.message);
+            } finally {
+                if (btnSave) {
+                    btnSave.textContent = '💾 Guardar Desconto';
+                    btnSave.disabled = false;
+                }
+            }
+        });
+    }
+
+    window.removerDescontoAtleta = async function(atletaId) {
+        const atl = (currentAtletas || []).find(x => x.id === atletaId);
+        const nome = atl ? atl.nome : 'o atleta';
+        if (!confirm(`Deseja remover o desconto de ${nome}? As próximas mensalidades serão cobradas ao valor normal.`)) return;
+
+        try {
+            delete descontosAtletasMap[atletaId];
+
+            await supabase.from('clube_config').upsert({
+                chave: 'descontos_atletas',
+                dados: descontosAtletasMap,
+                updated_at: new Date().toISOString()
+            }, { onConflict: 'chave' });
+
+            try {
+                await supabase.from('atletasbcv').update({
+                    desconto_mensalidade: 0,
+                    desconto_motivo: null
+                }).eq('id', atletaId);
+            } catch (_) {}
+
+            if (atl) {
+                atl.desconto_mensalidade = 0;
+                atl.desconto_motivo = null;
+            }
+
+            renderAtletasDescontosAdmin();
+
+        } catch (err) {
+            console.error("Erro ao remover desconto:", err);
+            alert("Erro ao remover desconto: " + err.message);
+        }
+    };
+
     // Modal de Pagamento no Admin
     function populateAtletasSelectInAdminPagamento() {
         if (!adminPagamentoAtleta) return;
         const sorted = [...currentAtletas].sort((a, b) => (a.nome || '').localeCompare(b.nome || ''));
         adminPagamentoAtleta.innerHTML = '<option value="" disabled selected>Selecionar Atleta</option>' +
-            sorted.map(a => `<option value="${a.id}">🏀 ${a.nome} (${a.escalao || 'Sem Escalão'})</option>`).join('');
+            sorted.map(a => {
+                const descBadge = Number(a.desconto_mensalidade || 0) > 0 ? ` (🏷️ ${a.desconto_mensalidade}%)` : '';
+                return `<option value="${a.id}">🏀 ${a.nome} (${a.escalao || 'Sem Escalão'})${descBadge}</option>`;
+            }).join('');
+    }
+
+    function atualizarPrecoAdminPagamento() {
+        const atlId = Number(adminPagamentoAtleta?.value);
+        const atl = (currentAtletas || []).find(a => a.id === atlId);
+        const badge = document.getElementById('admin-pagamento-desconto-badge');
+        const badgeTxt = document.getElementById('admin-pagamento-desconto-txt');
+
+        if (!atl) {
+            if (badge) badge.style.display = 'none';
+            return;
+        }
+
+        const esc = atl.escalao || 'Sub 14';
+        const cfg = tabelaPrecosQuotas[esc] || { mensal: 25.00, anual: 250.00 };
+        const isAnual = adminPagamentoTipo?.value === 'ANUAL';
+        const baseVal = isAnual ? Number(cfg.anual !== undefined ? cfg.anual : 250.00) : Number(cfg.mensal !== undefined ? cfg.mensal : 25.00);
+
+        const descPercent = Number(atl.desconto_mensalidade || descontosAtletasMap[atl.id]?.percentagem || 0);
+        if (descPercent > 0) {
+            const fator = Math.max(0, (100 - descPercent) / 100);
+            const valDesc = Number((baseVal * fator).toFixed(2));
+            if (adminPagamentoValor) adminPagamentoValor.value = valDesc.toFixed(2);
+            if (badge && badgeTxt) {
+                const motivo = atl.desconto_motivo || descontosAtletasMap[atl.id]?.motivo || 'Desconto 50%';
+                badgeTxt.textContent = `Atleta com ${descPercent}% de desconto (${motivo}). Valor calculado: ${valDesc.toFixed(2)}€ (Normal: ${baseVal.toFixed(2)}€)`;
+                badge.style.display = 'block';
+            }
+        } else {
+            if (adminPagamentoValor) adminPagamentoValor.value = baseVal.toFixed(2);
+            if (badge) badge.style.display = 'none';
+        }
     }
 
     window.openAdminPagamentoModal = function(pagamentoId = null) {
@@ -6752,6 +7157,7 @@ document.addEventListener('DOMContentLoaded', async () => {
             adminPagamentoData.value = p.data_pagamento || new Date().toISOString().split('T')[0];
             adminPagamentoRecebedor.value = p.registado_por || 'Secretaria';
             adminPagamentoNotas.value = p.notas || '';
+            atualizarPrecoAdminPagamento();
         } else {
             modalAdminPagamentoTitle.textContent = 'Registar Novo Pagamento';
             adminPagamentoId.value = '';
@@ -6764,6 +7170,8 @@ document.addEventListener('DOMContentLoaded', async () => {
             adminPagamentoData.value = new Date().toISOString().split('T')[0];
             adminPagamentoRecebedor.value = 'Secretaria Admin';
             adminPagamentoNotas.value = '';
+            const badge = document.getElementById('admin-pagamento-desconto-badge');
+            if (badge) badge.style.display = 'none';
         }
 
         modalAdminPagamento.classList.remove('hidden');
@@ -6787,26 +7195,13 @@ document.addEventListener('DOMContentLoaded', async () => {
         adminPagamentoTipo.addEventListener('change', () => {
             const isAnual = adminPagamentoTipo.value === 'ANUAL';
             if (containerAdminPagamentoMes) containerAdminPagamentoMes.style.display = isAnual ? 'none' : 'block';
-            
-            // Sugerir preço do escalão do atleta selecionado
-            const atlId = Number(adminPagamentoAtleta.value);
-            const atl = currentAtletas.find(a => a.id === atlId);
-            const esc = atl ? atl.escalao : 'Sub 14';
-            const cfg = tabelaPrecosQuotas[esc] || { mensal: 25.00, anual: 250.00 };
-
-            adminPagamentoValor.value = isAnual ? Number(cfg.anual || 250).toFixed(2) : Number(cfg.mensal || 25).toFixed(2);
+            atualizarPrecoAdminPagamento();
         });
     }
 
     if (adminPagamentoAtleta) {
         adminPagamentoAtleta.addEventListener('change', () => {
-            const atlId = Number(adminPagamentoAtleta.value);
-            const atl = currentAtletas.find(a => a.id === atlId);
-            if (!atl) return;
-            const esc = atl.escalao || 'Sub 14';
-            const cfg = tabelaPrecosQuotas[esc] || { mensal: 25.00, anual: 250.00 };
-            const isAnual = adminPagamentoTipo.value === 'ANUAL';
-            adminPagamentoValor.value = isAnual ? Number(cfg.anual || 250).toFixed(2) : Number(cfg.mensal || 25).toFixed(2);
+            atualizarPrecoAdminPagamento();
         });
     }
 

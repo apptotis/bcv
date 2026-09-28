@@ -612,6 +612,36 @@ document.addEventListener('DOMContentLoaded', () => {
                 currentEntregasTesouraria = [];
             }
 
+            // 6. Carregar Descontos de Atletas de clube_config e atletasbcv
+            let descontosMap = {};
+            try {
+                const { data: dRow } = await supabase
+                    .from('clube_config')
+                    .select('dados')
+                    .eq('chave', 'descontos_atletas')
+                    .maybeSingle();
+                if (dRow && dRow.dados) {
+                    descontosMap = typeof dRow.dados === 'string' ? JSON.parse(dRow.dados) : dRow.dados;
+                }
+            } catch (e) {
+                console.warn("Aviso ao carregar descontos_atletas:", e);
+            }
+
+            (currentAtletas || []).forEach(a => {
+                const dConfig = descontosMap[a.id];
+                const dCol = Number(a.desconto_mensalidade || 0);
+                if (dCol > 0) {
+                    a.desconto_mensalidade = dCol;
+                    a.desconto_motivo = a.desconto_motivo || 'Desconto 50%';
+                } else if (dConfig && Number(dConfig.percentagem) > 0) {
+                    a.desconto_mensalidade = Number(dConfig.percentagem);
+                    a.desconto_motivo = dConfig.motivo || 'Desconto 50%';
+                } else {
+                    a.desconto_mensalidade = 0;
+                    a.desconto_motivo = null;
+                }
+            });
+
             updatePrecosTab();
 
             // Renderizar interface
@@ -860,12 +890,20 @@ document.addEventListener('DOMContentLoaded', () => {
                 ? `<img src="${a.foto_url}" class="atleta-avatar" alt="${escapeHtml(a.nome)}">`
                 : `<div class="atleta-avatar">${(a.nome || 'A').charAt(0).toUpperCase()}</div>`;
 
+            const descPct = Number(a.desconto_mensalidade || 0);
+            const descBadge = descPct > 0 
+                ? `<span style="background: #fef3c7; color: #b45309; border: 1px solid #fde68a; font-size: 0.72rem; padding: 2px 7px; border-radius: 999px; font-weight: 700; margin-left: 6px; display: inline-flex; align-items: center; gap: 3px;" title="${escapeHtml(a.desconto_motivo || 'Desconto 50%')}">🏷️ ${descPct}% Desc.</span>`
+                : '';
+
             html += `
                 <div class="atleta-card">
                     <div class="atleta-top-row">
                         ${avatarHtml}
                         <div class="atleta-info">
-                            <div class="atleta-nome">${escapeHtml(a.nome)}</div>
+                            <div class="atleta-nome" style="display: flex; align-items: center; flex-wrap: wrap; gap: 4px;">
+                                <span>${escapeHtml(a.nome)}</span>
+                                ${descBadge}
+                            </div>
                         </div>
                     </div>
                     <div class="atleta-actions-row">
@@ -930,10 +968,31 @@ document.addEventListener('DOMContentLoaded', () => {
         const defBianual = isBaby ? 0.00 : 120.00;
         const defAnual = isBaby ? 0.00 : 230.00;
 
+        const baseMensal = (match?.mensal !== undefined && match?.mensal !== null && match?.mensal !== '') ? Number(match.mensal) : defMensal;
+        const baseBianual = (match?.bianual !== undefined && match?.bianual !== null && match?.bianual !== '') ? Number(match.bianual) : defBianual;
+        const baseAnual = (match?.anual !== undefined && match?.anual !== null && match?.anual !== '') ? Number(match.anual) : defAnual;
+
+        let mensal = baseMensal;
+        let bianual = baseBianual;
+        let anual = baseAnual;
+
+        const descPercent = Number(atleta?.desconto_mensalidade || 0);
+        if (descPercent > 0) {
+            const fator = Math.max(0, (100 - descPercent) / 100);
+            mensal = Number((baseMensal * fator).toFixed(2));
+            bianual = Number((baseBianual * fator).toFixed(2));
+            anual = Number((baseAnual * fator).toFixed(2));
+        }
+
         return {
-            mensal: (match?.mensal !== undefined && match?.mensal !== null && match?.mensal !== '') ? Number(match.mensal) : defMensal,
-            bianual: (match?.bianual !== undefined && match?.bianual !== null && match?.bianual !== '') ? Number(match.bianual) : defBianual,
-            anual: (match?.anual !== undefined && match?.anual !== null && match?.anual !== '') ? Number(match.anual) : defAnual
+            mensal,
+            bianual,
+            anual,
+            baseMensal,
+            baseBianual,
+            baseAnual,
+            desconto: descPercent,
+            motivo: atleta?.desconto_motivo || ''
         };
     }
 
@@ -1054,6 +1113,24 @@ document.addEventListener('DOMContentLoaded', () => {
                     </div>
                 `;
             } else {
+                // Banner Informativo de Desconto (se aplicável ao atleta)
+                if (precos.desconto > 0) {
+                    htmlQuotas += `
+                        <div style="background: #fffbeb; border: 1.5px solid #fde68a; border-radius: 8px; padding: 10px 12px; margin-bottom: 10px; display: flex; align-items: center; gap: 10px;">
+                            <span style="font-size: 1.35rem;">🏷️</span>
+                            <div style="flex: 1;">
+                                <div style="font-size: 0.82rem; font-weight: 800; color: #b45309; display: flex; align-items: center; gap: 6px;">
+                                    <span>Desconto de ${precos.desconto}% Aplicado</span>
+                                    <span style="background: #fef3c7; color: #92400e; font-size: 0.7rem; padding: 1px 6px; border-radius: 4px; border: 1px solid #fde68a;">Oficial</span>
+                                </div>
+                                <div style="font-size: 0.74rem; color: #92400e; margin-top: 2px;">
+                                    ${escapeHtml(precos.motivo || 'Desconto em mensalidades')} • Mensalidade: <span style="text-decoration: line-through; opacity: 0.7;">${precos.baseMensal.toFixed(2)}€</span> <strong style="color: #059669;">${precos.mensal.toFixed(2)}€</strong>
+                                </div>
+                            </div>
+                        </div>
+                    `;
+                }
+
                 // OPÇÃO A: QUOTA ANUAL COMPLETA
                 const isAnualSelected = selectedCobrancaItems.has('quota_ANUAL');
                 htmlQuotas += `
@@ -1067,6 +1144,7 @@ document.addEventListener('DOMContentLoaded', () => {
                          data-cat="Quota Anual" 
                          data-desc="Quota Anual Completa (2026/2027)" 
                          data-valor="${precos.anual}"
+                         data-desconto="${precos.desconto}"
                          style="background: #faf5ff; border: 1.5px solid #d8b4fe;">
                         <div class="cobranca-item-left">
                             <input type="checkbox" class="cobranca-item-checkbox" ${isAnualSelected ? 'checked' : ''}>
@@ -1076,6 +1154,7 @@ document.addEventListener('DOMContentLoaded', () => {
                             </div>
                         </div>
                         <div class="cobranca-item-right">
+                            ${precos.desconto > 0 ? `<span style="text-decoration: line-through; color: #94a3b8; font-size: 0.78rem; margin-right: 4px;">${precos.baseAnual.toFixed(2)} €</span>` : ''}
                             <span class="cobranca-item-price" style="color: #6b21a8; font-weight: 800;">${precos.anual.toFixed(2)} €</span>
                         </div>
                     </div>
@@ -1104,6 +1183,7 @@ document.addEventListener('DOMContentLoaded', () => {
                                  data-cat="Quota Bianual"
                                  data-desc="1ª Prestação Bianual (Setembro a Janeiro)"
                                  data-valor="${precos.bianual}"
+                                 data-desconto="${precos.desconto}"
                                  style="background: #f0fdf4; border: 1.5px solid #86efac;">
                                 <div class="cobranca-item-left">
                                     <input type="checkbox" class="cobranca-item-checkbox" ${isB1Sel ? 'checked' : ''}>
@@ -1113,6 +1193,7 @@ document.addEventListener('DOMContentLoaded', () => {
                                     </div>
                                 </div>
                                 <div class="cobranca-item-right">
+                                    ${precos.desconto > 0 ? `<span style="text-decoration: line-through; color: #94a3b8; font-size: 0.78rem; margin-right: 4px;">${precos.baseBianual.toFixed(2)} €</span>` : ''}
                                     <span class="cobranca-item-price" style="color: #16a34a; font-weight: 800;">${precos.bianual.toFixed(2)} €</span>
                                 </div>
                             </div>
@@ -1130,6 +1211,7 @@ document.addEventListener('DOMContentLoaded', () => {
                                  data-cat="Quota Bianual"
                                  data-desc="2ª Prestação Bianual (Fevereiro a Junho)"
                                  data-valor="${precos.bianual}"
+                                 data-desconto="${precos.desconto}"
                                  style="background: #f0fdf4; border: 1.5px solid #86efac;">
                                 <div class="cobranca-item-left">
                                     <input type="checkbox" class="cobranca-item-checkbox" ${isB2Sel ? 'checked' : ''}>
@@ -1139,6 +1221,7 @@ document.addEventListener('DOMContentLoaded', () => {
                                     </div>
                                 </div>
                                 <div class="cobranca-item-right">
+                                    ${precos.desconto > 0 ? `<span style="text-decoration: line-through; color: #94a3b8; font-size: 0.78rem; margin-right: 4px;">${precos.baseBianual.toFixed(2)} €</span>` : ''}
                                     <span class="cobranca-item-price" style="color: #16a34a; font-weight: 800;">${precos.bianual.toFixed(2)} €</span>
                                 </div>
                             </div>
@@ -1167,7 +1250,8 @@ document.addEventListener('DOMContentLoaded', () => {
                              data-mes="${m.key}" 
                              data-cat="Mensalidade" 
                              data-desc="Mensalidade ${m.label}" 
-                             data-valor="${precos.mensal}">
+                             data-valor="${precos.mensal}"
+                             data-desconto="${precos.desconto}">
                             <div class="cobranca-item-left">
                                 <input type="checkbox" class="cobranca-item-checkbox" ${isSelected ? 'checked' : ''}>
                                 <div>
@@ -1176,6 +1260,7 @@ document.addEventListener('DOMContentLoaded', () => {
                                 </div>
                             </div>
                             <div class="cobranca-item-right">
+                                ${precos.desconto > 0 ? `<span style="text-decoration: line-through; color: #94a3b8; font-size: 0.78rem; margin-right: 4px;">${precos.baseMensal.toFixed(2)} €</span>` : ''}
                                 <span class="cobranca-item-price">${precos.mensal.toFixed(2)} €</span>
                             </div>
                         </div>
@@ -1301,6 +1386,8 @@ document.addEventListener('DOMContentLoaded', () => {
                 const prodId = row.getAttribute('data-prod-id') ? Number(row.getAttribute('data-prod-id')) : null;
                 const checkbox = row.querySelector('.cobranca-item-checkbox');
 
+                const descAplicado = row.getAttribute('data-desconto') ? Number(row.getAttribute('data-desconto')) : 0;
+
                 if (selectedCobrancaItems.has(key)) {
                     // Desmarcar este item
                     selectedCobrancaItems.delete(key);
@@ -1379,7 +1466,8 @@ document.addEventListener('DOMContentLoaded', () => {
                         categoria: cat,
                         descricao: desc,
                         valor: valor,
-                        item_cobranca_id: prodId
+                        item_cobranca_id: prodId,
+                        descontoAplicado: descAplicado
                     });
                     row.classList.add('selected');
                     if (checkbox) checkbox.checked = true;
@@ -1434,20 +1522,28 @@ document.addEventListener('DOMContentLoaded', () => {
             btnConfirmarPagamento.disabled = true;
             if (btnConfirmarPagamentoTxt) btnConfirmarPagamentoTxt.textContent = 'A registar pagamentos...';
 
-            const batch = Array.from(selectedCobrancaItems.values()).map(item => ({
-                atleta_id: atleta.id,
-                epoca: '2026/2027',
-                categoria: item.categoria,
-                descricao: item.descricao,
-                mes: item.mes,
-                valor: Number(item.valor),
-                item_cobranca_id: item.item_cobranca_id || null,
-                estado: 'Pago',
-                metodo_pagamento: metodo,
-                data_pagamento: dataPag,
-                notas: notas,
-                registado_por: registadoPor
-            }));
+            const batch = Array.from(selectedCobrancaItems.values()).map(item => {
+                const descTexto = (item.descontoAplicado > 0) ? ` (Desconto ${item.descontoAplicado}%)` : '';
+                const descFinal = item.descricao + descTexto;
+                const notasFinal = (item.descontoAplicado > 0)
+                    ? (notas ? `${notas} | Desconto ${item.descontoAplicado}%` : `Desconto de ${item.descontoAplicado}% aplicado`)
+                    : notas;
+
+                return {
+                    atleta_id: atleta.id,
+                    epoca: '2026/2027',
+                    categoria: item.categoria,
+                    descricao: descFinal,
+                    mes: item.mes,
+                    valor: Number(item.valor),
+                    item_cobranca_id: item.item_cobranca_id || null,
+                    estado: 'Pago',
+                    metodo_pagamento: metodo,
+                    data_pagamento: dataPag,
+                    notas: notasFinal,
+                    registado_por: registadoPor
+                };
+            });
 
             try {
                 const { error } = await supabase

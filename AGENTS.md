@@ -17,11 +17,7 @@
 ## Histórico de Atualizações
 - [2026-05-07 a 2026-05-27] Gemini: Inicialização do projeto, tema institucional, aniversários, scroll-padding e melhorias de navegação.
 - [2026-06-04] Gemini: Módulo Gestão de Equipas BCV no Admin, página pública equipas.html com detalhe de plantel, novos campos de atletas e remoção de sync FPB.
-- [2026-08-22] Gemini: Criação do wizard de inscrição (inscricao.html), script update_atletas_fpb_schema.sql e exportação vetorial de PDF do Modelo 1 FPB com pdf-lib no Admin.
-- [2026-08-23] Gemini: Remoção do campo 'Alcunha / Nome de Camisola (Nickname)' do Passo 2 (Identificação do Atleta) e limpeza do preenchimento e payload no formulário inscricao.html.
-- [2026-08-23] Gemini: Implementação completa da Inscrição Integrada em 3 Fases (1. Federação FPB, 2. Exame Médico Desportivo IPDJ com 20 perguntas, 3. Equipamento Oficial BCV), cálculo automático de escalão por data de nascimento, script SQL update_atletas_emd_equipamento.sql e exportação vetorial de PDF do Exame Médico Desportivo (ipdj-exame-medico.pdf) e gestão de equipamentos no Admin.
-- [2026-08-23] Gemini: Otimizações de layout no formulário de inscrição (cabeçalhos, abas sem ícones, tabela de anos e escalões).
-- [2026-08-23] Gemini: Criação de script SQL unificado (setup_completo_atletasbcv_inscricoes.sql) com permissões públicas RLS (anon/auth) e suporte no inscricao.html para atualizar atletas existentes em revalidação ou criar novos.
+- [2026-08-22 a 2026-08-23] Gemini: Wizard de inscrição integrada (FPB, IPDJ, Equipamentos), cálculo automático de escalões, validações e PDFs oficiais FPB/EMD.
 - [2026-08-24] Gemini: Remoção do bloco de aniversariantes do dia do Dashboard no Admin (admin.html) e eliminação de toda a lógica e funções associadas em js/admin.js.
 - [2026-08-24] Gemini: Implementação do sistema de permissões granulares por checkboxes de menus na Gestão de Utilizadores do Admin, criação de setup_users_permissoes.sql e adaptação da visibilidade dinâmica da sidebar em js/admin.js.
 - [2026-08-24] Gemini: Reordenação dos itens da sidebar do Admin (Dashboard, Gestão de Users, Atletas, Notícias, Agenda, Resultados, Galeria, Equipas, Configurações).
@@ -96,3 +92,4 @@
 - [2026-09-28] Gemini: Remoção dos escalões Sub 20, Seniores Masculinos e Seniores Femininos dos módulos de pagamentos, preçários e afetação de utilizadores (admin.html, js/admin.js, pagamentos.html, js/pagamentos.js).
 - [2026-09-28] Gemini: Implementação do módulo Movimentos de Tesouraria em substituição do Extrato de Escalão no Portal de Pagamentos (pagamentos.html, js/pagamentos.js, pagamentos.css) com apuramento de numerário em posse, registo de entrega à tesouraria, emissão de recibo/comprovativo oficial e auditoria central no Admin (admin.html, js/admin.js, setup_movimentos_tesouraria.sql).
 - [2026-09-28] Gemini: Simplificação global dos fluxos de pagamento para Dinheiro (numerário) exclusivo: eliminação dos métodos MBWay/Transferência/Outro e filtros associados nos modais e tabelas (pagamentos.html, pagamentos.js, admin.html, admin.js).
+- [2026-09-28] Gemini: Implementação do sistema de desconto de mensalidades (50% e personalizado) com gestão no Admin (subfin-descontos, modal de atribuição e KPIs), cálculo e abatimento automático na cobrança mobile (pagamentos.html/js) e admin, badges visuais e setup_atletas_descontos.sql.

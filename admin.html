@@ -1409,6 +1409,7 @@
                         <button type="button" class="btn-subfin" data-sub="subfin-tabela-precos" style="padding: 8px 16px; border-radius: 8px; border: 1px solid var(--border-color); background: #f8fafc; color: var(--text-primary); font-weight: 600; cursor: pointer;">⚙️ Tabela de Preços por Escalão</button>
                         <button type="button" class="btn-subfin" data-sub="subfin-itens-cobranca" style="padding: 8px 16px; border-radius: 8px; border: 1px solid var(--border-color); background: #f8fafc; color: var(--text-primary); font-weight: 600; cursor: pointer;">🛍️ Produtos & Encargos de Escalão</button>
                         <button type="button" class="btn-subfin" data-sub="subfin-entregas-tesouraria" style="padding: 8px 16px; border-radius: 8px; border: 1px solid var(--border-color); background: #f8fafc; color: var(--text-primary); font-weight: 600; cursor: pointer;">🏛️ Entregas à Tesouraria</button>
+                        <button type="button" class="btn-subfin" data-sub="subfin-descontos" style="padding: 8px 16px; border-radius: 8px; border: 1px solid var(--border-color); background: #f8fafc; color: var(--text-primary); font-weight: 600; cursor: pointer;">🏷️ Atletas com Desconto</button>
                     </div>
 
                     <!-- SECÇÃO 1: REGISTO GLOBAL DE PAGAMENTOS -->
@@ -1704,6 +1705,134 @@
                             </table>
                         </div>
                     </div>
+
+                    <!-- SECÇÃO 5: ATLETAS COM DESCONTO NAS MENSALIDADES -->
+                    <div id="subfin-descontos" class="subfin-content hidden">
+                        <!-- KPIs de Descontos -->
+                        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px; margin-bottom: 20px;">
+                            <div class="welcome-box" style="margin: 0; padding: 16px; border-left: 4px solid #f59e0b;">
+                                <span style="font-size: 0.75rem; color: var(--text-secondary); font-weight: 700; text-transform: uppercase;">Atletas com Desconto</span>
+                                <h3 id="admin-desc-kpi-total" style="font-size: 1.8rem; margin: 4px 0 0; color: #d97706;">0</h3>
+                            </div>
+                            <div class="welcome-box" style="margin: 0; padding: 16px; border-left: 4px solid #10b981;">
+                                <span style="font-size: 0.75rem; color: var(--text-secondary); font-weight: 700; text-transform: uppercase;">Desconto Padrão</span>
+                                <h3 style="font-size: 1.8rem; margin: 4px 0 0; color: #059669;">50%</h3>
+                            </div>
+                            <div class="welcome-box" style="margin: 0; padding: 16px; border-left: 4px solid #7e22ce;">
+                                <span style="font-size: 0.75rem; color: var(--text-secondary); font-weight: 700; text-transform: uppercase;">Impacto Estimado / Mês</span>
+                                <h3 id="admin-desc-kpi-poupanca" style="font-size: 1.8rem; margin: 4px 0 0; color: #7e22ce;">0.00 €</h3>
+                            </div>
+                        </div>
+
+                        <!-- Barra de Controlo e Ações -->
+                        <div class="welcome-box" style="margin-bottom: 20px; padding: 16px;">
+                            <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 12px;">
+                                <div>
+                                    <h3 style="margin: 0; color: var(--text-primary);">🏷️ Gestão de Descontos em Mensalidades</h3>
+                                    <p style="color: var(--text-secondary); font-size: 0.85rem; margin-top: 4px;">Atletas nesta lista têm um cálculo automático de 50% nas mensalidades tanto no Portal de Cobrança Mobile como no registo de pagamentos do Admin.</p>
+                                </div>
+                                <button type="button" id="btn-abrir-modal-atribuir-desconto" class="btn-primary" style="display: flex; align-items: center; gap: 6px; font-weight: 700; padding: 9px 18px; background: linear-gradient(135deg, #d97706, #b45309);">
+                                    ➕ Atribuir Desconto a Atleta
+                                </button>
+                            </div>
+
+                            <!-- Filtros da Lista de Descontos -->
+                            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 12px; margin-top: 15px; padding-top: 15px; border-top: 1px solid var(--border-color); align-items: flex-end;">
+                                <div>
+                                    <label style="display: block; font-size: 0.8rem; font-weight: 600; margin-bottom: 4px;">Filtrar por Escalão:</label>
+                                    <select id="admin-desc-filter-escalao" class="admin-input" style="margin: 0;">
+                                        <option value="todos">Todos os Escalões</option>
+                                        <option value="BabyBasket">BabyBasket</option>
+                                        <option value="Mini 8">Mini 8</option>
+                                        <option value="Mini 10">Mini 10</option>
+                                        <option value="Mini 12">Mini 12</option>
+                                        <option value="Sub 14">Sub 14</option>
+                                        <option value="Sub 16">Sub 16</option>
+                                        <option value="Sub 18">Sub 18</option>
+                                    </select>
+                                </div>
+                                <div>
+                                    <label style="display: block; font-size: 0.8rem; font-weight: 600; margin-bottom: 4px;">Pesquisar Atleta / Motivo:</label>
+                                    <input type="text" id="admin-desc-filter-search" class="admin-input" placeholder="Pesquisar..." style="margin: 0;">
+                                </div>
+                                <div>
+                                    <button type="button" id="btn-admin-desc-refresh" class="btn-secondary" style="padding: 10px 16px; width: 100%; font-weight: 600;">🔄 Atualizar Lista</button>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Tabela de Atletas com Desconto -->
+                        <div class="welcome-box" style="overflow-x: auto;">
+                            <table class="admin-table" style="width: 100%; text-align: left; border-collapse: collapse;">
+                                <thead>
+                                    <tr style="border-bottom: 2px solid var(--border-color); background: rgba(0,0,0,0.02);">
+                                        <th style="padding: 10px;">Atleta</th>
+                                        <th style="padding: 10px;">Escalão</th>
+                                        <th style="padding: 10px; width: 130px; text-align: center;">Desconto</th>
+                                        <th style="padding: 10px; width: 160px;">Valor Previsto / Mês</th>
+                                        <th style="padding: 10px;">Motivo / Justificação</th>
+                                        <th style="padding: 10px; width: 100px; text-align: center;">Ações</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="admin-descontos-tbody">
+                                    <tr><td colspan="6" style="padding: 20px; text-align: center; color: var(--text-secondary);">A carregar atletas com desconto...</td></tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- MODAL DE ATRIBUIÇÃO DE DESCONTO A ATLETA -->
+                <div id="modal-atribuir-desconto" class="hidden" style="position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.5); display: flex; align-items: center; justify-content: center; z-index: 9999;">
+                    <div style="background: #ffffff; width: 92%; max-width: 480px; padding: 25px; border-radius: 12px; box-shadow: var(--shadow-lg); border: 1px solid var(--border-color);">
+                        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
+                            <h3 id="modal-atribuir-desconto-title" style="margin: 0; color: #b45309; display: flex; align-items: center; gap: 8px;">
+                                <span>🏷️</span> Atribuir Desconto a Atleta
+                            </h3>
+                            <button type="button" onclick="window.closeModalAtribuirDesconto()" style="background: none; border: none; font-size: 1.3rem; cursor: pointer; color: var(--text-secondary);">✕</button>
+                        </div>
+                        <form id="form-atribuir-desconto">
+                            <input type="hidden" id="desconto-edit-atleta-id">
+                            
+                            <div style="margin-bottom: 14px;">
+                                <label style="display:block; margin-bottom:4px; font-size:0.85rem; font-weight:600; color: var(--text-primary);">Selecionar Atleta (Época 2026/2027) *</label>
+                                <select id="desconto-select-atleta" required class="admin-input" style="width: 100%;">
+                                    <option value="" disabled selected>A carregar atletas...</option>
+                                </select>
+                            </div>
+
+                            <div style="margin-bottom: 14px;">
+                                <label style="display:block; margin-bottom:4px; font-size:0.85rem; font-weight:600; color: var(--text-primary);">Percentagem de Desconto *</label>
+                                <select id="desconto-select-percentagem" required class="admin-input" style="width: 100%; margin: 0;">
+                                    <option value="50" selected>🏷️ 50% de Desconto (Padrão BCV)</option>
+                                    <option value="25">🏷️ 25% de Desconto</option>
+                                    <option value="75">🏷️ 75% de Desconto</option>
+                                    <option value="100">🏷️ 100% de Isenção</option>
+                                </select>
+                            </div>
+
+                            <div style="margin-bottom: 16px;">
+                                <label style="display:block; margin-bottom:4px; font-size:0.85rem; font-weight:600; color: var(--text-primary);">Motivo / Justificação *</label>
+                                <select id="desconto-select-motivo-padrao" class="admin-input" style="margin-bottom: 8px;">
+                                    <option value="Irmão(ã) no Clube (2º Atleta)">Irmão(ã) no Clube (2º Atleta)</option>
+                                    <option value="Filho de Treinador / Dirigente">Filho de Treinador / Dirigente</option>
+                                    <option value="Apoio Social / Bolseiro">Apoio Social / Bolseiro</option>
+                                    <option value="Acordo Especial da Direção">Acordo Especial da Direção</option>
+                                    <option value="Outro">Outro (especificar abaixo)</option>
+                                </select>
+                                <input type="text" id="desconto-input-motivo" class="admin-input" placeholder="Ex: Irmão(ã) de..." required value="Irmão(ã) no Clube (2º Atleta)">
+                            </div>
+
+                            <div style="display: flex; gap: 10px;">
+                                <button type="submit" id="btn-save-atribuir-desconto" class="btn-primary" style="flex: 1; background: linear-gradient(135deg, #d97706, #b45309); font-weight: 700;">
+                                    💾 Guardar Desconto
+                                </button>
+                                <button type="button" onclick="window.closeModalAtribuirDesconto()" class="btn-secondary" style="flex: 1;">
+                                    Cancelar
+                                </button>
+                            </div>
+                        </form>
+                    </div>
                 </div>
 
                 <!-- MODAL DE REGISTO DE PAGAMENTO NO ADMIN -->
@@ -1721,6 +1850,9 @@
                                 <select id="admin-pagamento-atleta" required class="admin-input">
                                     <option value="" disabled selected>Selecionar Atleta</option>
                                 </select>
+                                <div id="admin-pagamento-desconto-badge" style="display: none; margin-top: 6px; padding: 6px 10px; border-radius: 6px; background: #fef3c7; border: 1px solid #fde68a; font-size: 0.82rem; color: #92400e; font-weight: 600;">
+                                    🏷️ <span id="admin-pagamento-desconto-txt">Atleta com desconto de 50%</span>
+                                </div>
                             </div>
 
                             <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 12px;">
@@ -2762,6 +2894,6 @@
 
     <!-- Scripts -->
     <script src="js/config.js"></script>
-    <script src="js/admin.js?v=20260928_1300"></script>
+    <script src="js/admin.js?v=20260928_2200"></script>
 </body>
 </html>
