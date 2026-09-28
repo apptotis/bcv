@@ -5888,7 +5888,7 @@ document.addEventListener('DOMContentLoaded', async () => {
                     <td style="padding: 10px;"><span style="background: #f1f5f9; padding: 2px 6px; border-radius: 4px; font-size: 0.75rem; font-weight: 700;">${p.tipo || 'Treino'}</span></td>
                     <td style="padding: 10px;"><span style="background: rgba(126, 34, 206, 0.08); color: #7e22ce; padding: 3px 8px; border-radius: 4px; font-size: 0.8rem; font-weight: 700; white-space: nowrap;">${escFinal}</span></td>
                     <td style="padding: 10px; font-weight: 600;">${atl.nome || `Atleta #${p.atleta_id}`}</td>
-                    <td style="padding: 10px; text-align: center;"><span style="background: #0f172a; color: #fff; padding: 1px 6px; border-radius: 4px; font-size: 0.75rem; font-weight: 700;">Nº ${dorsal}</span></td>
+                    <td style="padding: 10px; text-align: center;">${dorsal && dorsal !== '-' ? `<span style="background: #0f172a; color: #fff; padding: 2px 7px; border-radius: 4px; font-size: 0.78rem; font-weight: 700; white-space: nowrap; display: inline-block;">${dorsal}</span>` : '<span style="color: var(--text-secondary); opacity: 0.4;">-</span>'}</td>
                     <td style="padding: 10px; text-align: center;">${badgeHtml}</td>
                     <td style="padding: 10px; color: var(--text-secondary); font-size: 0.85rem;">👤 ${p.registado_por || 'Sistema'}</td>
                 </tr>
