@@ -90,3 +90,4 @@
 - [2026-09-28] Gemini: Adição do escalão BabyBasket à lista e menu drawer no Portal de Pagamentos (pagamentos.html, js/pagamentos.js), com acesso total para administradores e persistência de seleção no localStorage.
 - [2026-09-28] Gemini: Resolução do erro 'currentAtletas is not defined' na Gestão Financeira do Admin (admin.html, js/admin.js), declarando o estado no escopo global e suportando conceitos de Inscrição e Seguro.
 - [2026-09-28] Gemini: Remoção do ícone de bola (🏀) da coluna Escalão e tabelas financeiras do Admin (js/admin.js) para uma visualização mais limpa sem quebras de linha.
+- [2026-09-28] Gemini: Remoção do botão redundante '+ Registar' do card de Total Liquidado no modal de extrato individual do atleta (js/pagamentos.js, pagamentos.html).

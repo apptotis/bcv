@@ -1450,14 +1450,9 @@ document.addEventListener('DOMContentLoaded', () => {
         }
 
         modalExtratoContent.innerHTML = `
-            <div style="background: #faf5ff; border: 1px solid #e9d5ff; border-radius: var(--radius-md); padding: 14px; margin-bottom: 16px; display: flex; justify-content: space-between; align-items: center;">
-                <div>
-                    <div style="font-size: 0.75rem; color: #7e22ce; font-weight: 700; text-transform: uppercase;">Total Liquidado 2026/2027</div>
-                    <div style="font-size: 1.4rem; font-weight: 800; color: #581c87;">${totalPago.toFixed(2)} €</div>
-                </div>
-                <button type="button" class="btn-action-primary" style="padding: 8px 14px; font-size: 0.82rem;" onclick="closeModalExtrato(); window.openModalPagamento(${atletaId});">
-                    + Registar
-                </button>
+            <div style="background: #faf5ff; border: 1px solid #e9d5ff; border-radius: var(--radius-md); padding: 14px 16px; margin-bottom: 16px;">
+                <div style="font-size: 0.75rem; color: #7e22ce; font-weight: 700; text-transform: uppercase;">Total Liquidado 2026/2027</div>
+                <div style="font-size: 1.5rem; font-weight: 800; color: #581c87; margin-top: 2px;">${totalPago.toFixed(2)} €</div>
             </div>
             
             <div style="font-size: 0.8rem; font-weight: 700; color: var(--text-muted); text-transform: uppercase; margin-bottom: 8px;">Histórico de Transações:</div>
