@@ -213,11 +213,18 @@
             <!-- ======================================================= -->
             <section id="tab-precos" class="tab-content">
                 <div style="background: #ffffff; border: 1px solid var(--border); border-radius: var(--radius-md); padding: 20px; box-shadow: var(--shadow-sm); line-height: 1.6;">
-                    <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 14px;">
-                        <span style="font-size: 1.8rem;">🏷️</span>
-                        <div>
-                            <h3 style="font-size: 1.05rem; font-weight: 800; color: var(--primary);">Tabela de Preços Oficiais</h3>
-                            <p id="tabela-precos-escalao-sub" style="font-size: 0.8rem; color: var(--text-muted);">Valores de referência para o escalão ativo • Época 2026/2027</p>
+                    <div style="display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 12px; margin-bottom: 14px; padding-bottom: 12px; border-bottom: 1px solid var(--border);">
+                        <div style="display: flex; align-items: center; gap: 10px;">
+                            <span style="font-size: 1.8rem;">🏷️</span>
+                            <div>
+                                <h3 style="font-size: 1.05rem; font-weight: 800; color: var(--primary); margin: 0;">Tabela de Preços Oficiais</h3>
+                                <p id="tabela-precos-escalao-sub" style="font-size: 0.8rem; color: var(--text-muted); margin: 2px 0 0 0;">Valores de referência • Época 2026/2027</p>
+                            </div>
+                        </div>
+                        <div style="display: flex; align-items: center; gap: 8px;">
+                            <label for="select-precos-escalao" style="font-size: 0.8rem; font-weight: 700; color: var(--text-main); white-space: nowrap;">Escalão:</label>
+                            <select id="select-precos-escalao" class="mobile-select" style="padding: 6px 12px; font-size: 0.85rem; font-weight: 600; border-radius: 6px; border: 1px solid var(--border); background: #f8fafc; min-width: 140px;">
+                            </select>
                         </div>
                     </div>
 
@@ -369,6 +376,6 @@
 
     <!-- Scripts -->
     <script src="js/config.js"></script>
-    <script src="js/pagamentos.js?v=20260928_0825"></script>
+    <script src="js/pagamentos.js?v=20260928_1100"></script>
 </body>
 </html>

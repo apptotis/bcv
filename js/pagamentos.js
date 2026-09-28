@@ -122,6 +122,24 @@ document.addEventListener('DOMContentLoaded', () => {
         return esc.toString().toLowerCase().replace(/[-\s]/g, '').trim();
     }
 
+    // Helper: Remove sufixos de género para comparar escalões base (ex: "Sub 14 Masculino" -> "sub14")
+    function baseEscalao(esc) {
+        if (!esc) return '';
+        return normalizeEscalao(esc).replace(/masculin[oa]s?|feminin[oa]s?|masc|fem/gi, '').trim();
+    }
+
+    // Helper: Verifica se dois escalões correspondem (ex: "Sub 14" e "Sub 14 Masculino", ou "Todos")
+    function matchesEscalao(escA, escB) {
+        if (!escA || !escB) return false;
+        const normA = normalizeEscalao(escA);
+        const normB = normalizeEscalao(escB);
+        if (normA === 'todos' || normB === 'todos') return true;
+        if (normA === normB) return true;
+        const bA = baseEscalao(escA);
+        const bB = baseEscalao(escB);
+        return bA === bB && bA.length > 0;
+    }
+
     // Helper para verificar se um membro é staff (não jogador)
     function isStaffMember(funcao) {
         if (!funcao) return false;
@@ -572,16 +590,41 @@ document.addEventListener('DOMContentLoaded', () => {
     // =======================================================
     // 3.1 ATUALIZAR TABELA DE PREÇOS OFICIAIS (TAB 3)
     // =======================================================
-    function updatePrecosTab() {
+    function updatePrecosTab(targetEscalao) {
         const subLabel = document.getElementById('tabela-precos-escalao-sub');
         const quotasContainer = document.getElementById('tabela-precos-quotas-list');
         const produtosContainer = document.getElementById('tabela-precos-produtos-list');
+        const selectEscalao = document.getElementById('select-precos-escalao');
 
-        if (subLabel) {
-            subLabel.textContent = `Escalão Ativo: ${activeEscalao || 'Geral'} • Época 2026/2027`;
+        const currentTarget = targetEscalao || (selectEscalao ? selectEscalao.value : null) || activeEscalao || 'Sub 14 Masculino';
+
+        // Preencher o seletor de escalões se estiver vazio
+        if (selectEscalao) {
+            if (selectEscalao.options.length === 0) {
+                const listToUse = [
+                    'BabyBasket', 'Mini 8', 'Mini 10', 'Mini 12',
+                    'Sub 14 Masculino', 'Sub 14 Feminino',
+                    'Sub 16 Masculino', 'Sub 16 Feminino',
+                    'Sub 18 Masculino', 'Sub 18 Feminino',
+                    'Sub 20', 'Seniores Masculinos', 'Seniores Femininos'
+                ];
+                selectEscalao.innerHTML = listToUse.map(e => `
+                    <option value="${e}" ${matchesEscalao(e, currentTarget) ? 'selected' : ''}>${e}</option>
+                `).join('');
+
+                selectEscalao.addEventListener('change', () => {
+                    updatePrecosTab(selectEscalao.value);
+                });
+            } else if (targetEscalao) {
+                selectEscalao.value = targetEscalao;
+            }
         }
 
-        const precos = getPrecosAtleta({ escalao: activeEscalao });
+        if (subLabel) {
+            subLabel.textContent = `Escalão Selecionado: ${currentTarget} • Época 2026/2027`;
+        }
+
+        const precos = getPrecosAtleta({ escalao: currentTarget });
 
         // 1. Quotas Oficiais do Escalão
         if (quotasContainer) {
@@ -591,7 +634,7 @@ document.addEventListener('DOMContentLoaded', () => {
                         <strong style="font-size: 0.9rem; color: var(--text-main);">📅 Mensalidade Regular</strong>
                         <div style="font-size: 0.78rem; color: var(--text-muted);">Setembro a Junho (10 mensalidades)</div>
                     </div>
-                    <span style="font-size: 1.15rem; font-weight: 800; color: var(--primary);">${precos.mensal.toFixed(2)} €</span>
+                    <span style="font-size: 1.15rem; font-weight: 800; color: var(--primary);">${Number(precos.mensal || 0).toFixed(2)} €</span>
                 </div>
 
                 <div style="background: #f0fdf4; border: 1px solid #bbf7d0; border-radius: var(--radius-sm); padding: 12px 14px; display: flex; justify-content: space-between; align-items: center;">
@@ -599,7 +642,7 @@ document.addEventListener('DOMContentLoaded', () => {
                         <strong style="font-size: 0.9rem; color: #166534;">🌓 Quota Bianual (2 Prestações)</strong>
                         <div style="font-size: 0.78rem; color: #15803d;">Pagamento semestral (Setembro e Fevereiro)</div>
                     </div>
-                    <span style="font-size: 1.15rem; font-weight: 800; color: #16a34a;">${precos.bianual.toFixed(2)} €</span>
+                    <span style="font-size: 1.15rem; font-weight: 800; color: #16a34a;">${Number(precos.bianual || 0).toFixed(2)} €</span>
                 </div>
 
                 <div style="background: #faf5ff; border: 1px solid #e9d5ff; border-radius: var(--radius-sm); padding: 12px 14px; display: flex; justify-content: space-between; align-items: center;">
@@ -607,18 +650,16 @@ document.addEventListener('DOMContentLoaded', () => {
                         <strong style="font-size: 0.9rem; color: #581c87;">⭐ Quota Anual Completa</strong>
                         <div style="font-size: 0.78rem; color: #7e22ce;">Pagamento único integral de toda a época</div>
                     </div>
-                    <span style="font-size: 1.15rem; font-weight: 800; color: #6b21a8;">${precos.anual.toFixed(2)} €</span>
+                    <span style="font-size: 1.15rem; font-weight: 800; color: #6b21a8;">${Number(precos.anual || 0).toFixed(2)} €</span>
                 </div>
             `;
         }
 
         // 2. Produtos do escalão configurados pelo Admin
         if (produtosContainer) {
-            const escNorm = normalizeEscalao(activeEscalao);
-            const prods = currentItensCobranca.filter(item => {
+            const prods = (currentItensCobranca || []).filter(item => {
                 if (item.ativo === false) return false;
-                const itemEsc = normalizeEscalao(item.escalao);
-                return itemEsc === 'todos' || itemEsc === escNorm || !item.escalao;
+                return matchesEscalao(item.escalao, currentTarget) || !item.escalao;
             });
 
             if (prods.length === 0) {
@@ -823,12 +864,18 @@ document.addEventListener('DOMContentLoaded', () => {
     ];
 
     function getPrecosAtleta(atleta) {
-        const esc = atleta?.escalao || activeEscalao;
+        const esc = atleta?.escalao || activeEscalao || '';
         let match = null;
+
         if (Array.isArray(tabelaPrecosQuotas)) {
-            match = tabelaPrecosQuotas.find(p => normalizeEscalao(p.escalao) === normalizeEscalao(esc));
+            match = tabelaPrecosQuotas.find(p => matchesEscalao(p.escalao, esc));
         } else if (typeof tabelaPrecosQuotas === 'object' && tabelaPrecosQuotas !== null) {
-            match = tabelaPrecosQuotas[esc] || Object.values(tabelaPrecosQuotas).find(p => normalizeEscalao(p?.escalao) === normalizeEscalao(esc));
+            if (tabelaPrecosQuotas[esc]) {
+                match = tabelaPrecosQuotas[esc];
+            } else {
+                const foundKey = Object.keys(tabelaPrecosQuotas).find(k => matchesEscalao(k, esc));
+                if (foundKey) match = tabelaPrecosQuotas[foundKey];
+            }
         }
 
         const isBaby = normalizeEscalao(esc).includes('baby');
@@ -837,9 +884,9 @@ document.addEventListener('DOMContentLoaded', () => {
         const defAnual = isBaby ? 0.00 : 230.00;
 
         return {
-            mensal: (match?.mensal !== undefined && match?.mensal !== null) ? Number(match.mensal) : defMensal,
-            bianual: (match?.bianual !== undefined && match?.bianual !== null) ? Number(match.bianual) : defBianual,
-            anual: (match?.anual !== undefined && match?.anual !== null) ? Number(match.anual) : defAnual
+            mensal: (match?.mensal !== undefined && match?.mensal !== null && match?.mensal !== '') ? Number(match.mensal) : defMensal,
+            bianual: (match?.bianual !== undefined && match?.bianual !== null && match?.bianual !== '') ? Number(match.bianual) : defBianual,
+            anual: (match?.anual !== undefined && match?.anual !== null && match?.anual !== '') ? Number(match.anual) : defAnual
         };
     }
 
@@ -1096,12 +1143,11 @@ document.addEventListener('DOMContentLoaded', () => {
 
         // 2. SECÇÃO PRODUTOS & ENCARGOS PENDENTES
         let htmlProdutos = '';
-        const escAtleta = normalizeEscalao(atleta.escalao || activeEscalao);
+        const escAtleta = atleta.escalao || activeEscalao || '';
 
-        const prodsEscalao = currentItensCobranca.filter(item => {
+        const prodsEscalao = (currentItensCobranca || []).filter(item => {
             if (item.ativo === false) return false;
-            const itemEsc = normalizeEscalao(item.escalao);
-            return itemEsc === 'todos' || itemEsc === escAtleta || !item.escalao;
+            return matchesEscalao(item.escalao, escAtleta) || !item.escalao;
         });
 
         // Filtrar quais produtos já estão pagos vs pendentes
