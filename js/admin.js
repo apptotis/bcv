@@ -6032,6 +6032,8 @@ document.addEventListener('DOMContentLoaded', async () => {
     let currentFinanceiraPagamentos = [];
     const ESCALOES_PADRAO = ['BabyBasket', 'Mini 8', 'Mini 10', 'Mini 12', 'Sub 14', 'Sub 16', 'Sub 18'];
     let tabelaPrecosQuotas = {};
+    let descontosAtletasMap = {};
+    window.descontosAtletasMap = descontosAtletasMap;
 
     const btnSubfins = document.querySelectorAll('.btn-subfin');
     const subfinContents = document.querySelectorAll('.subfin-content');
