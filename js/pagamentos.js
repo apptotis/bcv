@@ -1474,13 +1474,10 @@ document.addEventListener('DOMContentLoaded', () => {
     function renderTesouraria() {
         if (!listaEntregasContainer) return;
 
-        // 1. Somar todo o dinheiro recebido dos atletas deste escalão na época ativa
+        // 1. Somar todo o dinheiro recebido dos atletas deste escalão na época ativa (100% numerário)
         let totalDinheiroCobrado = 0;
         currentPagamentos.forEach(p => {
-            const met = (p.metodo_pagamento || '').toLowerCase();
-            if (met.includes('dinheiro')) {
-                totalDinheiroCobrado += Number(p.valor || 0);
-            }
+            totalDinheiroCobrado += Number(p.valor || 0);
         });
 
         // 2. Somar todas as entregas já registadas à tesouraria para este escalão

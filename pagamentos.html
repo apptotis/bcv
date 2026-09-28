@@ -333,13 +333,11 @@
 
                         <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 10px;">
                             <div>
-                                <label class="form-label" style="font-size: 0.75rem;">Método de Pagamento</label>
-                                <select id="pagamento-metodo" class="form-select" style="padding: 8px 10px; font-size: 0.85rem;">
-                                    <option value="Dinheiro" selected>💵 Dinheiro</option>
-                                    <option value="MBWay">📱 MBWay</option>
-                                    <option value="Transferência">🏦 Transferência</option>
-                                    <option value="Outro">Outro</option>
-                                </select>
+                                <label class="form-label" style="font-size: 0.75rem;">Forma de Pagamento</label>
+                                <input type="hidden" id="pagamento-metodo" value="Dinheiro">
+                                <div style="padding: 7px 10px; font-size: 0.85rem; font-weight: 700; color: #047857; background: #ecfdf5; border: 1px solid #a7f3d0; border-radius: 8px; display: flex; align-items: center; gap: 6px;">
+                                    <span>💵</span> Dinheiro
+                                </div>
                             </div>
                             <div>
                                 <label class="form-label" style="font-size: 0.75rem;">Data Recebimento</label>
@@ -419,20 +417,11 @@
                             </div>
                         </div>
 
-                        <!-- Data e Método -->
-                        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
-                            <div>
-                                <label class="form-label" style="font-size: 0.78rem; font-weight: 700;">Data da Entrega *</label>
-                                <input type="date" id="entrega-data" class="form-input" required style="padding: 8px 10px; font-size: 0.85rem;">
-                            </div>
-                            <div>
-                                <label class="form-label" style="font-size: 0.78rem; font-weight: 700;">Método</label>
-                                <select id="entrega-metodo" class="form-select" style="padding: 8px 10px; font-size: 0.85rem;">
-                                    <option value="Dinheiro" selected>💵 Dinheiro / Numerário</option>
-                                    <option value="Transferência">🏦 Transferência p/ Clube</option>
-                                    <option value="Outro">Outro</option>
-                                </select>
-                            </div>
+                        <!-- Data da Entrega -->
+                        <div>
+                            <label class="form-label" style="font-size: 0.78rem; font-weight: 700;">Data da Entrega *</label>
+                            <input type="date" id="entrega-data" class="form-input" required style="padding: 8px 10px; font-size: 0.85rem;">
+                            <input type="hidden" id="entrega-metodo" value="Dinheiro">
                         </div>
 
                         <!-- Entregue a -->
@@ -490,6 +479,6 @@
 
     <!-- Scripts -->
     <script src="js/config.js"></script>
-    <script src="js/pagamentos.js?v=20260928_1200"></script>
+    <script src="js/pagamentos.js?v=20260928_1300"></script>
 </body>
 </html>

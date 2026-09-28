@@ -1427,10 +1427,10 @@
                                 <span style="font-size: 0.75rem; color: var(--text-secondary); font-weight: 700; text-transform: uppercase;">📅 Mensalidades</span>
                                 <h3 id="fin-kpi-total-mensalidades" style="font-size: 1.8rem; margin: 4px 0 0; color: #2563eb;">0.00 €</h3>
                             </div>
-                            <div class="welcome-box" style="margin: 0; padding: 16px; border-left: 4px solid #0f172a;">
-                                <span style="font-size: 0.75rem; color: var(--text-secondary); font-weight: 700; text-transform: uppercase;">Recebimentos por Método</span>
-                                <div id="fin-kpi-metodos" style="font-size: 0.85rem; font-weight: 700; color: var(--text-primary); margin-top: 6px;">
-                                    💵 0€ | 📱 0€ | 🏦 0€
+                            <div class="welcome-box" style="margin: 0; padding: 16px; border-left: 4px solid #059669;">
+                                <span style="font-size: 0.75rem; color: var(--text-secondary); font-weight: 700; text-transform: uppercase;">Forma de Cobrança</span>
+                                <div id="fin-kpi-metodos" style="font-size: 1.15rem; font-weight: 800; color: #059669; margin-top: 6px;">
+                                    💵 100% Dinheiro
                                 </div>
                             </div>
                         </div>
@@ -1485,16 +1485,6 @@
                                             <option value="EXAME">🩺 Exame Médico Desportivo (EMD)</option>
                                             <option value="OUTRO">🏷️ Outros Encargos / Produtos</option>
                                         </optgroup>
-                                    </select>
-                                </div>
-                                <div>
-                                    <label style="display:block; margin-bottom:4px; font-size:0.8rem; color: var(--text-secondary);">Método</label>
-                                    <select id="fin-filter-metodo" class="admin-input" style="margin-bottom: 0;">
-                                        <option value="">Todos os Métodos</option>
-                                        <option value="Dinheiro">💵 Dinheiro</option>
-                                        <option value="MBWay">📱 MBWay</option>
-                                        <option value="Transferência">🏦 Transferência Bancária</option>
-                                        <option value="Outro">Outro</option>
                                     </select>
                                 </div>
                                 <div>
@@ -1764,13 +1754,11 @@
                                     <input type="number" step="0.01" min="0" id="admin-pagamento-valor" required class="admin-input" value="25.00">
                                 </div>
                                 <div>
-                                    <label style="display:block; margin-bottom:4px; font-size:0.85rem; font-weight:600; color: var(--text-primary);">Método de Pagamento *</label>
-                                    <select id="admin-pagamento-metodo" required class="admin-input">
-                                        <option value="Dinheiro" selected>💵 Dinheiro</option>
-                                        <option value="MBWay">📱 MBWay</option>
-                                        <option value="Transferência">🏦 Transferência Bancária</option>
-                                        <option value="Outro">Outro</option>
-                                    </select>
+                                    <label style="display:block; margin-bottom:4px; font-size:0.85rem; font-weight:600; color: var(--text-primary);">Forma de Pagamento</label>
+                                    <input type="hidden" id="admin-pagamento-metodo" value="Dinheiro">
+                                    <div style="padding: 9px 12px; font-size: 0.88rem; font-weight: 700; color: #047857; background: #ecfdf5; border: 1px solid #a7f3d0; border-radius: 8px;">
+                                        💵 Dinheiro
+                                    </div>
                                 </div>
                             </div>
 
@@ -2774,6 +2762,6 @@
 
     <!-- Scripts -->
     <script src="js/config.js"></script>
-    <script src="js/admin.js?v=20260928_1200"></script>
+    <script src="js/admin.js?v=20260928_1300"></script>
 </body>
 </html>

@@ -6229,9 +6229,6 @@ document.addEventListener('DOMContentLoaded', async () => {
         let totalArrecadado = 0;
         let totalAnuais = 0;
         let totalMensalidades = 0;
-        let totalDinheiro = 0;
-        let totalMbway = 0;
-        let totalTransf = 0;
 
         filtrados.forEach(p => {
             const val = Number(p.valor || 0);
@@ -6241,18 +6238,13 @@ document.addEventListener('DOMContentLoaded', async () => {
             } else {
                 totalMensalidades += val;
             }
-
-            const met = (p.metodo_pagamento || '').toLowerCase();
-            if (met.includes('dinheiro')) totalDinheiro += val;
-            else if (met.includes('mbway')) totalMbway += val;
-            else if (met.includes('transf')) totalTransf += val;
         });
 
         if (finKpiTotalArrecadado) finKpiTotalArrecadado.textContent = `${totalArrecadado.toFixed(2)} €`;
         if (finKpiTotalAnuais) finKpiTotalAnuais.textContent = `${totalAnuais.toFixed(2)} €`;
         if (finKpiTotalMensalidades) finKpiTotalMensalidades.textContent = `${totalMensalidades.toFixed(2)} €`;
         if (finKpiMetodos) {
-            finKpiMetodos.innerHTML = `💵 ${totalDinheiro.toFixed(0)}€ &nbsp;|&nbsp; 📱 ${totalMbway.toFixed(0)}€ &nbsp;|&nbsp; 🏦 ${totalTransf.toFixed(0)}€`;
+            finKpiMetodos.innerHTML = `💵 100% Dinheiro (${totalArrecadado.toFixed(0)}€)`;
         }
         if (finCountInfo) finCountInfo.textContent = `${filtrados.length} pagamentos registados`;
 
@@ -6286,7 +6278,7 @@ document.addEventListener('DOMContentLoaded', async () => {
                 conceitoHtml = `<span style="background: #f1f5f9; padding: 2px 8px; border-radius: 4px; font-size: 0.78rem; font-weight: 600;">📅 ${p.mes || 'Mensalidade'}</span>`;
             }
 
-            const metHtml = p.metodo_pagamento === 'MBWay' ? '📱 MBWay' : (p.metodo_pagamento === 'Transferência' ? '🏦 Transf. Bancária' : '💵 Dinheiro');
+            const metHtml = '💵 Dinheiro';
 
             return `
                 <tr style="border-bottom: 1px solid var(--border-color);">
@@ -6656,10 +6648,7 @@ document.addEventListener('DOMContentLoaded', async () => {
 
             let totalDinheiroCobrado = 0;
             (pagsDinheiro || []).forEach(p => {
-                const met = (p.metodo_pagamento || '').toLowerCase();
-                if (met.includes('dinheiro')) {
-                    totalDinheiroCobrado += Number(p.valor || 0);
-                }
+                totalDinheiroCobrado += Number(p.valor || 0);
             });
 
             let totalEntregue = 0;
