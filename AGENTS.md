@@ -93,3 +93,4 @@
 - [2026-09-28] Gemini: Remoção do botão redundante '+ Registar' do card de Total Liquidado no modal de extrato individual do atleta (js/pagamentos.js, pagamentos.html).
 - [2026-09-28] Gemini: Correção da filtragem por escalão no Admin e reformulação do filtro de serviços/produtos (Quotas, Seguro, Equipamentos, Exames EMD e Outros) em admin.html e js/admin.js.
 - [2026-09-28] Gemini: Simplificação dos cartões de atleta no Portal de Pagamentos (pagamentos.html, js/pagamentos.js, css/pagamentos.css), exibindo apenas o nome com tipografia destacada.
+- [2026-09-28] Gemini: Correção de ReferenceError (atletaPags is not defined) em renderAtletas no Portal de Pagamentos (js/pagamentos.js).

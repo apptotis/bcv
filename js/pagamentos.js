@@ -689,6 +689,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
         let html = '';
         filtrados.forEach(a => {
+            const atletaPags = pagamentosAtletaMap[a.id] || [];
             const avatarHtml = a.foto_url 
                 ? `<img src="${a.foto_url}" class="atleta-avatar" alt="${escapeHtml(a.nome)}">`
                 : `<div class="atleta-avatar">${(a.nome || 'A').charAt(0).toUpperCase()}</div>`;
@@ -708,7 +709,7 @@ document.addEventListener('DOMContentLoaded', () => {
                         </button>
                         <button type="button" class="btn-action-secondary" onclick="window.openModalExtrato(${a.id})">
                             <span>📄</span>
-                            <span>Extrato (${atletaPags.length})</span>
+                            <span>Extrato</span>
                         </button>
                     </div>
                 </div>
