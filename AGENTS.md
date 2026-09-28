@@ -91,3 +91,4 @@
 - [2026-09-28] Gemini: Simplificação dos cartões de atleta no Portal de Pagamentos (apenas nome) e correção de atletaPags is not defined (pagamentos.js, pagamentos.html).
 - [2026-09-28] Gemini: Separação estrita de género (Masculino vs Feminino) no carregamento de atletas por escalão (js/pagamentos.js, js/admin.js, admin.html), resolvendo a mistura de atletas em Sub 14, Sub 16 e Sub 18.
 - [2026-09-28] Gemini: Implementação do perfil de utilizador 'Diretor & Pagamentos' no Admin (admin.html, js/admin.js), com afetação de múltiplos escalões, sincronização com staff, acesso integrado e atalhos cruzados nos menus drawer dos portais mobile (pagamentos.html, diretor.html, js/pagamentos.js, js/diretor.js).
+- [2026-09-28] Gemini: Resolução crítica de login nos portais Diretor e Pagamentos (remoção de variável inexistente em diretor.js, fallback resiliente de perfil por email, alargamento de permissões/escalões padrão e fallback em admin_create_user).

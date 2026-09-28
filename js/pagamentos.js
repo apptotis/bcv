@@ -142,14 +142,31 @@ document.addEventListener('DOMContentLoaded', () => {
 
             currentUser = session.user;
 
-            // Obter perfil na tabela pública public.users
-            const { data: profile, error: pError } = await supabase
-                .from('users')
-                .select('*')
-                .eq('id', currentUser.id)
-                .maybeSingle();
+            // Obter perfil na tabela pública public.users (por ID ou por Email)
+            let profile = null;
+            try {
+                const { data: byId } = await supabase
+                    .from('users')
+                    .select('*')
+                    .eq('id', currentUser.id)
+                    .maybeSingle();
+                if (byId) profile = byId;
+            } catch (e) {
+                console.warn("Consulta users por ID falhou:", e);
+            }
 
-            if (pError) console.warn("Aviso ao carregar perfil:", pError);
+            if (!profile && currentUser.email) {
+                try {
+                    const { data: byEmail } = await supabase
+                        .from('users')
+                        .select('*')
+                        .ilike('email', currentUser.email.trim())
+                        .maybeSingle();
+                    if (byEmail) profile = byEmail;
+                } catch (e) {
+                    console.warn("Consulta users por Email falhou:", e);
+                }
+            }
 
             userProfile = profile || {
                 nome: currentUser.user_metadata?.nome || currentUser.email.split('@')[0],
@@ -158,9 +175,15 @@ document.addEventListener('DOMContentLoaded', () => {
             };
 
             const userRole = (userProfile.role || '').toLowerCase();
-            const allowedRoles = ['pagamentos', 'tesoureiro', 'diretor_pagamentos', 'diretor', 'admin', 'editor'];
+            const userPerms = Array.isArray(userProfile.permissoes) ? userProfile.permissoes : [];
+            const allowedRoles = ['pagamentos', 'tesoureiro', 'diretor_pagamentos', 'diretor', 'seccionista', 'admin', 'editor', 'personalizado'];
 
-            if (!allowedRoles.includes(userRole) && userRole !== 'admin') {
+            const hasAccess = allowedRoles.includes(userRole) || 
+                              userPerms.includes('financeira') || 
+                              userRole === 'admin' ||
+                              (userProfile.escalao_afeto && userProfile.escalao_afeto.trim().length > 0);
+
+            if (!hasAccess) {
                 alert("Acesso Restrito: A sua conta não tem perfil de Responsável de Pagamentos de Escalão.");
                 await supabase.auth.signOut();
                 showLogin();
@@ -222,6 +245,11 @@ document.addEventListener('DOMContentLoaded', () => {
                 } catch (eFallback) {
                     console.warn("Aviso ao carregar escalões vinculados em pagamentos:", eFallback);
                 }
+            }
+
+            // Fallback: se ainda não tiver escalões definidos e for admin/diretor/pagamentos, disponibilizar padrão
+            if (userEscaloes.length === 0 && (userRole === 'admin' || userRole === 'diretor_pagamentos' || userRole === 'pagamentos' || userRole === 'diretor')) {
+                userEscaloes = ESCALOES_PADRAO_BCV;
             }
 
             // Definir escalão ativo inicial (lembrando seleção anterior se válida)
@@ -323,7 +351,7 @@ document.addEventListener('DOMContentLoaded', () => {
     if (formLogin) {
         formLogin.addEventListener('submit', async (e) => {
             e.preventDefault();
-            const email = loginEmailInput.value.trim();
+            const email = loginEmailInput.value.trim().toLowerCase();
             const password = loginPasswordInput.value;
 
             btnLogin.disabled = true;
@@ -337,9 +365,13 @@ document.addEventListener('DOMContentLoaded', () => {
                 await checkSession();
             } catch (err) {
                 console.error("Erro no login:", err);
-                loginErrorMsg.textContent = err.message.includes('Invalid login credentials')
-                    ? 'Email ou palavra-passe incorretos.'
-                    : 'Erro ao autenticar: ' + err.message;
+                let msg = err.message || 'Erro ao autenticar.';
+                if (msg.includes('Invalid login credentials')) {
+                    msg = 'Email ou palavra-passe incorretos.';
+                } else if (msg.includes('Email not confirmed')) {
+                    msg = 'O email da conta ainda não foi confirmado.';
+                }
+                loginErrorMsg.textContent = '❌ ' + msg;
                 loginErrorMsg.style.display = 'block';
             } finally {
                 btnLogin.disabled = false;

@@ -979,7 +979,8 @@ document.addEventListener('DOMContentLoaded', async () => {
                 createUserMsg.textContent = "✅ Utilizador atualizado com sucesso!";
             } else {
                 // Criar
-                const { error } = await supabase.rpc('admin_create_user', {
+                let newUserId = null;
+                const { data: createData, error } = await supabase.rpc('admin_create_user', {
                     p_email: email,
                     p_password: password,
                     p_nome: nome,
@@ -988,7 +989,27 @@ document.addEventListener('DOMContentLoaded', async () => {
                     p_permissoes: permissoes,
                     p_escalao_afeto: escalaoAfeto
                 });
-                if (error) throw error;
+
+                if (error) {
+                    // Fallback caso a RPC ainda não tenha o parâmetro p_escalao_afeto atualizado no Supabase
+                    const { data: createDataFallback, error: fallbackErr } = await supabase.rpc('admin_create_user', {
+                        p_email: email,
+                        p_password: password,
+                        p_nome: nome,
+                        p_telemovel: telemovel,
+                        p_role: role,
+                        p_permissoes: permissoes
+                    });
+                    if (fallbackErr) throw error;
+                    newUserId = createDataFallback?.user_id;
+                    if (escalaoAfeto) {
+                        if (newUserId) {
+                            await supabase.from('users').update({ escalao_afeto: escalaoAfeto }).eq('id', newUserId);
+                        } else {
+                            await supabase.from('users').update({ escalao_afeto: escalaoAfeto }).ilike('email', email);
+                        }
+                    }
+                }
                 createUserMsg.textContent = "✅ Utilizador criado com sucesso!";
             }
 

@@ -116,7 +116,6 @@ document.addEventListener('DOMContentLoaded', async () => {
     // Inicializar data de hoje
     const hojeIso = new Date().toISOString().split('T')[0];
     if (presencasDataInput) presencasDataInput.value = hojeIso;
-    if (pagamentoData) pagamentoData.value = hojeIso;
 
     let userEscaloes = []; // Array de escalões afetos (ex: ['Mini 12', 'Sub 14'])
     let activeEscalao = ''; // Escalão ativo no momento
@@ -138,12 +137,31 @@ document.addEventListener('DOMContentLoaded', async () => {
 
             currentUser = session.user;
 
-            // Carregar perfil do utilizador na tabela public.users
-            const { data: profile } = await supabase
-                .from('users')
-                .select('*')
-                .eq('id', currentUser.id)
-                .maybeSingle();
+            // Carregar perfil do utilizador na tabela public.users (por ID ou por Email)
+            let profile = null;
+            try {
+                const { data: byId } = await supabase
+                    .from('users')
+                    .select('*')
+                    .eq('id', currentUser.id)
+                    .maybeSingle();
+                if (byId) profile = byId;
+            } catch (e) {
+                console.warn("Consulta users por ID falhou:", e);
+            }
+
+            if (!profile && currentUser.email) {
+                try {
+                    const { data: byEmail } = await supabase
+                        .from('users')
+                        .select('*')
+                        .ilike('email', currentUser.email.trim())
+                        .maybeSingle();
+                    if (byEmail) profile = byEmail;
+                } catch (e) {
+                    console.warn("Consulta users por Email falhou:", e);
+                }
+            }
 
             userProfile = profile || {
                 nome: currentUser.user_metadata?.nome || currentUser.email.split('@')[0],
@@ -153,6 +171,20 @@ document.addEventListener('DOMContentLoaded', async () => {
 
             const userRole = (userProfile.role || 'diretor').toLowerCase();
             const isAdmin = userRole === 'admin';
+            const userPerms = Array.isArray(userProfile.permissoes) ? userProfile.permissoes : [];
+            const allowedRoles = ['diretor', 'seccionista', 'diretor_pagamentos', 'admin', 'editor', 'treinador', 'personalizado'];
+
+            const hasAccess = allowedRoles.includes(userRole) || 
+                              userPerms.includes('diretor_presencas') || 
+                              isAdmin ||
+                              (userProfile.escalao_afeto && userProfile.escalao_afeto.trim().length > 0);
+
+            if (!hasAccess) {
+                alert("Acesso Restrito: A sua conta não tem perfil de Diretor de Campo.");
+                await supabase.auth.signOut();
+                showLogin();
+                return;
+            }
 
             // Carregar equipas estritamente onde o diretor está associado em equipas_atletas
             userEscaloes = [];
@@ -222,6 +254,20 @@ document.addEventListener('DOMContentLoaded', async () => {
                 const rawEscs = (userProfile.escalao_afeto || '').split(',').map(s => s.trim()).filter(Boolean);
                 if (rawEscs.length > 0) {
                     userEscaloes = [...new Set(rawEscs)];
+                }
+            }
+
+            // Fallback: se ainda não tiver equipas vinculadas e for diretor/admin, carregar todas para permitir trabalho
+            if (userEscaloes.length === 0 && (isAdmin || userRole === 'diretor' || userRole === 'diretor_pagamentos')) {
+                try {
+                    const { data: allEqs } = await supabase
+                        .from('equipasbcv')
+                        .select('escalao, nome');
+                    if (allEqs && allEqs.length > 0) {
+                        userEscaloes = [...new Set(allEqs.map(e => e.nome || e.escalao).filter(Boolean))];
+                    }
+                } catch (eAll) {
+                    console.warn("Aviso ao carregar equipas de fallback:", eAll);
                 }
             }
 
@@ -382,7 +428,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     if (formLogin) {
         formLogin.addEventListener('submit', async (e) => {
             e.preventDefault();
-            const email = loginEmailInput.value.trim();
+            const email = loginEmailInput.value.trim().toLowerCase();
             const password = loginPassInput.value;
             const btnLogin = document.getElementById('btn-login');
 
@@ -397,7 +443,13 @@ document.addEventListener('DOMContentLoaded', async () => {
             } catch (err) {
                 console.error("Erro ao autenticar:", err);
                 if (loginErrorMsg) {
-                    loginErrorMsg.textContent = "❌ Email ou palavra-passe incorretos.";
+                    let msg = err.message || 'Erro ao autenticar.';
+                    if (msg.includes('Invalid login credentials')) {
+                        msg = 'Email ou palavra-passe incorretos.';
+                    } else if (msg.includes('Email not confirmed')) {
+                        msg = 'O email da conta ainda não foi confirmado.';
+                    }
+                    loginErrorMsg.textContent = "❌ " + msg;
                     loginErrorMsg.style.display = 'block';
                 }
             } finally {
