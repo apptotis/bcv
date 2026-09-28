@@ -167,21 +167,43 @@ document.addEventListener('DOMContentLoaded', () => {
                 return;
             }
 
+            // Lista completa de todos os escalões padrão do clube
+            const ESCALOES_PADRAO_BCV = [
+                'BabyBasket',
+                'Mini 8',
+                'Mini 10',
+                'Mini 12',
+                'Sub 14 Masculino',
+                'Sub 14 Feminino',
+                'Sub 16 Masculino',
+                'Sub 16 Feminino',
+                'Sub 18 Masculino',
+                'Sub 18 Feminino',
+                'Sub 20',
+                'Seniores'
+            ];
+
             // Processar escalões atribuídos (separados por vírgula em escalao_afeto)
             const rawEscaloes = (userProfile.escalao_afeto || '').split(',').map(s => s.trim()).filter(Boolean);
             
-            if (rawEscaloes.length > 0) {
-                userEscaloes = rawEscaloes;
-            } else if (userRole === 'admin') {
-                // Se for Admin total e não tiver escalão específico, permitir escolher todos os escalões padrão
-                userEscaloes = ['Mini 8', 'Mini 10', 'Mini 12', 'Sub 14 Masculino', 'Sub 14 Feminino', 'Sub 16 Masculino', 'Sub 16 Feminino', 'Sub 18 Masculino', 'Sub 18 Feminino', 'Sub 20', 'Seniores'];
+            if (userRole === 'admin') {
+                // Administrador tem sempre acesso total e irrestrito a todos os escalões do clube
+                userEscaloes = ESCALOES_PADRAO_BCV;
+            } else if (rawEscaloes.length > 0) {
+                userEscaloes = rawEscaloes.map(esc => {
+                    if (esc.toLowerCase().includes('baby')) return 'BabyBasket';
+                    return esc;
+                });
             } else {
                 // Responsável sem escalão ainda definido pelo admin
                 userEscaloes = [];
             }
 
-            // Definir escalão ativo inicial
-            if (!activeEscalao && userEscaloes.length > 0) {
+            // Definir escalão ativo inicial (lembrando seleção anterior se válida)
+            const savedEsc = localStorage.getItem('bcv_pagamentos_active_escalao');
+            if (savedEsc && userEscaloes.includes(savedEsc)) {
+                activeEscalao = savedEsc;
+            } else if (userEscaloes.length > 0) {
                 activeEscalao = userEscaloes[0];
             }
 
@@ -253,6 +275,9 @@ document.addEventListener('DOMContentLoaded', () => {
 
     function switchEscalao(novoEscalao) {
         activeEscalao = novoEscalao;
+        try {
+            localStorage.setItem('bcv_pagamentos_active_escalao', novoEscalao);
+        } catch(e) {}
         updateEscalaoDisplay();
         renderMultiEscalaoSelectors();
         loadData();

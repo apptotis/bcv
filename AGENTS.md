@@ -15,16 +15,8 @@
 - Múltiplos agentes (Gemini, Claude, Codex) mantêm este ficheiro como Single Source of Truth (SSOT).
 
 ## Histórico de Atualizações
-- [2026-05-07 a 2026-05-24] Gemini: Inicialização do projeto, stack, gestão de atletas/aniversariantes, cabeçalho centrado com drawer e tema institucional.
-- [2026-05-27] Gemini: Simplificação do modal de aniversários, alinhamento de rodapé, reformulação do Admin e ajustes de menu.
-- [2026-05-27] Gemini: Correção da cor do ícone de dropdown (abertura do sub-menu O Clube) no menu lateral de preto para branco em style.css e teste-design.css.
-- [2026-05-27] Gemini: Adicionado scroll-padding-top para evitar que o topo das secções seja ocultado sob a navbar fixa ao navegar pelos links do menu no mobile, e ajustado o margin-top do banner de aniversários em clube.html para evitar sobreposição inicial.
-- [2026-06-04] Gemini: Remoção completa da aba, menu e lógica JavaScript relacionados ao "Sincronizar FPB" da página admin.
-- [2026-06-04] Gemini: Atualização do formulário e tabela de Atletas no Admin para incluir os novos campos (epoca, funcao, equipafpb, equipabcv1, equipabcv2).
-- [2026-06-04] Gemini: Criação completa do módulo Gestão de Equipas BCV no Admin, incluindo CRUD na tabela equipasbcv com upload de foto.
-- [2026-06-04] Gemini: Criação da página pública Equipas (equipas.html) com listagem das equipas da época atual.
-- [2026-06-04] Gemini: Correção de bug no menu lateral que limitava a exibição da lista de equipas e remoção do link genérico 'Todas as Equipas'.
-- [2026-06-04] Gemini: Reformulação da visualização de Plantel na página Equipas (equipas.html) para exibir um detalhe focado na equipa selecionada, com cartões individuais de jogador (foto, número, alcunha).
+- [2026-05-07 a 2026-05-27] Gemini: Inicialização do projeto, tema institucional, aniversários, scroll-padding e melhorias de navegação.
+- [2026-06-04] Gemini: Módulo Gestão de Equipas BCV no Admin, página pública equipas.html com detalhe de plantel, novos campos de atletas e remoção de sync FPB.
 - [2026-08-22] Gemini: Criação da página mobile inscricao.html (Formulário por Passos / Wizard para época 2026/2027), criação do script update_atletas_fpb_schema.sql com campos do Modelo 1 da FPB, e adição de botão para exportação em PDF da ficha oficial FPB na Gestão de Atletas do Admin.
 - [2026-08-22] Gemini: Melhorias no inscricao.html (banner recto sem cantos arredondados, autocomplete ao pesquisar atleta em tempo real e validação nativa de campos obrigatórios ao avançar de passo no wizard).
 - [2026-08-22] Gemini: Correção de erro na submissão de inscrição enviando valores predefinidos para colunas com restrição NOT NULL (equipafpb, escalao, funcao).
@@ -95,3 +87,4 @@
 - [2026-09-28] Gemini: Modal de cobrança no Portal de Pagamentos com 3 opções de quota (Mensal, Bianual e Anual), pointer-events: none nas checkboxes e soma em tempo real com produtos/encargos (pagamentos.js, pagamentos.css, pagamentos.html).
 - [2026-09-28] Gemini: Remoção do card de filtros (pesquisa, mês e estado) na lista de atletas de pagamentos.html para um layout limpo e direto.
 - [2026-09-28] Gemini: Reformulação da aba 'Tabela de Preços' no Portal de Pagamentos (pagamentos.html, pagamentos.js) com carregamento dinâmico de quotas e produtos configurados no Admin para o escalão ativo.
+- [2026-09-28] Gemini: Adição do escalão BabyBasket à lista e menu drawer no Portal de Pagamentos (pagamentos.html, js/pagamentos.js), com acesso total para administradores e persistência de seleção no localStorage.
