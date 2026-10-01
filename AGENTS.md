@@ -18,14 +18,7 @@
 - [2026-05-07 a 2026-05-27] Gemini: Inicialização do projeto, tema institucional, aniversários, scroll-padding e melhorias de navegação.
 - [2026-06-04] Gemini: Módulo Gestão de Equipas BCV no Admin, página pública equipas.html com detalhe de plantel, novos campos de atletas e remoção de sync FPB.
 - [2026-08-22 a 2026-08-23] Gemini: Wizard de inscrição integrada (FPB, IPDJ, Equipamentos), cálculo automático de escalões, validações e PDFs oficiais FPB/EMD.
-- [2026-08-24] Gemini: Remoção do bloco de aniversariantes do dia do Dashboard no Admin (admin.html) e eliminação de toda a lógica e funções associadas em js/admin.js.
-- [2026-08-24] Gemini: Implementação do sistema de permissões granulares por checkboxes de menus na Gestão de Utilizadores do Admin, criação de setup_users_permissoes.sql e adaptação da visibilidade dinâmica da sidebar em js/admin.js.
-- [2026-08-24] Gemini: Reordenação dos itens da sidebar do Admin (Dashboard, Gestão de Users, Atletas, Notícias, Agenda, Resultados, Galeria, Equipas, Configurações).
-- [2026-08-24] Gemini: Adição de coluna de Estado/Época na tabela de Atletas com badges visuais (Inscrito 2026/2027 vs Pendente 2025/2026) e respetivo filtro de estado em admin.html e js/admin.js.
-- [2026-08-25] Gemini: Remoção da tag 'Automático' e ajuste do card de escalão atribuído em inscricao.html para duas linhas limpas (Escalão Atribuído FPB + Resultado).
-- [2026-08-25] Gemini: Ativação de campos obrigatórios (required) e validação estrita no Passo 4 (Encarregado de Educação) para atletas menores de 18 anos no wizard de inscrição.
-- [2026-08-25] Gemini: Integração completa da secção Encarregado de Educação no formulário/modal de Atletas do Admin e sincronização com a geração oficial de PDF da FPB.
-- [2026-08-25] Gemini: Atualização do campo Associação de Basquetebol no PDF oficial FPB de 'ABVC' para 'AB Viana do Castelo'.
+- [2026-08-24 a 2026-08-25] Gemini: Reformulações no Admin (permissões, sidebar, badges de época, validações e dados de encarregado no wizard/PDF FPB).
 - [2026-08-25] Gemini: Implementação completa do módulo Configurações do Clube no Admin (admin.html, admin.js) e frontend dinâmico (clube.html, clube.js, main.js) com script SQL setup_configuracoes_clube.sql para gestão de órgãos sociais, contactos, redes sociais e dados institucionais via Supabase.
 - [2026-08-27] Gemini: Correção da seleção de género no PDF oficial da FPB (js/admin.js), desmarcando explicitamente a checkbox Masculino (que vem marcada por defeito no template da federação) quando o atleta é Feminino, e aplicando desmarcação mútua a todos os grupos de checkboxes.
 - [2026-08-27] Gemini: Correção da ordem dos anos da época no PDF oficial da FPB (js/admin.js), mapeando o ano inicial para o campo epoca2 (à esquerda no formulário) e o ano final para epoca1 (à direita), corrigindo a exibição de 2027/2026 para 2026/2027.
@@ -97,3 +90,4 @@
 - [2026-09-28] Gemini: Logos oficiais FPB na Agenda/Resultados, alinhamento visual exato conforme mockup (Casa/Fora/VS).
 - [2026-09-28] Gemini: Uniformização dos títulos de Agenda Desportiva e Resultados Recentes com o estilo da Galeria de Fotos (tamanho, cor, uppercase e peso 800).
 - [2026-09-29] Gemini: Abertura e gestão de localização no Maps na Agenda (site/admin), com calibração mobile limpa e compacta (sem caixas pesadas).
+- [2026-10-01] Gemini: Implementação do botão Editar e suporte completo de alteração de produtos/preços de cobrança no Admin (admin.html, js/admin.js) e atualização imediata do Kit de Equipamento para 60.00 € (Supabase e setup_pagamentos_itens.sql).

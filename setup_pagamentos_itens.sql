@@ -42,7 +42,7 @@ SELECT 'Exame Médico Desportivo (EMD)', 'Certificação e consulta médica ofic
 WHERE NOT EXISTS (SELECT 1 FROM public.itens_cobranca WHERE titulo = 'Exame Médico Desportivo (EMD)' AND epoca = '2026/2027');
 
 INSERT INTO public.itens_cobranca (titulo, descricao, valor, categoria, escalao, epoca, obrigatorio, ativo)
-SELECT 'Equipamento Oficial BCV (Jogo + Treino)', 'Equipamento oficial do clube para a época 2026/2027', 45.00, 'Equipamento', 'Todos', '2026/2027', TRUE, TRUE
+SELECT 'Equipamento Oficial BCV (Jogo + Treino)', 'Equipamento oficial do clube para a época 2026/2027', 60.00, 'Equipamento', 'Todos', '2026/2027', TRUE, TRUE
 WHERE NOT EXISTS (SELECT 1 FROM public.itens_cobranca WHERE titulo = 'Equipamento Oficial BCV (Jogo + Treino)' AND epoca = '2026/2027');
 
 INSERT INTO public.itens_cobranca (titulo, descricao, valor, categoria, escalao, epoca, obrigatorio, ativo)

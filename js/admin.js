@@ -6613,17 +6613,39 @@ document.addEventListener('DOMContentLoaded', async () => {
     const formNovoItemCobrancaContainer = document.getElementById('form-novo-item-cobranca-container');
     const formNovoItemCobranca = document.getElementById('form-novo-item-cobranca');
     const btnCancelNovoItem = document.getElementById('btn-cancel-novo-item');
+    const formItemCobrancaTitulo = document.getElementById('form-item-cobranca-titulo');
+    const btnSubmitItemCobranca = document.getElementById('btn-submit-item-cobranca');
+    const novoItemId = document.getElementById('novo-item-id');
+    const novoItemAtivo = document.getElementById('novo-item-ativo');
+
+    function resetItemCobrancaForm() {
+        if (formNovoItemCobranca) formNovoItemCobranca.reset();
+        if (novoItemId) novoItemId.value = '';
+        if (novoItemAtivo) novoItemAtivo.value = 'true';
+        if (formItemCobrancaTitulo) formItemCobrancaTitulo.textContent = '➕ Adicionar Item de Cobrança';
+        if (btnSubmitItemCobranca) {
+            btnSubmitItemCobranca.textContent = 'Guardar Item';
+            btnSubmitItemCobranca.style.background = '#7e22ce';
+        }
+    }
 
     if (btnToggleNovoItemCobranca) {
         btnToggleNovoItemCobranca.addEventListener('click', () => {
             const isHidden = formNovoItemCobrancaContainer.style.display === 'none';
-            formNovoItemCobrancaContainer.style.display = isHidden ? 'block' : 'none';
+            if (isHidden) {
+                resetItemCobrancaForm();
+                formNovoItemCobrancaContainer.style.display = 'block';
+                formNovoItemCobrancaContainer.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+            } else {
+                formNovoItemCobrancaContainer.style.display = 'none';
+            }
         });
     }
+
     if (btnCancelNovoItem) {
         btnCancelNovoItem.addEventListener('click', () => {
+            resetItemCobrancaForm();
             formNovoItemCobrancaContainer.style.display = 'none';
-            formNovoItemCobranca.reset();
         });
     }
 
@@ -6681,25 +6703,56 @@ document.addEventListener('DOMContentLoaded', async () => {
                     </td>
                     <td style="padding: 10px;">${icon} ${escapeHtml(item.categoria)}</td>
                     <td style="padding: 10px;"><span style="background: #f1f5f9; padding: 2px 8px; border-radius: 4px; font-size: 0.8rem; font-weight: 600;">${escapeHtml(item.escalao || 'Todos')}</span></td>
-                    <td style="padding: 10px; text-align: right; font-weight: 700; color: #16a34a;">${Number(item.valor || 0).toFixed(2)} €</td>
+                    <td style="padding: 10px; text-align: right; font-weight: 700; color: #16a34a; font-size: 0.95rem;">${Number(item.valor || 0).toFixed(2)} €</td>
                     <td style="padding: 10px; text-align: center;">${statusHtml}</td>
-                    <td style="padding: 10px; text-align: center;">
-                        <button type="button" onclick="window.deleteItemCobranca(${item.id})" title="Eliminar" style="background: none; border: none; color: #ef4444; cursor: pointer; font-size: 1.05rem;">🗑️</button>
+                    <td style="padding: 10px; text-align: center; white-space: nowrap;">
+                        <button type="button" onclick="window.editItemCobranca(${item.id})" title="Editar Produto / Preço" style="background: #eff6ff; border: 1px solid #bfdbfe; color: #0284c7; cursor: pointer; font-size: 0.85rem; font-weight: 600; border-radius: 6px; padding: 4px 8px; margin-right: 6px; transition: all 0.2s;">✏️ Editar</button>
+                        <button type="button" onclick="window.deleteItemCobranca(${item.id})" title="Eliminar" style="background: #fef2f2; border: 1px solid #fecaca; color: #ef4444; cursor: pointer; font-size: 0.85rem; border-radius: 6px; padding: 4px 8px; transition: all 0.2s;">🗑️</button>
                     </td>
                 </tr>
             `;
         }).join('');
     }
 
+    window.editItemCobranca = function(id) {
+        const item = currentItensCobranca.find(i => Number(i.id) === Number(id));
+        if (!item) return;
+
+        if (novoItemId) novoItemId.value = item.id;
+        const inputTitulo = document.getElementById('novo-item-titulo');
+        const selectCategoria = document.getElementById('novo-item-categoria');
+        const selectEscalao = document.getElementById('novo-item-escalao');
+        const inputValor = document.getElementById('novo-item-valor');
+
+        if (inputTitulo) inputTitulo.value = item.titulo || '';
+        if (selectCategoria) selectCategoria.value = item.categoria || 'Equipamento';
+        if (selectEscalao) selectEscalao.value = item.escalao || 'Todos';
+        if (inputValor) inputValor.value = Number(item.valor || 0).toFixed(2);
+        if (novoItemAtivo) novoItemAtivo.value = item.ativo !== false ? 'true' : 'false';
+
+        if (formItemCobrancaTitulo) formItemCobrancaTitulo.textContent = `✏️ Editar Item: ${item.titulo || ''}`;
+        if (btnSubmitItemCobranca) {
+            btnSubmitItemCobranca.textContent = '💾 Atualizar Produto';
+            btnSubmitItemCobranca.style.background = '#0284c7';
+        }
+
+        if (formNovoItemCobrancaContainer) {
+            formNovoItemCobrancaContainer.style.display = 'block';
+            formNovoItemCobrancaContainer.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+        }
+    };
+
     if (formNovoItemCobranca) {
         formNovoItemCobranca.addEventListener('submit', async (e) => {
             e.preventDefault();
+            const editId = novoItemId && novoItemId.value ? parseInt(novoItemId.value, 10) : null;
             const titulo = document.getElementById('novo-item-titulo').value.trim();
             const categoria = document.getElementById('novo-item-categoria').value;
             const escalao = document.getElementById('novo-item-escalao').value;
             const rawValor = parseFloat(document.getElementById('novo-item-valor').value);
+            const ativo = novoItemAtivo ? (novoItemAtivo.value === 'true') : true;
 
-            if (!titulo || isNaN(rawValor) || rawValor <= 0) {
+            if (!titulo || isNaN(rawValor) || rawValor < 0) {
                 alert("Por favor indique um título e um valor válido em euros (€).");
                 return;
             }
@@ -6707,25 +6760,59 @@ document.addEventListener('DOMContentLoaded', async () => {
             const valor = Number(rawValor.toFixed(2));
 
             try {
-                const { data, error } = await supabase
-                    .from('itens_cobranca')
-                    .insert([{
-                        titulo,
-                        categoria,
-                        escalao,
-                        valor,
-                        epoca: '2026/2027',
-                        ativo: true
-                    }])
-                    .select();
+                if (btnSubmitItemCobranca) {
+                    btnSubmitItemCobranca.disabled = true;
+                    btnSubmitItemCobranca.textContent = 'A guardar...';
+                }
 
-                if (error) throw error;
-                if (data && data[0]) currentItensCobranca.push(data[0]);
+                if (editId) {
+                    const { data, error } = await supabase
+                        .from('itens_cobranca')
+                        .update({
+                            titulo,
+                            categoria,
+                            escalao,
+                            valor,
+                            ativo
+                        })
+                        .eq('id', editId)
+                        .select();
+
+                    if (error) throw error;
+                    if (data && data[0]) {
+                        const idx = currentItensCobranca.findIndex(i => i.id === editId);
+                        if (idx !== -1) currentItensCobranca[idx] = data[0];
+                    }
+                    alert("Item de cobrança atualizado com sucesso!");
+                } else {
+                    const { data, error } = await supabase
+                        .from('itens_cobranca')
+                        .insert([{
+                            titulo,
+                            categoria,
+                            escalao,
+                            valor,
+                            epoca: '2026/2027',
+                            ativo
+                        }])
+                        .select();
+
+                    if (error) throw error;
+                    if (data && data[0]) currentItensCobranca.push(data[0]);
+                    alert("Item de cobrança criado com sucesso!");
+                }
+
                 renderItensCobranca();
-                formNovoItemCobranca.reset();
-                formNovoItemCobrancaContainer.style.display = 'none';
+                resetItemCobrancaForm();
+                if (formNovoItemCobrancaContainer) formNovoItemCobrancaContainer.style.display = 'none';
             } catch (err) {
-                alert("Erro ao criar item de cobrança: " + err.message);
+                alert("Erro ao guardar item de cobrança: " + err.message);
+            } finally {
+                if (btnSubmitItemCobranca) {
+                    btnSubmitItemCobranca.disabled = false;
+                    btnSubmitItemCobranca.textContent = editId ? '💾 Atualizar Produto' : 'Guardar Item';
+                    btnSubmitItemCobranca.style.background = editId ? '#0284c7' : '#7e22ce';
+                }
             }
         });
     }

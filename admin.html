@@ -1599,10 +1599,11 @@
                                 </button>
                             </div>
 
-                            <!-- Formulário Adicionar Item (Recolhível) -->
+                            <!-- Formulário Adicionar/Editar Item (Recolhível) -->
                             <div id="form-novo-item-cobranca-container" style="display: none; background: #faf5ff; border: 1px solid #e9d5ff; border-radius: 8px; padding: 16px; margin-bottom: 20px;">
-                                <h4 style="margin: 0 0 12px; color: #581c87; font-size: 0.95rem;">Adicionar Item de Cobrança</h4>
+                                <h4 id="form-item-cobranca-titulo" style="margin: 0 0 12px; color: #581c87; font-size: 0.95rem;">➕ Adicionar Item de Cobrança</h4>
                                 <form id="form-novo-item-cobranca" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 12px; align-items: flex-end;">
+                                    <input type="hidden" id="novo-item-id" value="">
                                     <div style="grid-column: span 2;">
                                         <label style="display: block; font-size: 0.8rem; font-weight: 600; margin-bottom: 4px;">Título do Item / Produto *</label>
                                         <input type="text" id="novo-item-titulo" class="admin-input" placeholder="Ex: Equipamento Oficial, Exame Médico, Fato de Treino..." required style="margin: 0;">
@@ -1636,9 +1637,16 @@
                                         <label style="display: block; font-size: 0.8rem; font-weight: 600; margin-bottom: 4px;">Valor (€) *</label>
                                         <input type="number" step="0.01" min="0" id="novo-item-valor" class="admin-input" placeholder="0.00" required style="margin: 0;">
                                     </div>
+                                    <div>
+                                        <label style="display: block; font-size: 0.8rem; font-weight: 600; margin-bottom: 4px;">Estado *</label>
+                                        <select id="novo-item-ativo" class="admin-input" style="margin: 0;">
+                                            <option value="true">✅ Ativo</option>
+                                            <option value="false">⏸️ Inativo</option>
+                                        </select>
+                                    </div>
                                     <div style="display: flex; gap: 8px;">
-                                        <button type="submit" class="btn-primary" style="flex: 1; padding: 10px; margin: 0; background: #7e22ce;">Guardar Item</button>
-                                        <button type="button" id="btn-cancel-novo-item" class="btn-secondary" style="padding: 10px; margin: 0;">✕</button>
+                                        <button type="submit" id="btn-submit-item-cobranca" class="btn-primary" style="flex: 1; padding: 10px; margin: 0; background: #7e22ce;">Guardar Item</button>
+                                        <button type="button" id="btn-cancel-novo-item" class="btn-secondary" style="padding: 10px; margin: 0;" title="Cancelar">✕</button>
                                     </div>
                                 </form>
                             </div>
@@ -1652,7 +1660,7 @@
                                         <th style="padding: 10px; width: 140px;">Escalão</th>
                                         <th style="padding: 10px; width: 100px; text-align: right;">Valor</th>
                                         <th style="padding: 10px; width: 100px; text-align: center;">Estado</th>
-                                        <th style="padding: 10px; width: 80px; text-align: center;">Ações</th>
+                                        <th style="padding: 10px; width: 120px; text-align: center;">Ações</th>
                                     </tr>
                                 </thead>
                                 <tbody id="itens-cobranca-tbody">
