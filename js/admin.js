@@ -8495,6 +8495,7 @@ document.addEventListener('DOMContentLoaded', async () => {
                     ${comp.ordem || 1}
                 </td>
                 <td style="padding: 12px; text-align: center; white-space: nowrap;">
+                    <button class="btn-action" onclick="window.gerirTabelaSerie('${comp.id}')" title="Gerir Quadro de Classificação da Série" style="background: rgba(126, 34, 206, 0.08); color: var(--accent-primary); border: 1px solid rgba(126, 34, 206, 0.25); font-weight: 700; padding: 4px 8px; border-radius: 6px; font-size: 0.78rem; margin-right: 5px; cursor: pointer;">📊 Série</button>
                     <button class="btn-action edit" onclick="window.editCompeticao('${comp.id}')" title="Editar Competição" style="margin-right: 5px;">✏️</button>
                     <button class="btn-action delete" onclick="window.deleteCompeticao('${comp.id}')" title="Eliminar Competição">🗑️</button>
                 </td>
@@ -8653,6 +8654,247 @@ document.addEventListener('DOMContentLoaded', async () => {
             await saveCompeticoesToSupabase(currentCompeticoes, true);
         });
     }
+
+    // =========================================================================
+    // GESTÃO DA TABELA DA SÉRIE COMPLETA (Todas as equipas da mesma série)
+    // =========================================================================
+    let currentSerieCompId = null;
+    let currentEquipasSerie = [];
+
+    window.gerirTabelaSerie = function(id) {
+        const comp = currentCompeticoes.find(c => c.id === id);
+        if (!comp) return;
+
+        currentSerieCompId = id;
+        document.getElementById('serie-comp-id').value = id;
+        document.getElementById('modal-serie-title').textContent = `📊 Quadro da Série: ${comp.sigla || comp.nome}`;
+        document.getElementById('modal-serie-subtitle').textContent = `Série de ${comp.nome} (${comp.escalao} ${comp.sexo}) • Época 2026/2027`;
+
+        currentEquipasSerie = Array.isArray(comp.tabela_serie) ? JSON.parse(JSON.stringify(comp.tabela_serie)) : [];
+
+        // Se estiver vazia, sugerir preenchimento inicial com o BC Valença
+        if (currentEquipasSerie.length === 0) {
+            currentEquipasSerie.push({
+                pos: 1,
+                nome: "Basket Clube de Valença",
+                j: 0, v: 0, d: 0, pm: 0, ps: 0, pts: 0
+            });
+        }
+
+        renderTabelaSerieModal();
+        const modal = document.getElementById('modal-tabela-serie-container');
+        if (modal) modal.classList.remove('hidden');
+    };
+
+    window.fecharModalTabelaSerie = function() {
+        const modal = document.getElementById('modal-tabela-serie-container');
+        if (modal) modal.classList.add('hidden');
+        currentSerieCompId = null;
+        currentEquipasSerie = [];
+    };
+
+    function renderTabelaSerieModal() {
+        const tbody = document.getElementById('serie-table-body');
+        if (!tbody) return;
+
+        if (currentEquipasSerie.length === 0) {
+            tbody.innerHTML = '<tr><td colspan="9" style="padding: 18px; color: var(--text-secondary);">Nenhuma equipa registada nesta série. Clique em "➕ Adicionar Equipa" ou "⚡ Importar".</td></tr>';
+            return;
+        }
+
+        tbody.innerHTML = '';
+        currentEquipasSerie.forEach((eq, idx) => {
+            const tr = document.createElement('tr');
+            tr.style.borderBottom = "1px solid var(--border-color)";
+            const isBCV = (eq.nome || '').toLowerCase().includes('valença') || (eq.nome || '').toLowerCase().includes('bcv');
+            if (isBCV) tr.style.background = "rgba(126, 34, 206, 0.05)";
+
+            tr.innerHTML = `
+                <td style="padding: 6px;">
+                    <input type="number" value="${eq.pos || (idx + 1)}" onchange="window.updateEquipaSerieField(${idx}, 'pos', this.value)" style="width: 40px; text-align: center; padding: 4px; border: 1px solid var(--border-color); border-radius: 4px; font-weight: 700;">
+                </td>
+                <td style="padding: 6px; text-align: left;">
+                    <input type="text" value="${eq.nome || ''}" placeholder="Nome do Clube/Equipa" onchange="window.updateEquipaSerieField(${idx}, 'nome', this.value)" style="width: 95%; padding: 4px 8px; border: 1px solid var(--border-color); border-radius: 4px; font-weight: 600;">
+                </td>
+                <td style="padding: 6px;">
+                    <input type="number" min="0" value="${eq.j || 0}" onchange="window.updateEquipaSerieField(${idx}, 'j', this.value)" style="width: 45px; text-align: center; padding: 4px; border: 1px solid var(--border-color); border-radius: 4px;">
+                </td>
+                <td style="padding: 6px;">
+                    <input type="number" min="0" value="${eq.v || 0}" onchange="window.updateEquipaSerieField(${idx}, 'v', this.value)" style="width: 45px; text-align: center; padding: 4px; border: 1px solid var(--border-color); border-radius: 4px; color: #15803d; font-weight: 700;">
+                </td>
+                <td style="padding: 6px;">
+                    <input type="number" min="0" value="${eq.d || 0}" onchange="window.updateEquipaSerieField(${idx}, 'd', this.value)" style="width: 45px; text-align: center; padding: 4px; border: 1px solid var(--border-color); border-radius: 4px; color: #dc2626; font-weight: 600;">
+                </td>
+                <td style="padding: 6px;">
+                    <input type="number" min="0" value="${eq.pm || 0}" onchange="window.updateEquipaSerieField(${idx}, 'pm', this.value)" style="width: 50px; text-align: center; padding: 4px; border: 1px solid var(--border-color); border-radius: 4px;">
+                </td>
+                <td style="padding: 6px;">
+                    <input type="number" min="0" value="${eq.ps || 0}" onchange="window.updateEquipaSerieField(${idx}, 'ps', this.value)" style="width: 50px; text-align: center; padding: 4px; border: 1px solid var(--border-color); border-radius: 4px;">
+                </td>
+                <td style="padding: 6px;">
+                    <input type="number" min="0" value="${eq.pts !== undefined ? eq.pts : ((eq.v || 0) * 2 + (eq.d || 0) * 1)}" onchange="window.updateEquipaSerieField(${idx}, 'pts', this.value)" style="width: 50px; text-align: center; padding: 4px; border: 1px solid var(--accent-primary); border-radius: 4px; font-weight: 800; color: var(--accent-primary);">
+                </td>
+                <td style="padding: 6px;">
+                    <button type="button" onclick="window.removerEquipaSerie(${idx})" style="background: none; border: none; cursor: pointer; color: #dc2626; font-size: 1rem;" title="Remover da Série">🗑️</button>
+                </td>
+            `;
+            tbody.appendChild(tr);
+        });
+    }
+
+    window.updateEquipaSerieField = function(idx, field, val) {
+        if (!currentEquipasSerie[idx]) return;
+        if (field === 'nome') {
+            currentEquipasSerie[idx].nome = val.trim();
+        } else {
+            currentEquipasSerie[idx][field] = parseInt(val, 10) || 0;
+            // Recalcular automaticamente os pontos se V ou D mudarem
+            if (field === 'v' || field === 'd') {
+                const v = currentEquipasSerie[idx].v || 0;
+                const d = currentEquipasSerie[idx].d || 0;
+                currentEquipasSerie[idx].pts = v * 2 + d * 1;
+                renderTabelaSerieModal();
+            }
+        }
+    };
+
+    window.adicionarEquipaSerie = function() {
+        const nextPos = currentEquipasSerie.length + 1;
+        currentEquipasSerie.push({
+            pos: nextPos,
+            nome: "",
+            j: 0, v: 0, d: 0, pm: 0, ps: 0, pts: 0
+        });
+        renderTabelaSerieModal();
+    };
+
+    window.removerEquipaSerie = function(idx) {
+        currentEquipasSerie.splice(idx, 1);
+        renderTabelaSerieModal();
+    };
+
+    window.importarEquipasResultados = async function() {
+        if (!currentSerieCompId) return;
+        const comp = currentCompeticoes.find(c => c.id === currentSerieCompId);
+        if (!comp) return;
+
+        try {
+            // Buscar resultados da base de dados
+            const { data: resJogos, error } = await supabase
+                .from('resultados_bcv')
+                .select('*');
+
+            if (error) throw error;
+
+            // Encontrar jogos da competição
+            const jogosComp = (resJogos || []).filter(j => {
+                const sigla = (comp.sigla || '').toLowerCase();
+                const jComp = (j.competicao || '').toLowerCase();
+                const jEsc = (j.escalao || '').toLowerCase();
+                if (sigla.includes('sub 14') && (jComp.includes('sub 14') || jEsc.includes('sub 14'))) return true;
+                if (sigla.includes('sub 16') && (jComp.includes('sub 16') || jEsc.includes('sub 16'))) return true;
+                if (sigla.includes('sub 18') && (jComp.includes('sub 18') || jEsc.includes('sub 18'))) return true;
+                if (sigla === 'cn2' && (jComp.includes('cn2') || jEsc.includes('senior'))) return true;
+                return false;
+            });
+
+            if (jogosComp.length === 0) {
+                alert("Ainda não existem resultados registados desta competição na base de dados para importar.");
+                return;
+            }
+
+            // Apurar pontuações
+            const map = {};
+            jogosComp.forEach(j => {
+                const pCasa = parseInt(j.pontos_casa, 10);
+                const pFora = parseInt(j.pontos_fora, 10);
+                const cNome = (j.equipa_casa || '').trim();
+                const fNome = (j.equipa_fora || '').trim();
+                if (!cNome || !fNome || isNaN(pCasa) || isNaN(pFora)) return;
+
+                if (!map[cNome]) map[cNome] = { nome: cNome, j: 0, v: 0, d: 0, pm: 0, ps: 0, pts: 0 };
+                if (!map[fNome]) map[fNome] = { nome: fNome, j: 0, v: 0, d: 0, pm: 0, ps: 0, pts: 0 };
+
+                map[cNome].j += 1;
+                map[fNome].j += 1;
+                map[cNome].pm += pCasa;
+                map[cNome].ps += pFora;
+                map[fNome].pm += pFora;
+                map[fNome].ps += pCasa;
+
+                if (pCasa > pFora) {
+                    map[cNome].v += 1; map[cNome].pts += 2;
+                    map[fNome].d += 1; map[fNome].pts += 1;
+                } else if (pFora > pCasa) {
+                    map[fNome].v += 1; map[fNome].pts += 2;
+                    map[cNome].d += 1; map[cNome].pts += 1;
+                } else {
+                    map[cNome].pts += 1; map[fNome].pts += 1;
+                }
+            });
+
+            const importadas = Object.values(map).sort((a, b) => {
+                if (b.pts !== a.pts) return b.pts - a.pts;
+                return (b.pm - b.ps) - (a.pm - a.ps);
+            }).map((eq, i) => ({
+                pos: i + 1,
+                ...eq,
+                dif: eq.pm - eq.ps
+            }));
+
+            if (importadas.length > 0) {
+                currentEquipasSerie = importadas;
+                renderTabelaSerieModal();
+                alert(`✅ Foram importadas ${importadas.length} equipas a partir dos resultados oficiais!`);
+            }
+
+        } catch (err) {
+            console.error("Erro ao importar equipas:", err);
+            alert("Erro ao importar: " + err.message);
+        }
+    };
+
+    window.salvarTabelaSerie = async function() {
+        if (!currentSerieCompId) return;
+        const comp = currentCompeticoes.find(c => c.id === currentSerieCompId);
+        if (!comp) return;
+
+        // Filtrar equipas com nome válido
+        const equipasValidas = currentEquipasSerie
+            .filter(eq => (eq.nome || '').trim().length > 0)
+            .map((eq, idx) => ({
+                pos: Number(eq.pos) || (idx + 1),
+                nome: (eq.nome || '').trim(),
+                j: Number(eq.j) || 0,
+                v: Number(eq.v) || 0,
+                d: Number(eq.d) || 0,
+                pm: Number(eq.pm) || 0,
+                ps: Number(eq.ps) || 0,
+                dif: (Number(eq.pm) || 0) - (Number(eq.ps) || 0),
+                pts: Number(eq.pts) !== undefined && !isNaN(Number(eq.pts)) ? Number(eq.pts) : ((Number(eq.v) || 0) * 2 + (Number(eq.d) || 0) * 1)
+            }));
+
+        comp.tabela_serie = equipasValidas;
+
+        const btn = document.getElementById('btn-save-tabela-serie');
+        if (btn) {
+            btn.disabled = true;
+            btn.textContent = "A guardar...";
+        }
+
+        const ok = await saveCompeticoesToSupabase(currentCompeticoes, true);
+
+        if (btn) {
+            btn.disabled = false;
+            btn.textContent = "Guardar Quadro da Série";
+        }
+
+        if (ok) {
+            window.fecharModalTabelaSerie();
+            renderCompeticoesAdmin();
+            showCompeticoesStatus(`✅ Quadro da série de "${comp.sigla || comp.nome}" guardado com sucesso!`, "#15803d");
+        }
+    };
 
     // Filtros de Competições em Tempo Real
     ['filtro-competicao-busca', 'filtro-competicao-estado', 'filtro-competicao-tipo'].forEach(id => {

@@ -1186,14 +1186,103 @@ async function loadCompeticoesSection(supabase) {
         const renderClassificacaoTable = (comp, jogos) => {
             const urlFPB = comp.url_fpb || comp.url_classificacao_fpb || 'https://www.fpb.pt/competicoes/';
 
-            // Filtrar apenas jogos da competição com resultado válido
-            const jogosComResultado = (jogos || []).filter(j => {
-                const pCasa = parseInt(j.pontos_casa, 10);
-                const pFora = parseInt(j.pontos_fora, 10);
-                return !isNaN(pCasa) && !isNaN(pFora) && (pCasa > 0 || pFora > 0);
-            });
+            let equipas = [];
+            let isTabelaSerieOficial = false;
 
-            if (jogosComResultado.length === 0) {
+            // 1. Prioridade Máxima: Quadro Oficial Completo de Todas as Equipas da Mesma Série
+            if (comp.tabela_serie && Array.isArray(comp.tabela_serie) && comp.tabela_serie.length > 0) {
+                isTabelaSerieOficial = true;
+                equipas = comp.tabela_serie.map((eq, idx) => {
+                    const j = Number(eq.j) || 0;
+                    const v = Number(eq.v) || 0;
+                    const d = Number(eq.d) || 0;
+                    const pm = Number(eq.pm) || 0;
+                    const ps = Number(eq.ps) || 0;
+                    const dif = eq.dif !== undefined ? Number(eq.dif) : (pm - ps);
+                    const pts = Number(eq.pts) !== undefined && !isNaN(Number(eq.pts)) ? Number(eq.pts) : (v * 2 + d * 1);
+                    return {
+                        pos: Number(eq.pos) || (idx + 1),
+                        nome: eq.nome || '',
+                        logo: eq.logo || null,
+                        j, v, d, pm, ps, dif, pts
+                    };
+                });
+                // Ordenar por posição oficial ou pontos
+                equipas.sort((a, b) => {
+                    if (a.pos && b.pos && a.pos !== b.pos) return a.pos - b.pos;
+                    if (b.pts !== a.pts) return b.pts - a.pts;
+                    return b.dif - a.dif;
+                });
+            } else {
+                // 2. Apuramento Dinâmico Automático a partir dos Resultados dos Jogos Registados
+                const jogosComResultado = (jogos || []).filter(j => {
+                    const pCasa = parseInt(j.pontos_casa, 10);
+                    const pFora = parseInt(j.pontos_fora, 10);
+                    return !isNaN(pCasa) && !isNaN(pFora) && (pCasa > 0 || pFora > 0);
+                });
+
+                if (jogosComResultado.length > 0) {
+                    const tabelaMap = {};
+
+                    jogosComResultado.forEach(j => {
+                        const pCasa = parseInt(j.pontos_casa, 10);
+                        const pFora = parseInt(j.pontos_fora, 10);
+                        const cNome = (j.equipa_casa || '').trim();
+                        const fNome = (j.equipa_fora || '').trim();
+
+                        if (!cNome || !fNome) return;
+
+                        if (!tabelaMap[cNome]) {
+                            tabelaMap[cNome] = {
+                                nome: cNome,
+                                logo: j.logo_casa || null,
+                                j: 0, v: 0, d: 0, pm: 0, ps: 0, pts: 0
+                            };
+                        }
+                        if (!tabelaMap[fNome]) {
+                            tabelaMap[fNome] = {
+                                nome: fNome,
+                                logo: j.logo_fora || null,
+                                j: 0, v: 0, d: 0, pm: 0, ps: 0, pts: 0
+                            };
+                        }
+
+                        tabelaMap[cNome].j += 1;
+                        tabelaMap[fNome].j += 1;
+                        tabelaMap[cNome].pm += pCasa;
+                        tabelaMap[cNome].ps += pFora;
+                        tabelaMap[fNome].pm += pFora;
+                        tabelaMap[fNome].ps += pCasa;
+
+                        if (pCasa > pFora) {
+                            tabelaMap[cNome].v += 1;
+                            tabelaMap[cNome].pts += 2; // Vitória basquetebol FPB
+                            tabelaMap[fNome].d += 1;
+                            tabelaMap[fNome].pts += 1; // Derrota basquetebol FPB
+                        } else if (pFora > pCasa) {
+                            tabelaMap[fNome].v += 1;
+                            tabelaMap[fNome].pts += 2;
+                            tabelaMap[cNome].d += 1;
+                            tabelaMap[cNome].pts += 1;
+                        } else {
+                            tabelaMap[cNome].pts += 1;
+                            tabelaMap[fNome].pts += 1;
+                        }
+                    });
+
+                    equipas = Object.values(tabelaMap).map(eq => ({
+                        ...eq,
+                        dif: eq.pm - eq.ps
+                    })).sort((a, b) => {
+                        if (b.pts !== a.pts) return b.pts - a.pts;
+                        if (b.dif !== a.dif) return b.dif - a.dif;
+                        if (b.v !== a.v) return b.v - a.v;
+                        return b.pm - a.pm;
+                    });
+                }
+            }
+
+            if (equipas.length === 0) {
                 return `
                     <div class="comp-games-empty">
                         <span class="empty-icon">📊</span>
@@ -1211,70 +1300,14 @@ async function loadCompeticoesSection(supabase) {
                 `;
             }
 
-            // Calcular Tabela Classificativa (Regras Oficiais Basquetebol FPB: Vitória = 2 Pts, Derrota = 1 Pt)
-            const tabelaMap = {};
-
-            jogosComResultado.forEach(j => {
-                const pCasa = parseInt(j.pontos_casa, 10);
-                const pFora = parseInt(j.pontos_fora, 10);
-                const cNome = (j.equipa_casa || '').trim();
-                const fNome = (j.equipa_fora || '').trim();
-
-                if (!cNome || !fNome) return;
-
-                if (!tabelaMap[cNome]) {
-                    tabelaMap[cNome] = {
-                        nome: cNome,
-                        logo: j.logo_casa || null,
-                        j: 0, v: 0, d: 0, pm: 0, ps: 0, pts: 0
-                    };
-                }
-                if (!tabelaMap[fNome]) {
-                    tabelaMap[fNome] = {
-                        nome: fNome,
-                        logo: j.logo_fora || null,
-                        j: 0, v: 0, d: 0, pm: 0, ps: 0, pts: 0
-                    };
-                }
-
-                tabelaMap[cNome].j += 1;
-                tabelaMap[fNome].j += 1;
-                tabelaMap[cNome].pm += pCasa;
-                tabelaMap[cNome].ps += pFora;
-                tabelaMap[fNome].pm += pFora;
-                tabelaMap[fNome].ps += pCasa;
-
-                if (pCasa > pFora) {
-                    tabelaMap[cNome].v += 1;
-                    tabelaMap[cNome].pts += 2; // Vitória basquetebol FPB
-                    tabelaMap[fNome].d += 1;
-                    tabelaMap[fNome].pts += 1; // Derrota basquetebol FPB
-                } else if (pFora > pCasa) {
-                    tabelaMap[fNome].v += 1;
-                    tabelaMap[fNome].pts += 2;
-                    tabelaMap[cNome].d += 1;
-                    tabelaMap[cNome].pts += 1;
-                } else {
-                    tabelaMap[cNome].pts += 1;
-                    tabelaMap[fNome].pts += 1;
-                }
-            });
-
-            // Ordenar por Pontos (Pts), Diferença de Pontos (DIF), Vitórias (V) e Pontos Marcados (PM)
-            const equipas = Object.values(tabelaMap).map(eq => ({
-                ...eq,
-                dif: eq.pm - eq.ps
-            })).sort((a, b) => {
-                if (b.pts !== a.pts) return b.pts - a.pts;
-                if (b.dif !== a.dif) return b.dif - a.dif;
-                if (b.v !== a.v) return b.v - a.v;
-                return b.pm - a.pm;
-            });
+            const badgeFonte = isTabelaSerieOficial
+                ? `⚡ Quadro Oficial da Série • ${comp.tag || 'FPB'}`
+                : `⚡ Classificação apurada com resultados oficiais FPB`;
 
             return `
                 <div class="comp-classificacao-container">
                     <div class="comp-classificacao-header">
-                        <span class="comp-class-source-badge">⚡ Classificação calculada com resultados oficiais FPB</span>
+                        <span class="comp-class-source-badge">${badgeFonte}</span>
                         ${urlFPB ? `
                             <a href="${urlFPB}" target="_blank" rel="noopener noreferrer" class="comp-class-link-fpb" title="Abrir portal oficial da FPB">
                                 <span>Ver no Portal FPB ↗</span>
@@ -1302,10 +1335,11 @@ async function loadCompeticoesSection(supabase) {
                                     const isBCV = eq.nome.toLowerCase().includes('valença') || eq.nome.toLowerCase().includes('bcv');
                                     const logo = window.obterLogoEquipa ? window.obterLogoEquipa(eq.nome, eq.logo) : eq.logo;
                                     const difStr = eq.dif > 0 ? `+${eq.dif}` : `${eq.dif}`;
+                                    const posNum = eq.pos || (idx + 1);
                                     return `
                                         <tr class="${isBCV ? 'is-bcv-row' : ''}">
                                             <td class="td-pos">
-                                                <span class="pos-badge ${idx === 0 ? 'pos-first' : ''}">${idx + 1}</span>
+                                                <span class="pos-badge ${posNum === 1 ? 'pos-first' : ''}">${posNum}</span>
                                             </td>
                                             <td class="td-team">
                                                 <div class="td-team-content">
@@ -1342,20 +1376,27 @@ async function loadCompeticoesSection(supabase) {
             const jogosAgenda = allAgenda.filter(j => j.publicado !== false && matchJogoCompeticao(j, comp));
             const jogosResultados = allResultados.filter(j => j.publicado !== false && matchJogoCompeticao(j, comp));
 
+            // Omissão inteligente de redundâncias no cabeçalho
+            const nomeComp = comp.nome || '';
+            const siglaComp = comp.sigla || '';
+            // Se a sigla for apenas repetição de 'Sub 14' ou estiver contida no nome, não repete
+            const ehSiglaRedundante = /sub\s*\d+/i.test(siglaComp) || nomeComp.toLowerCase().includes(siglaComp.toLowerCase());
+            const mostrarSigla = siglaComp && !ehSiglaRedundante;
+
+            // Se o nome da competição já inclui o escalão, o detalhe é exibido diretamente sem repetir 'Sub 14 Masculinos'
+            const detalheTexto = comp.detalhe ? comp.detalhe : (comp.equipa_label || '');
+
             card.innerHTML = `
                 <div class="competicao-card-top">
                     <div class="competicao-info-col">
                         <div class="competicao-card-header">
                             <span class="competicao-tag">${comp.tag}</span>
-                            <span class="competicao-sigla">${comp.sigla}</span>
+                            ${mostrarSigla ? `<span class="competicao-sigla">${comp.sigla}</span>` : ''}
                         </div>
                         <h3 class="competicao-title">${comp.nome}</h3>
-                        <div class="competicao-equipa">
-                            <span>${comp.icon}</span>
-                            <strong>${comp.equipa_label}</strong>
-                        </div>
                         <p class="competicao-desc">
-                            ${comp.detalhe}
+                            <span class="comp-desc-icon">${comp.icon || '🏀'}</span>
+                            <span>${detalheTexto}</span>
                         </p>
                     </div>
 
@@ -1363,21 +1404,23 @@ async function loadCompeticoesSection(supabase) {
                     <div class="competicao-tabs-col">
                         <div class="competicao-tabs-bar">
                             <button type="button" class="competicao-tab-btn" data-action="agenda">
-                                <span>📅 Agenda</span>
+                                <span class="tab-icon">📅</span>
+                                <span class="tab-text">Agenda</span>
                                 ${jogosAgenda.length > 0 ? `<span class="tab-badge">${jogosAgenda.length}</span>` : ''}
                             </button>
                             <button type="button" class="competicao-tab-btn" data-action="resultados">
-                                <span>🏁 Resultados</span>
+                                <span class="tab-icon">🏁</span>
+                                <span class="tab-text">Resultados</span>
                                 ${jogosResultados.length > 0 ? `<span class="tab-badge">${jogosResultados.length}</span>` : ''}
                             </button>
                             <button type="button" class="competicao-tab-btn" data-action="classificacao">
-                                <span>📊 Classificação</span>
+                                <span class="tab-icon">📊</span>
+                                <span class="tab-text">Classificação</span>
                             </button>
                         </div>
                     </div>
                 </div>
 
-                <!-- Painel Expansível de Jogos e Classificação -->
                 <div class="competicao-tab-panel" style="display: none;"></div>
 
                 <div class="competicao-footer">
