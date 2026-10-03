@@ -1184,31 +1184,35 @@ async function loadCompeticoesSection(supabase) {
             const jogosResultados = allResultados.filter(j => j.publicado !== false && matchJogoCompeticao(j, comp));
 
             card.innerHTML = `
-                <div>
-                    <div class="competicao-card-header">
-                        <span class="competicao-tag">${comp.tag}</span>
-                        <span class="competicao-sigla">${comp.sigla}</span>
+                <div class="competicao-card-top">
+                    <div class="competicao-info-col">
+                        <div class="competicao-card-header">
+                            <span class="competicao-tag">${comp.tag}</span>
+                            <span class="competicao-sigla">${comp.sigla}</span>
+                        </div>
+                        <h3 class="competicao-title">${comp.nome}</h3>
+                        <div class="competicao-equipa">
+                            <span>${comp.icon}</span>
+                            <strong>${comp.equipa_label}</strong>
+                        </div>
+                        <p class="competicao-desc">
+                            ${comp.detalhe}
+                        </p>
                     </div>
-                    <h3 class="competicao-title">${comp.nome}</h3>
-                    <div class="competicao-equipa">
-                        <span>${comp.icon}</span>
-                        <strong>${comp.equipa_label}</strong>
-                    </div>
-                    <p style="font-size: 0.8rem; color: var(--text-secondary); margin: 0 0 14px 0; line-height: 1.4;">
-                        ${comp.detalhe}
-                    </p>
-                </div>
 
-                <!-- Abas 1 - Agenda e 2 - Resultados -->
-                <div class="competicao-tabs-bar">
-                    <button type="button" class="competicao-tab-btn" data-action="agenda">
-                        <span>📅 Agenda</span>
-                        ${jogosAgenda.length > 0 ? `<span class="tab-badge">${jogosAgenda.length}</span>` : ''}
-                    </button>
-                    <button type="button" class="competicao-tab-btn" data-action="resultados">
-                        <span>🏁 Resultados</span>
-                        ${jogosResultados.length > 0 ? `<span class="tab-badge">${jogosResultados.length}</span>` : ''}
-                    </button>
+                    <!-- Abas 1 - Agenda e 2 - Resultados -->
+                    <div class="competicao-tabs-col">
+                        <div class="competicao-tabs-bar">
+                            <button type="button" class="competicao-tab-btn" data-action="agenda">
+                                <span>📅 Agenda</span>
+                                ${jogosAgenda.length > 0 ? `<span class="tab-badge">${jogosAgenda.length}</span>` : ''}
+                            </button>
+                            <button type="button" class="competicao-tab-btn" data-action="resultados">
+                                <span>🏁 Resultados</span>
+                                ${jogosResultados.length > 0 ? `<span class="tab-badge">${jogosResultados.length}</span>` : ''}
+                            </button>
+                        </div>
+                    </div>
                 </div>
 
                 <!-- Painel Expansível de Jogos -->

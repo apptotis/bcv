@@ -2399,8 +2399,8 @@ img {
    SECÇÃO COMPETIÇÕES OFICIAIS (#competicoes)
    ========================================================================== */
 .competicoes-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(290px, 1fr));
+    display: flex;
+    flex-direction: column;
     gap: 16px;
     margin-top: 15px;
 }
@@ -2409,7 +2409,7 @@ img {
     background: #ffffff;
     border: 1px solid var(--border-color);
     border-radius: 12px;
-    padding: 18px 20px;
+    padding: 18px 22px;
     display: flex;
     flex-direction: column;
     justify-content: space-between;
@@ -2436,8 +2436,8 @@ img {
 }
 
 .competicao-card:hover {
-    transform: translateY(-3px);
-    box-shadow: 0 10px 25px rgba(126, 34, 206, 0.12);
+    transform: translateY(-2px);
+    box-shadow: 0 8px 22px rgba(126, 34, 206, 0.1);
     border-color: rgba(126, 34, 206, 0.3);
 }
 
@@ -2445,11 +2445,30 @@ img {
     width: 6px;
 }
 
-.competicao-card-header {
+/* Linha Principal do Card em Lista: Informação à esquerda, Ações à direita */
+.competicao-card-top {
     display: flex;
     justify-content: space-between;
+    align-items: flex-start;
+    gap: 20px;
+    width: 100%;
+}
+
+.competicao-info-col {
+    flex: 1;
+    min-width: 0;
+}
+
+.competicao-tabs-col {
+    flex-shrink: 0;
+    display: flex;
     align-items: center;
-    margin-bottom: 10px;
+}
+
+.competicao-card-header {
+    display: flex;
+    align-items: center;
+    margin-bottom: 8px;
     gap: 8px;
 }
 
@@ -2478,10 +2497,10 @@ img {
 
 .competicao-title {
     font-family: var(--font-heading);
-    font-size: 1.15rem;
+    font-size: 1.2rem;
     font-weight: 800;
     color: var(--text-primary);
-    margin: 0 0 6px 0;
+    margin: 0 0 4px 0;
     line-height: 1.25;
 }
 
@@ -2491,7 +2510,14 @@ img {
     gap: 6px;
     font-size: 0.88rem;
     color: var(--text-secondary);
-    margin-bottom: 14px;
+    margin-bottom: 6px;
+}
+
+.competicao-desc {
+    font-size: 0.84rem;
+    color: var(--text-secondary);
+    margin: 0;
+    line-height: 1.45;
 }
 
 .competicao-footer {
@@ -2500,7 +2526,7 @@ img {
     align-items: center;
     padding-top: 12px;
     border-top: 1px dashed var(--border-color);
-    margin-top: auto;
+    margin-top: 14px;
 }
 
 .competicao-btn-link {
@@ -2522,26 +2548,26 @@ img {
 /* Abas de Ação nos Cards de Competição (Agenda e Resultados) */
 .competicao-tabs-bar {
     display: flex;
-    gap: 8px;
-    margin: 14px 0 10px 0;
+    gap: 10px;
+    margin: 0;
 }
 
 .competicao-tab-btn {
-    flex: 1;
-    padding: 8px 10px;
+    padding: 9px 16px;
     border-radius: 8px;
     border: 1px solid rgba(126, 34, 206, 0.18);
     background: rgba(126, 34, 206, 0.04);
     color: var(--text-primary);
-    font-size: 0.82rem;
+    font-size: 0.84rem;
     font-weight: 700;
     cursor: pointer;
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    gap: 6px;
+    gap: 8px;
     transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
     font-family: inherit;
+    white-space: nowrap;
 }
 
 .competicao-tab-btn:hover {
@@ -2596,9 +2622,9 @@ img {
 }
 
 .comp-games-list {
-    display: flex;
-    flex-direction: column;
-    gap: 8px;
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+    gap: 10px;
 }
 
 .comp-game-card {
@@ -2718,9 +2744,31 @@ img {
     }
 
     .competicoes-grid {
-        grid-template-columns: 1fr;
-        gap: 14px;
+        gap: 12px;
         margin-top: 10px;
+    }
+
+    .competicao-card-top {
+        flex-direction: column;
+        gap: 12px;
+    }
+
+    .competicao-tabs-col {
+        width: 100%;
+    }
+
+    .competicao-tabs-col .competicao-tabs-bar {
+        width: 100%;
+        margin-top: 4px;
+    }
+
+    .competicao-tabs-col .competicao-tab-btn {
+        flex: 1;
+    }
+
+    .comp-games-list {
+        grid-template-columns: 1fr;
+        gap: 8px;
     }
 
     .competicao-card {
@@ -2735,12 +2783,11 @@ img {
 
     .competicao-equipa {
         font-size: 0.82rem;
-        margin-bottom: 10px;
+        margin-bottom: 6px;
     }
 
     .competicao-tabs-bar {
         gap: 6px;
-        margin: 12px 0 8px 0;
     }
 
     .competicao-tab-btn {
