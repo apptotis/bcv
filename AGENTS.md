@@ -91,3 +91,4 @@
 - [2026-09-28] Gemini: Uniformização dos títulos de Agenda Desportiva e Resultados Recentes com o estilo da Galeria de Fotos (tamanho, cor, uppercase e peso 800).
 - [2026-09-29] Gemini: Abertura e gestão de localização no Maps na Agenda (site/admin), com calibração mobile limpa e compacta (sem caixas pesadas).
 - [2026-10-01] Gemini: Implementação do botão Editar e suporte completo de alteração de produtos/preços de cobrança no Admin (admin.html, js/admin.js) e atualização imediata do Kit de Equipamento para 60.00 € (Supabase e setup_pagamentos_itens.sql).
+- [2026-10-03] Gemini: Correção da sincronização oficial de Resultados da FPB (functions/api/sync-fpb.ts, supabase/functions/sync-fpb/index.ts, js/admin.js): consulta paralela à página dedicada https://www.fpb.pt/resultados/clube_656/ (além do calendário), suporte ao parser para a estrutura .results_wrapper/.results_text e fusão inteligente (merge) com precedência de resultados terminados.

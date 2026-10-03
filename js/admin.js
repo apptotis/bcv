@@ -4322,6 +4322,7 @@ document.addEventListener('DOMContentLoaded', async () => {
 
     // Parser nativo dos dados da FPB para fallback garantido
     function parseFPBHtml(rawHtml) {
+        if (!rawHtml) return [];
         const games = [];
         const monthsMap = {
             'JAN': '01', 'FEV': '02', 'MAR': '03', 'ABR': '04', 'MAI': '05', 'JUN': '06',
@@ -4358,9 +4359,6 @@ document.addEventListener('DOMContentLoaded', async () => {
                 const logo1Match = gameContent.match(/class="team-container align-self-center">[\s\S]*?<img[^>]+src="([^">]+)"/i);
                 const logo1 = logo1Match ? logo1Match[1].trim() : null;
 
-                const hourMatch = gameContent.match(/<div class="hour align-self-center">[\s\S]*?<h3>([\s\S]*?)<\/h3>/i);
-                const rawHour = hourMatch ? hourMatch[1].replace(/<[^>]+>/g, '').trim() : '';
-
                 const team2Match = gameContent.match(/class="team-container right align-self-center">[\s\S]*?class="fullName">([^<]+)<\/span>/i);
                 const team2 = team2Match ? team2Match[1].trim() : '';
                 const logo2Match = gameContent.match(/class="team-container right align-self-center">[\s\S]*?<img[^>]+src="([^">]+)"/i);
@@ -4384,18 +4382,34 @@ document.addEventListener('DOMContentLoaded', async () => {
                 else if (/Baby/i.test(rawComp)) escalao = 'BabyBasket';
                 else if (/Veterano/i.test(rawComp)) escalao = 'Veteranos';
 
-                const scoreMatch = rawHour.match(/(\d+)\s*[-:]\s*(\d+)/);
-                const isResult = !!scoreMatch;
+                // Verificar se é resultado com pontos (estrutura oficial .results_wrapper ou na div.hour)
+                let isResult = false;
                 let pontosCasa = null;
                 let pontosFora = null;
                 let horaJogo = null;
 
-                if (isResult) {
-                    pontosCasa = parseInt(scoreMatch[1], 10);
-                    pontosFora = parseInt(scoreMatch[2], 10);
+                const resMatch = gameContent.match(/class="results_wrapper[^"]*"[\s\S]*?class="results_text[^"]*">\s*(\d+)\s*<\/h3>[\s\S]*?class="results_text[^"]*">\s*(\d+)\s*<\/h3>/i);
+                if (resMatch) {
+                    isResult = true;
+                    pontosCasa = parseInt(resMatch[1], 10);
+                    pontosFora = parseInt(resMatch[2], 10);
                 } else {
-                    const hmMatch = rawHour.match(/(\d{1,2}:\d{2})/);
-                    horaJogo = hmMatch ? hmMatch[1] : (rawHour.toLowerCase().includes('definir') ? 'A definir' : rawHour);
+                    const hourMatch = gameContent.match(/<div class="hour align-self-center">[\s\S]*?<h3>([\s\S]*?)<\/h3>/i);
+                    const rawHour = hourMatch ? hourMatch[1].replace(/<[^>]+>/g, '').trim() : '';
+                    const scoreMatch = rawHour.match(/(\d+)\s*[-:]\s*(\d+)/);
+
+                    if (scoreMatch) {
+                        isResult = true;
+                        pontosCasa = parseInt(scoreMatch[1], 10);
+                        pontosFora = parseInt(scoreMatch[2], 10);
+                    } else {
+                        const hmMatch = rawHour.match(/(\d{1,2})[:Hh](\d{2})/i);
+                        if (hmMatch) {
+                            horaJogo = `${hmMatch[1].padStart(2, '0')}:${hmMatch[2]}`;
+                        } else {
+                            horaJogo = rawHour.toLowerCase().includes('definir') ? 'A definir' : (rawHour || null);
+                        }
+                    }
                 }
 
                 games.push({
@@ -4417,6 +4431,60 @@ document.addEventListener('DOMContentLoaded', async () => {
             }
         }
         return games;
+    }
+
+    function mergeFPBGames(calendarGames, resultGames) {
+        const map = new Map();
+
+        function getKey(g) {
+            if (g.fpb_id) return 'id_' + g.fpb_id;
+            const c = (g.equipa_casa || '').trim().toLowerCase();
+            const f = (g.equipa_fora || '').trim().toLowerCase();
+            return `${g.data_jogo}_${c}_${f}`;
+        }
+
+        for (const g of (calendarGames || [])) {
+            map.set(getKey(g), g);
+        }
+
+        for (const g of (resultGames || [])) {
+            const key = getKey(g);
+            const existing = map.get(key);
+            if (existing) {
+                map.set(key, {
+                    ...existing,
+                    ...g,
+                    is_resultado: true
+                });
+            } else {
+                map.set(key, g);
+            }
+        }
+
+        return Array.from(map.values());
+    }
+
+    async function fetchFPBHtmlViaProxies(targetUrl) {
+        const proxies = [
+            `https://api.allorigins.win/raw?url=${encodeURIComponent(targetUrl)}`,
+            `https://corsproxy.io/?${encodeURIComponent(targetUrl)}`,
+            `https://api.codetabs.com/v1/proxy?quest=${encodeURIComponent(targetUrl)}`
+        ];
+
+        for (const proxyUrl of proxies) {
+            try {
+                const res = await fetch(proxyUrl);
+                if (res.ok) {
+                    const html = await res.text();
+                    if (html && (html.includes('day-wrapper') || html.includes('ficha-de-jogo') || html.includes('results_wrapper'))) {
+                        return html;
+                    }
+                }
+            } catch (eProxy) {
+                console.warn(`Proxy ${proxyUrl} falhou:`, eProxy);
+            }
+        }
+        return null;
     }
 
     async function abrirModalSyncFPB(tipoOrigem = 'todos') {
@@ -4463,29 +4531,15 @@ document.addEventListener('DOMContentLoaded', async () => {
                 }
             }
 
-            // 3. Fallback: Proxies CORS com URL canónica oficial da FPB (com barra final obrigatória)
+            // 3. Fallback: Proxies CORS com URLs canónicas oficiais da FPB (Agenda e Resultados)
             if (jogos.length === 0) {
-                const targetUrl = 'https://www.fpb.pt/calendario/clube_656/';
-                const proxies = [
-                    `https://api.allorigins.win/raw?url=${encodeURIComponent(targetUrl)}`,
-                    `https://corsproxy.io/?${encodeURIComponent(targetUrl)}`,
-                    `https://api.codetabs.com/v1/proxy?quest=${encodeURIComponent(targetUrl)}`
-                ];
-
-                for (const proxyUrl of proxies) {
-                    try {
-                        const res = await fetch(proxyUrl);
-                        if (res.ok) {
-                            const html = await res.text();
-                            if (html && (html.includes('day-wrapper') || html.includes('ficha-de-jogo'))) {
-                                jogos = parseFPBHtml(html);
-                                if (jogos.length > 0) break;
-                            }
-                        }
-                    } catch (eProxy) {
-                        console.warn(`Proxy ${proxyUrl} falhou:`, eProxy);
-                    }
-                }
+                const [calHtml, resHtml] = await Promise.all([
+                    fetchFPBHtmlViaProxies('https://www.fpb.pt/calendario/clube_656/'),
+                    fetchFPBHtmlViaProxies('https://www.fpb.pt/resultados/clube_656/')
+                ]);
+                const calGames = calHtml ? parseFPBHtml(calHtml) : [];
+                const resGames = resHtml ? parseFPBHtml(resHtml) : [];
+                jogos = mergeFPBGames(calGames, resGames);
             }
 
             if (!jogos || jogos.length === 0) {

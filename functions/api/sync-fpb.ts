@@ -102,19 +102,35 @@ function parseFPBCalendar(rawHtml: string): FPBGame[] {
       else if (/Baby/i.test(rawComp)) escalao = 'BabyBasket';
       else if (/Veterano/i.test(rawComp)) escalao = 'Veteranos';
 
-      // Verificar se é resultado com pontos
-      const scoreMatch = rawHour.match(/(\d+)\s*[-:]\s*(\d+)/);
-      const isResult = !!scoreMatch;
+      // Verificar se é resultado com pontos (bloco oficial .results_wrapper ou .hour)
+      let isResult = false;
       let pontosCasa: number | null = null;
       let pontosFora: number | null = null;
       let horaJogo: string | null = null;
 
-      if (isResult) {
-        pontosCasa = parseInt(scoreMatch[1], 10);
-        pontosFora = parseInt(scoreMatch[2], 10);
+      const resMatch = gameContent.match(/class="results_wrapper[^"]*"[\s\S]*?class="results_text[^"]*">\s*(\d+)\s*<\/h3>[\s\S]*?class="results_text[^"]*">\s*(\d+)\s*<\/h3>/i);
+      if (resMatch) {
+        isResult = true;
+        pontosCasa = parseInt(resMatch[1], 10);
+        pontosFora = parseInt(resMatch[2], 10);
       } else {
-        const hmMatch = rawHour.match(/(\d{1,2}:\d{2})/);
-        horaJogo = hmMatch ? hmMatch[1] : (rawHour.toLowerCase().includes('definir') ? 'A definir' : rawHour);
+        // Hora ou Resultado na div.hour
+        const hourMatch = gameContent.match(/<div class="hour align-self-center">[\s\S]*?<h3>([\s\S]*?)<\/h3>/i);
+        const rawHour = hourMatch ? hourMatch[1].replace(/<[^>]+>/g, '').trim() : '';
+        const scoreMatch = rawHour.match(/(\d+)\s*[-:]\s*(\d+)/);
+
+        if (scoreMatch) {
+          isResult = true;
+          pontosCasa = parseInt(scoreMatch[1], 10);
+          pontosFora = parseInt(scoreMatch[2], 10);
+        } else {
+          const hmMatch = rawHour.match(/(\d{1,2})[:Hh](\d{2})/i);
+          if (hmMatch) {
+            horaJogo = `${hmMatch[1].padStart(2, '0')}:${hmMatch[2]}`;
+          } else {
+            horaJogo = rawHour.toLowerCase().includes('definir') ? 'A definir' : (rawHour || null);
+          }
+        }
       }
 
       games.push({
@@ -139,34 +155,80 @@ function parseFPBCalendar(rawHtml: string): FPBGame[] {
   return games;
 }
 
+function mergeFPBGames(calendarGames: FPBGame[], resultGames: FPBGame[]): FPBGame[] {
+  const map = new Map<string, FPBGame>();
+
+  function getKey(g: FPBGame) {
+    if (g.fpb_id) return 'id_' + g.fpb_id;
+    const c = (g.equipa_casa || '').trim().toLowerCase();
+    const f = (g.equipa_fora || '').trim().toLowerCase();
+    return `${g.data_jogo}_${c}_${f}`;
+  }
+
+  // 1. Inserir todos os jogos de calendário
+  for (const g of calendarGames) {
+    map.set(getKey(g), g);
+  }
+
+  // 2. Sobrepor ou adicionar jogos de resultados (têm prioridade máxima)
+  for (const g of resultGames) {
+    const key = getKey(g);
+    const existing = map.get(key);
+    if (existing) {
+      map.set(key, {
+        ...existing,
+        ...g,
+        is_resultado: true
+      });
+    } else {
+      map.set(key, g);
+    }
+  }
+
+  return Array.from(map.values());
+}
+
 export const onRequest: PagesFunction<Env> = async (context) => {
   if (context.request.method === "OPTIONS") {
     return new Response(null, { headers: corsHeaders });
   }
 
   try {
-    // 1. Obter página oficial da FPB (com trailing slash obrigatório para evitar 301)
-    const fpbUrl = "https://www.fpb.pt/calendario/clube_656/";
-    const res = await fetch(fpbUrl, {
-      headers: {
-        "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/122.0.0.0 Safari/537.36",
-        "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8",
-        "Accept-Language": "pt-PT,pt;q=0.9,en-US;q=0.8,en;q=0.7"
-      }
-    });
+    const fpbHeaders = {
+      "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/122.0.0.0 Safari/537.36",
+      "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8",
+      "Accept-Language": "pt-PT,pt;q=0.9,en-US;q=0.8,en;q=0.7"
+    };
 
-    if (!res.ok) {
+    // 1. Obter em paralelo tanto a Agenda como os Resultados oficiais do BC Valença (Clube 656)
+    const [calRes, resRes] = await Promise.allSettled([
+      fetch("https://www.fpb.pt/calendario/clube_656/", { headers: fpbHeaders }),
+      fetch("https://www.fpb.pt/resultados/clube_656/", { headers: fpbHeaders })
+    ]);
+
+    let calHtml = "";
+    let resHtml = "";
+
+    if (calRes.status === "fulfilled" && calRes.value.ok) {
+      calHtml = await calRes.value.text();
+    }
+    if (resRes.status === "fulfilled" && resRes.value.ok) {
+      resHtml = await resRes.value.text();
+    }
+
+    if (!calHtml && !resHtml) {
       return new Response(JSON.stringify({
         success: false,
-        error: `A Federação Portuguesa de Basquetebol respondeu com o código HTTP ${res.status}.`
+        error: "Não foi possível obter os dados da FPB (Agenda e Resultados indisponíveis no momento)."
       }), {
-        status: res.status,
+        status: 502,
         headers: corsHeaders
       });
     }
 
-    const html = await res.text();
-    const jogos = parseFPBCalendar(html);
+    const calGames = calHtml ? parseFPBCalendar(calHtml) : [];
+    const resGames = resHtml ? parseFPBCalendar(resHtml) : [];
+    const jogos = mergeFPBGames(calGames, resGames);
 
     return new Response(JSON.stringify({
       success: true,
