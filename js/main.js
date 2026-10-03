@@ -1537,8 +1537,16 @@ async function loadCompeticoesSection(supabase) {
                 <div class="competicao-card-top">
                     <div class="competicao-info-col">
                         <div class="competicao-card-header">
-                            <span class="competicao-tag">${comp.tag}</span>
-                            ${mostrarSigla ? `<span class="competicao-sigla">${comp.sigla}</span>` : ''}
+                            <div class="competicao-tags-group">
+                                <span class="competicao-tag">${comp.tag}</span>
+                                ${mostrarSigla ? `<span class="competicao-sigla">${comp.sigla}</span>` : ''}
+                            </div>
+                            <!-- Botão de Agenda na 1.ª Linha (destaque à frente da tag em mobile) -->
+                            <button type="button" class="competicao-tab-btn btn-agenda-header" data-action="agenda">
+                                <span class="tab-icon">📅</span>
+                                <span class="tab-text">Agenda</span>
+                                ${jogosAgenda.length > 0 ? `<span class="tab-badge">${jogosAgenda.length}</span>` : ''}
+                            </button>
                         </div>
                         <h3 class="competicao-title">${comp.nome}</h3>
                         <p class="competicao-desc">
@@ -1547,10 +1555,10 @@ async function loadCompeticoesSection(supabase) {
                         </p>
                     </div>
 
-                    <!-- Abas 1 - Agenda, 2 - Resultados e 3 - Classificação -->
+                    <!-- Abas: Em Desktop mostra Agenda, Resultados e Classificação; em Mobile a Agenda fica na 1ª linha e aqui Resultados e Classificação têm largura total -->
                     <div class="competicao-tabs-col">
                         <div class="competicao-tabs-bar">
-                            <button type="button" class="competicao-tab-btn" data-action="agenda">
+                            <button type="button" class="competicao-tab-btn btn-agenda-desktop" data-action="agenda">
                                 <span class="tab-icon">📅</span>
                                 <span class="tab-text">Agenda</span>
                                 ${jogosAgenda.length > 0 ? `<span class="tab-badge">${jogosAgenda.length}</span>` : ''}
@@ -1576,25 +1584,21 @@ async function loadCompeticoesSection(supabase) {
                 </div>
             `;
 
-            // Event Listeners das Abas
-            const btnAgenda = card.querySelector('.competicao-tab-btn[data-action="agenda"]');
-            const btnResultados = card.querySelector('.competicao-tab-btn[data-action="resultados"]');
-            const btnClassificacao = card.querySelector('.competicao-tab-btn[data-action="classificacao"]');
+            // Event Listeners de Todas as Abas (tanto do cabeçalho como da barra)
+            const tabButtons = card.querySelectorAll('.competicao-tab-btn');
             const panel = card.querySelector('.competicao-tab-panel');
             let currentTab = null;
 
             const handleTabClick = (action) => {
                 if (currentTab === action) {
                     panel.style.display = 'none';
-                    btnAgenda.classList.remove('active');
-                    btnResultados.classList.remove('active');
-                    btnClassificacao.classList.remove('active');
+                    tabButtons.forEach(b => b.classList.remove('active'));
                     currentTab = null;
                 } else {
                     panel.style.display = 'block';
-                    btnAgenda.classList.toggle('active', action === 'agenda');
-                    btnResultados.classList.toggle('active', action === 'resultados');
-                    btnClassificacao.classList.toggle('active', action === 'classificacao');
+                    tabButtons.forEach(b => {
+                        b.classList.toggle('active', b.dataset.action === action);
+                    });
 
                     if (action === 'agenda') {
                         panel.innerHTML = renderAgendaList(jogosAgenda);
@@ -1607,19 +1611,11 @@ async function loadCompeticoesSection(supabase) {
                 }
             };
 
-            btnAgenda.addEventListener('click', (e) => {
-                e.stopPropagation();
-                handleTabClick('agenda');
-            });
-
-            btnResultados.addEventListener('click', (e) => {
-                e.stopPropagation();
-                handleTabClick('resultados');
-            });
-
-            btnClassificacao.addEventListener('click', (e) => {
-                e.stopPropagation();
-                handleTabClick('classificacao');
+            tabButtons.forEach(btn => {
+                btn.addEventListener('click', (e) => {
+                    e.stopPropagation();
+                    handleTabClick(btn.dataset.action);
+                });
             });
 
             grid.appendChild(card);
