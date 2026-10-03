@@ -8778,38 +8778,105 @@ document.addEventListener('DOMContentLoaded', async () => {
         const comp = currentCompeticoes.find(c => c.id === currentSerieCompId);
         if (!comp) return;
 
+        // Catálogo das Equipas Oficiais de cada Série (Época 2026/2027)
+        const SERIES_OFICIAIS_BCV = {
+            'sub14_fem': ['BC Valença', 'CB Viana', 'BC Limiense - B', 'Barca BC', 'Famalicense AC'],
+            'sub14_masc': ['BC Valença', 'Monção BC', 'CB Viana', 'Restauradores da Granja', 'SC Maria da Fonte', 'SC Braga B'],
+            'sub16_fem': ['BC Valença', 'Famalicense AC', 'BC Limiense', 'Futebol Clube de Vizela'],
+            'sub18_masc': ['BC Valença', 'CB Viana', 'Restauradores da Granja', 'Famalicense AC - B', 'Monção BC'],
+            'cn2': ['BC Valença', 'Monção BC', 'CAAS Padaria Ribeiro', 'CDJ Régio']
+        };
+
+        const normalizarNomeEq = (nome) => {
+            if (!nome) return '';
+            const n = nome.trim();
+            const l = n.toLowerCase();
+            if (l.includes('valença') || l.includes('bcv')) return 'BC Valença';
+            return n;
+        };
+
+        const obterChaveSerieComp = (c) => {
+            if (!c) return '';
+            const id = (c.id || '').toLowerCase();
+            if (SERIES_OFICIAIS_BCV[id]) return id;
+            const sigla = (c.sigla || '').toLowerCase();
+            const esc = (c.escalao || '').toLowerCase();
+            const sex = (c.sexo || '').toLowerCase();
+
+            if (id.includes('sub14') || esc.includes('14') || sigla.includes('14')) {
+                return (sex === 'feminino' || sigla.includes('fem')) ? 'sub14_fem' : 'sub14_masc';
+            }
+            if (id.includes('sub16') || esc.includes('16') || sigla.includes('16')) {
+                return 'sub16_fem';
+            }
+            if (id.includes('sub18') || esc.includes('18') || sigla.includes('18')) {
+                return 'sub18_masc';
+            }
+            if (id.includes('cn2') || sigla.includes('cn2') || esc.includes('sen')) {
+                return 'cn2';
+            }
+            return '';
+        };
+
         try {
-            // Buscar resultados da base de dados
-            const { data: resJogos, error } = await supabase
-                .from('resultados_bcv')
-                .select('*');
+            // 1. Buscar resultados e agenda da base de dados
+            const [resRes, resAgenda] = await Promise.all([
+                supabase.from('resultados_bcv').select('*'),
+                supabase.from('agenda_bcv').select('*')
+            ]);
 
-            if (error) throw error;
+            const allResultados = resRes.data || [];
+            const allAgenda = resAgenda.data || [];
 
-            // Encontrar jogos da competição
-            const jogosComp = (resJogos || []).filter(j => {
+            const matchJogo = (j) => {
                 const sigla = (comp.sigla || '').toLowerCase();
                 const jComp = (j.competicao || '').toLowerCase();
                 const jEsc = (j.escalao || '').toLowerCase();
-                if (sigla.includes('sub 14') && (jComp.includes('sub 14') || jEsc.includes('sub 14'))) return true;
-                if (sigla.includes('sub 16') && (jComp.includes('sub 16') || jEsc.includes('sub 16'))) return true;
-                if (sigla.includes('sub 18') && (jComp.includes('sub 18') || jEsc.includes('sub 18'))) return true;
-                if (sigla === 'cn2' && (jComp.includes('cn2') || jEsc.includes('senior'))) return true;
-                return false;
-            });
+                const sexComp = (comp.sexo || '').toLowerCase();
+                const jCasa = (j.equipa_casa || '').toLowerCase();
+                const jFora = (j.equipa_fora || '').toLowerCase();
 
-            if (jogosComp.length === 0) {
-                alert("Ainda não existem resultados registados desta competição na base de dados para importar.");
-                return;
+                if (sigla.includes('sub 14') && (jComp.includes('sub 14') || jEsc.includes('sub 14') || jEsc.includes('14'))) {
+                    const isFem = jComp.includes('fem') || jCasa.includes('fem') || jFora.includes('fem');
+                    return sexComp === 'feminino' ? isFem : !isFem;
+                }
+                if (sigla.includes('sub 16') && (jComp.includes('sub 16') || jEsc.includes('sub 16') || jEsc.includes('16'))) {
+                    const isFem = jComp.includes('fem') || jCasa.includes('fem') || jFora.includes('fem');
+                    return sexComp === 'feminino' ? isFem : !isFem;
+                }
+                if (sigla.includes('sub 18') && (jComp.includes('sub 18') || jEsc.includes('sub 18') || jEsc.includes('18'))) return true;
+                if (sigla === 'cn2' && (jComp.includes('cn2') || jEsc.includes('senior') || jComp.includes('2ª div'))) return true;
+                return false;
+            };
+
+            const jogosResComp = allResultados.filter(matchJogo);
+            const jogosAgendaComp = allAgenda.filter(matchJogo);
+
+            const map = {};
+
+            // A) Equipas oficiais da série predefinidas
+            const serieKey = obterChaveSerieComp(comp);
+            if (serieKey && SERIES_OFICIAIS_BCV[serieKey]) {
+                SERIES_OFICIAIS_BCV[serieKey].forEach(eq => {
+                    const n = normalizarNomeEq(eq);
+                    map[n] = { nome: n, j: 0, v: 0, d: 0, pm: 0, ps: 0, pts: 0 };
+                });
             }
 
-            // Apurar pontuações
-            const map = {};
-            jogosComp.forEach(j => {
+            // B) Equipas dos jogos agendados
+            jogosAgendaComp.forEach(j => {
+                const cNome = normalizarNomeEq(j.equipa_casa);
+                const fNome = normalizarNomeEq(j.equipa_fora);
+                if (cNome && !map[cNome]) map[cNome] = { nome: cNome, j: 0, v: 0, d: 0, pm: 0, ps: 0, pts: 0 };
+                if (fNome && !map[fNome]) map[fNome] = { nome: fNome, j: 0, v: 0, d: 0, pm: 0, ps: 0, pts: 0 };
+            });
+
+            // C) Equipas e pontuações dos jogos já realizados
+            jogosResComp.forEach(j => {
                 const pCasa = parseInt(j.pontos_casa, 10);
                 const pFora = parseInt(j.pontos_fora, 10);
-                const cNome = (j.equipa_casa || '').trim();
-                const fNome = (j.equipa_fora || '').trim();
+                const cNome = normalizarNomeEq(j.equipa_casa);
+                const fNome = normalizarNomeEq(j.equipa_fora);
                 if (!cNome || !fNome || isNaN(pCasa) || isNaN(pFora)) return;
 
                 if (!map[cNome]) map[cNome] = { nome: cNome, j: 0, v: 0, d: 0, pm: 0, ps: 0, pts: 0 };
@@ -8833,24 +8900,49 @@ document.addEventListener('DOMContentLoaded', async () => {
                 }
             });
 
-            const importadas = Object.values(map).sort((a, b) => {
+            const equipasComJogos = [];
+            const equipasSemJogos = [];
+
+            Object.values(map).forEach(eq => {
+                const item = { ...eq, dif: eq.pm - eq.ps };
+                if (eq.j > 0) {
+                    equipasComJogos.push(item);
+                } else {
+                    equipasSemJogos.push(item);
+                }
+            });
+
+            equipasComJogos.sort((a, b) => {
                 if (b.pts !== a.pts) return b.pts - a.pts;
-                return (b.pm - b.ps) - (a.pm - a.ps);
-            }).map((eq, i) => ({
+                if (b.dif !== a.dif) return b.dif - a.dif;
+                if (b.v !== a.v) return b.v - a.v;
+                return b.pm - a.pm;
+            });
+
+            equipasSemJogos.sort((a, b) => {
+                const isBCVa = a.nome.toLowerCase().includes('valença');
+                const isBCVb = b.nome.toLowerCase().includes('valença');
+                if (isBCVa && !isBCVb) return -1;
+                if (isBCVb && !isBCVa) return 1;
+                return a.nome.localeCompare(b.nome);
+            });
+
+            const importadas = [...equipasComJogos, ...equipasSemJogos].map((eq, i) => ({
                 pos: i + 1,
-                ...eq,
-                dif: eq.pm - eq.ps
+                ...eq
             }));
 
             if (importadas.length > 0) {
                 currentEquipasSerie = importadas;
                 renderTabelaSerieModal();
-                alert(`✅ Foram importadas ${importadas.length} equipas a partir dos resultados oficiais!`);
+                alert(`✅ Foram apuradas ${importadas.length} equipas da mesma série (com jogos realizados e agendados no calendário)!`);
+            } else {
+                alert("Nenhuma equipa encontrada para esta série.");
             }
 
         } catch (err) {
-            console.error("Erro ao importar equipas:", err);
-            alert("Erro ao importar: " + err.message);
+            console.error("Erro ao importar equipas da série:", err);
+            alert("Erro ao importar equipas da série: " + err.message);
         }
     };
 

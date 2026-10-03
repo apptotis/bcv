@@ -1182,15 +1182,55 @@ async function loadCompeticoesSection(supabase) {
             `;
         };
 
+        // Catálogo das Equipas Oficiais de cada Série (Época 2026/2027)
+        const SERIES_OFICIAIS_BCV = {
+            'sub14_fem': ['BC Valença', 'CB Viana', 'BC Limiense - B', 'Barca BC', 'Famalicense AC'],
+            'sub14_masc': ['BC Valença', 'Monção BC', 'CB Viana', 'Restauradores da Granja', 'SC Maria da Fonte', 'SC Braga B'],
+            'sub16_fem': ['BC Valença', 'Famalicense AC', 'BC Limiense', 'Futebol Clube de Vizela'],
+            'sub18_masc': ['BC Valença', 'CB Viana', 'Restauradores da Granja', 'Famalicense AC - B', 'Monção BC'],
+            'cn2': ['BC Valença', 'Monção BC', 'CAAS Padaria Ribeiro', 'CDJ Régio']
+        };
+
+        const normalizarNomeEquipa = (nome) => {
+            if (!nome) return '';
+            const n = nome.trim();
+            const l = n.toLowerCase();
+            if (l.includes('valença') || l.includes('bcv')) return 'BC Valença';
+            return n;
+        };
+
+        const obterChaveSerieComp = (c) => {
+            if (!c) return '';
+            const id = (c.id || '').toLowerCase();
+            if (SERIES_OFICIAIS_BCV[id]) return id;
+            const sigla = (c.sigla || '').toLowerCase();
+            const esc = (c.escalao || '').toLowerCase();
+            const sex = (c.sexo || '').toLowerCase();
+
+            if (id.includes('sub14') || esc.includes('14') || sigla.includes('14')) {
+                return (sex === 'feminino' || sigla.includes('fem')) ? 'sub14_fem' : 'sub14_masc';
+            }
+            if (id.includes('sub16') || esc.includes('16') || sigla.includes('16')) {
+                return 'sub16_fem';
+            }
+            if (id.includes('sub18') || esc.includes('18') || sigla.includes('18')) {
+                return 'sub18_masc';
+            }
+            if (id.includes('cn2') || sigla.includes('cn2') || esc.includes('sen')) {
+                return 'cn2';
+            }
+            return '';
+        };
+
         // Renderizador da Tabela de Classificação Oficial FPB
-        const renderClassificacaoTable = (comp, jogos) => {
+        const renderClassificacaoTable = (comp, jogos, jogosAgenda = []) => {
             const urlFPB = comp.url_fpb || comp.url_classificacao_fpb || 'https://www.fpb.pt/competicoes/';
 
             let equipas = [];
             let isTabelaSerieOficial = false;
 
-            // 1. Prioridade Máxima: Quadro Oficial Completo de Todas as Equipas da Mesma Série
-            if (comp.tabela_serie && Array.isArray(comp.tabela_serie) && comp.tabela_serie.length > 0) {
+            // 1. Prioridade Máxima: Quadro Oficial Completo Configurado no Admin (se tiver pelo menos 2 equipas)
+            if (comp.tabela_serie && Array.isArray(comp.tabela_serie) && comp.tabela_serie.length >= 2) {
                 isTabelaSerieOficial = true;
                 equipas = comp.tabela_serie.map((eq, idx) => {
                     const j = Number(eq.j) || 0;
@@ -1202,84 +1242,139 @@ async function loadCompeticoesSection(supabase) {
                     const pts = Number(eq.pts) !== undefined && !isNaN(Number(eq.pts)) ? Number(eq.pts) : (v * 2 + d * 1);
                     return {
                         pos: Number(eq.pos) || (idx + 1),
-                        nome: eq.nome || '',
+                        nome: normalizarNomeEquipa(eq.nome || ''),
                         logo: eq.logo || null,
                         j, v, d, pm, ps, dif, pts
                     };
                 });
-                // Ordenar por posição oficial ou pontos
                 equipas.sort((a, b) => {
                     if (a.pos && b.pos && a.pos !== b.pos) return a.pos - b.pos;
                     if (b.pts !== a.pts) return b.pts - a.pts;
                     return b.dif - a.dif;
                 });
             } else {
-                // 2. Apuramento Dinâmico Automático a partir dos Resultados dos Jogos Registados
+                // 2. Apuramento Dinâmico Completo de Todas as Equipas da Mesma Série
+                const tabelaMap = {};
+
+                // A) Inicializar com todas as equipas conhecidas da série oficial
+                const serieKey = obterChaveSerieComp(comp);
+                if (serieKey && SERIES_OFICIAIS_BCV[serieKey]) {
+                    SERIES_OFICIAIS_BCV[serieKey].forEach(nomeEq => {
+                        const norm = normalizarNomeEquipa(nomeEq);
+                        tabelaMap[norm] = {
+                            nome: norm,
+                            logo: window.obterLogoEquipa ? window.obterLogoEquipa(norm) : null,
+                            j: 0, v: 0, d: 0, pm: 0, ps: 0, pts: 0
+                        };
+                    });
+                }
+
+                // B) Adicionar equipas de todos os jogos agendados da competição
+                (jogosAgenda || []).forEach(j => {
+                    const cNome = normalizarNomeEquipa(j.equipa_casa);
+                    const fNome = normalizarNomeEquipa(j.equipa_fora);
+                    if (cNome && !tabelaMap[cNome]) {
+                        tabelaMap[cNome] = {
+                            nome: cNome,
+                            logo: j.logo_casa || (window.obterLogoEquipa ? window.obterLogoEquipa(cNome) : null),
+                            j: 0, v: 0, d: 0, pm: 0, ps: 0, pts: 0
+                        };
+                    }
+                    if (fNome && !tabelaMap[fNome]) {
+                        tabelaMap[fNome] = {
+                            nome: fNome,
+                            logo: j.logo_fora || (window.obterLogoEquipa ? window.obterLogoEquipa(fNome) : null),
+                            j: 0, v: 0, d: 0, pm: 0, ps: 0, pts: 0
+                        };
+                    }
+                });
+
+                // C) Processar jogos com resultado oficial registado
                 const jogosComResultado = (jogos || []).filter(j => {
                     const pCasa = parseInt(j.pontos_casa, 10);
                     const pFora = parseInt(j.pontos_fora, 10);
                     return !isNaN(pCasa) && !isNaN(pFora) && (pCasa > 0 || pFora > 0);
                 });
 
-                if (jogosComResultado.length > 0) {
-                    const tabelaMap = {};
+                jogosComResultado.forEach(j => {
+                    const pCasa = parseInt(j.pontos_casa, 10);
+                    const pFora = parseInt(j.pontos_fora, 10);
+                    const cNome = normalizarNomeEquipa(j.equipa_casa);
+                    const fNome = normalizarNomeEquipa(j.equipa_fora);
 
-                    jogosComResultado.forEach(j => {
-                        const pCasa = parseInt(j.pontos_casa, 10);
-                        const pFora = parseInt(j.pontos_fora, 10);
-                        const cNome = (j.equipa_casa || '').trim();
-                        const fNome = (j.equipa_fora || '').trim();
+                    if (!cNome || !fNome) return;
 
-                        if (!cNome || !fNome) return;
+                    if (!tabelaMap[cNome]) {
+                        tabelaMap[cNome] = {
+                            nome: cNome,
+                            logo: j.logo_casa || (window.obterLogoEquipa ? window.obterLogoEquipa(cNome) : null),
+                            j: 0, v: 0, d: 0, pm: 0, ps: 0, pts: 0
+                        };
+                    }
+                    if (!tabelaMap[fNome]) {
+                        tabelaMap[fNome] = {
+                            nome: fNome,
+                            logo: j.logo_fora || (window.obterLogoEquipa ? window.obterLogoEquipa(fNome) : null),
+                            j: 0, v: 0, d: 0, pm: 0, ps: 0, pts: 0
+                        };
+                    }
 
-                        if (!tabelaMap[cNome]) {
-                            tabelaMap[cNome] = {
-                                nome: cNome,
-                                logo: j.logo_casa || null,
-                                j: 0, v: 0, d: 0, pm: 0, ps: 0, pts: 0
-                            };
-                        }
-                        if (!tabelaMap[fNome]) {
-                            tabelaMap[fNome] = {
-                                nome: fNome,
-                                logo: j.logo_fora || null,
-                                j: 0, v: 0, d: 0, pm: 0, ps: 0, pts: 0
-                            };
-                        }
+                    tabelaMap[cNome].j += 1;
+                    tabelaMap[fNome].j += 1;
+                    tabelaMap[cNome].pm += pCasa;
+                    tabelaMap[cNome].ps += pFora;
+                    tabelaMap[fNome].pm += pFora;
+                    tabelaMap[fNome].ps += pCasa;
 
-                        tabelaMap[cNome].j += 1;
-                        tabelaMap[fNome].j += 1;
-                        tabelaMap[cNome].pm += pCasa;
-                        tabelaMap[cNome].ps += pFora;
-                        tabelaMap[fNome].pm += pFora;
-                        tabelaMap[fNome].ps += pCasa;
+                    if (pCasa > pFora) {
+                        tabelaMap[cNome].v += 1;
+                        tabelaMap[cNome].pts += 2; // Vitória FPB = 2 pontos
+                        tabelaMap[fNome].d += 1;
+                        tabelaMap[fNome].pts += 1; // Derrota FPB = 1 ponto
+                    } else if (pFora > pCasa) {
+                        tabelaMap[fNome].v += 1;
+                        tabelaMap[fNome].pts += 2;
+                        tabelaMap[cNome].d += 1;
+                        tabelaMap[cNome].pts += 1;
+                    } else {
+                        tabelaMap[cNome].pts += 1;
+                        tabelaMap[fNome].pts += 1;
+                    }
+                });
 
-                        if (pCasa > pFora) {
-                            tabelaMap[cNome].v += 1;
-                            tabelaMap[cNome].pts += 2; // Vitória basquetebol FPB
-                            tabelaMap[fNome].d += 1;
-                            tabelaMap[fNome].pts += 1; // Derrota basquetebol FPB
-                        } else if (pFora > pCasa) {
-                            tabelaMap[fNome].v += 1;
-                            tabelaMap[fNome].pts += 2;
-                            tabelaMap[cNome].d += 1;
-                            tabelaMap[cNome].pts += 1;
-                        } else {
-                            tabelaMap[cNome].pts += 1;
-                            tabelaMap[fNome].pts += 1;
-                        }
-                    });
+                // D) Ordenação da Série: Equipas com jogos primeiro (PTS > DIF > V > PM), seguidas das sem jogos
+                const equipasComJogos = [];
+                const equipasSemJogos = [];
 
-                    equipas = Object.values(tabelaMap).map(eq => ({
-                        ...eq,
-                        dif: eq.pm - eq.ps
-                    })).sort((a, b) => {
-                        if (b.pts !== a.pts) return b.pts - a.pts;
-                        if (b.dif !== a.dif) return b.dif - a.dif;
-                        if (b.v !== a.v) return b.v - a.v;
-                        return b.pm - a.pm;
-                    });
-                }
+                Object.values(tabelaMap).forEach(eq => {
+                    const dif = eq.pm - eq.ps;
+                    const item = { ...eq, dif };
+                    if (eq.j > 0) {
+                        equipasComJogos.push(item);
+                    } else {
+                        equipasSemJogos.push(item);
+                    }
+                });
+
+                equipasComJogos.sort((a, b) => {
+                    if (b.pts !== a.pts) return b.pts - a.pts;
+                    if (b.dif !== a.dif) return b.dif - a.dif;
+                    if (b.v !== a.v) return b.v - a.v;
+                    return b.pm - a.pm;
+                });
+
+                equipasSemJogos.sort((a, b) => {
+                    const isBCVa = a.nome.toLowerCase().includes('valença');
+                    const isBCVb = b.nome.toLowerCase().includes('valença');
+                    if (isBCVa && !isBCVb) return -1;
+                    if (isBCVb && !isBCVa) return 1;
+                    return a.nome.localeCompare(b.nome);
+                });
+
+                equipas = [...equipasComJogos, ...equipasSemJogos].map((eq, i) => ({
+                    ...eq,
+                    pos: i + 1
+                }));
             }
 
             if (equipas.length === 0) {
@@ -1454,7 +1549,7 @@ async function loadCompeticoesSection(supabase) {
                     } else if (action === 'resultados') {
                         panel.innerHTML = renderResultadosList(jogosResultados);
                     } else if (action === 'classificacao') {
-                        panel.innerHTML = renderClassificacaoTable(comp, jogosResultados);
+                        panel.innerHTML = renderClassificacaoTable(comp, jogosResultados, jogosAgenda);
                     }
                     currentTab = action;
                 }
