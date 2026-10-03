@@ -1141,15 +1141,30 @@
 
                             <!-- Barra de Ações Rápidas -->
                             <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; gap: 8px; flex-wrap: wrap;">
-                                <div style="display: flex; gap: 8px;">
+                                <div style="display: flex; gap: 8px; flex-wrap: wrap;">
                                     <button type="button" onclick="window.adicionarEquipaSerie()" class="btn-secondary" style="font-size: 0.8rem; padding: 6px 12px; display: inline-flex; align-items: center; gap: 5px;">
                                         ➕ Adicionar Equipa
                                     </button>
                                     <button type="button" onclick="window.importarEquipasResultados()" class="btn-secondary" style="font-size: 0.8rem; padding: 6px 12px; display: inline-flex; align-items: center; gap: 5px; color: var(--accent-primary); border-color: rgba(126,34,206,0.3);" title="Importa todas as equipas da série a partir do calendário e resultados oficiais FPB">
                                         ⚡ Importar da Série (Resultados + Agenda)
                                     </button>
+                                    <button type="button" onclick="window.abrirModalColarTabelaFPB()" class="btn-secondary" style="font-size: 0.8rem; padding: 6px 12px; display: inline-flex; align-items: center; gap: 5px; color: #0284c7; border-color: rgba(2, 132, 199, 0.3);" title="Copie a tabela da página da FPB e cole aqui para preenchimento automático">
+                                        📋 Colar Tabela da FPB
+                                    </button>
                                 </div>
                                 <span style="font-size: 0.75rem; color: var(--text-secondary);">Regra FPB: Vitória = 2 Pts | Derrota = 1 Pt</span>
+                            </div>
+
+                            <!-- Caixa Recolhível para Colar Dados da FPB -->
+                            <div id="box-colar-tabela-fpb" style="display: none; margin-bottom: 15px; padding: 14px; background: #f0fdf4; border: 1px solid #86efac; border-radius: 8px;">
+                                <label style="display: block; font-weight: 700; font-size: 0.85rem; color: #166534; margin-bottom: 5px;">
+                                    📋 Copie e cole aqui o texto da tabela ou classificação do site da FPB:
+                                </label>
+                                <textarea id="txt-colar-tabela-fpb" rows="5" style="width: 100%; font-family: monospace; font-size: 0.8rem; padding: 8px; border: 1px solid #bbf7d0; border-radius: 6px; box-sizing: border-box;" placeholder="Exemplo: selecione o texto da tabela da FPB no seu navegador, copie (Ctrl+C) e cole aqui (Ctrl+V)..."></textarea>
+                                <div style="display: flex; gap: 8px; margin-top: 8px;">
+                                    <button type="button" onclick="window.processarTextoColadoFPB()" class="btn-primary" style="font-size: 0.8rem; padding: 6px 14px; background: #16a34a;">⚡ Processar e Atualizar Tabela</button>
+                                    <button type="button" onclick="document.getElementById('box-colar-tabela-fpb').style.display='none'" class="btn-secondary" style="font-size: 0.8rem; padding: 6px 12px;">Fechar</button>
+                                </div>
                             </div>
 
                             <!-- Tabela de Equipas da Série -->

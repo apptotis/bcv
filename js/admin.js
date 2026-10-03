@@ -8661,6 +8661,23 @@ document.addEventListener('DOMContentLoaded', async () => {
     let currentSerieCompId = null;
     let currentEquipasSerie = [];
 
+    // Catálogo das Equipas Oficiais de cada Série (Época 2026/2027)
+    const SERIES_OFICIAIS_BCV_GLOBAL = {
+        'sub14_fem': [
+            'BC Valença',
+            'Restauradores da Granja',
+            'Famalicense AC',
+            'CB Viana',
+            'Barca BC',
+            'Futebol Clube de Vizela',
+            'BC Limiense - B'
+        ],
+        'sub14_masc': ['BC Valença', 'Monção BC', 'CB Viana', 'Restauradores da Granja', 'SC Maria da Fonte', 'SC Braga B'],
+        'sub16_fem': ['BC Valença', 'Famalicense AC', 'BC Limiense', 'Futebol Clube de Vizela'],
+        'sub18_masc': ['BC Valença', 'CB Viana', 'Restauradores da Granja', 'Famalicense AC - B', 'Monção BC'],
+        'cn2': ['BC Valença', 'Monção BC', 'CAAS Padaria Ribeiro', 'CDJ Régio']
+    };
+
     window.gerirTabelaSerie = function(id) {
         const comp = currentCompeticoes.find(c => c.id === id);
         if (!comp) return;
@@ -8672,14 +8689,27 @@ document.addEventListener('DOMContentLoaded', async () => {
 
         currentEquipasSerie = Array.isArray(comp.tabela_serie) ? JSON.parse(JSON.stringify(comp.tabela_serie)) : [];
 
-        // Se estiver vazia, sugerir preenchimento inicial com o BC Valença
-        if (currentEquipasSerie.length === 0) {
-            currentEquipasSerie.push({
-                pos: 1,
-                nome: "Basket Clube de Valença",
-                j: 0, v: 0, d: 0, pm: 0, ps: 0, pts: 0
-            });
+        // Se estiver vazia ou com menos de 2 equipas, carregar por defeito as equipas conhecidas da série
+        if (currentEquipasSerie.length < 2) {
+            const sKey = (comp.id || '').toLowerCase();
+            const equipasPadrao = SERIES_OFICIAIS_BCV_GLOBAL[sKey] || [];
+            if (equipasPadrao.length > 0) {
+                currentEquipasSerie = equipasPadrao.map((nome, idx) => ({
+                    pos: idx + 1,
+                    nome: nome,
+                    j: 0, v: 0, d: 0, pm: 0, ps: 0, pts: 0
+                }));
+            } else {
+                currentEquipasSerie = [{
+                    pos: 1,
+                    nome: "BC Valença",
+                    j: 0, v: 0, d: 0, pm: 0, ps: 0, pts: 0
+                }];
+            }
         }
+
+        const boxColar = document.getElementById('box-colar-tabela-fpb');
+        if (boxColar) boxColar.style.display = 'none';
 
         renderTabelaSerieModal();
         const modal = document.getElementById('modal-tabela-serie-container');
@@ -8691,6 +8721,92 @@ document.addEventListener('DOMContentLoaded', async () => {
         if (modal) modal.classList.add('hidden');
         currentSerieCompId = null;
         currentEquipasSerie = [];
+    };
+
+    window.abrirModalColarTabelaFPB = function() {
+        const box = document.getElementById('box-colar-tabela-fpb');
+        if (!box) return;
+        box.style.display = box.style.display === 'none' ? 'block' : 'none';
+        if (box.style.display === 'block') {
+            const txt = document.getElementById('txt-colar-tabela-fpb');
+            if (txt) {
+                txt.value = '';
+                txt.focus();
+            }
+        }
+    };
+
+    window.processarTextoColadoFPB = function() {
+        const txtEl = document.getElementById('txt-colar-tabela-fpb');
+        if (!txtEl) return;
+        const texto = txtEl.value.trim();
+        if (!texto) {
+            alert("Por favor cole o texto da tabela ou classificação da FPB.");
+            return;
+        }
+
+        const linhas = texto.split('\n').map(l => l.trim()).filter(l => l.length > 0);
+        const equipasProcessadas = [];
+
+        // Estratégia 1: Linhas tabuladas ou com múltiplos números
+        linhas.forEach(linha => {
+            // Ignorar cabeçalhos
+            if (/^(#|pos|equipa|j|v|d|pm|ps|dif|pts|classificação)/i.test(linha)) return;
+
+            // Dividir por tabulações ou múltiplos espaços
+            const partes = linha.split(/\t+|\s{2,}/).map(p => p.trim()).filter(p => p.length > 0);
+            
+            // Se encontrar linha com números no final
+            const tokens = linha.split(/\s+/);
+            const numeros = [];
+            const palavras = [];
+
+            tokens.forEach(tok => {
+                const n = parseInt(tok.replace(/^[+-]/, ''), 10);
+                if (!isNaN(n) && /^[-+]?\d+$/.test(tok)) {
+                    numeros.push(n);
+                } else if (!/^[#•\-\|\/]$/.test(tok)) {
+                    palavras.push(tok);
+                }
+            });
+
+            // Se tem pelo menos o nome de uma equipa
+            const nomeCandidato = palavras.join(' ').replace(/^\d+[\s\.\-]+/, '').trim();
+            if (nomeCandidato.length >= 3 && !/^(totais|total|legenda)/i.test(nomeCandidato)) {
+                // Números típicos de tabela FPB: [J, V, D, PM, PS, PTS] ou [Pos, J, V, D, PM, PS, DIF, PTS]
+                let j = 0, v = 0, d = 0, pm = 0, ps = 0, pts = 0;
+                if (numeros.length >= 6) {
+                    // [J, V, D, PM, PS, DIF, PTS] ou similar
+                    const ultimos = numeros.slice(-6);
+                    j = ultimos[0] || 0;
+                    v = ultimos[1] || 0;
+                    d = ultimos[2] || 0;
+                    pm = ultimos[3] || 0;
+                    ps = ultimos[4] || 0;
+                    pts = ultimos[5] || (v * 2 + d * 1);
+                } else if (numeros.length >= 3) {
+                    j = numeros[0] || 0;
+                    v = numeros[1] || 0;
+                    d = numeros[2] || 0;
+                    pts = (v * 2 + d * 1);
+                }
+
+                equipasProcessadas.push({
+                    pos: equipasProcessadas.length + 1,
+                    nome: nomeCandidato,
+                    j, v, d, pm, ps, pts
+                });
+            }
+        });
+
+        if (equipasProcessadas.length > 0) {
+            currentEquipasSerie = equipasProcessadas;
+            renderTabelaSerieModal();
+            document.getElementById('box-colar-tabela-fpb').style.display = 'none';
+            alert(`✅ Sucesso! Foram extraídas ${equipasProcessadas.length} equipas com as respetivas pontuações.`);
+        } else {
+            alert("Não foi possível detetar o formato da tabela no texto colado. Pode preencher ou ajustar os valores diretamente nas caixas abaixo.");
+        }
     };
 
     function renderTabelaSerieModal() {
@@ -8732,7 +8848,7 @@ document.addEventListener('DOMContentLoaded', async () => {
                     <input type="number" min="0" value="${eq.ps || 0}" onchange="window.updateEquipaSerieField(${idx}, 'ps', this.value)" style="width: 50px; text-align: center; padding: 4px; border: 1px solid var(--border-color); border-radius: 4px;">
                 </td>
                 <td style="padding: 6px;">
-                    <input type="number" min="0" value="${eq.pts !== undefined ? eq.pts : ((eq.v || 0) * 2 + (eq.d || 0) * 1)}" onchange="window.updateEquipaSerieField(${idx}, 'pts', this.value)" style="width: 50px; text-align: center; padding: 4px; border: 1px solid var(--accent-primary); border-radius: 4px; font-weight: 800; color: var(--accent-primary);">
+                    <input type="number" min="0" id="serie-pts-${idx}" value="${eq.pts !== undefined ? eq.pts : ((eq.v || 0) * 2 + (eq.d || 0) * 1)}" onchange="window.updateEquipaSerieField(${idx}, 'pts', this.value)" style="width: 50px; text-align: center; padding: 4px; border: 1px solid var(--accent-primary); border-radius: 4px; font-weight: 800; color: var(--accent-primary);">
                 </td>
                 <td style="padding: 6px;">
                     <button type="button" onclick="window.removerEquipaSerie(${idx})" style="background: none; border: none; cursor: pointer; color: #dc2626; font-size: 1rem;" title="Remover da Série">🗑️</button>
@@ -8748,12 +8864,13 @@ document.addEventListener('DOMContentLoaded', async () => {
             currentEquipasSerie[idx].nome = val.trim();
         } else {
             currentEquipasSerie[idx][field] = parseInt(val, 10) || 0;
-            // Recalcular automaticamente os pontos se V ou D mudarem
+            // Atualizar os pontos sem destruir o foco do input
             if (field === 'v' || field === 'd') {
                 const v = currentEquipasSerie[idx].v || 0;
                 const d = currentEquipasSerie[idx].d || 0;
                 currentEquipasSerie[idx].pts = v * 2 + d * 1;
-                renderTabelaSerieModal();
+                const ptsInput = document.getElementById(`serie-pts-${idx}`);
+                if (ptsInput) ptsInput.value = currentEquipasSerie[idx].pts;
             }
         }
     };
