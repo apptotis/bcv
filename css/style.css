@@ -712,23 +712,26 @@ img {
     margin-bottom: 0;
 }
 
-/* Grelha de Destaques (Agenda e Resultados) */
+/* Grelha de Destaques (Agenda e Resultados em Linhas Horizontais Empilhadas) */
 .portal-highlights-grid {
-    display: grid;
-    grid-template-columns: repeat(2, 1fr);
-    gap: 20px;
+    display: flex;
+    flex-direction: column;
+    gap: 24px;
 }
 
 .portal-games-list {
-    display: flex;
-    flex-direction: column;
-    gap: 8px;
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    gap: 14px;
 }
 
 @media (max-width: 768px) {
     .portal-highlights-grid {
+        gap: 16px;
+    }
+    .portal-games-list {
         grid-template-columns: 1fr;
-        gap: 12px;
+        gap: 10px;
     }
 }
 
@@ -753,10 +756,36 @@ img {
 .portal-card-header {
     display: flex;
     align-items: center;
+    justify-content: space-between;
     gap: 14px;
     margin-bottom: 16px;
     padding-bottom: 14px;
     border-bottom: 1px solid var(--border-color);
+    flex-wrap: wrap;
+}
+
+.portal-header-action-link {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 0.82rem;
+    font-weight: 700;
+    color: #7e22ce;
+    background: rgba(126, 34, 206, 0.08);
+    border: 1px solid rgba(126, 34, 206, 0.15);
+    padding: 6px 14px;
+    border-radius: 8px;
+    text-decoration: none;
+    transition: all 0.2s ease;
+    white-space: nowrap;
+}
+
+.portal-header-action-link:hover {
+    background: #7e22ce;
+    color: #ffffff;
+    border-color: #7e22ce;
+    box-shadow: 0 4px 10px rgba(126, 34, 206, 0.2);
+    transform: translateY(-1px);
 }
 
 .portal-card-header .card-icon-badge {
@@ -793,15 +822,18 @@ img {
 /* Itens de Agenda e Resultados */
 .game-schedule-item,
 .game-result-item {
-    padding: 10px 12px;
+    padding: 12px 14px;
     background: #f8fafc;
     border: 1px solid var(--border-color);
-    border-radius: 8px;
-    margin-bottom: 8px;
+    border-radius: 10px;
+    margin-bottom: 0;
     transition: all 0.2s ease;
     display: flex;
     flex-direction: column;
-    gap: 6px;
+    justify-content: space-between;
+    gap: 8px;
+    height: 100%;
+    box-sizing: border-box;
 }
 
 .game-schedule-item:last-child,
@@ -1038,12 +1070,18 @@ img {
 /* Otimização Mobile para Agenda e Resultados */
 @media (max-width: 768px) {
     .portal-highlights-grid {
-        grid-template-columns: 1fr !important;
-        gap: 12px !important;
+        display: flex !important;
+        flex-direction: column !important;
+        gap: 16px !important;
+    }
+
+    .portal-header-action-link {
+        font-size: 0.75rem !important;
+        padding: 4px 10px !important;
     }
 
     .portal-card {
-        padding: 12px 10px !important;
+        padding: 14px 12px !important;
     }
 
     .portal-section-header,
