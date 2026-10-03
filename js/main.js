@@ -1184,7 +1184,15 @@ async function loadCompeticoesSection(supabase) {
 
         // Catálogo das Equipas Oficiais de cada Série (Época 2026/2027)
         const SERIES_OFICIAIS_BCV = {
-            'sub14_fem': ['BC Valença', 'CB Viana', 'BC Limiense - B', 'Barca BC', 'Famalicense AC'],
+            'sub14_fem': [
+                'BC Valença',
+                'Restauradores da Granja',
+                'Famalicense AC',
+                'CB Viana',
+                'Barca BC',
+                'Futebol Clube de Vizela',
+                'BC Limiense - B'
+            ],
             'sub14_masc': ['BC Valença', 'Monção BC', 'CB Viana', 'Restauradores da Granja', 'SC Maria da Fonte', 'SC Braga B'],
             'sub16_fem': ['BC Valença', 'Famalicense AC', 'BC Limiense', 'Futebol Clube de Vizela'],
             'sub18_masc': ['BC Valença', 'CB Viana', 'Restauradores da Granja', 'Famalicense AC - B', 'Monção BC'],
@@ -1363,11 +1371,14 @@ async function loadCompeticoesSection(supabase) {
                     return b.pm - a.pm;
                 });
 
+                const ordemOficial = (serieKey && SERIES_OFICIAIS_BCV[serieKey]) ? SERIES_OFICIAIS_BCV[serieKey] : [];
+
                 equipasSemJogos.sort((a, b) => {
-                    const isBCVa = a.nome.toLowerCase().includes('valença');
-                    const isBCVb = b.nome.toLowerCase().includes('valença');
-                    if (isBCVa && !isBCVb) return -1;
-                    if (isBCVb && !isBCVa) return 1;
+                    const idxA = ordemOficial.findIndex(n => normalizarNomeEquipa(n).toLowerCase() === a.nome.toLowerCase());
+                    const idxB = ordemOficial.findIndex(n => normalizarNomeEquipa(n).toLowerCase() === b.nome.toLowerCase());
+                    if (idxA !== -1 && idxB !== -1) return idxA - idxB;
+                    if (idxA !== -1) return -1;
+                    if (idxB !== -1) return 1;
                     return a.nome.localeCompare(b.nome);
                 });
 

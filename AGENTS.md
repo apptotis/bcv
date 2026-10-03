@@ -89,5 +89,5 @@
 - [2026-10-03] Gemini: Reformulação visual: Agenda/Resultados em faixas horizontais de largura total no index.html e cards de competicoes.html em lista vertical moderna.
 - [2026-10-03] Gemini: Implementação da aba 'Classificação' nas competições (competicoes.html, main.js, style.css, admin.html, admin.js) com cálculo automático oficial FPB (Vitória=2pts, Derrota=1pt, J, V, D, PM, PS, DIF, PTS), destaque BCV, link direto oficial FPB por competição configurável no Admin e atualização em tempo real.
 - [2026-10-03] Gemini: Eliminação de redundâncias de escalão nos cards de competições, Segmented Control responsivo e módulo completo de Gestão do Quadro da Série no Admin.
-- [2026-10-03] Gemini: Exibição completa de todas as equipas da mesma série na aba Classificação de competicoes.html (apuramento automático combinando agenda oficial, resultados e catálogo de séries, ordenação FPB com destaque BCV e importação no Admin).
+- [2026-10-03] Gemini: Exibição completa de todas as equipas da mesma série na aba Classificação de competicoes.html (apuramento automático combinando agenda oficial, resultados e catálogo de 7 equipas oficiais FPB em Sub 14 Fem, ordenação FPB com destaque BCV e importação no Admin).
 
