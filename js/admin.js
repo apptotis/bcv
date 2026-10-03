@@ -144,7 +144,7 @@ document.addEventListener('DOMContentLoaded', async () => {
             { tab: 'tab-resultados', allow: isAdmin || userPerms.includes('resultados') },
             { tab: 'tab-galeria', allow: isAdmin || userPerms.includes('galeria') || role === 'editor' },
             { tab: 'tab-equipas', allow: isAdmin || userPerms.includes('equipas') || role === 'treinador' },
-            { tab: 'tab-competicoes', allow: isAdmin || role === 'diretor' || userPerms.includes('competicoes') || userPerms.includes('equipas') || userPerms.length === 0 },
+            { tab: 'tab-competicoes', allow: isAdmin || role === 'diretor' || userPerms.includes('competicoes') || userPerms.includes('resultados') || userPerms.includes('equipas') || userPerms.length === 0 },
             { tab: 'tab-patrocinadores', allow: isAdmin || userPerms.includes('patrocinadores') },
             { tab: 'tab-config', allow: isAdmin || userPerms.includes('config') }
         ];
@@ -4488,11 +4488,20 @@ document.addEventListener('DOMContentLoaded', async () => {
     }
 
     async function abrirModalSyncFPB(tipoOrigem = 'todos') {
-        if (!modalSyncFPB) return;
-        modalSyncFPB.classList.remove('hidden');
-        syncLoading.style.display = 'block';
-        syncSummary.style.display = 'none';
-        syncStatusBox.style.display = 'none';
+        const modal = document.getElementById('modal-sync-fpb');
+        const loading = document.getElementById('sync-fpb-loading');
+        const summary = document.getElementById('sync-fpb-summary');
+        const statusBox = document.getElementById('sync-fpb-status-box');
+
+        if (!modal) {
+            console.error("modal-sync-fpb não encontrado no DOM");
+            alert("Aviso: Janela de sincronização FPB não encontrada no ecrã.");
+            return;
+        }
+        modal.classList.remove('hidden');
+        if (loading) loading.style.display = 'block';
+        if (summary) summary.style.display = 'none';
+        if (statusBox) statusBox.style.display = 'none';
         currentFPBGames = [];
 
         try {
@@ -4589,19 +4598,30 @@ document.addEventListener('DOMContentLoaded', async () => {
 
             renderSyncJogosList();
 
-            syncLoading.style.display = 'none';
-            syncSummary.style.display = 'block';
+            if (loading) loading.style.display = 'none';
+            if (summary) summary.style.display = 'block';
 
         } catch (err) {
             console.error("Erro na sincronização FPB:", err);
-            syncLoading.style.display = 'none';
-            syncStatusBox.style.display = 'block';
-            syncStatusBox.style.background = '#fef2f2';
-            syncStatusBox.style.color = '#b91c1c';
-            syncStatusBox.style.border = '1px solid #fecaca';
-            syncStatusBox.innerHTML = `<strong>Falha ao sincronizar com a FPB:</strong><br>${err.message}`;
+            const loading = document.getElementById('sync-fpb-loading');
+            const statusBox = document.getElementById('sync-fpb-status-box');
+            if (loading) loading.style.display = 'none';
+            if (statusBox) {
+                statusBox.style.display = 'block';
+                statusBox.style.background = '#fef2f2';
+                statusBox.style.color = '#b91c1c';
+                statusBox.style.border = '1px solid #fecaca';
+                statusBox.innerHTML = `<strong>Falha ao sincronizar com a FPB:</strong><br>${err.message}`;
+            } else {
+                alert("Falha ao sincronizar com a FPB: " + err.message);
+            }
         }
     }
+    window.abrirModalSyncFPB = abrirModalSyncFPB;
+    window.fecharModalSyncFPB = function() {
+        const modal = document.getElementById('modal-sync-fpb');
+        if (modal) modal.classList.add('hidden');
+    };
 
     // Verificar se o jogo já existe na base de dados (agenda ou resultados)
     function isJogoInDb(jogo) {
@@ -8345,11 +8365,11 @@ document.addEventListener('DOMContentLoaded', async () => {
 
     async function loadCompeticoesAdmin() {
         const tbody = document.getElementById('competicoes-table-body');
-        if (!tbody) return;
+        if (tbody) {
+            tbody.innerHTML = '<tr><td colspan="6" style="padding: 20px; text-align: center; color: var(--text-secondary);">A carregar competições...</td></tr>';
+        }
 
         try {
-            tbody.innerHTML = '<tr><td colspan="6" style="padding: 20px; text-align: center; color: var(--text-secondary);">A carregar competições...</td></tr>';
-
             const { data, error } = await supabase
                 .from('clube_config')
                 .select('*')
@@ -8366,13 +8386,18 @@ document.addEventListener('DOMContentLoaded', async () => {
                 await saveCompeticoesToSupabase(currentCompeticoes, false);
             }
 
-            renderCompeticoesAdmin();
+            if (tbody) {
+                renderCompeticoesAdmin();
+            }
 
         } catch (err) {
             console.error("Erro ao carregar competições no admin:", err);
-            tbody.innerHTML = '<tr><td colspan="6" style="padding: 20px; text-align: center; color: #dc2626;">Erro ao carregar competições.</td></tr>';
+            if (tbody) {
+                tbody.innerHTML = '<tr><td colspan="6" style="padding: 20px; text-align: center; color: #dc2626;">Erro ao carregar competições.</td></tr>';
+            }
         }
     }
+    window.loadCompeticoesAdmin = loadCompeticoesAdmin;
 
     async function saveCompeticoesToSupabase(competicoesList, showToast = true) {
         try {
@@ -8679,13 +8704,28 @@ document.addEventListener('DOMContentLoaded', async () => {
     };
 
     window.gerirTabelaSerie = function(id) {
-        const comp = currentCompeticoes.find(c => c.id === id);
+        if (!currentCompeticoes || currentCompeticoes.length === 0) {
+            alert("A carregar competições... Por favor aguarde um segundo e tente novamente.");
+            return;
+        }
+
+        const comp = currentCompeticoes.find(c => c.id === id) || currentCompeticoes[0];
         if (!comp) return;
 
-        currentSerieCompId = id;
-        document.getElementById('serie-comp-id').value = id;
-        document.getElementById('modal-serie-title').textContent = `📊 Quadro da Série: ${comp.sigla || comp.nome}`;
-        document.getElementById('modal-serie-subtitle').textContent = `Série de ${comp.nome} (${comp.escalao} ${comp.sexo}) • Época 2026/2027`;
+        currentSerieCompId = comp.id;
+        if (document.getElementById('serie-comp-id')) document.getElementById('serie-comp-id').value = comp.id;
+        if (document.getElementById('modal-serie-title')) document.getElementById('modal-serie-title').textContent = `📊 Quadro da Série: ${comp.sigla || comp.nome}`;
+        if (document.getElementById('modal-serie-subtitle')) document.getElementById('modal-serie-subtitle').textContent = `Série de ${comp.nome} (${comp.escalao} ${comp.sexo}) • Época 2026/2027`;
+
+        // Atualizar opções do seletor rápido no topo do modal
+        const selectComp = document.getElementById('select-serie-comp-ativo');
+        if (selectComp) {
+            selectComp.innerHTML = currentCompeticoes.filter(c => c.ativo !== false).map(c => `
+                <option value="${c.id}" ${c.id === comp.id ? 'selected' : ''}>
+                    ${c.icon || '🏀'} ${c.nome} (${c.escalao} ${c.sexo})
+                </option>
+            `).join('');
+        }
 
         currentEquipasSerie = Array.isArray(comp.tabela_serie) ? JSON.parse(JSON.stringify(comp.tabela_serie)) : [];
 
@@ -8714,6 +8754,23 @@ document.addEventListener('DOMContentLoaded', async () => {
         renderTabelaSerieModal();
         const modal = document.getElementById('modal-tabela-serie-container');
         if (modal) modal.classList.remove('hidden');
+    };
+
+    window.abrirModalSerieRapido = function() {
+        if (!currentCompeticoes || currentCompeticoes.length === 0) {
+            loadCompeticoesAdmin().then(() => {
+                const sub14Fem = (currentCompeticoes || []).find(c => c.id === 'sub14_fem' || (c.sigla || '').toLowerCase().includes('sub 14 fem'));
+                if (sub14Fem) window.gerirTabelaSerie(sub14Fem.id);
+                else if (currentCompeticoes && currentCompeticoes.length > 0) window.gerirTabelaSerie(currentCompeticoes[0].id);
+            });
+            return;
+        }
+        const sub14Fem = currentCompeticoes.find(c => c.id === 'sub14_fem' || (c.sigla || '').toLowerCase().includes('sub 14 fem'));
+        if (sub14Fem) {
+            window.gerirTabelaSerie(sub14Fem.id);
+        } else {
+            window.gerirTabelaSerie(currentCompeticoes[0].id);
+        }
     };
 
     window.fecharModalTabelaSerie = function() {
@@ -9145,7 +9202,10 @@ document.addEventListener('DOMContentLoaded', async () => {
 
             if (target === 'tab-noticias') loadNoticiasAdmin();
             if (target === 'tab-agenda') loadAgenda();
-            if (target === 'tab-resultados') loadResultados();
+            if (target === 'tab-resultados') {
+                loadResultados();
+                loadCompeticoesAdmin();
+            }
             if (target === 'tab-equipas') loadEquipas();
             if (target === 'tab-competicoes') loadCompeticoesAdmin();
             if (target === 'tab-patrocinadores') loadPatrocinadores();

@@ -90,4 +90,4 @@
 - [2026-10-03] Gemini: Implementação da aba 'Classificação' nas competições (competicoes.html, main.js, style.css, admin.html, admin.js) com cálculo automático oficial FPB (Vitória=2pts, Derrota=1pt, J, V, D, PM, PS, DIF, PTS), destaque BCV, link direto oficial FPB por competição configurável no Admin e atualização em tempo real.
 - [2026-10-03] Gemini: Eliminação de redundâncias de escalão nos cards de competições, Segmented Control responsivo e módulo completo de Gestão do Quadro da Série no Admin.
 - [2026-10-03] Gemini: Exibição completa das 7 equipas da série Sub 14 Fem na Classificação, pré-carregamento automático no Admin e ferramenta 'Colar Tabela da FPB' com parser inteligente de dados federativos.
-
+- [2026-10-03] Gemini: Botão direto '📊 Série / Classificação' em Gestão de Resultados no Admin, resolução resiliente e handlers globais para Sincronização FPB com quebra de cache v=20261003_2330.
