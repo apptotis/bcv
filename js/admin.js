@@ -8732,19 +8732,31 @@ document.addEventListener('DOMContentLoaded', async () => {
         // Se estiver vazia ou com menos de 2 equipas, carregar por defeito as equipas conhecidas da série
         if (currentEquipasSerie.length < 2) {
             const sKey = (comp.id || '').toLowerCase();
-            const equipasPadrao = SERIES_OFICIAIS_BCV_GLOBAL[sKey] || [];
-            if (equipasPadrao.length > 0) {
-                currentEquipasSerie = equipasPadrao.map((nome, idx) => ({
-                    pos: idx + 1,
-                    nome: nome,
-                    j: 0, v: 0, d: 0, pm: 0, ps: 0, pts: 0
-                }));
+            if (sKey === 'sub14_fem' || sKey.includes('sub14_fem') || (comp.sigla || '').toLowerCase().includes('sub 14 fem')) {
+                currentEquipasSerie = [
+                    { pos: 1, nome: "BC Valença", j: 1, v: 1, d: 0, pm: 134, ps: 4, dif: 130, pts: 2 },
+                    { pos: 2, nome: "Restauradores da Granja", j: 1, v: 1, d: 0, pm: 20, ps: 0, dif: 20, pts: 2 },
+                    { pos: 3, nome: "Famalicense AC", j: 1, v: 0, d: 1, pm: 0, ps: 20, dif: -20, pts: 1 },
+                    { pos: 4, nome: "CB Viana", j: 1, v: 0, d: 1, pm: 4, ps: 134, dif: -130, pts: 1 },
+                    { pos: 5, nome: "Barca BC", j: 0, v: 0, d: 0, pm: 0, ps: 0, dif: 0, pts: 0 },
+                    { pos: 6, nome: "Futebol Clube de Vizela", j: 0, v: 0, d: 0, pm: 0, ps: 0, dif: 0, pts: 0 },
+                    { pos: 7, nome: "BC Limiense - B", j: 0, v: 0, d: 0, pm: 0, ps: 0, dif: 0, pts: 0 }
+                ];
             } else {
-                currentEquipasSerie = [{
-                    pos: 1,
-                    nome: "BC Valença",
-                    j: 0, v: 0, d: 0, pm: 0, ps: 0, pts: 0
-                }];
+                const equipasPadrao = SERIES_OFICIAIS_BCV_GLOBAL[sKey] || [];
+                if (equipasPadrao.length > 0) {
+                    currentEquipasSerie = equipasPadrao.map((nome, idx) => ({
+                        pos: idx + 1,
+                        nome: nome,
+                        j: 0, v: 0, d: 0, pm: 0, ps: 0, pts: 0
+                    }));
+                } else {
+                    currentEquipasSerie = [{
+                        pos: 1,
+                        nome: "BC Valença",
+                        j: 0, v: 0, d: 0, pm: 0, ps: 0, pts: 0
+                    }];
+                }
             }
         }
 
@@ -9053,7 +9065,7 @@ document.addEventListener('DOMContentLoaded', async () => {
                 if (fNome && !map[fNome]) map[fNome] = { nome: fNome, j: 0, v: 0, d: 0, pm: 0, ps: 0, pts: 0 };
             });
 
-            // C) Equipas e pontuações dos jogos já realizados
+            // C) Equipas e pontuações dos jogos já realizados do BCV
             jogosResComp.forEach(j => {
                 const pCasa = parseInt(j.pontos_casa, 10);
                 const pFora = parseInt(j.pontos_fora, 10);
@@ -9081,6 +9093,57 @@ document.addEventListener('DOMContentLoaded', async () => {
                     map[cNome].pts += 1; map[fNome].pts += 1;
                 }
             });
+
+            // D) Resultados Oficiais FPB entre outros clubes da série (fora do feed exclusivo do clube 656)
+            const JOGOS_OFICIAIS_SERIE_FPB = {
+                'sub14_fem': [
+                    { equipa_casa: 'Restauradores da Granja', equipa_fora: 'Famalicense AC', pontos_casa: 20, pontos_fora: 0, id: '419131' }
+                ]
+            };
+
+            const jogosOficiaisAdicionais = (serieKey && JOGOS_OFICIAIS_SERIE_FPB[serieKey]) ? JOGOS_OFICIAIS_SERIE_FPB[serieKey] : [];
+            jogosOficiaisAdicionais.forEach(j => {
+                const pCasa = parseInt(j.pontos_casa, 10);
+                const pFora = parseInt(j.pontos_fora, 10);
+                const cNome = normalizarNomeEq(j.equipa_casa);
+                const fNome = normalizarNomeEq(j.equipa_fora);
+                if (!cNome || !fNome || isNaN(pCasa) || isNaN(pFora)) return;
+
+                if (!map[cNome]) map[cNome] = { nome: cNome, j: 0, v: 0, d: 0, pm: 0, ps: 0, pts: 0 };
+                if (!map[fNome]) map[fNome] = { nome: fNome, j: 0, v: 0, d: 0, pm: 0, ps: 0, pts: 0 };
+
+                map[cNome].j += 1;
+                map[fNome].j += 1;
+                map[cNome].pm += pCasa;
+                map[cNome].ps += pFora;
+                map[fNome].pm += pFora;
+                map[fNome].ps += pCasa;
+
+                if (pCasa > pFora) {
+                    map[cNome].v += 1; map[cNome].pts += 2;
+                    map[fNome].d += 1; map[fNome].pts += 1;
+                } else if (pFora > pCasa) {
+                    map[fNome].v += 1; map[fNome].pts += 2;
+                    map[cNome].d += 1; map[cNome].pts += 1;
+                } else {
+                    map[cNome].pts += 1; map[fNome].pts += 1;
+                }
+            });
+
+            // E) Preservar dados já existentes no quadro se foram importados/colados da FPB
+            if (Array.isArray(currentEquipasSerie) && currentEquipasSerie.length > 0) {
+                currentEquipasSerie.forEach(eqExistente => {
+                    const n = normalizarNomeEq(eqExistente.nome);
+                    if (map[n] && map[n].j === 0 && eqExistente.j > 0) {
+                        map[n].j = Number(eqExistente.j) || 0;
+                        map[n].v = Number(eqExistente.v) || 0;
+                        map[n].d = Number(eqExistente.d) || 0;
+                        map[n].pm = Number(eqExistente.pm) || 0;
+                        map[n].ps = Number(eqExistente.ps) || 0;
+                        map[n].pts = Number(eqExistente.pts) || ((map[n].v * 2) + (map[n].d * 1));
+                    }
+                });
+            }
 
             const equipasComJogos = [];
             const equipasSemJogos = [];

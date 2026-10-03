@@ -1350,6 +1350,47 @@ async function loadCompeticoesSection(supabase) {
                     }
                 });
 
+                // C.2) Processar jogos e resultados oficiais da série entre outros adversários FPB
+                const JOGOS_OFICIAIS_SERIE_FALLBACK = {
+                    'sub14_fem': [
+                        { equipa_casa: 'Restauradores da Granja', equipa_fora: 'Famalicense AC', pontos_casa: 20, pontos_fora: 0 }
+                    ]
+                };
+                const jogosSerieExtras = (serieKey && JOGOS_OFICIAIS_SERIE_FALLBACK[serieKey]) ? JOGOS_OFICIAIS_SERIE_FALLBACK[serieKey] : [];
+                jogosSerieExtras.forEach(j => {
+                    const pCasa = parseInt(j.pontos_casa, 10);
+                    const pFora = parseInt(j.pontos_fora, 10);
+                    const cNome = normalizarNomeEquipa(j.equipa_casa);
+                    const fNome = normalizarNomeEquipa(j.equipa_fora);
+                    if (!cNome || !fNome) return;
+
+                    if (!tabelaMap[cNome]) {
+                        tabelaMap[cNome] = { nome: cNome, logo: null, j: 0, v: 0, d: 0, pm: 0, ps: 0, pts: 0 };
+                    }
+                    if (!tabelaMap[fNome]) {
+                        tabelaMap[fNome] = { nome: fNome, logo: null, j: 0, v: 0, d: 0, pm: 0, ps: 0, pts: 0 };
+                    }
+
+                    tabelaMap[cNome].j += 1;
+                    tabelaMap[fNome].j += 1;
+                    tabelaMap[cNome].pm += pCasa;
+                    tabelaMap[cNome].ps += pFora;
+                    tabelaMap[fNome].pm += pFora;
+                    tabelaMap[fNome].ps += pCasa;
+
+                    if (pCasa > pFora) {
+                        tabelaMap[cNome].v += 1;
+                        tabelaMap[cNome].pts += 2;
+                        tabelaMap[fNome].d += 1;
+                        tabelaMap[fNome].pts += 1;
+                    } else if (pFora > pCasa) {
+                        tabelaMap[fNome].v += 1;
+                        tabelaMap[fNome].pts += 2;
+                        tabelaMap[cNome].d += 1;
+                        tabelaMap[cNome].pts += 1;
+                    }
+                });
+
                 // D) Ordenação da Série: Equipas com jogos primeiro (PTS > DIF > V > PM), seguidas das sem jogos
                 const equipasComJogos = [];
                 const equipasSemJogos = [];
