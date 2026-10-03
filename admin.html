@@ -1019,193 +1019,6 @@
                         </table>
                     </div>
 
-                    <!-- Modal Adicionar / Editar Competição -->
-                    <div id="modal-competicao-container" class="hidden" style="position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.55); display: flex; align-items: center; justify-content: center; z-index: 9999; padding: 20px;">
-                        <div style="background: #ffffff; width: 100%; max-width: 620px; max-height: 90vh; overflow-y: auto; padding: 28px; border-radius: 14px; box-shadow: var(--shadow-lg); border: 1px solid var(--border-color);">
-                            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
-                                <h3 id="modal-competicao-title" style="margin: 0; color: var(--accent-primary); font-size: 1.25rem;">Adicionar Competição</h3>
-                                <button type="button" id="btn-close-modal-competicao" style="background: none; border: none; font-size: 1.4rem; cursor: pointer; color: var(--text-secondary);">&times;</button>
-                            </div>
-                            <form id="form-competicao">
-                                <input type="hidden" id="competicao-id">
-
-                                <div style="display: grid; grid-template-columns: 2fr 1fr; gap: 14px; margin-bottom: 14px;">
-                                    <div>
-                                        <label style="display:block; margin-bottom: 5px; font-size: 0.85rem; font-weight: 600;">Nome Oficial da Competição <span class="req">*</span></label>
-                                        <input type="text" id="comp-nome" class="admin-input" placeholder="Ex: Campeonato Nacional da 2.ª Divisão" required style="width: 100%;">
-                                    </div>
-                                    <div>
-                                        <label style="display:block; margin-bottom: 5px; font-size: 0.85rem; font-weight: 600;">Sigla / Código <span class="req">*</span></label>
-                                        <input type="text" id="comp-sigla" class="admin-input" placeholder="Ex: CN2" required style="width: 100%;">
-                                    </div>
-                                </div>
-
-                                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 14px; margin-bottom: 14px;">
-                                    <div>
-                                        <label style="display:block; margin-bottom: 5px; font-size: 0.85rem; font-weight: 600;">Escalão <span class="req">*</span></label>
-                                        <select id="comp-escalao" class="admin-input" required style="width: 100%;">
-                                            <option value="Seniores">Seniores</option>
-                                            <option value="Sub 20">Sub 20</option>
-                                            <option value="Sub 18">Sub 18</option>
-                                            <option value="Sub 16">Sub 16</option>
-                                            <option value="Sub 14">Sub 14</option>
-                                            <option value="Mini 12">Mini 12</option>
-                                            <option value="Mini 10">Mini 10</option>
-                                            <option value="Mini 8">Mini 8</option>
-                                            <option value="BabyBasket">BabyBasket</option>
-                                            <option value="Veteranos">Veteranos</option>
-                                        </select>
-                                    </div>
-                                    <div>
-                                        <label style="display:block; margin-bottom: 5px; font-size: 0.85rem; font-weight: 600;">Género / Sexo <span class="req">*</span></label>
-                                        <select id="comp-sexo" class="admin-input" required style="width: 100%;">
-                                            <option value="Masculino">Masculino</option>
-                                            <option value="Feminino">Feminino</option>
-                                            <option value="Misto">Misto</option>
-                                        </select>
-                                    </div>
-                                </div>
-
-                                <div style="display: grid; grid-template-columns: 2fr 1fr; gap: 14px; margin-bottom: 14px;">
-                                    <div>
-                                        <label style="display:block; margin-bottom: 5px; font-size: 0.85rem; font-weight: 600;">Rótulo da Equipa</label>
-                                        <input type="text" id="comp-equipa-label" class="admin-input" placeholder="Ex: Seniores Masculinos" style="width: 100%;">
-                                    </div>
-                                    <div>
-                                        <label style="display:block; margin-bottom: 5px; font-size: 0.85rem; font-weight: 600;">Ícone</label>
-                                        <select id="comp-icon" class="admin-input" style="width: 100%;">
-                                            <option value="🏀">🏀 Basquetebol</option>
-                                            <option value="🏆">🏆 Troféu / Taça</option>
-                                            <option value="⭐">⭐ Estrela / Formação</option>
-                                            <option value="🎯">🎯 Alvo</option>
-                                            <option value="🔥">🔥 Fogo</option>
-                                        </select>
-                                    </div>
-                                </div>
-
-                                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 14px; margin-bottom: 14px;">
-                                    <div>
-                                        <label style="display:block; margin-bottom: 5px; font-size: 0.85rem; font-weight: 600;">Tag / Entidade</label>
-                                        <input type="text" id="comp-tag" class="admin-input" placeholder="Ex: FPB • Nacional" style="width: 100%;">
-                                    </div>
-                                    <div>
-                                        <label style="display:block; margin-bottom: 5px; font-size: 0.85rem; font-weight: 600;">Tipo de Competição</label>
-                                        <select id="comp-tipo" class="admin-input" style="width: 100%;">
-                                            <option value="nacional">Nacional (Destaque Ouro)</option>
-                                            <option value="distrital">Distrital</option>
-                                        </select>
-                                    </div>
-                                </div>
-
-                                <div style="margin-bottom: 14px;">
-                                    <label style="display:block; margin-bottom: 5px; font-size: 0.85rem; font-weight: 600;">Detalhe / Fase / Associação</label>
-                                    <input type="text" id="comp-detalhe" class="admin-input" placeholder="Ex: Zona Norte • Federação Portuguesa de Basquetebol" style="width: 100%;">
-                                </div>
-
-                                <div style="margin-bottom: 14px;">
-                                    <label style="display:block; margin-bottom: 5px; font-size: 0.85rem; font-weight: 600;">Link Oficial FPB / Classificação (Opcional)</label>
-                                    <input type="url" id="comp-url-fpb" class="admin-input" placeholder="Ex: https://www.fpb.pt/competicoes/ ou link da fase na FPB" style="width: 100%;">
-                                    <span style="font-size: 0.74rem; color: var(--text-secondary); display: block; margin-top: 3px;">Se preenchido, os adeptos terão um botão direto na aba Classificação para consultar a tabela oficial na Federação.</span>
-                                </div>
-
-                                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 14px; margin-bottom: 22px; padding: 14px; background: #f8fafc; border: 1px solid var(--border-color); border-radius: 8px;">
-                                    <div>
-                                        <label style="display:block; margin-bottom: 5px; font-size: 0.85rem; font-weight: 700; color: var(--accent-primary);">Visível no Site? (Frontend) <span class="req">*</span></label>
-                                        <select id="comp-ativo" class="admin-input" required style="width: 100%; font-weight: 700;">
-                                            <option value="sim">🟢 SIM - Visível no Site</option>
-                                            <option value="nao">🔴 NÃO - Ocultar no Site</option>
-                                        </select>
-                                    </div>
-                                    <div>
-                                        <label style="display:block; margin-bottom: 5px; font-size: 0.85rem; font-weight: 600;">Ordem de Apresentação</label>
-                                        <input type="number" id="comp-ordem" class="admin-input" value="1" min="1" max="99" style="width: 100%;">
-                                    </div>
-                                </div>
-
-                                <div style="display: flex; gap: 10px;">
-                                    <button type="submit" id="btn-save-competicao" class="btn-primary" style="flex: 1;">Guardar Competição</button>
-                                    <button type="button" id="btn-cancel-modal-competicao" class="btn-secondary" style="flex: 1; border: 1px solid var(--border-color); background: #f8fafc;">Cancelar</button>
-                                </div>
-                            </form>
-                    </div>
-
-                    <!-- Modal Gerir Quadro da Série Completa -->
-                    <div id="modal-tabela-serie-container" class="hidden" style="position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.55); display: flex; align-items: center; justify-content: center; z-index: 9999; padding: 20px;">
-                        <div style="background: #ffffff; width: 100%; max-width: 780px; max-height: 90vh; overflow-y: auto; padding: 26px; border-radius: 14px; box-shadow: var(--shadow-lg); border: 1px solid var(--border-color);">
-                            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
-                                <div>
-                                    <h3 id="modal-serie-title" style="margin: 0; color: var(--accent-primary); font-size: 1.25rem;">📊 Quadro da Série Completa</h3>
-                                    <p id="modal-serie-subtitle" style="margin: 3px 0 0 0; font-size: 0.82rem; color: var(--text-secondary);">Defina a lista de todas as equipas da mesma série e as suas pontuações oficiais para a época 2026/2027.</p>
-                                </div>
-                                <button type="button" onclick="window.fecharModalTabelaSerie()" style="background: none; border: none; font-size: 1.4rem; cursor: pointer; color: var(--text-secondary);">&times;</button>
-                            </div>
-
-                            <input type="hidden" id="serie-comp-id">
-
-                            <!-- Seletor de Competição / Série Ativa -->
-                            <div style="background: #f8fafc; border: 1px solid var(--border-color); border-radius: 8px; padding: 10px 14px; margin-bottom: 14px; display: flex; align-items: center; gap: 12px; flex-wrap: wrap;">
-                                <label style="font-weight: 700; font-size: 0.85rem; color: var(--text-primary); white-space: nowrap;">🏀 Competição / Série:</label>
-                                <select id="select-serie-comp-ativo" onchange="window.gerirTabelaSerie(this.value)" class="admin-input" style="flex: 1; min-width: 240px; padding: 6px 10px; font-weight: 700; color: var(--accent-primary);">
-                                    <!-- Preenchido dinamicamente -->
-                                </select>
-                            </div>
-
-                            <!-- Barra de Ações Rápidas -->
-                            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; gap: 8px; flex-wrap: wrap;">
-                                <div style="display: flex; gap: 8px; flex-wrap: wrap;">
-                                    <button type="button" onclick="window.adicionarEquipaSerie()" class="btn-secondary" style="font-size: 0.8rem; padding: 6px 12px; display: inline-flex; align-items: center; gap: 5px;">
-                                        ➕ Adicionar Equipa
-                                    </button>
-                                    <button type="button" onclick="window.importarEquipasResultados()" class="btn-secondary" style="font-size: 0.8rem; padding: 6px 12px; display: inline-flex; align-items: center; gap: 5px; color: var(--accent-primary); border-color: rgba(126,34,206,0.3);" title="Importa todas as equipas da série a partir do calendário e resultados oficiais FPB">
-                                        ⚡ Importar da Série (Resultados + Agenda)
-                                    </button>
-                                    <button type="button" onclick="window.abrirModalColarTabelaFPB()" class="btn-secondary" style="font-size: 0.8rem; padding: 6px 12px; display: inline-flex; align-items: center; gap: 5px; color: #0284c7; border-color: rgba(2, 132, 199, 0.3);" title="Copie a tabela da página da FPB e cole aqui para preenchimento automático">
-                                        📋 Colar Tabela da FPB
-                                    </button>
-                                </div>
-                                <span style="font-size: 0.75rem; color: var(--text-secondary);">Regra FPB: Vitória = 2 Pts | Derrota = 1 Pt</span>
-                            </div>
-
-                            <!-- Caixa Recolhível para Colar Dados da FPB -->
-                            <div id="box-colar-tabela-fpb" style="display: none; margin-bottom: 15px; padding: 14px; background: #f0fdf4; border: 1px solid #86efac; border-radius: 8px;">
-                                <label style="display: block; font-weight: 700; font-size: 0.85rem; color: #166534; margin-bottom: 5px;">
-                                    📋 Copie e cole aqui o texto da tabela ou classificação do site da FPB:
-                                </label>
-                                <textarea id="txt-colar-tabela-fpb" rows="5" style="width: 100%; font-family: monospace; font-size: 0.8rem; padding: 8px; border: 1px solid #bbf7d0; border-radius: 6px; box-sizing: border-box;" placeholder="Exemplo: selecione o texto da tabela da FPB no seu navegador, copie (Ctrl+C) e cole aqui (Ctrl+V)..."></textarea>
-                                <div style="display: flex; gap: 8px; margin-top: 8px;">
-                                    <button type="button" onclick="window.processarTextoColadoFPB()" class="btn-primary" style="font-size: 0.8rem; padding: 6px 14px; background: #16a34a;">⚡ Processar e Atualizar Tabela</button>
-                                    <button type="button" onclick="document.getElementById('box-colar-tabela-fpb').style.display='none'" class="btn-secondary" style="font-size: 0.8rem; padding: 6px 12px;">Fechar</button>
-                                </div>
-                            </div>
-
-                            <!-- Tabela de Equipas da Série -->
-                            <div style="overflow-x: auto; border: 1px solid var(--border-color); border-radius: 8px; margin-bottom: 16px;">
-                                <table style="width: 100%; border-collapse: collapse; font-size: 0.82rem; text-align: center;">
-                                    <thead>
-                                        <tr style="background: #f8fafc; border-bottom: 1px solid var(--border-color);">
-                                            <th style="padding: 8px; width: 45px;">#</th>
-                                            <th style="padding: 8px; text-align: left; min-width: 180px;">Equipa da Série</th>
-                                            <th style="padding: 8px; width: 55px;" title="Jogos">J</th>
-                                            <th style="padding: 8px; width: 55px;" title="Vitórias">V</th>
-                                            <th style="padding: 8px; width: 55px;" title="Derrotas">D</th>
-                                            <th style="padding: 8px; width: 60px;" title="Pontos Marcados">PM</th>
-                                            <th style="padding: 8px; width: 60px;" title="Pontos Sofridos">PS</th>
-                                            <th style="padding: 8px; width: 60px;" title="Pontos de Classificação">PTS</th>
-                                            <th style="padding: 8px; width: 45px;">Ação</th>
-                                        </tr>
-                                    </thead>
-                                    <tbody id="serie-table-body">
-                                        <!-- Linhas inseridas dinamicamente -->
-                                    </tbody>
-                                </table>
-                            </div>
-
-                            <div style="display: flex; gap: 10px;">
-                                <button type="button" id="btn-save-tabela-serie" onclick="window.salvarTabelaSerie()" class="btn-primary" style="flex: 1; padding: 10px;">Guardar Quadro da Série</button>
-                                <button type="button" onclick="window.fecharModalTabelaSerie()" class="btn-secondary" style="flex: 1; border: 1px solid var(--border-color); background: #f8fafc; padding: 10px;">Cancelar</button>
-                            </div>
-                        </div>
-                    </div>
                 </div>
 
                 <!-- TAB: GESTÃO DE EQUIPAMENTOS -->
@@ -3007,12 +2820,201 @@
                         </form>
                     </div>
                 </div>
+
+                <!-- Modal Adicionar / Editar Competição -->
+                <div id="modal-competicao-container" class="admin-modal-overlay hidden">
+                    <div class="admin-modal-content" style="max-width: 620px;">
+                        <div class="admin-modal-header" style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+                            <h3 id="modal-competicao-title" style="margin: 0; color: var(--accent-primary); font-size: 1.25rem;">Adicionar Competição</h3>
+                            <button type="button" id="btn-close-modal-competicao" class="admin-modal-close" style="background: none; border: none; font-size: 1.4rem; cursor: pointer; color: var(--text-secondary);">&times;</button>
+                        </div>
+                        <form id="form-competicao">
+                            <input type="hidden" id="competicao-id">
+
+                            <div style="display: grid; grid-template-columns: 2fr 1fr; gap: 14px; margin-bottom: 14px;">
+                                <div>
+                                    <label style="display:block; margin-bottom: 5px; font-size: 0.85rem; font-weight: 600;">Nome Oficial da Competição <span class="req">*</span></label>
+                                    <input type="text" id="comp-nome" class="admin-input" placeholder="Ex: Campeonato Nacional da 2.ª Divisão" required style="width: 100%;">
+                                </div>
+                                <div>
+                                    <label style="display:block; margin-bottom: 5px; font-size: 0.85rem; font-weight: 600;">Sigla / Código <span class="req">*</span></label>
+                                    <input type="text" id="comp-sigla" class="admin-input" placeholder="Ex: CN2" required style="width: 100%;">
+                                </div>
+                            </div>
+
+                            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 14px; margin-bottom: 14px;">
+                                <div>
+                                    <label style="display:block; margin-bottom: 5px; font-size: 0.85rem; font-weight: 600;">Escalão <span class="req">*</span></label>
+                                    <select id="comp-escalao" class="admin-input" required style="width: 100%;">
+                                        <option value="Seniores">Seniores</option>
+                                        <option value="Sub 20">Sub 20</option>
+                                        <option value="Sub 18">Sub 18</option>
+                                        <option value="Sub 16">Sub 16</option>
+                                        <option value="Sub 14">Sub 14</option>
+                                        <option value="Mini 12">Mini 12</option>
+                                        <option value="Mini 10">Mini 10</option>
+                                        <option value="Mini 8">Mini 8</option>
+                                        <option value="BabyBasket">BabyBasket</option>
+                                        <option value="Veteranos">Veteranos</option>
+                                    </select>
+                                </div>
+                                <div>
+                                    <label style="display:block; margin-bottom: 5px; font-size: 0.85rem; font-weight: 600;">Género / Sexo <span class="req">*</span></label>
+                                    <select id="comp-sexo" class="admin-input" required style="width: 100%;">
+                                        <option value="Masculino">Masculino</option>
+                                        <option value="Feminino">Feminino</option>
+                                        <option value="Misto">Misto</option>
+                                    </select>
+                                </div>
+                            </div>
+
+                            <div style="display: grid; grid-template-columns: 2fr 1fr; gap: 14px; margin-bottom: 14px;">
+                                <div>
+                                    <label style="display:block; margin-bottom: 5px; font-size: 0.85rem; font-weight: 600;">Rótulo da Equipa</label>
+                                    <input type="text" id="comp-equipa-label" class="admin-input" placeholder="Ex: Seniores Masculinos" style="width: 100%;">
+                                </div>
+                                <div>
+                                    <label style="display:block; margin-bottom: 5px; font-size: 0.85rem; font-weight: 600;">Ícone</label>
+                                    <select id="comp-icon" class="admin-input" style="width: 100%;">
+                                        <option value="🏀">🏀 Basquetebol</option>
+                                        <option value="🏆">🏆 Troféu / Taça</option>
+                                        <option value="⭐">⭐ Estrela / Formação</option>
+                                        <option value="🎯">🎯 Alvo</option>
+                                        <option value="🔥">🔥 Fogo</option>
+                                    </select>
+                                </div>
+                            </div>
+
+                            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 14px; margin-bottom: 14px;">
+                                <div>
+                                    <label style="display:block; margin-bottom: 5px; font-size: 0.85rem; font-weight: 600;">Tag / Entidade</label>
+                                    <input type="text" id="comp-tag" class="admin-input" placeholder="Ex: FPB • Nacional" style="width: 100%;">
+                                </div>
+                                <div>
+                                    <label style="display:block; margin-bottom: 5px; font-size: 0.85rem; font-weight: 600;">Tipo de Competição</label>
+                                    <select id="comp-tipo" class="admin-input" style="width: 100%;">
+                                        <option value="nacional">Nacional (Destaque Ouro)</option>
+                                        <option value="distrital">Distrital</option>
+                                    </select>
+                                </div>
+                            </div>
+
+                            <div style="margin-bottom: 14px;">
+                                <label style="display:block; margin-bottom: 5px; font-size: 0.85rem; font-weight: 600;">Detalhe / Fase / Associação</label>
+                                <input type="text" id="comp-detalhe" class="admin-input" placeholder="Ex: Zona Norte • Federação Portuguesa de Basquetebol" style="width: 100%;">
+                            </div>
+
+                            <div style="margin-bottom: 14px;">
+                                <label style="display:block; margin-bottom: 5px; font-size: 0.85rem; font-weight: 600;">Link Oficial FPB / Classificação (Opcional)</label>
+                                <input type="url" id="comp-url-fpb" class="admin-input" placeholder="Ex: https://www.fpb.pt/competicoes/ ou link da fase na FPB" style="width: 100%;">
+                                <span style="font-size: 0.74rem; color: var(--text-secondary); display: block; margin-top: 3px;">Se preenchido, os adeptos terão um botão direto na aba Classificação para consultar a tabela oficial na Federação.</span>
+                            </div>
+
+                            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 14px; margin-bottom: 22px; padding: 14px; background: #f8fafc; border: 1px solid var(--border-color); border-radius: 8px;">
+                                <div>
+                                    <label style="display:block; margin-bottom: 5px; font-size: 0.85rem; font-weight: 700; color: var(--accent-primary);">Visível no Site? (Frontend) <span class="req">*</span></label>
+                                    <select id="comp-ativo" class="admin-input" required style="width: 100%; font-weight: 700;">
+                                        <option value="sim">🟢 SIM - Visível no Site</option>
+                                        <option value="nao">🔴 NÃO - Ocultar no Site</option>
+                                    </select>
+                                </div>
+                                <div>
+                                    <label style="display:block; margin-bottom: 5px; font-size: 0.85rem; font-weight: 600;">Ordem de Apresentação</label>
+                                    <input type="number" id="comp-ordem" class="admin-input" value="1" min="1" max="99" style="width: 100%;">
+                                </div>
+                            </div>
+
+                            <div style="display: flex; gap: 10px;">
+                                <button type="submit" id="btn-save-competicao" class="btn-primary" style="flex: 1;">Guardar Competição</button>
+                                <button type="button" id="btn-cancel-modal-competicao" class="btn-secondary" style="flex: 1; border: 1px solid var(--border-color); background: #f8fafc;">Cancelar</button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+
+                <!-- Modal Gerir Quadro da Série Completa -->
+                <div id="modal-tabela-serie-container" class="admin-modal-overlay hidden">
+                    <div class="admin-modal-content" style="max-width: 780px;">
+                        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
+                            <div>
+                                <h3 id="modal-serie-title" style="margin: 0; color: var(--accent-primary); font-size: 1.25rem;">📊 Quadro da Série Completa</h3>
+                                <p id="modal-serie-subtitle" style="margin: 3px 0 0 0; font-size: 0.82rem; color: var(--text-secondary);">Defina a lista de todas as equipas da mesma série e as suas pontuações oficiais para a época 2026/2027.</p>
+                            </div>
+                            <button type="button" onclick="window.fecharModalTabelaSerie()" class="admin-modal-close" style="background: none; border: none; font-size: 1.4rem; cursor: pointer; color: var(--text-secondary);">&times;</button>
+                        </div>
+
+                        <input type="hidden" id="serie-comp-id">
+
+                        <!-- Seletor de Competição / Série Ativa -->
+                        <div style="background: #f8fafc; border: 1px solid var(--border-color); border-radius: 8px; padding: 10px 14px; margin-bottom: 14px; display: flex; align-items: center; gap: 12px; flex-wrap: wrap;">
+                            <label style="font-weight: 700; font-size: 0.85rem; color: var(--text-primary); white-space: nowrap;">🏀 Competição / Série:</label>
+                            <select id="select-serie-comp-ativo" onchange="window.gerirTabelaSerie(this.value)" class="admin-input" style="flex: 1; min-width: 240px; padding: 6px 10px; font-weight: 700; color: var(--accent-primary);">
+                                <!-- Preenchido dinamicamente -->
+                            </select>
+                        </div>
+
+                        <!-- Barra de Ações Rápidas -->
+                        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; gap: 8px; flex-wrap: wrap;">
+                            <div style="display: flex; gap: 8px; flex-wrap: wrap;">
+                                <button type="button" onclick="window.adicionarEquipaSerie()" class="btn-secondary" style="font-size: 0.8rem; padding: 6px 12px; display: inline-flex; align-items: center; gap: 5px;">
+                                    ➕ Adicionar Equipa
+                                </button>
+                                <button type="button" onclick="window.importarEquipasResultados()" class="btn-secondary" style="font-size: 0.8rem; padding: 6px 12px; display: inline-flex; align-items: center; gap: 5px; color: var(--accent-primary); border-color: rgba(126,34,206,0.3);" title="Importa todas as equipas da série a partir do calendário e resultados oficiais FPB">
+                                    ⚡ Importar da Série (Resultados + Agenda)
+                                </button>
+                                <button type="button" onclick="window.abrirModalColarTabelaFPB()" class="btn-secondary" style="font-size: 0.8rem; padding: 6px 12px; display: inline-flex; align-items: center; gap: 5px; color: #0284c7; border-color: rgba(2, 132, 199, 0.3);" title="Copie a tabela da página da FPB e cole aqui para preenchimento automático">
+                                    📋 Colar Tabela da FPB
+                                </button>
+                            </div>
+                            <span style="font-size: 0.75rem; color: var(--text-secondary);">Regra FPB: Vitória = 2 Pts | Derrota = 1 Pt</span>
+                        </div>
+
+                        <!-- Caixa Recolhível para Colar Dados da FPB -->
+                        <div id="box-colar-tabela-fpb" style="display: none; margin-bottom: 15px; padding: 14px; background: #f0fdf4; border: 1px solid #86efac; border-radius: 8px;">
+                            <label style="display: block; font-weight: 700; font-size: 0.85rem; color: #166534; margin-bottom: 5px;">
+                                📋 Copie e cole aqui o texto da tabela ou classificação do site da FPB:
+                            </label>
+                            <textarea id="txt-colar-tabela-fpb" rows="5" style="width: 100%; font-family: monospace; font-size: 0.8rem; padding: 8px; border: 1px solid #bbf7d0; border-radius: 6px; box-sizing: border-box;" placeholder="Exemplo: selecione o texto da tabela da FPB no seu navegador, copie (Ctrl+C) e cole aqui (Ctrl+V)..."></textarea>
+                            <div style="display: flex; gap: 8px; margin-top: 8px;">
+                                <button type="button" onclick="window.processarTextoColadoFPB()" class="btn-primary" style="font-size: 0.8rem; padding: 6px 14px; background: #16a34a;">⚡ Processar e Atualizar Tabela</button>
+                                <button type="button" onclick="document.getElementById('box-colar-tabela-fpb').style.display='none'" class="btn-secondary" style="font-size: 0.8rem; padding: 6px 12px;">Fechar</button>
+                            </div>
+                        </div>
+
+                        <!-- Tabela de Equipas da Série -->
+                        <div style="overflow-x: auto; border: 1px solid var(--border-color); border-radius: 8px; margin-bottom: 16px;">
+                            <table style="width: 100%; border-collapse: collapse; font-size: 0.82rem; text-align: center;">
+                                <thead>
+                                    <tr style="background: #f8fafc; border-bottom: 1px solid var(--border-color);">
+                                        <th style="padding: 8px; width: 45px;">#</th>
+                                        <th style="padding: 8px; text-align: left; min-width: 180px;">Equipa da Série</th>
+                                        <th style="padding: 8px; width: 55px;" title="Jogos">J</th>
+                                        <th style="padding: 8px; width: 55px;" title="Vitórias">V</th>
+                                        <th style="padding: 8px; width: 55px;" title="Derrotas">D</th>
+                                        <th style="padding: 8px; width: 60px;" title="Pontos Marcados">PM</th>
+                                        <th style="padding: 8px; width: 60px;" title="Pontos Sofridos">PS</th>
+                                        <th style="padding: 8px; width: 60px;" title="Pontos de Classificação">PTS</th>
+                                        <th style="padding: 8px; width: 45px;">Ação</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="serie-table-body">
+                                    <!-- Linhas inseridas dinamicamente -->
+                                </tbody>
+                            </table>
+                        </div>
+
+                        <div style="display: flex; gap: 10px;">
+                            <button type="button" id="btn-save-tabela-serie" onclick="window.salvarTabelaSerie()" class="btn-primary" style="flex: 1; padding: 10px;">Guardar Quadro da Série</button>
+                            <button type="button" onclick="window.fecharModalTabelaSerie()" class="btn-secondary" style="flex: 1; border: 1px solid var(--border-color); background: #f8fafc; padding: 10px;">Cancelar</button>
+                        </div>
+                    </div>
+                </div>
             </main>
         </div>
     </div>
 
     <!-- Scripts -->
     <script src="js/config.js"></script>
-    <script src="js/admin.js?v=20261003_2330"></script>
+    <script src="js/admin.js?v=20261003_2345"></script>
 </body>
 </html>
