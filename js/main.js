@@ -905,7 +905,8 @@ async function loadCompeticoesSection(supabase) {
             tag: "FPB • Nacional",
             tipo: "nacional",
             detalhe: "Zona Norte • Federação Portuguesa de Basquetebol",
-            icon: "🏀"
+            icon: "🏀",
+            url_fpb: "https://www.fpb.pt/competicoes/"
         },
         {
             sigla: "Taça de Portugal",
@@ -916,7 +917,8 @@ async function loadCompeticoesSection(supabase) {
             tag: "FPB • Nacional",
             tipo: "nacional",
             detalhe: "Fases Eliminatórias Nacionais • Federação Portuguesa de Basquetebol",
-            icon: "🏆"
+            icon: "🏆",
+            url_fpb: "https://www.fpb.pt/competicoes/"
         },
         {
             sigla: "Sub 18 Masc",
@@ -927,7 +929,8 @@ async function loadCompeticoesSection(supabase) {
             tag: "ABVC • Distrital",
             tipo: "distrital",
             detalhe: "Fase Regular e Taça Distrital • AB Viana do Castelo",
-            icon: "🏀"
+            icon: "🏀",
+            url_fpb: "https://www.fpb.pt/competicoes/"
         },
         {
             sigla: "Sub 16 Fem",
@@ -938,7 +941,8 @@ async function loadCompeticoesSection(supabase) {
             tag: "ABVC • Distrital",
             tipo: "distrital",
             detalhe: "Campeonato Inter-distrital • AB Viana do Castelo / FPB",
-            icon: "🏀"
+            icon: "🏀",
+            url_fpb: "https://www.fpb.pt/competicoes/"
         },
         {
             sigla: "Sub 14 Masc",
@@ -949,7 +953,8 @@ async function loadCompeticoesSection(supabase) {
             tag: "ABVC • Distrital",
             tipo: "distrital",
             detalhe: "Campeonato Distrital de Formação • AB Viana do Castelo",
-            icon: "🏀"
+            icon: "🏀",
+            url_fpb: "https://www.fpb.pt/competicoes/"
         },
         {
             sigla: "Sub 14 Fem",
@@ -960,7 +965,8 @@ async function loadCompeticoesSection(supabase) {
             tag: "ABVC • Distrital",
             tipo: "distrital",
             detalhe: "Campeonato Distrital de Formação • AB Viana do Castelo",
-            icon: "🏀"
+            icon: "🏀",
+            url_fpb: "https://www.fpb.pt/competicoes/"
         },
         {
             sigla: "Minibasquete",
@@ -971,7 +977,8 @@ async function loadCompeticoesSection(supabase) {
             tag: "FPB / ABVC",
             tipo: "distrital",
             detalhe: "Festivais e Concentrações de Iniciação e Formação",
-            icon: "⭐"
+            icon: "⭐",
+            url_fpb: "https://www.fpb.pt/clube/basket-clube-de-valenca/"
         }
     ];
 
@@ -1175,6 +1182,158 @@ async function loadCompeticoesSection(supabase) {
             `;
         };
 
+        // Renderizador da Tabela de Classificação Oficial FPB
+        const renderClassificacaoTable = (comp, jogos) => {
+            const urlFPB = comp.url_fpb || comp.url_classificacao_fpb || 'https://www.fpb.pt/competicoes/';
+
+            // Filtrar apenas jogos da competição com resultado válido
+            const jogosComResultado = (jogos || []).filter(j => {
+                const pCasa = parseInt(j.pontos_casa, 10);
+                const pFora = parseInt(j.pontos_fora, 10);
+                return !isNaN(pCasa) && !isNaN(pFora) && (pCasa > 0 || pFora > 0);
+            });
+
+            if (jogosComResultado.length === 0) {
+                return `
+                    <div class="comp-games-empty">
+                        <span class="empty-icon">📊</span>
+                        <span style="font-weight: 700; color: var(--text-primary);">Ainda sem resultados oficiais registados para apurar a classificação desta época.</span>
+                        <span style="font-size: 0.8rem; color: var(--text-secondary); max-width: 480px; margin: 4px auto 0 auto;">A classificação é atualizada automaticamente em tempo real sempre que os jogos terminam e são sincronizados com a FPB.</span>
+                        ${urlFPB ? `
+                            <div style="margin-top: 12px;">
+                                <a href="${urlFPB}" target="_blank" rel="noopener noreferrer" class="comp-class-btn-external" title="Abrir página oficial da competição na FPB">
+                                    <span>🌐 Consultar Tabela Oficial no Portal FPB</span>
+                                    <span>↗</span>
+                                </a>
+                            </div>
+                        ` : ''}
+                    </div>
+                `;
+            }
+
+            // Calcular Tabela Classificativa (Regras Oficiais Basquetebol FPB: Vitória = 2 Pts, Derrota = 1 Pt)
+            const tabelaMap = {};
+
+            jogosComResultado.forEach(j => {
+                const pCasa = parseInt(j.pontos_casa, 10);
+                const pFora = parseInt(j.pontos_fora, 10);
+                const cNome = (j.equipa_casa || '').trim();
+                const fNome = (j.equipa_fora || '').trim();
+
+                if (!cNome || !fNome) return;
+
+                if (!tabelaMap[cNome]) {
+                    tabelaMap[cNome] = {
+                        nome: cNome,
+                        logo: j.logo_casa || null,
+                        j: 0, v: 0, d: 0, pm: 0, ps: 0, pts: 0
+                    };
+                }
+                if (!tabelaMap[fNome]) {
+                    tabelaMap[fNome] = {
+                        nome: fNome,
+                        logo: j.logo_fora || null,
+                        j: 0, v: 0, d: 0, pm: 0, ps: 0, pts: 0
+                    };
+                }
+
+                tabelaMap[cNome].j += 1;
+                tabelaMap[fNome].j += 1;
+                tabelaMap[cNome].pm += pCasa;
+                tabelaMap[cNome].ps += pFora;
+                tabelaMap[fNome].pm += pFora;
+                tabelaMap[fNome].ps += pCasa;
+
+                if (pCasa > pFora) {
+                    tabelaMap[cNome].v += 1;
+                    tabelaMap[cNome].pts += 2; // Vitória basquetebol FPB
+                    tabelaMap[fNome].d += 1;
+                    tabelaMap[fNome].pts += 1; // Derrota basquetebol FPB
+                } else if (pFora > pCasa) {
+                    tabelaMap[fNome].v += 1;
+                    tabelaMap[fNome].pts += 2;
+                    tabelaMap[cNome].d += 1;
+                    tabelaMap[cNome].pts += 1;
+                } else {
+                    tabelaMap[cNome].pts += 1;
+                    tabelaMap[fNome].pts += 1;
+                }
+            });
+
+            // Ordenar por Pontos (Pts), Diferença de Pontos (DIF), Vitórias (V) e Pontos Marcados (PM)
+            const equipas = Object.values(tabelaMap).map(eq => ({
+                ...eq,
+                dif: eq.pm - eq.ps
+            })).sort((a, b) => {
+                if (b.pts !== a.pts) return b.pts - a.pts;
+                if (b.dif !== a.dif) return b.dif - a.dif;
+                if (b.v !== a.v) return b.v - a.v;
+                return b.pm - a.pm;
+            });
+
+            return `
+                <div class="comp-classificacao-container">
+                    <div class="comp-classificacao-header">
+                        <span class="comp-class-source-badge">⚡ Classificação calculada com resultados oficiais FPB</span>
+                        ${urlFPB ? `
+                            <a href="${urlFPB}" target="_blank" rel="noopener noreferrer" class="comp-class-link-fpb" title="Abrir portal oficial da FPB">
+                                <span>Ver no Portal FPB ↗</span>
+                            </a>
+                        ` : ''}
+                    </div>
+
+                    <div class="comp-table-scroll">
+                        <table class="comp-classificacao-table">
+                            <thead>
+                                <tr>
+                                    <th class="th-pos">#</th>
+                                    <th class="th-team">Equipa</th>
+                                    <th class="th-num" title="Jogos Disputados">J</th>
+                                    <th class="th-num" title="Vitórias">V</th>
+                                    <th class="th-num" title="Derrotas">D</th>
+                                    <th class="th-num col-pts-extra" title="Pontos Marcados">PM</th>
+                                    <th class="th-num col-pts-extra" title="Pontos Sofridos">PS</th>
+                                    <th class="th-num" title="Diferença de Pontos">DIF</th>
+                                    <th class="th-num th-pts" title="Pontos de Classificação">PTS</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                ${equipas.map((eq, idx) => {
+                                    const isBCV = eq.nome.toLowerCase().includes('valença') || eq.nome.toLowerCase().includes('bcv');
+                                    const logo = window.obterLogoEquipa ? window.obterLogoEquipa(eq.nome, eq.logo) : eq.logo;
+                                    const difStr = eq.dif > 0 ? `+${eq.dif}` : `${eq.dif}`;
+                                    return `
+                                        <tr class="${isBCV ? 'is-bcv-row' : ''}">
+                                            <td class="td-pos">
+                                                <span class="pos-badge ${idx === 0 ? 'pos-first' : ''}">${idx + 1}</span>
+                                            </td>
+                                            <td class="td-team">
+                                                <div class="td-team-content">
+                                                    ${logo ? `<img src="${logo}" alt="" class="team-logo-icon" style="width: 18px; height: 18px;" onerror="this.style.display='none'">` : ''}
+                                                    <span class="team-name" title="${eq.nome}">${eq.nome}</span>
+                                                    ${isBCV ? `<span class="bcv-badge-tag">BCV</span>` : ''}
+                                                </div>
+                                            </td>
+                                            <td class="td-num">${eq.j}</td>
+                                            <td class="td-num v-color">${eq.v}</td>
+                                            <td class="td-num d-color">${eq.d}</td>
+                                            <td class="td-num col-pts-extra text-muted">${eq.pm}</td>
+                                            <td class="td-num col-pts-extra text-muted">${eq.ps}</td>
+                                            <td class="td-num dif-color ${eq.dif > 0 ? 'dif-pos' : eq.dif < 0 ? 'dif-neg' : ''}">${difStr}</td>
+                                            <td class="td-num td-pts"><strong>${eq.pts}</strong></td>
+                                        </tr>
+                                    `;
+                                }).join('')}
+                            </tbody>
+                        </table>
+                    </div>
+                    <div class="comp-table-legend">
+                        <span><strong>Regra Oficial FPB:</strong> Vitória = 2 Pts | Derrota = 1 Pt</span>
+                    </div>
+                </div>
+            `;
+        };
+
         grid.innerHTML = '';
         competicoesAtivas.forEach(comp => {
             const card = document.createElement('div');
@@ -1200,7 +1359,7 @@ async function loadCompeticoesSection(supabase) {
                         </p>
                     </div>
 
-                    <!-- Abas 1 - Agenda e 2 - Resultados -->
+                    <!-- Abas 1 - Agenda, 2 - Resultados e 3 - Classificação -->
                     <div class="competicao-tabs-col">
                         <div class="competicao-tabs-bar">
                             <button type="button" class="competicao-tab-btn" data-action="agenda">
@@ -1211,11 +1370,14 @@ async function loadCompeticoesSection(supabase) {
                                 <span>🏁 Resultados</span>
                                 ${jogosResultados.length > 0 ? `<span class="tab-badge">${jogosResultados.length}</span>` : ''}
                             </button>
+                            <button type="button" class="competicao-tab-btn" data-action="classificacao">
+                                <span>📊 Classificação</span>
+                            </button>
                         </div>
                     </div>
                 </div>
 
-                <!-- Painel Expansível de Jogos -->
+                <!-- Painel Expansível de Jogos e Classificação -->
                 <div class="competicao-tab-panel" style="display: none;"></div>
 
                 <div class="competicao-footer">
@@ -1227,6 +1389,7 @@ async function loadCompeticoesSection(supabase) {
             // Event Listeners das Abas
             const btnAgenda = card.querySelector('.competicao-tab-btn[data-action="agenda"]');
             const btnResultados = card.querySelector('.competicao-tab-btn[data-action="resultados"]');
+            const btnClassificacao = card.querySelector('.competicao-tab-btn[data-action="classificacao"]');
             const panel = card.querySelector('.competicao-tab-panel');
             let currentTab = null;
 
@@ -1235,17 +1398,20 @@ async function loadCompeticoesSection(supabase) {
                     panel.style.display = 'none';
                     btnAgenda.classList.remove('active');
                     btnResultados.classList.remove('active');
+                    btnClassificacao.classList.remove('active');
                     currentTab = null;
                 } else {
                     panel.style.display = 'block';
+                    btnAgenda.classList.toggle('active', action === 'agenda');
+                    btnResultados.classList.toggle('active', action === 'resultados');
+                    btnClassificacao.classList.toggle('active', action === 'classificacao');
+
                     if (action === 'agenda') {
-                        btnAgenda.classList.add('active');
-                        btnResultados.classList.remove('active');
                         panel.innerHTML = renderAgendaList(jogosAgenda);
-                    } else {
-                        btnResultados.classList.add('active');
-                        btnAgenda.classList.remove('active');
+                    } else if (action === 'resultados') {
                         panel.innerHTML = renderResultadosList(jogosResultados);
+                    } else if (action === 'classificacao') {
+                        panel.innerHTML = renderClassificacaoTable(comp, jogosResultados);
                     }
                     currentTab = action;
                 }
@@ -1259,6 +1425,11 @@ async function loadCompeticoesSection(supabase) {
             btnResultados.addEventListener('click', (e) => {
                 e.stopPropagation();
                 handleTabClick('resultados');
+            });
+
+            btnClassificacao.addEventListener('click', (e) => {
+                e.stopPropagation();
+                handleTabClick('classificacao');
             });
 
             grid.appendChild(card);

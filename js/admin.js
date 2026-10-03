@@ -8247,6 +8247,7 @@ document.addEventListener('DOMContentLoaded', async () => {
             tipo: "nacional",
             detalhe: "Zona Norte • Federação Portuguesa de Basquetebol",
             icon: "🏀",
+            url_fpb: "https://www.fpb.pt/competicoes/",
             ativo: true,
             ordem: 1
         },
@@ -8261,6 +8262,7 @@ document.addEventListener('DOMContentLoaded', async () => {
             tipo: "nacional",
             detalhe: "Fases Eliminatórias Nacionais • Federação Portuguesa de Basquetebol",
             icon: "🏆",
+            url_fpb: "https://www.fpb.pt/competicoes/",
             ativo: true,
             ordem: 2
         },
@@ -8275,6 +8277,7 @@ document.addEventListener('DOMContentLoaded', async () => {
             tipo: "distrital",
             detalhe: "Fase Regular e Taça Distrital • AB Viana do Castelo",
             icon: "🏀",
+            url_fpb: "https://www.fpb.pt/competicoes/",
             ativo: true,
             ordem: 3
         },
@@ -8289,6 +8292,7 @@ document.addEventListener('DOMContentLoaded', async () => {
             tipo: "distrital",
             detalhe: "Campeonato Inter-distrital • AB Viana do Castelo / FPB",
             icon: "🏀",
+            url_fpb: "https://www.fpb.pt/competicoes/",
             ativo: true,
             ordem: 4
         },
@@ -8303,6 +8307,7 @@ document.addEventListener('DOMContentLoaded', async () => {
             tipo: "distrital",
             detalhe: "Campeonato Distrital de Formação • AB Viana do Castelo",
             icon: "🏀",
+            url_fpb: "https://www.fpb.pt/competicoes/",
             ativo: true,
             ordem: 5
         },
@@ -8317,6 +8322,7 @@ document.addEventListener('DOMContentLoaded', async () => {
             tipo: "distrital",
             detalhe: "Campeonato Distrital de Formação • AB Viana do Castelo",
             icon: "🏀",
+            url_fpb: "https://www.fpb.pt/competicoes/",
             ativo: true,
             ordem: 6
         },
@@ -8331,6 +8337,7 @@ document.addEventListener('DOMContentLoaded', async () => {
             tipo: "distrital",
             detalhe: "Festivais e Concentrações de Iniciação e Formação",
             icon: "⭐",
+            url_fpb: "https://www.fpb.pt/clube/basket-clube-de-valenca/",
             ativo: true,
             ordem: 7
         }
@@ -8531,6 +8538,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         document.getElementById('comp-tag').value = comp.tag || 'FPB • Nacional';
         document.getElementById('comp-tipo').value = comp.tipo || 'distrital';
         document.getElementById('comp-detalhe').value = comp.detalhe || '';
+        document.getElementById('comp-url-fpb').value = comp.url_fpb || '';
         document.getElementById('comp-ativo').value = comp.ativo !== false ? 'sim' : 'nao';
         document.getElementById('comp-ordem').value = comp.ordem || 1;
 
@@ -8567,6 +8575,7 @@ document.addEventListener('DOMContentLoaded', async () => {
             const tag = document.getElementById('comp-tag').value.trim() || 'FPB';
             const tipo = document.getElementById('comp-tipo').value;
             const detalhe = document.getElementById('comp-detalhe').value.trim();
+            const url_fpb = document.getElementById('comp-url-fpb').value.trim();
             const ativo = document.getElementById('comp-ativo').value === 'sim';
             const ordem = parseInt(document.getElementById('comp-ordem').value, 10) || 1;
 
@@ -8580,7 +8589,7 @@ document.addEventListener('DOMContentLoaded', async () => {
                 if (idx !== -1) {
                     currentCompeticoes[idx] = {
                         ...currentCompeticoes[idx],
-                        nome, sigla, escalao, sexo, equipa_label, icon, tag, tipo, detalhe, ativo, ordem
+                        nome, sigla, escalao, sexo, equipa_label, icon, tag, tipo, detalhe, url_fpb, ativo, ordem
                     };
                 }
             } else {
@@ -8588,7 +8597,7 @@ document.addEventListener('DOMContentLoaded', async () => {
                 const novoId = 'comp_' + Date.now();
                 currentCompeticoes.push({
                     id: novoId,
-                    nome, sigla, escalao, sexo, equipa_label, icon, tag, tipo, detalhe, ativo, ordem
+                    nome, sigla, escalao, sexo, equipa_label, icon, tag, tipo, detalhe, url_fpb, ativo, ordem
                 });
             }
 
@@ -8611,6 +8620,7 @@ document.addEventListener('DOMContentLoaded', async () => {
             document.getElementById('modal-competicao-title').textContent = "Adicionar Competição";
             document.getElementById('competicao-id').value = '';
             if (formCompeticao) formCompeticao.reset();
+            if (document.getElementById('comp-url-fpb')) document.getElementById('comp-url-fpb').value = '';
             document.getElementById('comp-ativo').value = 'sim';
             document.getElementById('comp-ordem').value = currentCompeticoes.length + 1;
             document.getElementById('modal-competicao-container').classList.remove('hidden');

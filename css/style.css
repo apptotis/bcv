@@ -2725,6 +2725,229 @@ img {
     opacity: 0.8;
 }
 
+/* Tabela de Classificação das Competições (Estilo Oficial FPB) */
+.comp-classificacao-container {
+    width: 100%;
+}
+
+.comp-classificacao-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 8px;
+    gap: 8px;
+    flex-wrap: wrap;
+}
+
+.comp-class-source-badge {
+    font-size: 0.72rem;
+    font-weight: 700;
+    color: var(--accent-primary);
+    background: rgba(126, 34, 206, 0.08);
+    padding: 3px 8px;
+    border-radius: 6px;
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+}
+
+.comp-class-link-fpb {
+    font-size: 0.75rem;
+    font-weight: 700;
+    color: #b45309;
+    background: rgba(245, 158, 11, 0.12);
+    border: 1px solid rgba(245, 158, 11, 0.28);
+    padding: 3px 10px;
+    border-radius: 6px;
+    text-decoration: none;
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    transition: all 0.2s ease;
+}
+
+.comp-class-link-fpb:hover {
+    background: rgba(245, 158, 11, 0.22);
+    transform: translateY(-1px);
+}
+
+.comp-class-btn-external {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 7px 14px;
+    border-radius: 8px;
+    background: var(--accent-primary);
+    color: #ffffff;
+    font-size: 0.8rem;
+    font-weight: 700;
+    text-decoration: none;
+    transition: all 0.2s ease;
+}
+
+.comp-class-btn-external:hover {
+    background: #6b21a8;
+    transform: translateY(-1px);
+    box-shadow: 0 4px 10px rgba(126, 34, 206, 0.25);
+}
+
+.comp-table-scroll {
+    width: 100%;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    border: 1px solid rgba(0, 0, 0, 0.08);
+    border-radius: 8px;
+    background: #ffffff;
+}
+
+.comp-classificacao-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 0.82rem;
+    text-align: left;
+    white-space: nowrap;
+}
+
+.comp-classificacao-table thead th {
+    background: #f8fafc;
+    padding: 8px 10px;
+    font-size: 0.72rem;
+    font-weight: 800;
+    color: var(--text-secondary);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    border-bottom: 1px solid var(--border-color);
+}
+
+.comp-classificacao-table thead th.th-num {
+    text-align: center;
+}
+
+.comp-classificacao-table thead th.th-pts {
+    color: var(--accent-primary);
+    background: rgba(126, 34, 206, 0.06);
+    font-weight: 900;
+}
+
+.comp-classificacao-table tbody td {
+    padding: 7px 10px;
+    border-bottom: 1px solid rgba(0, 0, 0, 0.04);
+    color: var(--text-primary);
+    font-size: 0.82rem;
+}
+
+.comp-classificacao-table tbody tr:last-child td {
+    border-bottom: none;
+}
+
+.comp-classificacao-table tbody tr:hover td {
+    background: rgba(126, 34, 206, 0.02);
+}
+
+.comp-classificacao-table tbody tr.is-bcv-row td {
+    background: rgba(126, 34, 206, 0.07);
+    font-weight: 700;
+    color: var(--accent-primary);
+}
+
+.comp-classificacao-table tbody tr.is-bcv-row {
+    border-left: 3px solid var(--accent-primary);
+}
+
+.comp-classificacao-table .td-pos {
+    width: 32px;
+    text-align: center;
+    padding-left: 8px;
+}
+
+.pos-badge {
+    display: inline-block;
+    width: 20px;
+    height: 20px;
+    line-height: 20px;
+    text-align: center;
+    border-radius: 50%;
+    font-size: 0.72rem;
+    font-weight: 800;
+    color: var(--text-secondary);
+    background: #f1f5f9;
+}
+
+.pos-badge.pos-first {
+    background: #fef3c7;
+    color: #b45309;
+}
+
+.comp-classificacao-table .td-team {
+    min-width: 170px;
+}
+
+.td-team-content {
+    display: inline-flex;
+    align-items: center;
+    gap: 7px;
+}
+
+.team-name {
+    font-weight: 600;
+}
+
+.bcv-badge-tag {
+    font-size: 0.65rem;
+    font-weight: 800;
+    padding: 1px 5px;
+    border-radius: 4px;
+    background: var(--accent-primary);
+    color: #ffffff;
+    letter-spacing: 0.5px;
+}
+
+.comp-classificacao-table .td-num {
+    text-align: center;
+    padding: 7px 8px;
+}
+
+.comp-classificacao-table .td-num.td-pts {
+    font-weight: 800;
+    color: var(--accent-primary);
+    background: rgba(126, 34, 206, 0.05);
+}
+
+.comp-classificacao-table .td-num.v-color {
+    color: #15803d;
+    font-weight: 700;
+}
+
+.comp-classificacao-table .td-num.d-color {
+    color: #b91c1c;
+    font-weight: 600;
+}
+
+.comp-classificacao-table .td-num.dif-color.dif-pos {
+    color: #15803d;
+    font-weight: 700;
+}
+
+.comp-classificacao-table .td-num.dif-color.dif-neg {
+    color: #b91c1c;
+    font-weight: 600;
+}
+
+.comp-table-legend {
+    display: flex;
+    justify-content: flex-end;
+    font-size: 0.72rem;
+    color: var(--text-secondary);
+    margin-top: 6px;
+    padding: 0 4px;
+}
+
+@media (max-width: 600px) {
+    .col-pts-extra {
+        display: none;
+    }
+}
+
 /* Responsividade Mobile para Competições Oficiais */
 @media (max-width: 768px) {
     .portal-section-header {
