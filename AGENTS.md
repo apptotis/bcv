@@ -92,4 +92,5 @@
 - [2026-10-03] Gemini: Exibição completa das 7 equipas da série Sub 14 Fem na Classificação, pré-carregamento automático no Admin e ferramenta 'Colar Tabela da FPB' com parser inteligente de dados federativos.
 - [2026-10-03] Gemini: Correção estrutural crítica no Admin (admin.html): resolução de tag div não fechada em tab-competicoes que retinha modais (Série e Sincronização FPB) em elementos ocultos, e migração dos modais para a raiz do documento.
 - [2026-10-03] Gemini: Sincronização integral da classificação da série com a FPB e otimização mobile dos cards (botão Agenda na 1ª linha e abas a 50%).
-- [2026-10-04] Gemini: Correção da falsa derrota 0-20 do jogo adiado de Sub 14 Masc (id 417379 reinserido na Agenda) e expansão da série de Sub 18 Masc para 8 equipas (SC Maria da Fonte, GDAS Basket, SC Braga B).
+- [2026-10-04] Gemini: Correção da falsa derrota 0-20 do jogo adiado de Sub 14 Masc (id 417379 reinserido na Agenda) e expansão da série de Sub 18 Masc para 8 equipas (SC Maria da Fonte, GDAS Basket, ATC).
+- [2026-10-04] Gemini: Atualização da série Sub 16 Fem para as 7 equipas oficiais da FPB (GDAS Basket, CB Viana, Monção BC) e substituição de SC Braga B por ATC em Sub 18 Masc.

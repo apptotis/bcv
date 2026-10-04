@@ -8706,8 +8706,8 @@ document.addEventListener('DOMContentLoaded', async () => {
             'BC Limiense - B'
         ],
         'sub14_masc': ['BC Valença', 'Monção BC', 'CB Viana', 'Restauradores da Granja', 'SC Maria da Fonte', 'SC Braga B'],
-        'sub16_fem': ['BC Valença', 'Famalicense AC', 'BC Limiense', 'Futebol Clube de Vizela'],
-        'sub18_masc': ['BC Valença', 'CB Viana', 'Restauradores da Granja', 'Famalicense AC - B', 'Monção BC', 'SC Maria da Fonte', 'GDAS Basket', 'SC Braga B'],
+        'sub16_fem': ['BC Valença', 'Famalicense AC', 'BC Limiense', 'Futebol Clube de Vizela', 'GDAS Basket', 'CB Viana', 'Monção BC'],
+        'sub18_masc': ['BC Valença', 'CB Viana', 'Restauradores da Granja', 'Famalicense AC - B', 'Monção BC', 'SC Maria da Fonte', 'GDAS Basket', 'ATC'],
         'cn2': ['BC Valença', 'Monção BC', 'CAAS Padaria Ribeiro', 'CDJ Régio']
     };
 
@@ -8750,6 +8750,16 @@ document.addEventListener('DOMContentLoaded', async () => {
                     { pos: 6, nome: "Futebol Clube de Vizela", j: 0, v: 0, d: 0, pm: 0, ps: 0, dif: 0, pts: 0 },
                     { pos: 7, nome: "BC Limiense - B", j: 0, v: 0, d: 0, pm: 0, ps: 0, dif: 0, pts: 0 }
                 ];
+            } else if (sKey === 'sub16_fem' || sKey.includes('sub16_fem') || (comp.sigla || '').toLowerCase().includes('sub 16 fem')) {
+                currentEquipasSerie = [
+                    { pos: 1, nome: "Famalicense AC", j: 1, v: 1, d: 0, pm: 54, ps: 40, dif: 14, pts: 2 },
+                    { pos: 2, nome: "BC Valença", j: 1, v: 0, d: 1, pm: 40, ps: 54, dif: -14, pts: 1 },
+                    { pos: 3, nome: "BC Limiense", j: 0, v: 0, d: 0, pm: 0, ps: 0, dif: 0, pts: 0 },
+                    { pos: 4, nome: "Futebol Clube de Vizela", j: 0, v: 0, d: 0, pm: 0, ps: 0, dif: 0, pts: 0 },
+                    { pos: 5, nome: "GDAS Basket", j: 0, v: 0, d: 0, pm: 0, ps: 0, dif: 0, pts: 0 },
+                    { pos: 6, nome: "CB Viana", j: 0, v: 0, d: 0, pm: 0, ps: 0, dif: 0, pts: 0 },
+                    { pos: 7, nome: "Monção BC", j: 0, v: 0, d: 0, pm: 0, ps: 0, dif: 0, pts: 0 }
+                ];
             } else if (sKey === 'sub18_masc' || sKey.includes('sub18_masc') || (comp.sigla || '').toLowerCase().includes('sub 18')) {
                 currentEquipasSerie = [
                     { pos: 1, nome: "CB Viana", j: 1, v: 1, d: 0, pm: 123, ps: 23, dif: 100, pts: 2 },
@@ -8759,7 +8769,7 @@ document.addEventListener('DOMContentLoaded', async () => {
                     { pos: 5, nome: "Monção BC", j: 0, v: 0, d: 0, pm: 0, ps: 0, dif: 0, pts: 0 },
                     { pos: 6, nome: "SC Maria da Fonte", j: 0, v: 0, d: 0, pm: 0, ps: 0, dif: 0, pts: 0 },
                     { pos: 7, nome: "GDAS Basket", j: 0, v: 0, d: 0, pm: 0, ps: 0, dif: 0, pts: 0 },
-                    { pos: 8, nome: "SC Braga B", j: 0, v: 0, d: 0, pm: 0, ps: 0, dif: 0, pts: 0 }
+                    { pos: 8, nome: "ATC", j: 0, v: 0, d: 0, pm: 0, ps: 0, dif: 0, pts: 0 }
                 ];
             } else {
                 const equipasPadrao = SERIES_OFICIAIS_BCV_GLOBAL[sKey] || [];
@@ -8995,8 +9005,8 @@ document.addEventListener('DOMContentLoaded', async () => {
                 'BC Limiense - B'
             ],
             'sub14_masc': ['BC Valença', 'Monção BC', 'CB Viana', 'Restauradores da Granja', 'SC Maria da Fonte', 'SC Braga B'],
-            'sub16_fem': ['BC Valença', 'Famalicense AC', 'BC Limiense', 'Futebol Clube de Vizela'],
-            'sub18_masc': ['BC Valença', 'CB Viana', 'Restauradores da Granja', 'Famalicense AC - B', 'Monção BC', 'SC Maria da Fonte', 'GDAS Basket', 'SC Braga B'],
+            'sub16_fem': ['BC Valença', 'Famalicense AC', 'BC Limiense', 'Futebol Clube de Vizela', 'GDAS Basket', 'CB Viana', 'Monção BC'],
+            'sub18_masc': ['BC Valença', 'CB Viana', 'Restauradores da Granja', 'Famalicense AC - B', 'Monção BC', 'SC Maria da Fonte', 'GDAS Basket', 'ATC'],
             'cn2': ['BC Valença', 'Monção BC', 'CAAS Padaria Ribeiro', 'CDJ Régio']
         };
 
