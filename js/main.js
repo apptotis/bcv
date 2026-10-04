@@ -1195,7 +1195,7 @@ async function loadCompeticoesSection(supabase) {
             ],
             'sub14_masc': ['BC Valença', 'Monção BC', 'CB Viana', 'Restauradores da Granja', 'SC Maria da Fonte', 'SC Braga B'],
             'sub16_fem': ['BC Valença', 'Famalicense AC', 'BC Limiense', 'Futebol Clube de Vizela'],
-            'sub18_masc': ['BC Valença', 'CB Viana', 'Restauradores da Granja', 'Famalicense AC - B', 'Monção BC'],
+            'sub18_masc': ['BC Valença', 'CB Viana', 'Restauradores da Granja', 'Famalicense AC - B', 'Monção BC', 'SC Maria da Fonte', 'GDAS Basket', 'SC Braga B'],
             'cn2': ['BC Valença', 'Monção BC', 'CAAS Padaria Ribeiro', 'CDJ Régio']
         };
 
