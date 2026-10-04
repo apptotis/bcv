@@ -133,13 +133,6 @@ function parseFPBCalendar(rawHtml: string): FPBGame[] {
         }
       }
 
-      // Proteção para jogos adiados com resultado não homologado/provisório 0-20
-      if (internalId === '417379' || (isResult && pontosCasa === 0 && pontosFora === 20 && internalId === '417379')) {
-        isResult = false;
-        pontosCasa = null;
-        pontosFora = null;
-        horaJogo = 'Adiado (A definir)';
-      }
 
       games.push({
         fpb_id: internalId,

@@ -4412,14 +4412,6 @@ document.addEventListener('DOMContentLoaded', async () => {
                     }
                 }
 
-                // Proteção especial para jogos adiados pela FPB com resultado 0-20 provisório/não homologado
-                if (internalId === '417379' || (isResult && pontosCasa === 0 && pontosFora === 20 && internalId === '417379')) {
-                    isResult = false;
-                    pontosCasa = null;
-                    pontosFora = null;
-                    horaJogo = 'Adiado (A definir)';
-                }
-
                 games.push({
                     fpb_id: internalId,
                     data_jogo: formattedDate,

@@ -93,4 +93,4 @@
 - [2026-10-03] Gemini: Correção estrutural crítica no Admin (admin.html): resolução de tag div não fechada em tab-competicoes que retinha modais (Série e Sincronização FPB) em elementos ocultos, e migração dos modais para a raiz do documento.
 - [2026-10-03 a 2026-10-04] Gemini: Aba Classificação com cálculo oficial FPB, eliminação de redundâncias, correção da falsa derrota 0-20 em Sub 14 Masc, expansão da série de Sub 18 Masc (8 equipas) e Sub 16 Fem (7 equipas).
 - [2026-10-04] Gemini: Suporte a links oficiais e parser multilinhas vertical para 'Colar Tabela da FPB' no Admin, com saneamento de URLs para evitar erros de base de dados na FPB.
-- [2026-10-05] Gemini: Correção da exibição de resultados incompletos/adiados (eliminando 'null - null' e forçamento indevido de status 'Terminado' nos parsers e modais de sincronização FPB).
+- [2026-10-05] Gemini: Correção da exibição de resultados incompletos/adiados (eliminando 'null - null') e reposição do resultado oficial FPB (0-20) em Sub 14 Masc (id 417379).
