@@ -906,7 +906,7 @@ async function loadCompeticoesSection(supabase) {
             tipo: "nacional",
             detalhe: "Zona Norte • Federação Portuguesa de Basquetebol",
             icon: "🏀",
-            url_fpb: "https://www.fpb.pt/classificacao/associacao_5/?associacao=5&epoca=2026/2027&genero=masculino&escalao=Sénior&"
+            url_fpb: "https://www.fpb.pt/competicoes/"
         },
         {
             sigla: "Taça de Portugal",
@@ -930,7 +930,7 @@ async function loadCompeticoesSection(supabase) {
             tipo: "distrital",
             detalhe: "Fase Regular e Taça Distrital • AB Viana do Castelo",
             icon: "🏀",
-            url_fpb: "https://www.fpb.pt/classificacao/associacao_5/?associacao=5&epoca=2026/2027&genero=masculino&escalao=Sub%2018&"
+            url_fpb: "https://www.fpb.pt/classificacao/associacao_5/"
         },
         {
             sigla: "Sub 16 Fem",
@@ -942,7 +942,7 @@ async function loadCompeticoesSection(supabase) {
             tipo: "distrital",
             detalhe: "Campeonato Inter-distrital • AB Viana do Castelo / FPB",
             icon: "🏀",
-            url_fpb: "https://www.fpb.pt/classificacao/associacao_5/?associacao=5&epoca=2026/2027&genero=feminino&escalao=Sub%2016&"
+            url_fpb: "https://www.fpb.pt/classificacao/associacao_5/"
         },
         {
             sigla: "Sub 14 Masc",
@@ -954,7 +954,7 @@ async function loadCompeticoesSection(supabase) {
             tipo: "distrital",
             detalhe: "Campeonato Distrital de Formação • AB Viana do Castelo",
             icon: "🏀",
-            url_fpb: "https://www.fpb.pt/classificacao/associacao_5/?associacao=5&epoca=2026/2027&genero=masculino&escalao=Sub%2014&"
+            url_fpb: "https://www.fpb.pt/classificacao/associacao_5/"
         },
         {
             sigla: "Sub 14 Fem",
@@ -966,7 +966,7 @@ async function loadCompeticoesSection(supabase) {
             tipo: "distrital",
             detalhe: "Campeonato Distrital de Formação • AB Viana do Castelo",
             icon: "🏀",
-            url_fpb: "https://www.fpb.pt/classificacao/associacao_5/?associacao=5&epoca=2026/2027&genero=feminino&escalao=Sub%2014&"
+            url_fpb: "https://www.fpb.pt/classificacao/associacao_5/"
         },
         {
             sigla: "Minibasquete",
@@ -1231,30 +1231,17 @@ async function loadCompeticoesSection(supabase) {
         };
 
         const obterUrlFPBOficial = (c) => {
-            if (c.url_fpb && c.url_fpb !== 'https://www.fpb.pt/competicoes/' && c.url_fpb !== 'https://www.fpb.pt/competicoes') {
+            if (c.url_fpb && c.url_fpb.startsWith('http')) {
                 return c.url_fpb;
             }
             const id = (c.id || '').toLowerCase();
-            const sigla = (c.sigla || '').toLowerCase();
-            const esc = (c.escalao || '').toLowerCase();
-            const sex = (c.sexo || '').toLowerCase();
-
-            if (id.includes('sub18') || sigla.includes('sub 18') || esc.includes('18')) {
-                return 'https://www.fpb.pt/classificacao/associacao_5/?associacao=5&epoca=2026/2027&genero=masculino&escalao=Sub%2018&';
+            if (id.includes('cn2') || id.includes('taca')) {
+                return 'https://www.fpb.pt/competicoes/';
             }
-            if (id.includes('sub16') || sigla.includes('sub 16') || esc.includes('16')) {
-                return 'https://www.fpb.pt/classificacao/associacao_5/?associacao=5&epoca=2026/2027&genero=feminino&escalao=Sub%2016&';
+            if (id.includes('mini')) {
+                return 'https://www.fpb.pt/calendario/clube_656';
             }
-            if (id.includes('sub14') || sigla.includes('sub 14') || esc.includes('14')) {
-                if (sex === 'feminino' || id.includes('fem') || sigla.includes('fem')) {
-                    return 'https://www.fpb.pt/classificacao/associacao_5/?associacao=5&epoca=2026/2027&genero=feminino&escalao=Sub%2014&';
-                }
-                return 'https://www.fpb.pt/classificacao/associacao_5/?associacao=5&epoca=2026/2027&genero=masculino&escalao=Sub%2014&';
-            }
-            if (id.includes('cn2') || sigla.includes('cn2') || esc.includes('sen')) {
-                return 'https://www.fpb.pt/classificacao/associacao_5/?associacao=5&epoca=2026/2027&genero=masculino&escalao=Sénior&';
-            }
-            return 'https://www.fpb.pt/clube/basket-clube-de-valenca/';
+            return 'https://www.fpb.pt/classificacao/associacao_5/';
         };
 
         // Renderizador da Tabela de Classificação Oficial FPB

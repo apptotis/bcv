@@ -8275,7 +8275,7 @@ document.addEventListener('DOMContentLoaded', async () => {
             tipo: "nacional",
             detalhe: "Zona Norte • Federação Portuguesa de Basquetebol",
             icon: "🏀",
-            url_fpb: "https://www.fpb.pt/classificacao/associacao_5/?associacao=5&epoca=2026/2027&genero=masculino&escalao=Sénior&",
+            url_fpb: "https://www.fpb.pt/competicoes/",
             ativo: true,
             ordem: 1
         },
@@ -8305,7 +8305,7 @@ document.addEventListener('DOMContentLoaded', async () => {
             tipo: "distrital",
             detalhe: "Fase Regular e Taça Distrital • AB Viana do Castelo",
             icon: "🏀",
-            url_fpb: "https://www.fpb.pt/classificacao/associacao_5/?associacao=5&epoca=2026/2027&genero=masculino&escalao=Sub%2018&",
+            url_fpb: "https://www.fpb.pt/classificacao/associacao_5/",
             ativo: true,
             ordem: 3
         },
@@ -8320,7 +8320,7 @@ document.addEventListener('DOMContentLoaded', async () => {
             tipo: "distrital",
             detalhe: "Campeonato Inter-distrital • AB Viana do Castelo / FPB",
             icon: "🏀",
-            url_fpb: "https://www.fpb.pt/classificacao/associacao_5/?associacao=5&epoca=2026/2027&genero=feminino&escalao=Sub%2016&",
+            url_fpb: "https://www.fpb.pt/classificacao/associacao_5/",
             ativo: true,
             ordem: 4
         },
@@ -8335,7 +8335,7 @@ document.addEventListener('DOMContentLoaded', async () => {
             tipo: "distrital",
             detalhe: "Campeonato Distrital de Formação • AB Viana do Castelo",
             icon: "🏀",
-            url_fpb: "https://www.fpb.pt/classificacao/associacao_5/?associacao=5&epoca=2026/2027&genero=masculino&escalao=Sub%2014&",
+            url_fpb: "https://www.fpb.pt/classificacao/associacao_5/",
             ativo: true,
             ordem: 5
         },
@@ -8350,7 +8350,7 @@ document.addEventListener('DOMContentLoaded', async () => {
             tipo: "distrital",
             detalhe: "Campeonato Distrital de Formação • AB Viana do Castelo",
             icon: "🏀",
-            url_fpb: "https://www.fpb.pt/classificacao/associacao_5/?associacao=5&epoca=2026/2027&genero=feminino&escalao=Sub%2014&",
+            url_fpb: "https://www.fpb.pt/classificacao/associacao_5/",
             ativo: true,
             ordem: 6
         },
@@ -8847,17 +8847,11 @@ document.addEventListener('DOMContentLoaded', async () => {
         }
 
         const linhas = texto.split('\n').map(l => l.trim()).filter(l => l.length > 0);
-        const equipasProcessadas = [];
+        let equipasProcessadas = [];
 
-        // Estratégia 1: Linhas tabuladas ou com múltiplos números
+        // Estratégia 1: Linhas horizontais (tabuladas ou com múltiplos números)
         linhas.forEach(linha => {
-            // Ignorar cabeçalhos
             if (/^(#|pos|equipa|j|v|d|pm|ps|dif|pts|classificação)/i.test(linha)) return;
-
-            // Dividir por tabulações ou múltiplos espaços
-            const partes = linha.split(/\t+|\s{2,}/).map(p => p.trim()).filter(p => p.length > 0);
-            
-            // Se encontrar linha com números no final
             const tokens = linha.split(/\s+/);
             const numeros = [];
             const palavras = [];
@@ -8871,13 +8865,10 @@ document.addEventListener('DOMContentLoaded', async () => {
                 }
             });
 
-            // Se tem pelo menos o nome de uma equipa
             const nomeCandidato = palavras.join(' ').replace(/^\d+[\s\.\-]+/, '').trim();
-            if (nomeCandidato.length >= 3 && !/^(totais|total|legenda)/i.test(nomeCandidato)) {
-                // Números típicos de tabela FPB: [J, V, D, PM, PS, PTS] ou [Pos, J, V, D, PM, PS, DIF, PTS]
+            if (nomeCandidato.length >= 3 && numeros.length >= 3 && !/^(totais|total|legenda)/i.test(nomeCandidato)) {
                 let j = 0, v = 0, d = 0, pm = 0, ps = 0, pts = 0;
                 if (numeros.length >= 6) {
-                    // [J, V, D, PM, PS, DIF, PTS] ou similar
                     const ultimos = numeros.slice(-6);
                     j = ultimos[0] || 0;
                     v = ultimos[1] || 0;
@@ -8885,7 +8876,7 @@ document.addEventListener('DOMContentLoaded', async () => {
                     pm = ultimos[3] || 0;
                     ps = ultimos[4] || 0;
                     pts = ultimos[5] || (v * 2 + d * 1);
-                } else if (numeros.length >= 3) {
+                } else {
                     j = numeros[0] || 0;
                     v = numeros[1] || 0;
                     d = numeros[2] || 0;
@@ -8900,13 +8891,71 @@ document.addEventListener('DOMContentLoaded', async () => {
             }
         });
 
+        // Estratégia 2: Copiado vertical da FPB (procura pelas equipas da série e respetivos números)
+        if (equipasProcessadas.length < 2) {
+            const catalogoBase = (currentSerieCompId && SERIES_OFICIAIS_BCV_GLOBAL[currentSerieCompId]) 
+                ? SERIES_OFICIAIS_BCV_GLOBAL[currentSerieCompId] 
+                : (currentEquipasSerie.map(e => e.nome) || []);
+
+            const textoLimpo = texto.replace(/\r/g, '\n');
+            const tokens = textoLimpo.split(/[\n\t]+/).map(t => t.trim()).filter(t => t.length > 0);
+
+            const encontradas = [];
+            for (let i = 0; i < tokens.length; i++) {
+                const token = tokens[i];
+                const eqMatch = catalogoBase.find(eqNome => {
+                    const normNome = eqNome.toLowerCase().replace(/[^a-z0-9]/g, '');
+                    const normToken = token.toLowerCase().replace(/[^a-z0-9]/g, '');
+                    return normToken.length >= 3 && (normNome.includes(normToken) || normToken.includes(normNome));
+                });
+
+                if (eqMatch) {
+                    const nums = [];
+                    let jIdx = i + 1;
+                    if (jIdx < tokens.length && /^[A-Z]{2,4}$/.test(tokens[jIdx])) {
+                        jIdx++;
+                    }
+                    while (jIdx < tokens.length && nums.length < 8) {
+                        const numCandidato = parseInt(tokens[jIdx].replace(/^[+-]/, ''), 10);
+                        if (!isNaN(numCandidato) && /^[-+]?\d+$/.test(tokens[jIdx])) {
+                            nums.push(numCandidato);
+                            jIdx++;
+                        } else {
+                            break;
+                        }
+                    }
+
+                    if (nums.length >= 3 && !encontradas.some(e => e.nome === eqMatch)) {
+                        let j = nums[0] || 0;
+                        let v = nums[1] || 0;
+                        let d = nums[2] || 0;
+                        let pm = 0, ps = 0, pts = (v * 2 + d * 1);
+                        if (nums.length >= 6) {
+                            pm = nums[3] || 0;
+                            ps = nums[4] || 0;
+                            pts = nums[nums.length - 1] || (v * 2 + d * 1);
+                        }
+                        encontradas.push({
+                            pos: encontradas.length + 1,
+                            nome: eqMatch,
+                            j, v, d, pm, ps, pts
+                        });
+                    }
+                }
+            }
+
+            if (encontradas.length >= 2) {
+                equipasProcessadas = encontradas;
+            }
+        }
+
         if (equipasProcessadas.length > 0) {
             currentEquipasSerie = equipasProcessadas;
             renderTabelaSerieModal();
             document.getElementById('box-colar-tabela-fpb').style.display = 'none';
             alert(`✅ Sucesso! Foram extraídas ${equipasProcessadas.length} equipas com as respetivas pontuações.`);
         } else {
-            alert("Não foi possível detetar o formato da tabela no texto colado. Pode preencher ou ajustar os valores diretamente nas caixas abaixo.");
+            alert("Não foi possível detetar o formato da tabela no texto colado. Pode preencher ou ajustar os valores diretamente nas caixas da tabela abaixo.");
         }
     };
 
