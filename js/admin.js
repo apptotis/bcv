@@ -4224,7 +4224,7 @@ document.addEventListener('DOMContentLoaded', async () => {
                     <strong>${jogo.equipa_casa}</strong> vs <strong>${jogo.equipa_fora}</strong>
                     ${jogo.local ? `<br><small style="color:var(--text-secondary);">${jogo.local}</small>` : ''}
                 </td>
-                <td style="padding: 12px;"><span style="background:linear-gradient(135deg, #7e22ce, #a855f7); color:#fff; padding:4px 10px; border-radius:6px; font-weight:800; font-size:0.95rem; box-shadow:0 2px 6px rgba(126,34,206,0.3);">${jogo.pontos_casa} - ${jogo.pontos_fora}</span></td>
+                <td style="padding: 12px;"><span style="background:linear-gradient(135deg, #7e22ce, #a855f7); color:#fff; padding:4px 10px; border-radius:6px; font-weight:800; font-size:0.95rem; box-shadow:0 2px 6px rgba(126,34,206,0.3);">${(jogo.pontos_casa !== null && jogo.pontos_casa !== undefined && jogo.pontos_fora !== null && jogo.pontos_fora !== undefined) ? `${jogo.pontos_casa} - ${jogo.pontos_fora}` : 'Adiado / Pendente'}</span></td>
                 <td style="padding: 12px;"><span style="font-size:0.8rem; background:rgba(22, 163, 74, 0.12); color:#16a34a; padding:3px 8px; border-radius:4px; font-weight:600;">${jogo.escalao || 'BCV'}</span></td>
                 <td style="padding: 12px; text-align: center; white-space: nowrap;">
                     <button class="btn-action edit" onclick="window.editResultado('${jogo.id}')" title="Editar Resultado" style="margin-right: 4px;">✏️</button>
@@ -4458,14 +4458,18 @@ document.addEventListener('DOMContentLoaded', async () => {
         for (const g of (resultGames || [])) {
             const key = getKey(g);
             const existing = map.get(key);
+            const hasValidScore = g.pontos_casa !== null && g.pontos_casa !== undefined && g.pontos_fora !== null && g.pontos_fora !== undefined;
             if (existing) {
                 map.set(key, {
                     ...existing,
                     ...g,
-                    is_resultado: true
+                    is_resultado: hasValidScore ? true : existing.is_resultado
                 });
             } else {
-                map.set(key, g);
+                map.set(key, {
+                    ...g,
+                    is_resultado: hasValidScore
+                });
             }
         }
 
@@ -4722,9 +4726,10 @@ document.addEventListener('DOMContentLoaded', async () => {
                 user-select: none;
             `;
 
-            const badgeStatus = jogo.is_resultado 
+            const hasScore = jogo.is_resultado && jogo.pontos_casa !== null && jogo.pontos_casa !== undefined && jogo.pontos_fora !== null && jogo.pontos_fora !== undefined;
+            const badgeStatus = hasScore 
                 ? `<span style="background: rgba(22, 163, 74, 0.15); color: #16a34a; font-weight: 700; font-size: 0.75rem; padding: 2px 8px; border-radius: 4px;">🏆 ${jogo.pontos_casa} - ${jogo.pontos_fora}</span>`
-                : `<span style="background: rgba(37, 99, 235, 0.12); color: #2563eb; font-weight: 700; font-size: 0.75rem; padding: 2px 8px; border-radius: 4px;">📅 ${jogo.hora_jogo || 'A definir'}</span>`;
+                : `<span style="background: rgba(37, 99, 235, 0.12); color: #2563eb; font-weight: 700; font-size: 0.75rem; padding: 2px 8px; border-radius: 4px;">📅 ${jogo.hora_jogo || (jogo.is_resultado ? 'Sem pontuação' : 'A definir')}</span>`;
 
             const badgeDb = inDb 
                 ? `<span style="font-size: 0.72rem; background: #e0f2fe; color: #0284c7; padding: 1px 6px; border-radius: 4px; font-weight: 600;" title="Este jogo já está registado na base de dados">✓ Já no site</span>`
@@ -4747,7 +4752,7 @@ document.addEventListener('DOMContentLoaded', async () => {
                 </div>
                 <div style="text-align: right; white-space: nowrap;">
                     <div style="font-weight: 700; font-size: 0.88rem; color: var(--text-primary);">${formatDate(jogo.data_jogo)}</div>
-                    <div style="font-size: 0.74rem; color: var(--text-secondary);">${jogo.is_resultado ? 'Terminado' : (jogo.hora_jogo || 'Hora a definir')}</div>
+                    <div style="font-size: 0.74rem; color: var(--text-secondary);">${hasScore ? 'Terminado' : (jogo.hora_jogo || 'Hora a definir')}</div>
                 </div>
             `;
 

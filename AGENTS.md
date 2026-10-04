@@ -91,7 +91,6 @@
 - [2026-10-03] Gemini: Eliminação de redundâncias de escalão nos cards de competições, Segmented Control responsivo e módulo completo de Gestão do Quadro da Série no Admin.
 - [2026-10-03] Gemini: Exibição completa das 7 equipas da série Sub 14 Fem na Classificação, pré-carregamento automático no Admin e ferramenta 'Colar Tabela da FPB' com parser inteligente de dados federativos.
 - [2026-10-03] Gemini: Correção estrutural crítica no Admin (admin.html): resolução de tag div não fechada em tab-competicoes que retinha modais (Série e Sincronização FPB) em elementos ocultos, e migração dos modais para a raiz do documento.
-- [2026-10-03] Gemini: Sincronização integral da classificação da série com a FPB e otimização mobile dos cards (botão Agenda na 1ª linha e abas a 50%).
-- [2026-10-04] Gemini: Correção da falsa derrota 0-20 em Sub 14 Masc (jogo adiado 417379), expansão da série de Sub 18 Masc (8 equipas com ATC) e Sub 16 Fem (7 equipas).
+- [2026-10-03 a 2026-10-04] Gemini: Aba Classificação com cálculo oficial FPB, eliminação de redundâncias, correção da falsa derrota 0-20 em Sub 14 Masc, expansão da série de Sub 18 Masc (8 equipas) e Sub 16 Fem (7 equipas).
 - [2026-10-04] Gemini: Suporte a links oficiais e parser multilinhas vertical para 'Colar Tabela da FPB' no Admin, com saneamento de URLs para evitar erros de base de dados na FPB.
-
+- [2026-10-05] Gemini: Correção da exibição de resultados incompletos/adiados (eliminando 'null - null' e forçamento indevido de status 'Terminado' nos parsers e modais de sincronização FPB).

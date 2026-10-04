@@ -182,14 +182,18 @@ function mergeFPBGames(calendarGames: FPBGame[], resultGames: FPBGame[]): FPBGam
   for (const g of resultGames) {
     const key = getKey(g);
     const existing = map.get(key);
+    const hasValidScore = g.pontos_casa !== null && g.pontos_casa !== undefined && g.pontos_fora !== null && g.pontos_fora !== undefined;
     if (existing) {
       map.set(key, {
         ...existing,
         ...g,
-        is_resultado: true
+        is_resultado: hasValidScore ? true : existing.is_resultado
       });
     } else {
-      map.set(key, g);
+      map.set(key, {
+        ...g,
+        is_resultado: hasValidScore
+      });
     }
   }
 
