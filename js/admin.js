@@ -8275,7 +8275,7 @@ document.addEventListener('DOMContentLoaded', async () => {
             tipo: "nacional",
             detalhe: "Zona Norte • Federação Portuguesa de Basquetebol",
             icon: "🏀",
-            url_fpb: "https://www.fpb.pt/competicoes/",
+            url_fpb: "https://www.fpb.pt/classificacao/associacao_5/?associacao=5&epoca=2026/2027&genero=masculino&escalao=Sénior&",
             ativo: true,
             ordem: 1
         },
@@ -8305,7 +8305,7 @@ document.addEventListener('DOMContentLoaded', async () => {
             tipo: "distrital",
             detalhe: "Fase Regular e Taça Distrital • AB Viana do Castelo",
             icon: "🏀",
-            url_fpb: "https://www.fpb.pt/competicoes/",
+            url_fpb: "https://www.fpb.pt/classificacao/associacao_5/?associacao=5&epoca=2026/2027&genero=masculino&escalao=Sub%2018&",
             ativo: true,
             ordem: 3
         },
@@ -8320,7 +8320,7 @@ document.addEventListener('DOMContentLoaded', async () => {
             tipo: "distrital",
             detalhe: "Campeonato Inter-distrital • AB Viana do Castelo / FPB",
             icon: "🏀",
-            url_fpb: "https://www.fpb.pt/competicoes/",
+            url_fpb: "https://www.fpb.pt/classificacao/associacao_5/?associacao=5&epoca=2026/2027&genero=feminino&escalao=Sub%2016&",
             ativo: true,
             ordem: 4
         },
@@ -8335,7 +8335,7 @@ document.addEventListener('DOMContentLoaded', async () => {
             tipo: "distrital",
             detalhe: "Campeonato Distrital de Formação • AB Viana do Castelo",
             icon: "🏀",
-            url_fpb: "https://www.fpb.pt/competicoes/",
+            url_fpb: "https://www.fpb.pt/classificacao/associacao_5/?associacao=5&epoca=2026/2027&genero=masculino&escalao=Sub%2014&",
             ativo: true,
             ordem: 5
         },
@@ -8350,7 +8350,7 @@ document.addEventListener('DOMContentLoaded', async () => {
             tipo: "distrital",
             detalhe: "Campeonato Distrital de Formação • AB Viana do Castelo",
             icon: "🏀",
-            url_fpb: "https://www.fpb.pt/competicoes/",
+            url_fpb: "https://www.fpb.pt/classificacao/associacao_5/?associacao=5&epoca=2026/2027&genero=feminino&escalao=Sub%2014&",
             ativo: true,
             ordem: 6
         },
@@ -8724,6 +8724,9 @@ document.addEventListener('DOMContentLoaded', async () => {
         if (document.getElementById('serie-comp-id')) document.getElementById('serie-comp-id').value = comp.id;
         if (document.getElementById('modal-serie-title')) document.getElementById('modal-serie-title').textContent = `📊 Quadro da Série: ${comp.sigla || comp.nome}`;
         if (document.getElementById('modal-serie-subtitle')) document.getElementById('modal-serie-subtitle').textContent = `Série de ${comp.nome} (${comp.escalao} ${comp.sexo}) • Época 2026/2027`;
+        if (document.getElementById('link-abrir-fpb-modal')) {
+            document.getElementById('link-abrir-fpb-modal').href = comp.url_fpb || 'https://www.fpb.pt/competicoes/';
+        }
 
         // Atualizar opções do seletor rápido no topo do modal
         const selectComp = document.getElementById('select-serie-comp-ativo');

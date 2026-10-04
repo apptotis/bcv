@@ -906,7 +906,7 @@ async function loadCompeticoesSection(supabase) {
             tipo: "nacional",
             detalhe: "Zona Norte • Federação Portuguesa de Basquetebol",
             icon: "🏀",
-            url_fpb: "https://www.fpb.pt/competicoes/"
+            url_fpb: "https://www.fpb.pt/classificacao/associacao_5/?associacao=5&epoca=2026/2027&genero=masculino&escalao=Sénior&"
         },
         {
             sigla: "Taça de Portugal",
@@ -930,7 +930,7 @@ async function loadCompeticoesSection(supabase) {
             tipo: "distrital",
             detalhe: "Fase Regular e Taça Distrital • AB Viana do Castelo",
             icon: "🏀",
-            url_fpb: "https://www.fpb.pt/competicoes/"
+            url_fpb: "https://www.fpb.pt/classificacao/associacao_5/?associacao=5&epoca=2026/2027&genero=masculino&escalao=Sub%2018&"
         },
         {
             sigla: "Sub 16 Fem",
@@ -942,7 +942,7 @@ async function loadCompeticoesSection(supabase) {
             tipo: "distrital",
             detalhe: "Campeonato Inter-distrital • AB Viana do Castelo / FPB",
             icon: "🏀",
-            url_fpb: "https://www.fpb.pt/competicoes/"
+            url_fpb: "https://www.fpb.pt/classificacao/associacao_5/?associacao=5&epoca=2026/2027&genero=feminino&escalao=Sub%2016&"
         },
         {
             sigla: "Sub 14 Masc",
@@ -954,7 +954,7 @@ async function loadCompeticoesSection(supabase) {
             tipo: "distrital",
             detalhe: "Campeonato Distrital de Formação • AB Viana do Castelo",
             icon: "🏀",
-            url_fpb: "https://www.fpb.pt/competicoes/"
+            url_fpb: "https://www.fpb.pt/classificacao/associacao_5/?associacao=5&epoca=2026/2027&genero=masculino&escalao=Sub%2014&"
         },
         {
             sigla: "Sub 14 Fem",
@@ -966,7 +966,7 @@ async function loadCompeticoesSection(supabase) {
             tipo: "distrital",
             detalhe: "Campeonato Distrital de Formação • AB Viana do Castelo",
             icon: "🏀",
-            url_fpb: "https://www.fpb.pt/competicoes/"
+            url_fpb: "https://www.fpb.pt/classificacao/associacao_5/?associacao=5&epoca=2026/2027&genero=feminino&escalao=Sub%2014&"
         },
         {
             sigla: "Minibasquete",
@@ -1230,9 +1230,36 @@ async function loadCompeticoesSection(supabase) {
             return '';
         };
 
+        const obterUrlFPBOficial = (c) => {
+            if (c.url_fpb && c.url_fpb !== 'https://www.fpb.pt/competicoes/' && c.url_fpb !== 'https://www.fpb.pt/competicoes') {
+                return c.url_fpb;
+            }
+            const id = (c.id || '').toLowerCase();
+            const sigla = (c.sigla || '').toLowerCase();
+            const esc = (c.escalao || '').toLowerCase();
+            const sex = (c.sexo || '').toLowerCase();
+
+            if (id.includes('sub18') || sigla.includes('sub 18') || esc.includes('18')) {
+                return 'https://www.fpb.pt/classificacao/associacao_5/?associacao=5&epoca=2026/2027&genero=masculino&escalao=Sub%2018&';
+            }
+            if (id.includes('sub16') || sigla.includes('sub 16') || esc.includes('16')) {
+                return 'https://www.fpb.pt/classificacao/associacao_5/?associacao=5&epoca=2026/2027&genero=feminino&escalao=Sub%2016&';
+            }
+            if (id.includes('sub14') || sigla.includes('sub 14') || esc.includes('14')) {
+                if (sex === 'feminino' || id.includes('fem') || sigla.includes('fem')) {
+                    return 'https://www.fpb.pt/classificacao/associacao_5/?associacao=5&epoca=2026/2027&genero=feminino&escalao=Sub%2014&';
+                }
+                return 'https://www.fpb.pt/classificacao/associacao_5/?associacao=5&epoca=2026/2027&genero=masculino&escalao=Sub%2014&';
+            }
+            if (id.includes('cn2') || sigla.includes('cn2') || esc.includes('sen')) {
+                return 'https://www.fpb.pt/classificacao/associacao_5/?associacao=5&epoca=2026/2027&genero=masculino&escalao=Sénior&';
+            }
+            return 'https://www.fpb.pt/clube/basket-clube-de-valenca/';
+        };
+
         // Renderizador da Tabela de Classificação Oficial FPB
         const renderClassificacaoTable = (comp, jogos, jogosAgenda = []) => {
-            const urlFPB = comp.url_fpb || comp.url_classificacao_fpb || 'https://www.fpb.pt/competicoes/';
+            const urlFPB = obterUrlFPBOficial(comp);
 
             let equipas = [];
             let isTabelaSerieOficial = false;
@@ -1429,35 +1456,48 @@ async function loadCompeticoesSection(supabase) {
                 }));
             }
 
+            const bannerFPB = `
+                <div class="comp-class-official-banner" style="background: linear-gradient(135deg, #f8fafc 0%, #eff6ff 100%); border: 1.5px solid #bfdbfe; border-radius: 10px; padding: 12px 14px; margin-bottom: 12px; display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 10px; box-shadow: 0 1px 3px rgba(0,0,0,0.04);">
+                    <div style="display: flex; align-items: center; gap: 12px;">
+                        <span style="font-size: 1.4rem; background: #dbeafe; color: #1e40af; width: 38px; height: 38px; border-radius: 50%; display: flex; align-items: center; justify-content: center; flex-shrink: 0;">🏆</span>
+                        <div>
+                            <div style="font-weight: 800; font-size: 0.88rem; color: #1e3a8a;">Classificação Oficial Homologada FPB</div>
+                            <div style="font-size: 0.74rem; color: #3b82f6;">Quadro integral da Série com todas as equipas, critérios e jornadas oficiais.</div>
+                        </div>
+                    </div>
+                    <a href="${urlFPB}" target="_blank" rel="noopener noreferrer" style="display: inline-flex; align-items: center; gap: 6px; background: #7e22ce; color: #ffffff; padding: 8px 14px; border-radius: 8px; font-size: 0.8rem; font-weight: 700; text-decoration: none; box-shadow: 0 2px 6px rgba(126,34,206,0.25); transition: transform 0.2s;" onmouseover="this.style.transform='translateY(-1px)'" onmouseout="this.style.transform='none'">
+                        <span>Abrir Classificação na FPB</span>
+                        <span style="font-size: 0.85rem;">↗</span>
+                    </a>
+                </div>
+            `;
+
             if (equipas.length === 0) {
                 return `
-                    <div class="comp-games-empty">
-                        <span class="empty-icon">📊</span>
-                        <span style="font-weight: 700; color: var(--text-primary);">Ainda sem resultados oficiais registados para apurar a classificação desta época.</span>
-                        <span style="font-size: 0.8rem; color: var(--text-secondary); max-width: 480px; margin: 4px auto 0 auto;">A classificação é atualizada automaticamente em tempo real sempre que os jogos terminam e são sincronizados com a FPB.</span>
-                        ${urlFPB ? `
-                            <div style="margin-top: 12px;">
-                                <a href="${urlFPB}" target="_blank" rel="noopener noreferrer" class="comp-class-btn-external" title="Abrir página oficial da competição na FPB">
-                                    <span>🌐 Consultar Tabela Oficial no Portal FPB</span>
-                                    <span>↗</span>
-                                </a>
-                            </div>
-                        ` : ''}
+                    <div class="comp-classificacao-container">
+                        ${bannerFPB}
+                        <div class="comp-games-empty" style="padding: 14px 10px;">
+                            <span class="empty-icon">📊</span>
+                            <span style="font-weight: 700; color: var(--text-primary);">Ainda sem resultados oficiais registados para apurar a classificação desta época no site.</span>
+                            <span style="font-size: 0.8rem; color: var(--text-secondary); max-width: 480px; margin: 4px auto 0 auto;">Aceda ao quadro completo oficial da Federação Portuguesa de Basquetebol no botão acima.</span>
+                        </div>
                     </div>
                 `;
             }
 
             const badgeFonte = isTabelaSerieOficial
                 ? `⚡ Quadro Oficial da Série • ${comp.tag || 'FPB'}`
-                : `⚡ Classificação apurada com resultados oficiais FPB`;
+                : `⚡ Jogos apurados do Basket Clube de Valença`;
 
             return `
                 <div class="comp-classificacao-container">
+                    ${bannerFPB}
+
                     <div class="comp-classificacao-header">
                         <span class="comp-class-source-badge">${badgeFonte}</span>
                         ${urlFPB ? `
                             <a href="${urlFPB}" target="_blank" rel="noopener noreferrer" class="comp-class-link-fpb" title="Abrir portal oficial da FPB">
-                                <span>Ver no Portal FPB ↗</span>
+                                <span>Ver na FPB ↗</span>
                             </a>
                         ` : ''}
                     </div>
@@ -1580,7 +1620,7 @@ async function loadCompeticoesSection(supabase) {
 
                 <div class="competicao-footer">
                     <span style="font-size: 0.75rem; color: var(--text-secondary); font-weight: 600;">Época 2026/2027</span>
-                    <span style="font-size: 0.72rem; color: var(--accent-primary); font-weight: 700; background: rgba(126,34,206,0.08); padding: 2px 8px; border-radius: 4px;">FPB Oficial</span>
+                    <a href="${obterUrlFPBOficial(comp)}" target="_blank" rel="noopener noreferrer" style="font-size: 0.72rem; color: var(--accent-primary); font-weight: 700; background: rgba(126,34,206,0.08); padding: 2px 8px; border-radius: 4px; text-decoration: none; display: inline-flex; align-items: center; gap: 3px;" title="Consultar no portal oficial da FPB">FPB Oficial ↗</a>
                 </div>
             `;
 
