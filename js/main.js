@@ -1609,12 +1609,6 @@ async function loadCompeticoesSection(supabase) {
                                 <span class="competicao-tag">${comp.tag}</span>
                                 ${mostrarSigla ? `<span class="competicao-sigla">${comp.sigla}</span>` : ''}
                             </div>
-                            <!-- Botão de Agenda na 1.ª Linha (destaque à frente da tag em mobile) -->
-                            <button type="button" class="competicao-tab-btn btn-agenda-header" data-action="agenda">
-                                <span class="tab-icon">📅</span>
-                                <span class="tab-text">Agenda</span>
-                                ${jogosAgenda.length > 0 ? `<span class="tab-badge">${jogosAgenda.length}</span>` : ''}
-                            </button>
                         </div>
                         <h3 class="competicao-title">${comp.nome}</h3>
                         <p class="competicao-desc">
@@ -1623,10 +1617,10 @@ async function loadCompeticoesSection(supabase) {
                         </p>
                     </div>
 
-                    <!-- Abas: Em Desktop mostra Agenda, Resultados e Classificação; em Mobile a Agenda fica na 1ª linha e aqui Resultados e Classificação têm largura total -->
+                    <!-- Abas de Ação: Agenda e Resultados -->
                     <div class="competicao-tabs-col">
                         <div class="competicao-tabs-bar">
-                            <button type="button" class="competicao-tab-btn btn-agenda-desktop" data-action="agenda">
+                            <button type="button" class="competicao-tab-btn" data-action="agenda">
                                 <span class="tab-icon">📅</span>
                                 <span class="tab-text">Agenda</span>
                                 ${jogosAgenda.length > 0 ? `<span class="tab-badge">${jogosAgenda.length}</span>` : ''}
@@ -1635,10 +1629,6 @@ async function loadCompeticoesSection(supabase) {
                                 <span class="tab-icon">🏁</span>
                                 <span class="tab-text">Resultados</span>
                                 ${jogosResultados.length > 0 ? `<span class="tab-badge">${jogosResultados.length}</span>` : ''}
-                            </button>
-                            <button type="button" class="competicao-tab-btn" data-action="classificacao">
-                                <span class="tab-icon">📊</span>
-                                <span class="tab-text">Classificação</span>
                             </button>
                         </div>
                     </div>

@@ -91,3 +91,4 @@
 - [2026-10-04] Gemini: Suporte a links oficiais e parser multilinhas vertical para 'Colar Tabela da FPB' no Admin, com saneamento de URLs para evitar erros de base de dados na FPB.
 - [2026-10-05] Gemini: Correção da exibição de resultados incompletos/adiados (eliminando 'null - null') e reposição do resultado oficial FPB (0-20) em Sub 14 Masc (id 417379).
 - [2026-10-05] Gemini: Módulo de Registo de Jogos da Série no Admin e cálculo automático em tempo real da Classificação oficial FPB (jogos_serie e tabela_serie em clube_config), com importação automática de jogos do BCV e consolidação na aba de Resultados (admin.html, js/admin.js, competicoes.html, js/main.js).
+- [2026-10-05] Gemini: Ocultação da aba Classificação nas competições públicas a pedido, mantendo abas Agenda e Resultados (50% no mobile) com link oficial FPB no rodapé dos cards (competicoes.html, js/main.js, css/style.css).
