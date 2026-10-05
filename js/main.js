@@ -1157,6 +1157,7 @@ async function loadCompeticoesSection(supabase) {
                         const ptsCasa = Number(j.pontos_casa) || 0;
                         const ptsFora = Number(j.pontos_fora) || 0;
                         const logoCasa = window.obterLogoEquipa ? window.obterLogoEquipa(j.equipa_casa, j.logo_casa) : '';
+                        const logoFora = window.obterLogoEquipa ? window.obterLogoEquipa(j.equipa_fora, j.logo_fora) : '';
                         let tagJornada = '';
                         if (j.jornada) {
                             tagJornada = `Jornada ${j.jornada}`;
