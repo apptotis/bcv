@@ -1157,8 +1157,15 @@ async function loadCompeticoesSection(supabase) {
                         const ptsCasa = Number(j.pontos_casa) || 0;
                         const ptsFora = Number(j.pontos_fora) || 0;
                         const logoCasa = window.obterLogoEquipa ? window.obterLogoEquipa(j.equipa_casa, j.logo_casa) : '';
-                        const logoFora = window.obterLogoEquipa ? window.obterLogoEquipa(j.equipa_fora, j.logo_fora) : '';
-                        const tagJornada = j.jornada ? `Jornada ${j.jornada}` : (j.competicao || '');
+                        let tagJornada = '';
+                        if (j.jornada) {
+                            tagJornada = `Jornada ${j.jornada}`;
+                        } else if (j.competicao && /jornada\s*\d+/i.test(j.competicao)) {
+                            const m = j.competicao.match(/jornada\s*\d+/i);
+                            tagJornada = m ? m[0] : j.competicao;
+                        } else {
+                            tagJornada = 'Jornada 1';
+                        }
                         return `
                             <div class="comp-game-card">
                                 <div class="comp-game-date-row">
@@ -1546,12 +1553,17 @@ async function loadCompeticoesSection(supabase) {
                 comp.jogos_serie.forEach(js => {
                     const cNome = (js.equipa_casa || '').trim().toLowerCase();
                     const fNome = (js.equipa_fora || '').trim().toLowerCase();
-                    const jaExiste = jogosResultados.some(jb => 
+                    const jogoExistente = jogosResultados.find(jb => 
                         (jb.equipa_casa || '').trim().toLowerCase() === cNome &&
                         (jb.equipa_fora || '').trim().toLowerCase() === fNome &&
                         (jb.data_jogo === js.data || !js.data)
                     );
-                    if (!jaExiste) {
+                    if (jogoExistente) {
+                        if (js.jornada) {
+                            jogoExistente.jornada = js.jornada;
+                            jogoExistente.competicao = `Jornada ${js.jornada}`;
+                        }
+                    } else {
                         jogosResultados.push({
                             id: js.id || `serie_${Math.random()}`,
                             equipa_casa: js.equipa_casa,

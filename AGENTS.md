@@ -94,3 +94,4 @@
 - [2026-10-05] Gemini: Ocultação da aba Classificação nas competições públicas a pedido, mantendo abas Agenda e Resultados (50% no mobile) com link oficial FPB no rodapé dos cards (competicoes.html, js/main.js, css/style.css).
 - [2026-10-05] Gemini: Ativação seletiva da aba 'Classificação' para o Campeonato Distrital Sub 14 Masculino (competicoes.html, js/main.js), permitindo a validação da tabela apurada e quadro oficial da série.
 - [2026-10-05] Gemini: Reestruturação do layout dos cards de competição em 3 linhas unificadas (desktop e mobile): Linha 1 com o nome da competição em largura total, Linha 2 com tag da série e botão Agenda, e Linha 3 com os botões de Resultados e Classificação (main.js, style.css).
+- [2026-10-05] Gemini: Uniformização da indicação 'Jornada 1' nos resultados (resultados_bcv no Supabase e consolidação dinâmica em main.js), eliminando texto residual de competição no cabeçalho do jogo do BC Valença.
