@@ -8690,6 +8690,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     // =========================================================================
     let currentSerieCompId = null;
     let currentEquipasSerie = [];
+    let currentJogosSerie = [];
 
     // Catálogo das Equipas Oficiais de cada Série (Época 2026/2027)
     const SERIES_OFICIAIS_BCV_GLOBAL = {
@@ -8706,6 +8707,359 @@ document.addEventListener('DOMContentLoaded', async () => {
         'sub16_fem': ['BC Valença', 'Famalicense AC', 'BC Limiense', 'Futebol Clube de Vizela', 'GDAS Basket', 'CB Viana', 'Monção BC'],
         'sub18_masc': ['BC Valença', 'CB Viana', 'Restauradores da Granja', 'Famalicense AC - B', 'Monção BC', 'SC Maria da Fonte', 'GDAS Basket', 'ATC'],
         'cn2': ['BC Valença', 'Monção BC', 'CAAS Padaria Ribeiro', 'CDJ Régio']
+    };
+
+    window.alternarSubAbaSerie = function(aba) {
+        const btnClass = document.getElementById('btn-sub-serie-classificacao');
+        const btnJogos = document.getElementById('btn-sub-serie-jogos');
+        const paneClass = document.getElementById('sub-aba-serie-classificacao');
+        const paneJogos = document.getElementById('sub-aba-serie-jogos');
+
+        if (aba === 'classificacao') {
+            if (paneClass) paneClass.style.display = 'block';
+            if (paneJogos) paneJogos.style.display = 'none';
+            if (btnClass) {
+                btnClass.classList.add('active');
+                btnClass.style.background = '#fff';
+                btnClass.style.color = 'var(--accent-primary)';
+                btnClass.style.boxShadow = '0 1px 3px rgba(0,0,0,0.1)';
+            }
+            if (btnJogos) {
+                btnJogos.classList.remove('active');
+                btnJogos.style.background = 'transparent';
+                btnJogos.style.color = 'var(--text-secondary)';
+                btnJogos.style.boxShadow = 'none';
+            }
+        } else {
+            if (paneClass) paneClass.style.display = 'none';
+            if (paneJogos) paneJogos.style.display = 'block';
+            if (btnJogos) {
+                btnJogos.classList.add('active');
+                btnJogos.style.background = '#fff';
+                btnJogos.style.color = 'var(--accent-primary)';
+                btnJogos.style.boxShadow = '0 1px 3px rgba(0,0,0,0.1)';
+            }
+            if (btnClass) {
+                btnClass.classList.remove('active');
+                btnClass.style.background = 'transparent';
+                btnClass.style.color = 'var(--text-secondary)';
+                btnClass.style.boxShadow = 'none';
+            }
+            popularSelectsEquipasJogo();
+            renderJogosSerieModal();
+        }
+    };
+
+    function popularSelectsEquipasJogo() {
+        const selCasa = document.getElementById('serie-novo-equipa-casa');
+        const selFora = document.getElementById('serie-novo-equipa-fora');
+        if (!selCasa || !selFora) return;
+
+        const valCasaAnterior = selCasa.value;
+        const valForaAnterior = selFora.value;
+
+        const equipas = (currentEquipasSerie || [])
+            .map(eq => (eq.nome || '').trim())
+            .filter(n => n.length > 0);
+
+        if (equipas.length === 0) {
+            selCasa.innerHTML = '<option value="">Sem equipas configuradas</option>';
+            selFora.innerHTML = '<option value="">Sem equipas configuradas</option>';
+            return;
+        }
+
+        const opts = equipas.map(nome => `<option value="${nome}">${nome}</option>`).join('');
+        selCasa.innerHTML = opts;
+        selFora.innerHTML = opts;
+
+        if (valCasaAnterior && equipas.includes(valCasaAnterior)) selCasa.value = valCasaAnterior;
+        else selCasa.selectedIndex = 0;
+
+        if (valForaAnterior && equipas.includes(valForaAnterior)) selFora.value = valForaAnterior;
+        else if (equipas.length > 1) selFora.selectedIndex = 1;
+    }
+
+    function renderJogosSerieModal() {
+        const container = document.getElementById('serie-jogos-lista-container');
+        const countBadge = document.getElementById('serie-jogos-badge-count');
+        if (countBadge) countBadge.textContent = (currentJogosSerie || []).length;
+        if (!container) return;
+
+        if (!currentJogosSerie || currentJogosSerie.length === 0) {
+            container.innerHTML = `
+                <div style="padding: 24px 15px; text-align: center; color: var(--text-secondary); font-size: 0.85rem;">
+                    🏀 Nenhum jogo registado para esta série ainda.<br>
+                    <span style="font-size: 0.78rem;">Registe os resultados dos jogos da jornada no formulário acima ou clique em "📥 Puxar Resultados BCV Existentes".</span>
+                </div>
+            `;
+            return;
+        }
+
+        const ordenados = [...currentJogosSerie].sort((a, b) => {
+            const jA = Number(a.jornada) || 1;
+            const jB = Number(b.jornada) || 1;
+            if (jA !== jB) return jA - jB;
+            return (a.data || '').localeCompare(b.data || '');
+        });
+
+        container.innerHTML = '';
+        ordenados.forEach((j, originalIdx) => {
+            const realIdx = currentJogosSerie.indexOf(j);
+            const isBCVCasa = (j.equipa_casa || '').toLowerCase().includes('valença') || (j.equipa_casa || '').toLowerCase().includes('bcv');
+            const isBCVFora = (j.equipa_fora || '').toLowerCase().includes('valença') || (j.equipa_fora || '').toLowerCase().includes('bcv');
+
+            const item = document.createElement('div');
+            item.style.cssText = `
+                display: flex;
+                align-items: center;
+                justify-content: space-between;
+                padding: 8px 12px;
+                border-radius: 6px;
+                background: ${isBCVCasa || isBCVFora ? 'rgba(126, 34, 206, 0.05)' : '#f8fafc'};
+                border: 1px solid ${isBCVCasa || isBCVFora ? 'rgba(126, 34, 206, 0.25)' : 'var(--border-color)'};
+                gap: 10px;
+                font-size: 0.84rem;
+            `;
+
+            const dataFmt = j.data ? formatDate(j.data) : 'Data a definir';
+            const jNum = j.jornada ? `Jornada ${j.jornada}` : 'Jornada';
+
+            item.innerHTML = `
+                <div style="display: flex; align-items: center; gap: 8px; flex-wrap: wrap;">
+                    <span style="background: rgba(126, 34, 206, 0.12); color: var(--accent-primary); font-weight: 700; font-size: 0.75rem; padding: 2px 7px; border-radius: 4px;">
+                        ${jNum}
+                    </span>
+                    <span style="font-size: 0.78rem; color: var(--text-secondary);">📅 ${dataFmt}</span>
+                </div>
+
+                <div style="flex: 1; display: flex; align-items: center; justify-content: center; gap: 8px; font-weight: 700;">
+                    <span style="text-align: right; color: ${isBCVCasa ? 'var(--accent-primary)' : 'var(--text-primary)'}; flex: 1;">${j.equipa_casa}</span>
+                    <span style="background: linear-gradient(135deg, #7e22ce, #9333ea); color: #fff; padding: 2px 10px; border-radius: 5px; font-weight: 800; font-size: 0.92rem; white-space: nowrap; box-shadow: 0 2px 6px rgba(126,34,206,0.25);">
+                        ${j.pontos_casa} - ${j.pontos_fora}
+                    </span>
+                    <span style="text-align: left; color: ${isBCVFora ? 'var(--accent-primary)' : 'var(--text-primary)'}; flex: 1;">${j.equipa_fora}</span>
+                </div>
+
+                <div style="display: flex; align-items: center; gap: 5px;">
+                    <button type="button" onclick="window.editarJogoSerie(${realIdx})" class="btn-action edit" title="Editar Resultado" style="padding: 3px 6px; font-size: 0.8rem;">✏️</button>
+                    <button type="button" onclick="window.removerJogoSerie(${realIdx})" class="btn-action delete" title="Eliminar Jogo" style="padding: 3px 6px; font-size: 0.8rem;">🗑️</button>
+                </div>
+            `;
+            container.appendChild(item);
+        });
+    }
+
+    window.adicionarJogoSerie = function() {
+        const editIdx = parseInt(document.getElementById('serie-jogo-edit-idx')?.value ?? '-1', 10);
+        const jornada = parseInt(document.getElementById('serie-novo-jornada')?.value || '1', 10) || 1;
+        const data = document.getElementById('serie-novo-data')?.value || '';
+        const equipaCasa = document.getElementById('serie-novo-equipa-casa')?.value?.trim();
+        const equipaFora = document.getElementById('serie-novo-equipa-fora')?.value?.trim();
+        const ptsCasaRaw = document.getElementById('serie-novo-pts-casa')?.value;
+        const ptsForaRaw = document.getElementById('serie-novo-pts-fora')?.value;
+
+        if (!equipaCasa || !equipaFora) {
+            alert("Por favor selecione ambas as equipas.");
+            return;
+        }
+        if (equipaCasa === equipaFora) {
+            alert("A equipa da casa e a equipa visitante não podem ser a mesma.");
+            return;
+        }
+        if (ptsCasaRaw === '' || ptsForaRaw === '' || isNaN(Number(ptsCasaRaw)) || isNaN(Number(ptsForaRaw))) {
+            alert("Por favor introduza a pontuação de ambas as equipas.");
+            return;
+        }
+
+        const pontosCasa = parseInt(ptsCasaRaw, 10);
+        const pontosFora = parseInt(ptsForaRaw, 10);
+
+        const jogoObj = {
+            id: editIdx >= 0 && currentJogosSerie[editIdx]?.id ? currentJogosSerie[editIdx].id : ('js_' + Date.now()),
+            jornada,
+            data,
+            equipa_casa: equipaCasa,
+            equipa_fora: equipaFora,
+            pontos_casa: pontosCasa,
+            pontos_fora: pontosFora
+        };
+
+        if (editIdx >= 0 && editIdx < currentJogosSerie.length) {
+            currentJogosSerie[editIdx] = jogoObj;
+        } else {
+            currentJogosSerie.push(jogoObj);
+        }
+
+        window.cancelarEdicaoJogoSerie();
+        renderJogosSerieModal();
+
+        // Recalcular automaticamente a classificação
+        window.recalcularClassificacaoAutomaticamente(false);
+    };
+
+    window.editarJogoSerie = function(idx) {
+        const j = currentJogosSerie[idx];
+        if (!j) return;
+
+        document.getElementById('serie-jogo-edit-idx').value = idx;
+        document.getElementById('serie-novo-jornada').value = j.jornada || 1;
+        document.getElementById('serie-novo-data').value = j.data || '';
+        popularSelectsEquipasJogo();
+        document.getElementById('serie-novo-equipa-casa').value = j.equipa_casa;
+        document.getElementById('serie-novo-equipa-fora').value = j.equipa_fora;
+        document.getElementById('serie-novo-pts-casa').value = j.pontos_casa;
+        document.getElementById('serie-novo-pts-fora').value = j.pontos_fora;
+
+        document.getElementById('serie-jogo-form-title').textContent = `✏️ A Editar Jogo: ${j.equipa_casa} vs ${j.equipa_fora}`;
+        document.getElementById('btn-salvar-jogo-serie').textContent = "💾 Atualizar Jogo";
+        document.getElementById('btn-cancelar-edicao-jogo-serie').style.display = 'inline-block';
+    };
+
+    window.cancelarEdicaoJogoSerie = function() {
+        const editIdxEl = document.getElementById('serie-jogo-edit-idx');
+        if (editIdxEl) editIdxEl.value = "-1";
+        if (document.getElementById('serie-novo-pts-casa')) document.getElementById('serie-novo-pts-casa').value = '';
+        if (document.getElementById('serie-novo-pts-fora')) document.getElementById('serie-novo-pts-fora').value = '';
+        if (document.getElementById('serie-jogo-form-title')) document.getElementById('serie-jogo-form-title').textContent = "➕ Registar Resultado de Jogo da Série";
+        if (document.getElementById('btn-salvar-jogo-serie')) document.getElementById('btn-salvar-jogo-serie').textContent = "➕ Registar Jogo";
+        if (document.getElementById('btn-cancelar-edicao-jogo-serie')) document.getElementById('btn-cancelar-edicao-jogo-serie').style.display = 'none';
+    };
+
+    window.removerJogoSerie = function(idx) {
+        if (!confirm("Tem a certeza que deseja eliminar este jogo da série?")) return;
+        currentJogosSerie.splice(idx, 1);
+        renderJogosSerieModal();
+        window.recalcularClassificacaoAutomaticamente(false);
+    };
+
+    window.recalcularClassificacaoAutomaticamente = function(showToast = false) {
+        if (!currentEquipasSerie || currentEquipasSerie.length === 0) {
+            if (showToast) alert("Adicione primeiro as equipas da série.");
+            return;
+        }
+
+        const statsMap = {};
+        currentEquipasSerie.forEach(eq => {
+            const nome = (eq.nome || '').trim();
+            if (!nome) return;
+            statsMap[nome.toLowerCase()] = {
+                nome: nome,
+                j: 0,
+                v: 0,
+                d: 0,
+                pm: 0,
+                ps: 0,
+                pts: 0
+            };
+        });
+
+        (currentJogosSerie || []).forEach(j => {
+            const cNome = (j.equipa_casa || '').trim();
+            const fNome = (j.equipa_fora || '').trim();
+            const cKey = cNome.toLowerCase();
+            const fKey = fNome.toLowerCase();
+
+            const pCasa = Number(j.pontos_casa);
+            const pFora = Number(j.pontos_fora);
+            if (isNaN(pCasa) || isNaN(pFora)) return;
+
+            if (!statsMap[cKey]) statsMap[cKey] = { nome: cNome, j: 0, v: 0, d: 0, pm: 0, ps: 0, pts: 0 };
+            if (!statsMap[fKey]) statsMap[fKey] = { nome: fNome, j: 0, v: 0, d: 0, pm: 0, ps: 0, pts: 0 };
+
+            statsMap[cKey].j += 1;
+            statsMap[fKey].j += 1;
+            statsMap[cKey].pm += pCasa;
+            statsMap[cKey].ps += pFora;
+            statsMap[fKey].pm += pFora;
+            statsMap[fKey].ps += pCasa;
+
+            if (pCasa > pFora) {
+                statsMap[cKey].v += 1;
+                statsMap[cKey].pts += 2; // Vitória FPB = 2 pts
+                statsMap[fKey].d += 1;
+                statsMap[fKey].pts += (pCasa === 20 && pFora === 0) ? 0 : 1; // Falta de comparência (0 pts) ou derrota (1 pt)
+            } else if (pFora > pCasa) {
+                statsMap[fKey].v += 1;
+                statsMap[fKey].pts += 2;
+                statsMap[cKey].d += 1;
+                statsMap[cKey].pts += (pFora === 20 && pCasa === 0) ? 0 : 1;
+            }
+        });
+
+        const equipasCalculadas = Object.values(statsMap).map(eq => ({
+            ...eq,
+            dif: eq.pm - eq.ps
+        }));
+
+        equipasCalculadas.sort((a, b) => {
+            if (b.pts !== a.pts) return b.pts - a.pts;
+            if (b.dif !== a.dif) return b.dif - a.dif;
+            return b.pm - a.pm;
+        });
+
+        currentEquipasSerie = equipasCalculadas.map((eq, idx) => ({
+            pos: idx + 1,
+            ...eq
+        }));
+
+        renderTabelaSerieModal();
+
+        if (showToast) {
+            alert(`✅ Classificação recalculada com sucesso a partir de ${currentJogosSerie.length} jogo(s)!`);
+        }
+    };
+
+    window.puxarJogosBCVParaSerie = function() {
+        if (!currentSerieCompId) return;
+        const comp = currentCompeticoes.find(c => c.id === currentSerieCompId);
+        if (!comp) return;
+
+        const esc = (comp.escalao || '').toLowerCase();
+        const sex = (comp.sexo || '').toLowerCase();
+
+        const jogosComp = (currentResultadosGames || []).filter(j => {
+            const jEsc = (j.escalao || '').toLowerCase();
+            const jComp = (j.competicao || '').toLowerCase();
+            const matchEsc = jEsc.includes(esc.replace('sub ', 'sub')) || jComp.includes(esc);
+            const matchSex = sex === 'feminino' ? (jComp.includes('fem') || jEsc.includes('fem')) : (!jComp.includes('fem') && !jEsc.includes('fem'));
+            return matchEsc && matchSex && j.pontos_casa !== null && j.pontos_fora !== null;
+        });
+
+        if (jogosComp.length === 0) {
+            alert("Não foram encontrados resultados do BC Valença na base de dados para este escalão.");
+            return;
+        }
+
+        let adicionados = 0;
+        jogosComp.forEach(j => {
+            const cNome = (j.equipa_casa || '').trim();
+            const fNome = (j.equipa_fora || '').trim();
+            const pCasa = parseInt(j.pontos_casa, 10);
+            const pFora = parseInt(j.pontos_fora, 10);
+
+            const existe = currentJogosSerie.some(item => 
+                item.equipa_casa.toLowerCase() === cNome.toLowerCase() && 
+                item.equipa_fora.toLowerCase() === fNome.toLowerCase() &&
+                item.data === j.data_jogo
+            );
+
+            if (!existe) {
+                currentJogosSerie.push({
+                    id: 'bcv_' + (j.fpb_id || j.id || Date.now()),
+                    jornada: 1,
+                    data: j.data_jogo || '',
+                    equipa_casa: cNome,
+                    equipa_fora: fNome,
+                    pontos_casa: pCasa,
+                    pontos_fora: pFora
+                });
+                adicionados++;
+            }
+        });
+
+        renderJogosSerieModal();
+        window.recalcularClassificacaoAutomaticamente(false);
+        alert(`✅ ${adicionados} jogo(s) do BC Valença importados para a série!`);
     };
 
     window.gerirTabelaSerie = function(id) {
@@ -8725,7 +9079,6 @@ document.addEventListener('DOMContentLoaded', async () => {
             document.getElementById('link-abrir-fpb-modal').href = comp.url_fpb || 'https://www.fpb.pt/competicoes/';
         }
 
-        // Atualizar opções do seletor rápido no topo do modal
         const selectComp = document.getElementById('select-serie-comp-ativo');
         if (selectComp) {
             selectComp.innerHTML = currentCompeticoes.filter(c => c.ativo !== false).map(c => `
@@ -8736,6 +9089,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         }
 
         currentEquipasSerie = Array.isArray(comp.tabela_serie) ? JSON.parse(JSON.stringify(comp.tabela_serie)) : [];
+        currentJogosSerie = Array.isArray(comp.jogos_serie) ? JSON.parse(JSON.stringify(comp.jogos_serie)) : [];
 
         // Se estiver vazia ou com menos de 2 equipas, carregar por defeito as equipas conhecidas da série
         if (currentEquipasSerie.length < 2) {
@@ -8793,6 +9147,10 @@ document.addEventListener('DOMContentLoaded', async () => {
         if (boxColar) boxColar.style.display = 'none';
 
         renderTabelaSerieModal();
+        popularSelectsEquipasJogo();
+        renderJogosSerieModal();
+        window.alternarSubAbaSerie('classificacao');
+
         const modal = document.getElementById('modal-tabela-serie-container');
         if (modal) modal.classList.remove('hidden');
     };
@@ -8819,6 +9177,8 @@ document.addEventListener('DOMContentLoaded', async () => {
         if (modal) modal.classList.add('hidden');
         currentSerieCompId = null;
         currentEquipasSerie = [];
+        currentJogosSerie = [];
+        window.cancelarEdicaoJogoSerie();
     };
 
     window.abrirModalColarTabelaFPB = function() {
@@ -9003,6 +9363,7 @@ document.addEventListener('DOMContentLoaded', async () => {
             `;
             tbody.appendChild(tr);
         });
+        popularSelectsEquipasJogo();
     }
 
     window.updateEquipaSerieField = function(idx, field, val) {
@@ -9293,6 +9654,7 @@ document.addEventListener('DOMContentLoaded', async () => {
             }));
 
         comp.tabela_serie = equipasValidas;
+        comp.jogos_serie = currentJogosSerie || [];
 
         const btn = document.getElementById('btn-save-tabela-serie');
         if (btn) {

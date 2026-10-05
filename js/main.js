@@ -1151,18 +1151,19 @@ async function loadCompeticoesSection(supabase) {
             return `
                 <div class="comp-games-list">
                     ${jogos.map(j => {
-                        const dataFmt = formatDataComp(j.data_jogo);
+                        const dataFmt = formatDataComp(j.data_jogo || j.data);
                         const isCasaBCV = (j.equipa_casa || '').toLowerCase().includes('valença') || (j.equipa_casa || '').toLowerCase().includes('bcv');
                         const isForaBCV = (j.equipa_fora || '').toLowerCase().includes('valença') || (j.equipa_fora || '').toLowerCase().includes('bcv');
                         const ptsCasa = Number(j.pontos_casa) || 0;
                         const ptsFora = Number(j.pontos_fora) || 0;
                         const logoCasa = window.obterLogoEquipa ? window.obterLogoEquipa(j.equipa_casa, j.logo_casa) : '';
                         const logoFora = window.obterLogoEquipa ? window.obterLogoEquipa(j.equipa_fora, j.logo_fora) : '';
+                        const tagJornada = j.jornada ? `Jornada ${j.jornada}` : (j.competicao || '');
                         return `
                             <div class="comp-game-card">
                                 <div class="comp-game-date-row">
                                     <span>📅 ${dataFmt}</span>
-                                    <span class="game-hour">${j.competicao || ''}</span>
+                                    <span class="game-hour">${tagJornada}</span>
                                 </div>
                                 <div class="comp-game-match-row">
                                     <span class="comp-game-team ${isCasaBCV ? 'is-bcv' : ''}" title="${j.equipa_casa}">
@@ -1370,7 +1371,21 @@ async function loadCompeticoesSection(supabase) {
                         { equipa_casa: 'Restauradores da Granja', equipa_fora: 'Famalicense AC', pontos_casa: 20, pontos_fora: 0 }
                     ]
                 };
-                const jogosSerieExtras = (serieKey && JOGOS_OFICIAIS_SERIE_FALLBACK[serieKey]) ? JOGOS_OFICIAIS_SERIE_FALLBACK[serieKey] : [];
+                let jogosSerieExtras = [];
+                if (comp.jogos_serie && Array.isArray(comp.jogos_serie) && comp.jogos_serie.length > 0) {
+                    jogosSerieExtras = comp.jogos_serie.filter(js => {
+                        const cN = normalizarNomeEquipa(js.equipa_casa);
+                        const fN = normalizarNomeEquipa(js.equipa_fora);
+                        const jaProcessado = jogosComResultado.some(jr => 
+                            normalizarNomeEquipa(jr.equipa_casa) === cN &&
+                            normalizarNomeEquipa(jr.equipa_fora) === fN &&
+                            (jr.data_jogo === js.data || !js.data)
+                        );
+                        return !jaProcessado;
+                    });
+                } else if (serieKey && JOGOS_OFICIAIS_SERIE_FALLBACK[serieKey]) {
+                    jogosSerieExtras = JOGOS_OFICIAIS_SERIE_FALLBACK[serieKey];
+                }
                 jogosSerieExtras.forEach(j => {
                     const pCasa = parseInt(j.pontos_casa, 10);
                     const pFora = parseInt(j.pontos_fora, 10);
@@ -1548,7 +1563,33 @@ async function loadCompeticoesSection(supabase) {
             card.className = `competicao-card ${comp.tipo === 'nacional' ? 'nacional' : ''}`;
 
             const jogosAgenda = allAgenda.filter(j => j.publicado !== false && matchJogoCompeticao(j, comp));
-            const jogosResultados = allResultados.filter(j => j.publicado !== false && matchJogoCompeticao(j, comp));
+            const jogosBCVResultados = allResultados.filter(j => j.publicado !== false && matchJogoCompeticao(j, comp));
+
+            // Consolidar resultados: jogos do BC Valença + todos os jogos registados da série
+            let jogosResultados = [...jogosBCVResultados];
+            if (comp.jogos_serie && Array.isArray(comp.jogos_serie) && comp.jogos_serie.length > 0) {
+                comp.jogos_serie.forEach(js => {
+                    const cNome = (js.equipa_casa || '').trim().toLowerCase();
+                    const fNome = (js.equipa_fora || '').trim().toLowerCase();
+                    const jaExiste = jogosResultados.some(jb => 
+                        (jb.equipa_casa || '').trim().toLowerCase() === cNome &&
+                        (jb.equipa_fora || '').trim().toLowerCase() === fNome &&
+                        (jb.data_jogo === js.data || !js.data)
+                    );
+                    if (!jaExiste) {
+                        jogosResultados.push({
+                            id: js.id || `serie_${Math.random()}`,
+                            equipa_casa: js.equipa_casa,
+                            equipa_fora: js.equipa_fora,
+                            pontos_casa: js.pontos_casa,
+                            pontos_fora: js.pontos_fora,
+                            data_jogo: js.data,
+                            jornada: js.jornada,
+                            competicao: js.jornada ? `Jornada ${js.jornada}` : (comp.sigla || comp.nome)
+                        });
+                    }
+                });
+            }
 
             // Omissão inteligente de redundâncias no cabeçalho
             const nomeComp = comp.nome || '';
