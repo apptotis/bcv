@@ -2445,35 +2445,75 @@ img {
     width: 6px;
 }
 
-/* Linha Principal do Card em Lista: Informação à esquerda, Ações à direita */
-.competicao-card-top {
+/* Estrutura Vertical dos Cards de Competição */
+.competicao-title-row {
+    width: 100%;
+    margin-bottom: 8px;
+}
+
+.competicao-title {
+    font-family: var(--font-heading);
+    font-size: 1.25rem;
+    font-weight: 800;
+    color: var(--text-primary);
+    margin: 0;
+    line-height: 1.3;
+    text-transform: uppercase;
+    letter-spacing: -0.01em;
+}
+
+/* Linha 2: Tag da Série + Botão Agenda */
+.competicao-sub-row {
     display: flex;
     justify-content: space-between;
-    align-items: flex-start;
-    gap: 20px;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 12px;
     width: 100%;
 }
 
-.competicao-info-col {
-    flex: 1;
-    min-width: 0;
-}
-
-.competicao-tabs-col {
-    flex-shrink: 0;
-    display: flex;
+.competicao-agenda-btn {
+    display: inline-flex;
     align-items: center;
+    gap: 6px;
+    padding: 6px 14px;
+    font-size: 0.8rem;
+    font-weight: 700;
+    background: #f8fafc;
+    border: 1px solid rgba(126, 34, 206, 0.22);
+    color: var(--accent-primary);
+    border-radius: 8px;
+    cursor: pointer;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04);
+    transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+    white-space: nowrap;
 }
 
-.competicao-card-header {
-    display: flex;
-    align-items: center;
-    margin-bottom: 8px;
-    gap: 8px;
+.competicao-agenda-btn:hover {
+    background: rgba(126, 34, 206, 0.08);
+    border-color: var(--accent-primary);
 }
 
-.competicao-card-header .btn-agenda-header {
-    display: none;
+.competicao-agenda-btn.active {
+    background: var(--accent-primary);
+    color: #ffffff;
+    border-color: var(--accent-primary);
+    box-shadow: 0 2px 8px rgba(126, 34, 206, 0.3);
+}
+
+.competicao-agenda-btn .tab-badge {
+    background: rgba(126, 34, 206, 0.14);
+    color: var(--accent-primary);
+    font-size: 0.68rem;
+    font-weight: 800;
+    padding: 1px 6px;
+    border-radius: 10px;
+    line-height: 1.2;
+}
+
+.competicao-agenda-btn.active .tab-badge {
+    background: rgba(255, 255, 255, 0.28);
+    color: #ffffff;
 }
 
 .competicao-tags-group {
@@ -2482,7 +2522,6 @@ img {
     gap: 8px;
     flex-wrap: wrap;
 }
-
 
 .competicao-tag {
     font-size: 0.72rem;
@@ -2505,31 +2544,6 @@ img {
     font-size: 0.82rem;
     font-weight: 800;
     color: var(--text-secondary);
-}
-
-.competicao-title {
-    font-family: var(--font-heading);
-    font-size: 1.2rem;
-    font-weight: 800;
-    color: var(--text-primary);
-    margin: 0 0 4px 0;
-    line-height: 1.25;
-}
-
-.competicao-equipa {
-    display: flex;
-    align-items: center;
-    gap: 6px;
-    font-size: 0.88rem;
-    color: var(--text-secondary);
-    margin-bottom: 6px;
-}
-
-.competicao-desc {
-    font-size: 0.84rem;
-    color: var(--text-secondary);
-    margin: 0;
-    line-height: 1.45;
 }
 
 .competicao-footer {
@@ -2557,15 +2571,20 @@ img {
     text-decoration: underline;
 }
 
-/* Abas de Ação nos Cards de Competição (Agenda, Resultados e Classificação) */
+/* Linha 3: Barra com Resultados e Classificação */
+.competicao-actions-row {
+    width: 100%;
+}
+
 .competicao-tabs-bar {
-    display: inline-flex;
-    align-items: center;
-    background: #f8fafc;
+    width: 100%;
+    display: flex;
+    background: #f1f5f9;
     padding: 4px;
     border-radius: 10px;
-    border: 1px solid rgba(0, 0, 0, 0.08);
-    gap: 4px;
+    border: 1px solid rgba(0, 0, 0, 0.06);
+    gap: 6px;
+    box-sizing: border-box;
 }
 
 .competicao-tab-btn {
@@ -2986,61 +3005,18 @@ img {
         margin-top: 10px;
     }
 
-    .competicao-card-top {
-        flex-direction: column;
-        align-items: stretch;
-        gap: 12px;
+    .competicao-title {
+        font-size: 1.15rem;
     }
 
-    .competicao-card-header {
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-        width: 100%;
-        margin-bottom: 10px;
-        gap: 8px;
-    }
-
-    .competicao-card-header .btn-agenda-header {
-        display: inline-flex;
+    .competicao-agenda-btn {
         padding: 5px 12px;
         font-size: 0.78rem;
-        background: #f8fafc;
-        border: 1px solid rgba(126, 34, 206, 0.22);
-        color: var(--accent-primary);
-        border-radius: 8px;
-        font-weight: 700;
-        box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04);
-        align-items: center;
-        gap: 5px;
-        white-space: nowrap;
-        cursor: pointer;
     }
 
-    .competicao-card-header .btn-agenda-header.active {
-        background: var(--accent-primary);
-        color: #ffffff;
-        border-color: var(--accent-primary);
-        box-shadow: 0 2px 8px rgba(126, 34, 206, 0.3);
-    }
-
-    .competicao-tabs-col {
-        width: 100%;
-    }
-
-    .competicao-tabs-col .btn-agenda-desktop {
-        display: none !important;
-    }
-
-    .competicao-tabs-col .competicao-tabs-bar {
-        width: 100%;
-        display: flex;
-        background: #f1f5f9;
-        padding: 4px;
-        border-radius: 10px;
-        border: 1px solid rgba(0, 0, 0, 0.06);
-        gap: 6px;
-        box-sizing: border-box;
+    .competicao-tabs-bar .competicao-tab-btn {
+        padding: 9px 8px;
+        font-size: 0.8rem;
     }
 
     .competicao-tabs-col .competicao-tab-btn {

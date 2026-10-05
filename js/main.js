@@ -1578,43 +1578,38 @@ async function loadCompeticoesSection(supabase) {
                 (comp.escalao === 'Sub 14' && (comp.sexo === 'Masculino' || comp.sexo === 'Masc'));
 
             card.innerHTML = `
-                <div class="competicao-card-top">
-                    <div class="competicao-info-col">
-                        <div class="competicao-card-header">
-                            <div class="competicao-tags-group">
-                                <span class="competicao-tag">${comp.tag}</span>
-                                ${mostrarSigla ? `<span class="competicao-sigla">${comp.sigla}</span>` : ''}
-                            </div>
-                            <!-- Botão de Agenda na 1.ª Linha (destaque à frente da tag em mobile) -->
-                            <button type="button" class="competicao-tab-btn btn-agenda-header" data-action="agenda">
-                                <span class="tab-icon">📅</span>
-                                <span class="tab-text">Agenda</span>
-                                ${jogosAgenda.length > 0 ? `<span class="tab-badge">${jogosAgenda.length}</span>` : ''}
-                            </button>
-                        </div>
-                        <h3 class="competicao-title">${comp.nome}</h3>
-                    </div>
+                <!-- Linha 1: Nome da Competição (Largura Total) -->
+                <div class="competicao-title-row">
+                    <h3 class="competicao-title">${comp.nome}</h3>
+                </div>
 
-                    <!-- Abas de Ação: Agenda (Desktop), Resultados e Classificação -->
-                    <div class="competicao-tabs-col">
-                        <div class="competicao-tabs-bar">
-                            <button type="button" class="competicao-tab-btn btn-agenda-desktop" data-action="agenda">
-                                <span class="tab-icon">📅</span>
-                                <span class="tab-text">Agenda</span>
-                                ${jogosAgenda.length > 0 ? `<span class="tab-badge">${jogosAgenda.length}</span>` : ''}
-                            </button>
-                            <button type="button" class="competicao-tab-btn" data-action="resultados">
-                                <span class="tab-icon">🏁</span>
-                                <span class="tab-text">Resultados</span>
-                                ${jogosResultados.length > 0 ? `<span class="tab-badge">${jogosResultados.length}</span>` : ''}
-                            </button>
-                            ${mostrarClassificacao ? `
-                            <button type="button" class="competicao-tab-btn" data-action="classificacao">
-                                <span class="tab-icon">📊</span>
-                                <span class="tab-text">Classificação</span>
-                            </button>
-                            ` : ''}
-                        </div>
+                <!-- Linha 2: Tag da Série + Botão Agenda -->
+                <div class="competicao-sub-row">
+                    <div class="competicao-tags-group">
+                        <span class="competicao-tag">${comp.tag}</span>
+                        ${mostrarSigla ? `<span class="competicao-sigla">${comp.sigla}</span>` : ''}
+                    </div>
+                    <button type="button" class="competicao-tab-btn competicao-agenda-btn" data-action="agenda">
+                        <span class="tab-icon">📅</span>
+                        <span class="tab-text">Agenda</span>
+                        ${jogosAgenda.length > 0 ? `<span class="tab-badge">${jogosAgenda.length}</span>` : ''}
+                    </button>
+                </div>
+
+                <!-- Linha 3: Botões de Ação (Resultados e Classificação) -->
+                <div class="competicao-actions-row">
+                    <div class="competicao-tabs-bar">
+                        <button type="button" class="competicao-tab-btn" data-action="resultados">
+                            <span class="tab-icon">🏁</span>
+                            <span class="tab-text">Resultados</span>
+                            ${jogosResultados.length > 0 ? `<span class="tab-badge">${jogosResultados.length}</span>` : ''}
+                        </button>
+                        ${mostrarClassificacao ? `
+                        <button type="button" class="competicao-tab-btn" data-action="classificacao">
+                            <span class="tab-icon">📊</span>
+                            <span class="tab-text">Classificação</span>
+                        </button>
+                        ` : ''}
                     </div>
                 </div>
 
