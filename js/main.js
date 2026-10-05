@@ -1051,7 +1051,7 @@ async function loadCompeticoesSection(supabase) {
             }
 
             // 4. Escalões de Formação por escalão e género
-            if (escalaoComp && jEsc === escalaoComp) {
+            if (escalaoComp && (jEsc === escalaoComp || jEsc.startsWith(escalaoComp))) {
                 const isFem = jComp.includes('fem') || jCasa.includes('fem') || jFora.includes('fem') || jEsc.includes('fem');
                 if (sexoComp === 'feminino') return isFem;
                 if (sexoComp === 'masculino') return !isFem;
@@ -1061,11 +1061,11 @@ async function loadCompeticoesSection(supabase) {
             // Fallback por texto da competição FPB
             if (sigla.includes('sub 18') && (jComp.includes('sub 18') || jComp.includes('sub-18') || jComp.includes('sub18'))) return true;
             if (sigla.includes('sub 16') && (jComp.includes('sub 16') || jComp.includes('sub-16') || jComp.includes('sub16'))) {
-                const isFem = jComp.includes('fem') || jCasa.includes('fem') || jFora.includes('fem');
+                const isFem = jComp.includes('fem') || jCasa.includes('fem') || jFora.includes('fem') || jEsc.includes('fem');
                 return sexoComp === 'feminino' ? isFem : !isFem;
             }
             if (sigla.includes('sub 14') && (jComp.includes('sub 14') || jComp.includes('sub-14') || jComp.includes('sub14'))) {
-                const isFem = jComp.includes('fem') || jCasa.includes('fem') || jFora.includes('fem');
+                const isFem = jComp.includes('fem') || jCasa.includes('fem') || jFora.includes('fem') || jEsc.includes('fem');
                 return sexoComp === 'feminino' ? isFem : !isFem;
             }
 
