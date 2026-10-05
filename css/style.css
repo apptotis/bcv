@@ -2472,6 +2472,10 @@ img {
     gap: 8px;
 }
 
+.competicao-card-header .btn-agenda-header {
+    display: none;
+}
+
 .competicao-tags-group {
     display: inline-flex;
     align-items: center;
@@ -2990,14 +2994,42 @@ img {
 
     .competicao-card-header {
         display: flex;
+        justify-content: space-between;
         align-items: center;
         width: 100%;
         margin-bottom: 10px;
         gap: 8px;
     }
 
+    .competicao-card-header .btn-agenda-header {
+        display: inline-flex;
+        padding: 5px 12px;
+        font-size: 0.78rem;
+        background: #f8fafc;
+        border: 1px solid rgba(126, 34, 206, 0.22);
+        color: var(--accent-primary);
+        border-radius: 8px;
+        font-weight: 700;
+        box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04);
+        align-items: center;
+        gap: 5px;
+        white-space: nowrap;
+        cursor: pointer;
+    }
+
+    .competicao-card-header .btn-agenda-header.active {
+        background: var(--accent-primary);
+        color: #ffffff;
+        border-color: var(--accent-primary);
+        box-shadow: 0 2px 8px rgba(126, 34, 206, 0.3);
+    }
+
     .competicao-tabs-col {
         width: 100%;
+    }
+
+    .competicao-tabs-col .btn-agenda-desktop {
+        display: none !important;
     }
 
     .competicao-tabs-col .competicao-tabs-bar {

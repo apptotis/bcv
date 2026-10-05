@@ -1458,30 +1458,12 @@ async function loadCompeticoesSection(supabase) {
                 }));
             }
 
-            const bannerFPB = `
-                <div class="comp-class-official-banner" style="background: linear-gradient(135deg, #f8fafc 0%, #eff6ff 100%); border: 1.5px solid #bfdbfe; border-radius: 10px; padding: 12px 14px; margin-bottom: 12px; display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 10px; box-shadow: 0 1px 3px rgba(0,0,0,0.04);">
-                    <div style="display: flex; align-items: center; gap: 12px;">
-                        <span style="font-size: 1.4rem; background: #dbeafe; color: #1e40af; width: 38px; height: 38px; border-radius: 50%; display: flex; align-items: center; justify-content: center; flex-shrink: 0;">🏆</span>
-                        <div>
-                            <div style="font-weight: 800; font-size: 0.88rem; color: #1e3a8a;">Classificação Oficial Homologada FPB</div>
-                            <div style="font-size: 0.74rem; color: #3b82f6;">Quadro integral da Série com todas as equipas, critérios e jornadas oficiais.</div>
-                        </div>
-                    </div>
-                    <a href="${urlFPB}" target="_blank" rel="noopener noreferrer" style="display: inline-flex; align-items: center; gap: 6px; background: #7e22ce; color: #ffffff; padding: 8px 14px; border-radius: 8px; font-size: 0.8rem; font-weight: 700; text-decoration: none; box-shadow: 0 2px 6px rgba(126,34,206,0.25); transition: transform 0.2s;" onmouseover="this.style.transform='translateY(-1px)'" onmouseout="this.style.transform='none'">
-                        <span>Abrir Classificação na FPB</span>
-                        <span style="font-size: 0.85rem;">↗</span>
-                    </a>
-                </div>
-            `;
-
             if (equipas.length === 0) {
                 return `
                     <div class="comp-classificacao-container">
-                        ${bannerFPB}
                         <div class="comp-games-empty" style="padding: 14px 10px;">
                             <span class="empty-icon">📊</span>
                             <span style="font-weight: 700; color: var(--text-primary);">Ainda sem resultados oficiais registados para apurar a classificação desta época no site.</span>
-                            <span style="font-size: 0.8rem; color: var(--text-secondary); max-width: 480px; margin: 4px auto 0 auto;">Aceda ao quadro completo oficial da Federação Portuguesa de Basquetebol no botão acima.</span>
                         </div>
                     </div>
                 `;
@@ -1493,15 +1475,8 @@ async function loadCompeticoesSection(supabase) {
 
             return `
                 <div class="comp-classificacao-container">
-                    ${bannerFPB}
-
-                    <div class="comp-classificacao-header">
+                    <div class="comp-classificacao-header" style="margin-bottom: 8px;">
                         <span class="comp-class-source-badge">${badgeFonte}</span>
-                        ${urlFPB ? `
-                            <a href="${urlFPB}" target="_blank" rel="noopener noreferrer" class="comp-class-link-fpb" title="Abrir portal oficial da FPB">
-                                <span>Ver na FPB ↗</span>
-                            </a>
-                        ` : ''}
                     </div>
 
                     <div class="comp-table-scroll">
@@ -1598,9 +1573,6 @@ async function loadCompeticoesSection(supabase) {
             const ehSiglaRedundante = /sub\s*\d+/i.test(siglaComp) || nomeComp.toLowerCase().includes(siglaComp.toLowerCase());
             const mostrarSigla = siglaComp && !ehSiglaRedundante;
 
-            // Se o nome da competição já inclui o escalão, o detalhe é exibido diretamente sem repetir 'Sub 14 Masculinos'
-            const detalheTexto = comp.detalhe ? comp.detalhe : (comp.equipa_label || '');
-
             // Ativação da Classificação para Sub 14 Masculinos
             const mostrarClassificacao = comp.id === 'sub14_masc' || 
                 (comp.escalao === 'Sub 14' && (comp.sexo === 'Masculino' || comp.sexo === 'Masc'));
@@ -1613,18 +1585,20 @@ async function loadCompeticoesSection(supabase) {
                                 <span class="competicao-tag">${comp.tag}</span>
                                 ${mostrarSigla ? `<span class="competicao-sigla">${comp.sigla}</span>` : ''}
                             </div>
+                            <!-- Botão de Agenda na 1.ª Linha (destaque à frente da tag em mobile) -->
+                            <button type="button" class="competicao-tab-btn btn-agenda-header" data-action="agenda">
+                                <span class="tab-icon">📅</span>
+                                <span class="tab-text">Agenda</span>
+                                ${jogosAgenda.length > 0 ? `<span class="tab-badge">${jogosAgenda.length}</span>` : ''}
+                            </button>
                         </div>
                         <h3 class="competicao-title">${comp.nome}</h3>
-                        <p class="competicao-desc">
-                            <span class="comp-desc-icon">${comp.icon || '🏀'}</span>
-                            <span>${detalheTexto}</span>
-                        </p>
                     </div>
 
-                    <!-- Abas de Ação: Agenda, Resultados e Classificação -->
+                    <!-- Abas de Ação: Agenda (Desktop), Resultados e Classificação -->
                     <div class="competicao-tabs-col">
                         <div class="competicao-tabs-bar">
-                            <button type="button" class="competicao-tab-btn" data-action="agenda">
+                            <button type="button" class="competicao-tab-btn btn-agenda-desktop" data-action="agenda">
                                 <span class="tab-icon">📅</span>
                                 <span class="tab-text">Agenda</span>
                                 ${jogosAgenda.length > 0 ? `<span class="tab-badge">${jogosAgenda.length}</span>` : ''}
