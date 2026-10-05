@@ -92,5 +92,4 @@
 - [2026-10-05] Gemini: Correção da exibição de resultados incompletos/adiados (eliminando 'null - null') e reposição do resultado oficial FPB (0-20) em Sub 14 Masc (id 417379).
 - [2026-10-05] Gemini: Módulo de Registo de Jogos da Série no Admin e cálculo automático em tempo real da Classificação oficial FPB (jogos_serie e tabela_serie em clube_config), com importação automática de jogos do BCV e consolidação na aba de Resultados (admin.html, js/admin.js, competicoes.html, js/main.js).
 - [2026-10-05] Gemini: Ocultação da aba Classificação nas competições públicas a pedido, mantendo abas Agenda e Resultados (50% no mobile) com link oficial FPB no rodapé dos cards (competicoes.html, js/main.js, css/style.css).
-- [2026-10-05] Gemini: Correção estrutural do modal Quadro da Série no Admin (admin.html), eliminando tags HTML órfãs que fechavam antecipadamente o contentor e mantendo os botões 'Guardar Quadro da Série' e 'Cancelar' no interior do modal.
-
+- [2026-10-05] Gemini: Ativação seletiva da aba 'Classificação' para o Campeonato Distrital Sub 14 Masculino (competicoes.html, js/main.js), permitindo a validação da tabela apurada e quadro oficial da série.

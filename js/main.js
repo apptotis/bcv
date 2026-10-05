@@ -1601,6 +1601,10 @@ async function loadCompeticoesSection(supabase) {
             // Se o nome da competição já inclui o escalão, o detalhe é exibido diretamente sem repetir 'Sub 14 Masculinos'
             const detalheTexto = comp.detalhe ? comp.detalhe : (comp.equipa_label || '');
 
+            // Ativação da Classificação para Sub 14 Masculinos
+            const mostrarClassificacao = comp.id === 'sub14_masc' || 
+                (comp.escalao === 'Sub 14' && (comp.sexo === 'Masculino' || comp.sexo === 'Masc'));
+
             card.innerHTML = `
                 <div class="competicao-card-top">
                     <div class="competicao-info-col">
@@ -1617,7 +1621,7 @@ async function loadCompeticoesSection(supabase) {
                         </p>
                     </div>
 
-                    <!-- Abas de Ação: Agenda e Resultados -->
+                    <!-- Abas de Ação: Agenda, Resultados e Classificação -->
                     <div class="competicao-tabs-col">
                         <div class="competicao-tabs-bar">
                             <button type="button" class="competicao-tab-btn" data-action="agenda">
@@ -1630,6 +1634,12 @@ async function loadCompeticoesSection(supabase) {
                                 <span class="tab-text">Resultados</span>
                                 ${jogosResultados.length > 0 ? `<span class="tab-badge">${jogosResultados.length}</span>` : ''}
                             </button>
+                            ${mostrarClassificacao ? `
+                            <button type="button" class="competicao-tab-btn" data-action="classificacao">
+                                <span class="tab-icon">📊</span>
+                                <span class="tab-text">Classificação</span>
+                            </button>
+                            ` : ''}
                         </div>
                     </div>
                 </div>
