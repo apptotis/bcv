@@ -1586,9 +1586,10 @@ async function loadCompeticoesSection(supabase) {
             const ehSiglaRedundante = /sub\s*\d+/i.test(siglaComp) || nomeComp.toLowerCase().includes(siglaComp.toLowerCase());
             const mostrarSigla = siglaComp && !ehSiglaRedundante;
 
-            // Ativação da Classificação para Sub 14 Masculinos
-            const mostrarClassificacao = comp.id === 'sub14_masc' || 
-                (comp.escalao === 'Sub 14' && (comp.sexo === 'Masculino' || comp.sexo === 'Masc'));
+            // Ativação da Classificação para Sub 14 Masc, Sub 14 Fem, Sub 16 Fem e Sub 18 Masc
+            const compsComClassificacao = ['sub14_masc', 'sub14_fem', 'sub16_fem', 'sub18_masc'];
+            const mostrarClassificacao = compsComClassificacao.includes(comp.id) || 
+                (comp.tabela_serie && Array.isArray(comp.tabela_serie) && comp.tabela_serie.length >= 2);
 
             card.innerHTML = `
                 <!-- Linha 1: Nome da Competição (Largura Total) -->

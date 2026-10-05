@@ -95,3 +95,4 @@
 - [2026-10-05] Gemini: Uniformização da indicação 'Jornada 1' nos resultados (resultados_bcv no Supabase e consolidação dinâmica em main.js), eliminando texto residual de competição no cabeçalho do jogo do BC Valença.
 - [2026-10-05] Gemini: Correção de ReferenceError em logoFora dentro de renderResultadosList (main.js) restabelecendo a abertura imediata da lista de resultados.
 - [2026-10-05] Gemini: Correção do escalão do jogo CB Viana vs BC Valença (4-134) para Sub 14 Feminino no Supabase e aprimoramento de matchJogoCompeticao em main.js isolando os 4 jogos oficiais de Sub 14 Masc.
+- [2026-10-05] Gemini: Ativação da aba 'Classificação' para Sub 14 Fem, Sub 16 Fem e Sub 18 Masc em competicoes.html.
