@@ -2321,6 +2321,9 @@ document.addEventListener('DOMContentLoaded', async () => {
         fotoUrlInput.value = '';
         fotoFileInput.value = '';
         fotoPreviewDiv.style.display = 'none';
+        if (document.getElementById('atleta-inscrito-fpb')) {
+            document.getElementById('atleta-inscrito-fpb').checked = false;
+        }
         
         formAtletaTitle.textContent = 'Adicionar Novo Atleta';
         btnSaveAtleta.textContent = 'Adicionar Atleta';
@@ -2337,11 +2340,12 @@ document.addEventListener('DOMContentLoaded', async () => {
         return String(val).toLowerCase().replace(/[\s\-_]/g, '');
     }
 
-    // Função de filtragem combinada em tempo real (Pesquisa + Função + Estado/Época + Escalão)
+    // Função de filtragem combinada em tempo real (Pesquisa + Função + Estado/Época + Inscrito FPB + Escalão)
     function applyAtletasFilters() {
         const searchVal = (document.getElementById('filter-search-atleta')?.value || '').toLowerCase().trim();
         const funcaoVal = document.getElementById('filter-funcao-atleta')?.value || '';
         const epocaVal = document.getElementById('filter-epoca-atleta')?.value || '';
+        const fpbVal = document.getElementById('filter-inscrito-fpb')?.value || '';
         const escalaoVal = document.getElementById('filter-escalao')?.value || '';
 
         const filtrados = currentAtletas.filter(atleta => {
@@ -2364,6 +2368,13 @@ document.addEventListener('DOMContentLoaded', async () => {
                 matchesEpoca = atleta.epoca !== '2026/2027';
             }
 
+            let matchesFPB = true;
+            if (fpbVal === 'sim') {
+                matchesFPB = atleta.inscrito_fpb === true;
+            } else if (fpbVal === 'nao') {
+                matchesFPB = !atleta.inscrito_fpb;
+            }
+
             let matchesEscalao = true;
             if (escalaoVal) {
                 const normFiltro = normalizeEscalao(escalaoVal);
@@ -2375,7 +2386,7 @@ document.addEventListener('DOMContentLoaded', async () => {
                                  (normFiltro.includes('master') && (normAtleta.includes('veterano') || normAtleta.includes('master')));
             }
 
-            return matchesSearch && matchesFuncao && matchesEpoca && matchesEscalao;
+            return matchesSearch && matchesFuncao && matchesEpoca && matchesFPB && matchesEscalao;
         });
 
         renderAtletasTable(filtrados);
@@ -2384,18 +2395,21 @@ document.addEventListener('DOMContentLoaded', async () => {
     const filterSearchInput = document.getElementById('filter-search-atleta');
     const filterFuncaoSelect = document.getElementById('filter-funcao-atleta');
     const filterEpocaSelect = document.getElementById('filter-epoca-atleta');
+    const filterInscritoFPBSelect = document.getElementById('filter-inscrito-fpb');
     const filterEscalaoSelect = document.getElementById('filter-escalao');
     const btnClearFilters = document.getElementById('btn-clear-filters');
 
     if (filterSearchInput) filterSearchInput.addEventListener('input', applyAtletasFilters);
     if (filterFuncaoSelect) filterFuncaoSelect.addEventListener('change', applyAtletasFilters);
     if (filterEpocaSelect) filterEpocaSelect.addEventListener('change', applyAtletasFilters);
+    if (filterInscritoFPBSelect) filterInscritoFPBSelect.addEventListener('change', applyAtletasFilters);
     if (filterEscalaoSelect) filterEscalaoSelect.addEventListener('change', applyAtletasFilters);
     if (btnClearFilters) {
         btnClearFilters.addEventListener('click', () => {
             if (filterSearchInput) filterSearchInput.value = '';
             if (filterFuncaoSelect) filterFuncaoSelect.value = '';
             if (filterEpocaSelect) filterEpocaSelect.value = '';
+            if (filterInscritoFPBSelect) filterInscritoFPBSelect.value = '';
             if (filterEscalaoSelect) filterEscalaoSelect.value = '';
             applyAtletasFilters();
         });
@@ -2418,7 +2432,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         if (!atletasTableBody) return;
         
         try {
-            atletasTableBody.innerHTML = '<tr><td colspan="7" style="padding: 10px;">A carregar atletas...</td></tr>';
+            atletasTableBody.innerHTML = '<tr><td colspan="8" style="padding: 10px;">A carregar atletas...</td></tr>';
             
             const { data: atletas, error } = await supabase
                 .from('atletasbcv')
@@ -2427,7 +2441,7 @@ document.addEventListener('DOMContentLoaded', async () => {
 
             if (error) {
                 if (error.code === '42P01') {
-                    atletasTableBody.innerHTML = '<tr><td colspan="7" style="padding: 10px;">A tabela "atletasbcv" não existe na base de dados. Por favor, crie-a no Supabase.</td></tr>';
+                    atletasTableBody.innerHTML = '<tr><td colspan="8" style="padding: 10px;">A tabela "atletasbcv" não existe na base de dados. Por favor, crie-a no Supabase.</td></tr>';
                     return;
                 }
                 throw error;
@@ -2438,7 +2452,7 @@ document.addEventListener('DOMContentLoaded', async () => {
             
         } catch (error) {
             console.error("Erro ao carregar atletas:", error);
-            atletasTableBody.innerHTML = `<tr><td colspan="7" style="color: red; padding: 10px;">Erro: ${error.message}</td></tr>`;
+            atletasTableBody.innerHTML = `<tr><td colspan="8" style="color: red; padding: 10px;">Erro: ${error.message}</td></tr>`;
         }
     }
 
@@ -2446,7 +2460,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         atletasTableBody.innerHTML = '';
         
         if (!lista || lista.length === 0) {
-            atletasTableBody.innerHTML = '<tr><td colspan="7" style="padding: 10px;">Nenhum atleta encontrado com os filtros selecionados.</td></tr>';
+            atletasTableBody.innerHTML = '<tr><td colspan="8" style="padding: 10px;">Nenhum atleta encontrado com os filtros selecionados.</td></tr>';
             return;
         }
 
@@ -2472,11 +2486,25 @@ document.addEventListener('DOMContentLoaded', async () => {
                 ? '<span style="background: rgba(22, 163, 74, 0.12); color: #16a34a; padding: 3px 8px; border-radius: 4px; font-weight: 700; font-size: 0.78rem; border: 1px solid rgba(22, 163, 74, 0.3); white-space: nowrap;">🟢 2026/2027</span>'
                 : `<span style="background: rgba(217, 119, 6, 0.12); color: #b45309; padding: 3px 8px; border-radius: 4px; font-weight: 600; font-size: 0.78rem; border: 1px solid rgba(217, 119, 6, 0.3); white-space: nowrap;">🟡 ${atleta.epoca || '2025/2026'} (Pendente)</span>`;
 
+            const isInscritoFPB = !!atleta.inscrito_fpb;
+            const fpbCellHtml = `
+                <div style="display: flex; align-items: center; justify-content: center; gap: 6px;">
+                    <input type="checkbox" id="chk-fpb-${atleta.id}" ${isInscritoFPB ? 'checked' : ''} 
+                        onchange="window.toggleInscritoFPB(${atleta.id}, this.checked)"
+                        style="width: 17px; height: 17px; cursor: pointer; accent-color: #16a34a;"
+                        title="${isInscritoFPB ? 'Inscrito na FPB (Clique para desmarcar)' : 'Marcar como Inscrito na FPB'}">
+                    <span id="badge-fpb-${atleta.id}" style="font-size: 0.78rem; font-weight: 700; color: ${isInscritoFPB ? '#16a34a' : '#94a3b8'};">
+                        ${isInscritoFPB ? 'Sim' : 'Não'}
+                    </span>
+                </div>
+            `;
+
             tr.innerHTML = `
                 <td style="padding: 10px;">${fotoHtml}</td>
                 <td style="padding: 10px;"><strong>${atleta.nome || '-'}</strong></td>
                 <td style="padding: 10px;"><span style="background: rgba(0,0,0,0.04); border: 1px solid var(--border-color); padding: 3px 8px; border-radius: 6px; font-size: 0.85rem;">${atleta.escalao || '-'}</span></td>
                 <td style="padding: 10px;">${statusBadgeHtml}</td>
+                <td style="padding: 10px; text-align: center;">${fpbCellHtml}</td>
                 <td style="padding: 10px;">${atleta.nickname ? `<span style="color: var(--accent-primary); font-weight: 600;">"${atleta.nickname}"</span>` : '<span style="color: #a0a0ab;">-</span>'}</td>
                 <td style="padding: 10px; text-align: center;">${numCamisolaHtml}</td>
                 <td style="padding: 10px; text-align: center; white-space: nowrap;">
@@ -2489,6 +2517,61 @@ document.addEventListener('DOMContentLoaded', async () => {
             atletasTableBody.appendChild(tr);
         });
     }
+
+    // Toggle rápido de 1 clique para inscrição oficial na FPB
+    window.toggleInscritoFPB = async function(id, isChecked) {
+        const badgeEl = document.getElementById(`badge-fpb-${id}`);
+        const chkEl = document.getElementById(`chk-fpb-${id}`);
+
+        // Atualização visual otimista
+        if (badgeEl) {
+            badgeEl.textContent = isChecked ? 'Sim' : 'Não';
+            badgeEl.style.color = isChecked ? '#16a34a' : '#94a3b8';
+        }
+
+        try {
+            const { error } = await supabase
+                .from('atletasbcv')
+                .update({ inscrito_fpb: isChecked })
+                .eq('id', id);
+
+            if (error) {
+                if (error.code === '42703' || (error.message && error.message.includes('inscrito_fpb'))) {
+                    alert('Aviso: A coluna "inscrito_fpb" ainda não foi criada no Supabase.\nPor favor, execute o ficheiro SQL setup_atleta_inscrito_fpb.sql no Editor SQL do Supabase.');
+                } else {
+                    alert('Erro ao atualizar estado FPB: ' + error.message);
+                }
+                // Reverter interface
+                if (chkEl) chkEl.checked = !isChecked;
+                if (badgeEl) {
+                    badgeEl.textContent = !isChecked ? 'Sim' : 'Não';
+                    badgeEl.style.color = !isChecked ? '#16a34a' : '#94a3b8';
+                }
+                return;
+            }
+
+            // Atualizar cache de atletas local
+            const at = currentAtletas.find(a => String(a.id) === String(id));
+            if (at) {
+                at.inscrito_fpb = isChecked;
+            }
+
+            // Se o filtro ativo for de estado FPB, reaplicar filtros para refletir a mudança
+            const fpbFilter = document.getElementById('filter-inscrito-fpb')?.value;
+            if (fpbFilter) {
+                applyAtletasFilters();
+            }
+
+        } catch (err) {
+            console.error('Erro ao atualizar inscrito_fpb:', err);
+            if (chkEl) chkEl.checked = !isChecked;
+            if (badgeEl) {
+                badgeEl.textContent = !isChecked ? 'Sim' : 'Não';
+                badgeEl.style.color = !isChecked ? '#16a34a' : '#94a3b8';
+            }
+            alert('Erro de comunicação: ' + err.message);
+        }
+    };
 
     // Função para exportar PDF Oficial do Modelo 1 da FPB usando pdf-lib
     window.exportAtletaPDF = async function(atletaArg) {
@@ -3076,6 +3159,9 @@ document.addEventListener('DOMContentLoaded', async () => {
         document.getElementById('atleta-nascimento').value = atleta.data_nascimento || '';
         document.getElementById('atleta-nacionalidade').value = atleta.nacionalidade || 'Portugal';
         document.getElementById('atleta-licenca').value = atleta.licenca || '';
+        if (document.getElementById('atleta-inscrito-fpb')) {
+            document.getElementById('atleta-inscrito-fpb').checked = !!atleta.inscrito_fpb;
+        }
 
         if (document.getElementById('atleta-nif')) document.getElementById('atleta-nif').value = atleta.nif || '';
         if (document.getElementById('atleta-email')) document.getElementById('atleta-email').value = atleta.email || '';
@@ -3198,6 +3284,7 @@ document.addEventListener('DOMContentLoaded', async () => {
                 data_nascimento: document.getElementById('atleta-nascimento').value || null,
                 nacionalidade: document.getElementById('atleta-nacionalidade').value,
                 licenca: document.getElementById('atleta-licenca').value,
+                inscrito_fpb: document.getElementById('atleta-inscrito-fpb') ? document.getElementById('atleta-inscrito-fpb').checked : false,
                 foto: fotoUrlInput.value,
 
                 // Documentos e Residência

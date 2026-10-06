@@ -15,13 +15,9 @@
 - Múltiplos agentes (Gemini, Claude, Codex) mantêm este ficheiro como Single Source of Truth (SSOT).
 
 ## Histórico de Atualizações
-- [2026-05-07 a 2026-05-27] Gemini: Inicialização do projeto, tema institucional, aniversários, scroll-padding e melhorias de navegação.
-- [2026-06-04] Gemini: Módulo Gestão de Equipas BCV no Admin, página pública equipas.html com detalhe de plantel, novos campos de atletas e remoção de sync FPB.
-- [2026-08-22 a 2026-08-23] Gemini: Wizard de inscrição integrada (FPB, IPDJ, Equipamentos), cálculo automático de escalões, validações e PDFs oficiais FPB/EMD.
-- [2026-08-24 a 2026-08-25] Gemini: Reformulações no Admin (permissões, sidebar, badges de época, validações e dados de encarregado no wizard/PDF FPB).
-- [2026-08-25] Gemini: Implementação completa do módulo Configurações do Clube no Admin (admin.html, admin.js) e frontend dinâmico (clube.html, clube.js, main.js) com script SQL setup_configuracoes_clube.sql para gestão de órgãos sociais, contactos, redes sociais e dados institucionais via Supabase.
-- [2026-08-27] Gemini: Correções no PDF oficial FPB, formulário de atletas, módulo Gestão de Equipamentos no Admin (dashboard/filtros/exportação) e modal de atleta global.
-- [2026-08-27] Gemini: Implementação completa do Portal Mobile do Diretor de Campo (diretor.html, css/diretor.css, js/diretor.js) para chamada de presenças em treinos/jogos com 1 toque, cobrança e registo de mensalidades, contactos de emergência (SOS Encarregados), afetação automática de escalão por utilizador no Admin, e script SQL setup_diretores_presencas_mensalidades.sql.
+- [2026-05 a 2026-06] Gemini: Inicialização do projeto, tema institucional, aniversários, scroll-padding, gestão de equipas no Admin e página pública equipas.html.
+- [2026-08-22 a 2026-08-25] Gemini: Wizard de inscrições integradas (FPB/IPDJ/Equipamentos), PDFs oficiais, reformulações no Admin e módulo de Configurações do Clube.
+- [2026-08-27] Gemini: Portais Mobile (Diretor de Campo), gestão de equipamentos, presenças/mensalidades com 1 toque, desportiva e financeira no Admin.
 - [2026-08-27] Gemini: Modernização da navegação do Portal do Diretor (diretor.html, css/diretor.css, js/diretor.js), substituindo os botões fixos inferiores por um Menu Hambúrguer lateral (Drawer) no cabeçalho, libertando espaço vertical no ecrã e preparando a estrutura para futuras funcionalidades.
 - [2026-08-27] Gemini: Implementação de suporte a múltiplos escalões por utilizador/diretor (checkboxes no Admin) e seletor dinâmico de equipa ativa no Portal Mobile com alternância com 1 toque no topo e no drawer.
 - [2026-08-27] Gemini: Resolução do corte de nomes longos de atletas com quebra de linha fluida, reformulação vertical do cartão de cobrança com botão de registo em largura total abaixo do número, e suporte integrado a Quota Anual Completa (250€) com deteção automática em todos os meses da época.
@@ -96,3 +92,4 @@
 - [2026-10-05] Gemini: Correção de ReferenceError em logoFora dentro de renderResultadosList (main.js) restabelecendo a abertura imediata da lista de resultados.
 - [2026-10-05] Gemini: Correção do escalão do jogo CB Viana vs BC Valença (4-134) para Sub 14 Feminino no Supabase e aprimoramento de matchJogoCompeticao em main.js isolando os 4 jogos oficiais de Sub 14 Masc.
 - [2026-10-05] Gemini: Ativação da aba 'Classificação' para Sub 14 Fem, Sub 16 Fem e Sub 18 Masc em competicoes.html.
+- [2026-10-06] Gemini: Implementação do campo 'Inscrito FPB' (inscrito_fpb) na tabela atletasbcv com checkbox interativa de 1 toque na tabela de atletas, filtro dedicado no Admin e integração no modal de edição (admin.html, js/admin.js, setup_atleta_inscrito_fpb.sql).

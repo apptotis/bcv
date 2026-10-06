@@ -893,6 +893,14 @@
                                 </select>
                             </div>
                             <div style="flex: 1; min-width: 150px;">
+                                <label style="display:block; margin-bottom:5px; font-size:0.8rem; color: var(--text-secondary);">Inscrito FPB</label>
+                                <select id="filter-inscrito-fpb" class="admin-input" style="margin-bottom: 0;">
+                                    <option value="">Todos</option>
+                                    <option value="sim">🟢 Inscritos FPB (Sim)</option>
+                                    <option value="nao">🟡 Pendentes FPB (Não)</option>
+                                </select>
+                            </div>
+                            <div style="flex: 1; min-width: 150px;">
                                 <label style="display:block; margin-bottom:5px; font-size:0.8rem; color: var(--text-secondary);">Escalão</label>
                                 <select id="filter-escalao" class="admin-input" style="margin-bottom: 0;">
                                     <option value="">Todos os Escalões</option>
@@ -925,13 +933,14 @@
                                     <th style="padding: 10px;">Nome</th>
                                     <th style="padding: 10px;">Escalão</th>
                                     <th style="padding: 10px;">Estado / Época</th>
+                                    <th style="padding: 10px; text-align: center; width: 120px;">Inscrito FPB</th>
                                     <th style="padding: 10px;">Nickname</th>
                                     <th style="padding: 10px; width: 60px; text-align: center;">Nº</th>
                                     <th style="padding: 10px; text-align: center; width: 180px;">Ações</th>
                                 </tr>
                             </thead>
                             <tbody id="atletas-table-body">
-                                <tr><td colspan="7" style="padding: 10px;">A carregar atletas...</td></tr>
+                                <tr><td colspan="8" style="padding: 10px;">A carregar atletas...</td></tr>
                             </tbody>
                         </table>
                     </div>
@@ -2552,7 +2561,7 @@
                                 </div>
                             </div>
 
-                            <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 15px;">
+                            <div style="display: grid; grid-template-columns: 1fr 1fr 1fr 1fr; gap: 15px; align-items: flex-end;">
                                 <div>
                                     <label style="display:block; margin-bottom:5px; font-size:0.8rem; color:#a0a0ab;">Naturalidade (País)</label>
                                     <input type="text" id="atleta-pais-nasc" placeholder="Ex: Portugal" class="admin-input">
@@ -2564,6 +2573,12 @@
                                 <div>
                                     <label style="display:block; margin-bottom:5px; font-size:0.8rem; color:#a0a0ab;">Nº Licença FPB</label>
                                     <input type="text" id="atleta-licenca" placeholder="Licença" class="admin-input">
+                                </div>
+                                <div style="padding-bottom: 2px;">
+                                    <label style="display: flex; align-items: center; gap: 8px; cursor: pointer; font-size: 0.85rem; font-weight: 700; color: #16a34a; background: rgba(22, 163, 74, 0.08); padding: 10px 12px; border-radius: 6px; border: 1px solid rgba(22, 163, 74, 0.3);">
+                                        <input type="checkbox" id="atleta-inscrito-fpb" style="width: 17px; height: 17px; cursor: pointer; accent-color: #16a34a;">
+                                        <span>Inscrito FPB</span>
+                                    </label>
                                 </div>
                             </div>
 
