@@ -725,6 +725,41 @@ img {
     gap: 14px;
 }
 
+/* Agenda Desportiva no Index: Estritamente 1 jogo por linha (largura total) para leitura clara sem confusão */
+#agenda-list.portal-games-list {
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+}
+
+#agenda-list .game-schedule-item {
+    width: 100%;
+    height: auto;
+    background: #ffffff;
+    border: 1px solid var(--border-color);
+    border-radius: 12px;
+    padding: 14px 18px;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.03);
+}
+
+#agenda-list .game-schedule-item:hover {
+    background: #f8fafc;
+    border-color: var(--accent-primary);
+    transform: translateY(-2px);
+    box-shadow: 0 4px 14px rgba(126, 34, 206, 0.08);
+}
+
+#agenda-list .matchup-row-aligned {
+    gap: 16px;
+    padding: 8px 0 6px;
+}
+
+#agenda-list .game-schedule-venue {
+    margin-top: 4px;
+    padding-top: 8px;
+    border-top: 1px dashed rgba(0, 0, 0, 0.06);
+}
+
 @media (max-width: 768px) {
     .portal-highlights-grid {
         gap: 16px;
@@ -732,6 +767,13 @@ img {
     .portal-games-list {
         grid-template-columns: 1fr;
         gap: 10px;
+    }
+    #agenda-list.portal-games-list {
+        gap: 10px !important;
+    }
+    #agenda-list .game-schedule-item {
+        padding: 10px 12px !important;
+        gap: 6px !important;
     }
 }
 
