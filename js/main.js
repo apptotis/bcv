@@ -215,20 +215,53 @@ async function loadPortalHighlights(supabase) {
     window.obterLogoEquipa = obterLogoEquipa;
     window.FPB_CLUB_LOGOS = FPB_CLUB_LOGOS;
 
-    // 1. CARREGAR AGENDA (Próximos Jogos)
+    // 1. CARREGAR AGENDA (Próximos Jogos nos próximos 6 dias)
     if (agendaContainer) {
         try {
             const hoje = new Date();
-            const hojeStr = hoje.toISOString().split('T')[0];
+            const ano = hoje.getFullYear();
+            const mes = String(hoje.getMonth() + 1).padStart(2, '0');
+            const dia = String(hoje.getDate()).padStart(2, '0');
+            const hojeStr = `${ano}-${mes}-${dia}`;
+
+            // Data limite: hoje + 6 dias (janela de 7 dias incluindo hoje)
+            const dataLimite = new Date(hoje);
+            dataLimite.setDate(hoje.getDate() + 6);
+            const anoLim = dataLimite.getFullYear();
+            const mesLim = String(dataLimite.getMonth() + 1).padStart(2, '0');
+            const diaLim = String(dataLimite.getDate()).padStart(2, '0');
+            const dataLimiteStr = `${anoLim}-${mesLim}-${diaLim}`;
 
             const { data: agenda, error } = await supabase
                 .from('agenda_bcv')
                 .select('*')
                 .gte('data_jogo', hojeStr)
-                .order('data_jogo', { ascending: true })
-                .limit(8);
+                .lte('data_jogo', dataLimiteStr)
+                .order('data_jogo', { ascending: true });
 
-            const agendaPublicada = (agenda || []).filter(j => j.publicado !== false).slice(0, 5);
+            function normalizarHoraParaMinutos(horaStr) {
+                if (!horaStr || typeof horaStr !== 'string') return 9999;
+                const limpo = horaStr.trim().toLowerCase();
+                if (limpo.includes('definir') || limpo === '-') return 9999;
+                const match = limpo.match(/(\d{1,2})[:hH](\d{2})/);
+                if (match) {
+                    return parseInt(match[1], 10) * 60 + parseInt(match[2], 10);
+                }
+                return 9999;
+            }
+
+            const agendaPublicada = (agenda || [])
+                .filter(j => j.publicado !== false && j.data_jogo >= hojeStr && j.data_jogo <= dataLimiteStr)
+                .sort((a, b) => {
+                    // Ordenar primeiramente por data crescente
+                    if (a.data_jogo !== b.data_jogo) {
+                        return a.data_jogo.localeCompare(b.data_jogo);
+                    }
+                    // No mesmo dia: ordenar pela hora do jogo (do mais cedo ao mais tarde)
+                    const minA = normalizarHoraParaMinutos(a.hora_jogo);
+                    const minB = normalizarHoraParaMinutos(b.hora_jogo);
+                    return minA - minB;
+                });
 
             if (!error && agendaPublicada.length > 0) {
                 hasAgenda = true;
