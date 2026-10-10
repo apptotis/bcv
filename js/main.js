@@ -283,8 +283,8 @@ async function loadPortalHighlights(supabase) {
                     item.className = 'game-schedule-item';
                     item.innerHTML = `
                         <div class="game-schedule-top">
-                            <span class="game-escalao-badge">🏀 ${escalaoCompleto}</span>
-                            <span class="game-date-badge">📅 ${dataJogo} ${horaJogo ? '• ' + horaJogo : ''}</span>
+                            <span class="game-escalao-badge">${escalaoCompleto}</span>
+                            <span class="game-date-badge">${dataJogo} ${horaJogo ? '• ' + horaJogo : ''}</span>
                         </div>
                         <div class="matchup-row-aligned">
                             <div class="matchup-team-col team-casa ${isCasaBCV ? 'team-bcv' : ''}">
@@ -349,8 +349,8 @@ async function loadPortalHighlights(supabase) {
                     item.className = 'game-result-item';
                     item.innerHTML = `
                         <div class="game-result-top">
-                            <span class="game-escalao-badge">🏀 ${escalaoCompleto}</span>
-                            <span class="game-date-badge">📅 ${dataJogo}</span>
+                            <span class="game-escalao-badge">${escalaoCompleto}</span>
+                            <span class="game-date-badge">${dataJogo}</span>
                         </div>
                         <div class="matchup-row-aligned">
                             <div class="matchup-team-col team-casa ${isCasaBCV ? 'team-bcv' : ''}">

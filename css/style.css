@@ -1176,17 +1176,27 @@ img {
 
     .game-schedule-top,
     .game-result-top {
-        gap: 4px !important;
+        display: flex !important;
+        justify-content: space-between !important;
+        align-items: center !important;
+        gap: 6px !important;
+        flex-wrap: nowrap !important;
     }
 
     .game-escalao-badge {
         font-size: 0.72rem !important;
         padding: 2px 6px !important;
+        white-space: nowrap !important;
+        overflow: hidden !important;
+        text-overflow: ellipsis !important;
+        max-width: 58% !important;
     }
 
     .game-date-badge {
         font-size: 0.72rem !important;
         padding: 2px 6px !important;
+        white-space: nowrap !important;
+        flex-shrink: 0 !important;
     }
 
     .matchup-row-aligned {
