@@ -4530,19 +4530,41 @@ document.addEventListener('DOMContentLoaded', async () => {
             return `${g.data_jogo}_${c}_${f}`;
         }
 
+        // 1. Inserir todos os jogos de calendário (têm a hora oficial marcada pela FPB)
         for (const g of (calendarGames || [])) {
-            map.set(getKey(g), g);
+            map.set(getKey(g), { ...g });
         }
 
+        // 2. Mesclar jogos de resultados sem apagar as horas ou detalhes do calendário
         for (const g of (resultGames || [])) {
             const key = getKey(g);
             const existing = map.get(key);
             const hasValidScore = g.pontos_casa !== null && g.pontos_casa !== undefined && g.pontos_fora !== null && g.pontos_fora !== undefined;
+
             if (existing) {
+                // Preservar hora oficial: a página de resultados não lista hora para jogos futuros ou decorridos sem placar
+                const horaFinal = (g.hora_jogo && g.hora_jogo !== 'A definir') 
+                    ? g.hora_jogo 
+                    : (existing.hora_jogo || g.hora_jogo || null);
+
+                const localFinal = (g.local && g.local.trim()) ? g.local : (existing.local || '');
+                const competicaoFinal = (g.competicao && g.competicao.trim()) ? g.competicao : (existing.competicao || '');
+                const escalaoFinal = (g.escalao && g.escalao !== 'BCV') ? g.escalao : (existing.escalao || g.escalao || 'BCV');
+                const logoCasaFinal = g.logo_casa || existing.logo_casa || null;
+                const logoForaFinal = g.logo_fora || existing.logo_fora || null;
+
                 map.set(key, {
                     ...existing,
                     ...g,
-                    is_resultado: hasValidScore ? true : existing.is_resultado
+                    hora_jogo: horaFinal,
+                    local: localFinal,
+                    competicao: competicaoFinal,
+                    escalao: escalaoFinal,
+                    logo_casa: logoCasaFinal,
+                    logo_fora: logoForaFinal,
+                    is_resultado: hasValidScore ? true : existing.is_resultado,
+                    pontos_casa: hasValidScore ? g.pontos_casa : existing.pontos_casa,
+                    pontos_fora: hasValidScore ? g.pontos_fora : existing.pontos_fora
                 });
             } else {
                 map.set(key, {
