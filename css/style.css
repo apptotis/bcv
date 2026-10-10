@@ -725,14 +725,16 @@ img {
     gap: 14px;
 }
 
-/* Agenda Desportiva no Index: Estritamente 1 jogo por linha (largura total) para leitura clara sem confusão */
-#agenda-list.portal-games-list {
+/* Destaques no Index (Agenda e Resultados Recentes): Estritamente 1 jogo/resultado por linha (largura total) para leitura clara sem confusão */
+#agenda-list.portal-games-list,
+#resultados-list.portal-games-list {
     display: flex;
     flex-direction: column;
     gap: 14px;
 }
 
-#agenda-list .game-schedule-item {
+#agenda-list .game-schedule-item,
+#resultados-list .game-result-item {
     width: 100%;
     height: auto;
     background: #ffffff;
@@ -742,14 +744,16 @@ img {
     box-shadow: 0 1px 3px rgba(0, 0, 0, 0.03);
 }
 
-#agenda-list .game-schedule-item:hover {
+#agenda-list .game-schedule-item:hover,
+#resultados-list .game-result-item:hover {
     background: #f8fafc;
     border-color: var(--accent-primary);
     transform: translateY(-2px);
     box-shadow: 0 4px 14px rgba(126, 34, 206, 0.08);
 }
 
-#agenda-list .matchup-row-aligned {
+#agenda-list .matchup-row-aligned,
+#resultados-list .matchup-row-aligned {
     gap: 16px;
     padding: 8px 0 6px;
 }
@@ -768,10 +772,12 @@ img {
         grid-template-columns: 1fr;
         gap: 10px;
     }
-    #agenda-list.portal-games-list {
+    #agenda-list.portal-games-list,
+    #resultados-list.portal-games-list {
         gap: 10px !important;
     }
-    #agenda-list .game-schedule-item {
+    #agenda-list .game-schedule-item,
+    #resultados-list .game-result-item {
         padding: 10px 12px !important;
         gap: 6px !important;
     }

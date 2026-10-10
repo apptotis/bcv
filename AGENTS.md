@@ -85,4 +85,4 @@
 - [2026-10-05] Gemini: Correção do escalão do jogo CB Viana vs BC Valença (4-134) para Sub 14 Feminino no Supabase e aprimoramento de matchJogoCompeticao em main.js isolando os 4 jogos oficiais de Sub 14 Masc.
 - [2026-10-05] Gemini: Ativação da aba 'Classificação' para Sub 14 Fem, Sub 16 Fem e Sub 18 Masc em competicoes.html.
 - [2026-10-06] Gemini: Implementação do campo 'Inscrito FPB' (inscrito_fpb) na tabela atletasbcv com checkbox interativa de 1 toque na tabela de atletas, filtro dedicado no Admin e integração no modal de edição (admin.html, js/admin.js, setup_atleta_inscrito_fpb.sql).
-- [2026-10-10] Gemini: Ajuste da Agenda Desportiva no index.html para exibição estrita de 1 jogo por linha (largura total), eliminando a grelha de múltiplos blocos e evitando qualquer confusão visual entre jogos e adversários (css/style.css).
+- [2026-10-10] Gemini: Ajuste da Agenda e dos Resultados Recentes no index.html para exibição estrita de 1 jogo/resultado por linha (largura total), eliminando a grelha de múltiplos blocos e garantindo leitura clara e sem confusão (css/style.css).
