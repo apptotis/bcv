@@ -88,3 +88,4 @@
 - [2026-10-10] Gemini: Ajuste da Agenda e dos Resultados Recentes no index.html para exibição estrita de 1 jogo/resultado por linha (largura total), eliminando a grelha de múltiplos blocos e garantindo leitura clara e sem confusão (css/style.css).
 - [2026-10-10] Gemini: Correção da fusão de jogos da FPB (mergeFPBGames) em functions/api/sync-fpb.ts, supabase/functions/sync-fpb e js/admin.js, impedindo que jogos da página de resultados sobrescrevam com null as horas oficiais do calendário, e atualização das horas na base de dados (15:00 e 21:15).
 - [2026-10-10] Gemini: Agenda do index.html restrita à janela dos próximos 6 dias (hoje até hoje+6) com ordenação cronológica por data e, no mesmo dia, por hora crescente do jogo mais cedo ao mais tarde (js/main.js).
+- [2026-10-10] Gemini: Cache-busting de scripts/estilos (v=20261010_1535) e cabeçalhos de revalidação no Cloudflare Pages (_headers, index.html, competicoes.html), garantindo atualização imediata no mobile.
