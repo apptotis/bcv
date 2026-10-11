@@ -8829,8 +8829,67 @@ document.addEventListener('DOMContentLoaded', async () => {
         'sub14_masc': ['BC Valença', 'Monção BC', 'CB Viana', 'Restauradores da Granja', 'SC Maria da Fonte', 'SC Braga B'],
         'sub16_fem': ['BC Valença', 'Famalicense AC', 'BC Limiense', 'Futebol Clube de Vizela', 'GDAS Basket', 'CB Viana', 'Monção BC'],
         'sub18_masc': ['BC Valença', 'CB Viana', 'Restauradores da Granja', 'Famalicense AC - B', 'Monção BC', 'SC Maria da Fonte', 'GDAS Basket', 'ATC'],
-        'cn2': ['BC Valença', 'Monção BC', 'CAAS Padaria Ribeiro', 'CDJ Régio']
+        'cn2': [
+            'UAA Aroso',
+            'CD Aves',
+            'BC Valença',
+            'Monção BC',
+            'BC Limiense',
+            'GD Bolacesto',
+            'SC Muya',
+            'GDB Leça',
+            'Mirandela BC / O CERDOURA',
+            'CDJ Régio',
+            'ACR Vigorosa',
+            'CAAS Padaria Ribeiro',
+            'NCR Valongo/Comida c Amor',
+            'Maia Basket B'
+        ]
     };
+
+    const FPB_CLUB_LOGOS_ADMIN = {
+        'bc valença': 'https://sav2.fpb.pt/uploads/clubes/logotipo/CLU_6561737484866.png',
+        'cb viana': 'https://sav2.fpb.pt/old_uploads/CLU/CLU_723_LOGO.jpg',
+        'monção bc': 'https://sav2.fpb.pt/uploads/clubes/logotipo/CLU_8801736270009.png',
+        'famalicense ac': 'https://sav2.fpb.pt/uploads/clubes/logotipo/CLU_691693656807.png',
+        'famalicense ac - b': 'https://sav2.fpb.pt/uploads/clubes/logotipo/CLU_691693656807.png',
+        'bc limiense': 'https://sav2.fpb.pt/old_uploads/CLU/CLU_2920_LOGO.png',
+        'bc limiense - b': 'https://sav2.fpb.pt/old_uploads/CLU/CLU_2920_LOGO.png',
+        'restauradores da granja': 'https://sav2.fpb.pt/uploads/clubes/logotipo/CLU_28191667463213.jpg',
+        'futebol clube de vizela': 'https://sav2.fpb.pt/uploads/clubes/logotipo/CLU_33981702573447.png',
+        'fc vizela': 'https://sav2.fpb.pt/uploads/clubes/logotipo/CLU_33981702573447.png',
+        'caas padaria ribeiro': 'https://sav2.fpb.pt/uploads/clubes/logotipo/Centro_dos_Antigos_Alunos_Salesianos1639227568.png',
+        'sc braga b': 'https://sav2.fpb.pt/uploads/clubes/logotipo/CLU_24041710324824.png',
+        'sc braga': 'https://sav2.fpb.pt/uploads/clubes/logotipo/CLU_24041710324824.png',
+        'barca bc': 'https://sav2.fpb.pt/uploads/clubes/logotipo/Barca_Basket_Clube1639920613.png',
+        'sc maria da fonte': 'https://sav2.fpb.pt/uploads/clubes/logotipo/Sport_Clube_Maria_da_Fonte1639174733.png',
+        'cdj régio': 'https://sav2.fpb.pt/uploads/clubes/logotipo/CLU_3041717586387.png',
+        'uaa aroso': 'https://sav2.fpb.pt/uploads/clubes/logotipo/CLU_181.png',
+        'cd aves': 'https://sav2.fpb.pt/uploads/clubes/logotipo/CLU_36571695909164.png',
+        'gd bolacesto': 'https://sav2.fpb.pt/uploads/clubes/logotipo/CLU_1791790001218.png',
+        'sc muya': 'https://sav2.fpb.pt/uploads/clubes/logotipo/CLU_37781788717225.png',
+        'gdb leça': 'https://sav2.fpb.pt/uploads/clubes/logotipo/Grupo_Desportivo_Basquete_de_Leca1602618188.png',
+        'mirandela bc / o cerdoura': 'https://sav2.fpb.pt/uploads/clubes/logotipo/Mirandela_Basquete_Clube1600936996.png',
+        'mirandela bc': 'https://sav2.fpb.pt/uploads/clubes/logotipo/Mirandela_Basquete_Clube1600936996.png',
+        'acr vigorosa': 'https://sav2.fpb.pt/uploads/clubes/logotipo/CLU_24051677937068.png',
+        'acr vigoroso': 'https://sav2.fpb.pt/uploads/clubes/logotipo/CLU_24051677937068.png',
+        'ncr valongo/comida c amor': 'https://sav2.fpb.pt/uploads/clubes/logotipo/CLU_1721693497331.png',
+        'ncr valongo': 'https://sav2.fpb.pt/uploads/clubes/logotipo/CLU_1721693497331.png',
+        'maia basket b': 'https://sav2.fpb.pt/uploads/clubes/logotipo/CLU_7141746203247.png',
+        'maia basket': 'https://sav2.fpb.pt/uploads/clubes/logotipo/CLU_7141746203247.png'
+    };
+
+    function obterLogoEquipaAdmin(nomeEquipa, dbLogo) {
+        if (dbLogo && typeof dbLogo === 'string' && dbLogo.trim().startsWith('http')) return dbLogo.trim();
+        if (!nomeEquipa) return '';
+        const norm = nomeEquipa.toLowerCase().trim();
+        if (FPB_CLUB_LOGOS_ADMIN[norm]) return FPB_CLUB_LOGOS_ADMIN[norm];
+        for (const [chave, url] of Object.entries(FPB_CLUB_LOGOS_ADMIN)) {
+            if (norm.includes(chave) || chave.includes(norm)) return url;
+        }
+        return '';
+    }
+    window.obterLogoEquipa = window.obterLogoEquipa || obterLogoEquipaAdmin;
 
     window.alternarSubAbaSerie = function(aba) {
         const btnClass = document.getElementById('btn-sub-serie-classificacao');
@@ -9282,10 +9341,20 @@ document.addEventListener('DOMContentLoaded', async () => {
                 ];
             } else if (sKey === 'cn2' || sKey.includes('cn2') || (comp.sigla || '').toLowerCase().includes('cn2') || (comp.escalao || '').toLowerCase().includes('sen')) {
                 currentEquipasSerie = [
-                    { pos: 1, nome: "BC Valença", j: 1, v: 1, d: 0, pm: 73, ps: 67, dif: 6, pts: 2 },
-                    { pos: 2, nome: "Monção BC", j: 1, v: 0, d: 1, pm: 67, ps: 73, dif: -6, pts: 1 },
-                    { pos: 3, nome: "CAAS Padaria Ribeiro", j: 0, v: 0, d: 0, pm: 0, ps: 0, dif: 0, pts: 0 },
-                    { pos: 4, nome: "CDJ Régio", j: 0, v: 0, d: 0, pm: 0, ps: 0, dif: 0, pts: 0 }
+                    { pos: 1, nome: "UAA Aroso", j: 1, v: 1, d: 0, pm: 0, ps: 0, dif: 0, pts: 2 },
+                    { pos: 2, nome: "CD Aves", j: 1, v: 1, d: 0, pm: 0, ps: 0, dif: 0, pts: 2 },
+                    { pos: 3, nome: "BC Valença", j: 1, v: 1, d: 0, pm: 73, ps: 67, dif: 6, pts: 2 },
+                    { pos: 4, nome: "Monção BC", j: 1, v: 0, d: 1, pm: 67, ps: 73, dif: -6, pts: 1 },
+                    { pos: 5, nome: "BC Limiense", j: 1, v: 0, d: 1, pm: 0, ps: 0, dif: 0, pts: 1 },
+                    { pos: 6, nome: "GD Bolacesto", j: 1, v: 0, d: 1, pm: 0, ps: 0, dif: 0, pts: 1 },
+                    { pos: 7, nome: "SC Muya", j: 0, v: 0, d: 0, pm: 0, ps: 0, dif: 0, pts: 0 },
+                    { pos: 8, nome: "GDB Leça", j: 0, v: 0, d: 0, pm: 0, ps: 0, dif: 0, pts: 0 },
+                    { pos: 9, nome: "Mirandela BC / O CERDOURA", j: 0, v: 0, d: 0, pm: 0, ps: 0, dif: 0, pts: 0 },
+                    { pos: 10, nome: "CDJ Régio", j: 0, v: 0, d: 0, pm: 0, ps: 0, dif: 0, pts: 0 },
+                    { pos: 11, nome: "ACR Vigorosa", j: 0, v: 0, d: 0, pm: 0, ps: 0, dif: 0, pts: 0 },
+                    { pos: 12, nome: "CAAS Padaria Ribeiro", j: 0, v: 0, d: 0, pm: 0, ps: 0, dif: 0, pts: 0 },
+                    { pos: 13, nome: "NCR Valongo/Comida c Amor", j: 0, v: 0, d: 0, pm: 0, ps: 0, dif: 0, pts: 0 },
+                    { pos: 14, nome: "Maia Basket B", j: 0, v: 0, d: 0, pm: 0, ps: 0, dif: 0, pts: 0 }
                 ];
                 if (currentJogosSerie.length === 0) {
                     currentJogosSerie = [
@@ -9497,14 +9566,17 @@ document.addEventListener('DOMContentLoaded', async () => {
             const tr = document.createElement('tr');
             tr.style.borderBottom = "1px solid var(--border-color)";
             const isBCV = (eq.nome || '').toLowerCase().includes('valença') || (eq.nome || '').toLowerCase().includes('bcv');
-            if (isBCV) tr.style.background = "rgba(126, 34, 206, 0.05)";
+            const eqLogo = eq.logo || (window.obterLogoEquipa ? window.obterLogoEquipa(eq.nome) : '');
 
             tr.innerHTML = `
                 <td style="padding: 6px;">
                     <input type="number" value="${eq.pos || (idx + 1)}" onchange="window.updateEquipaSerieField(${idx}, 'pos', this.value)" style="width: 40px; text-align: center; padding: 4px; border: 1px solid var(--border-color); border-radius: 4px; font-weight: 700;">
                 </td>
                 <td style="padding: 6px; text-align: left;">
-                    <input type="text" value="${eq.nome || ''}" placeholder="Nome do Clube/Equipa" onchange="window.updateEquipaSerieField(${idx}, 'nome', this.value)" style="width: 95%; padding: 4px 8px; border: 1px solid var(--border-color); border-radius: 4px; font-weight: 600;">
+                    <div style="display: flex; align-items: center; gap: 8px;">
+                        ${eqLogo ? `<img src="${eqLogo}" alt="" style="width: 22px; height: 22px; object-fit: contain; flex-shrink: 0;" onerror="this.style.display='none'">` : `<span style="width: 22px; height: 22px; display: inline-flex; align-items: center; justify-content: center; background: rgba(0,0,0,0.05); border-radius: 4px; font-size: 0.75rem; color: var(--text-secondary); flex-shrink: 0;">🛡️</span>`}
+                        <input type="text" value="${eq.nome || ''}" placeholder="Nome do Clube/Equipa" onchange="window.updateEquipaSerieField(${idx}, 'nome', this.value)" style="width: 90%; padding: 4px 8px; border: 1px solid var(--border-color); border-radius: 4px; font-weight: 600;">
+                    </div>
                 </td>
                 <td style="padding: 6px;">
                     <input type="number" min="0" value="${eq.j || 0}" onchange="window.updateEquipaSerieField(${idx}, 'j', this.value)" style="width: 45px; text-align: center; padding: 4px; border: 1px solid var(--border-color); border-radius: 4px;">
@@ -9584,7 +9656,22 @@ document.addEventListener('DOMContentLoaded', async () => {
             'sub14_masc': ['BC Valença', 'Monção BC', 'CB Viana', 'Restauradores da Granja', 'SC Maria da Fonte', 'SC Braga B'],
             'sub16_fem': ['BC Valença', 'Famalicense AC', 'BC Limiense', 'Futebol Clube de Vizela', 'GDAS Basket', 'CB Viana', 'Monção BC'],
             'sub18_masc': ['BC Valença', 'CB Viana', 'Restauradores da Granja', 'Famalicense AC - B', 'Monção BC', 'SC Maria da Fonte', 'GDAS Basket', 'ATC'],
-            'cn2': ['BC Valença', 'Monção BC', 'CAAS Padaria Ribeiro', 'CDJ Régio']
+            'cn2': [
+                'UAA Aroso',
+                'CD Aves',
+                'BC Valença',
+                'Monção BC',
+                'BC Limiense',
+                'GD Bolacesto',
+                'SC Muya',
+                'GDB Leça',
+                'Mirandela BC / O CERDOURA',
+                'CDJ Régio',
+                'ACR Vigorosa',
+                'CAAS Padaria Ribeiro',
+                'NCR Valongo/Comida c Amor',
+                'Maia Basket B'
+            ]
         };
 
         const normalizarNomeEq = (nome) => {
@@ -9819,6 +9906,7 @@ document.addEventListener('DOMContentLoaded', async () => {
                 return {
                     pos: Number(eq.pos) || (idx + 1),
                     nome: (eq.nome || '').trim(),
+                    logo: eq.logo || (window.obterLogoEquipa ? window.obterLogoEquipa(eq.nome) : null),
                     j: Number(eq.j) || (v + d),
                     v: v,
                     d: d,

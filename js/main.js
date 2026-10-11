@@ -194,7 +194,20 @@ async function loadPortalHighlights(supabase) {
         'sc braga': 'https://sav2.fpb.pt/uploads/clubes/logotipo/CLU_24041710324824.png',
         'barca bc': 'https://sav2.fpb.pt/uploads/clubes/logotipo/Barca_Basket_Clube1639920613.png',
         'sc maria da fonte': 'https://sav2.fpb.pt/uploads/clubes/logotipo/Sport_Clube_Maria_da_Fonte1639174733.png',
-        'cdj régio': 'https://sav2.fpb.pt/uploads/clubes/logotipo/CLU_3041717586387.png'
+        'cdj régio': 'https://sav2.fpb.pt/uploads/clubes/logotipo/CLU_3041717586387.png',
+        'uaa aroso': 'https://sav2.fpb.pt/uploads/clubes/logotipo/CLU_181.png',
+        'cd aves': 'https://sav2.fpb.pt/uploads/clubes/logotipo/CLU_36571695909164.png',
+        'gd bolacesto': 'https://sav2.fpb.pt/uploads/clubes/logotipo/CLU_1791790001218.png',
+        'sc muya': 'https://sav2.fpb.pt/uploads/clubes/logotipo/CLU_37781788717225.png',
+        'gdb leça': 'https://sav2.fpb.pt/uploads/clubes/logotipo/Grupo_Desportivo_Basquete_de_Leca1602618188.png',
+        'mirandela bc / o cerdoura': 'https://sav2.fpb.pt/uploads/clubes/logotipo/Mirandela_Basquete_Clube1600936996.png',
+        'mirandela bc': 'https://sav2.fpb.pt/uploads/clubes/logotipo/Mirandela_Basquete_Clube1600936996.png',
+        'acr vigorosa': 'https://sav2.fpb.pt/uploads/clubes/logotipo/CLU_24051677937068.png',
+        'acr vigoroso': 'https://sav2.fpb.pt/uploads/clubes/logotipo/CLU_24051677937068.png',
+        'ncr valongo/comida c amor': 'https://sav2.fpb.pt/uploads/clubes/logotipo/CLU_1721693497331.png',
+        'ncr valongo': 'https://sav2.fpb.pt/uploads/clubes/logotipo/CLU_1721693497331.png',
+        'maia basket b': 'https://sav2.fpb.pt/uploads/clubes/logotipo/CLU_7141746203247.png',
+        'maia basket': 'https://sav2.fpb.pt/uploads/clubes/logotipo/CLU_7141746203247.png'
     };
 
     function obterLogoEquipa(nomeEquipa, dbLogo) {
@@ -1238,7 +1251,22 @@ async function loadCompeticoesSection(supabase) {
             'sub14_masc': ['BC Valença', 'Monção BC', 'CB Viana', 'Restauradores da Granja', 'SC Maria da Fonte', 'SC Braga B'],
             'sub16_fem': ['BC Valença', 'Famalicense AC', 'BC Limiense', 'Futebol Clube de Vizela', 'GDAS Basket', 'CB Viana', 'Monção BC'],
             'sub18_masc': ['BC Valença', 'CB Viana', 'Restauradores da Granja', 'Famalicense AC - B', 'Monção BC', 'SC Maria da Fonte', 'GDAS Basket', 'ATC'],
-            'cn2': ['BC Valença', 'Monção BC', 'CAAS Padaria Ribeiro', 'CDJ Régio']
+            'cn2': [
+                'UAA Aroso',
+                'CD Aves',
+                'BC Valença',
+                'Monção BC',
+                'BC Limiense',
+                'GD Bolacesto',
+                'SC Muya',
+                'GDB Leça',
+                'Mirandela BC / O CERDOURA',
+                'CDJ Régio',
+                'ACR Vigorosa',
+                'CAAS Padaria Ribeiro',
+                'NCR Valongo/Comida c Amor',
+                'Maia Basket B'
+            ]
         };
 
         const normalizarNomeEquipa = (nome) => {
