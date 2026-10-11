@@ -1627,9 +1627,12 @@ async function loadCompeticoesSection(supabase) {
             const ehSiglaRedundante = /sub\s*\d+/i.test(siglaComp) || nomeComp.toLowerCase().includes(siglaComp.toLowerCase());
             const mostrarSigla = siglaComp && !ehSiglaRedundante;
 
-            // Ativação da Classificação para Sub 14 Masc, Sub 14 Fem, Sub 16 Fem e Sub 18 Masc
-            const compsComClassificacao = ['sub14_masc', 'sub14_fem', 'sub16_fem', 'sub18_masc'];
-            const mostrarClassificacao = compsComClassificacao.includes(comp.id) || 
+            // Ativação da Classificação para Seniores (CN2), Sub 14 Masc, Sub 14 Fem, Sub 16 Fem e Sub 18 Masc
+            const compsComClassificacao = ['cn2', 'sub14_masc', 'sub14_fem', 'sub16_fem', 'sub18_masc'];
+            const compIdLower = (comp.id || '').toLowerCase();
+            const mostrarClassificacao = compsComClassificacao.includes(compIdLower) || 
+                compIdLower.includes('cn2') ||
+                compIdLower.includes('sen') ||
                 (comp.tabela_serie && Array.isArray(comp.tabela_serie) && comp.tabela_serie.length >= 2);
 
             card.innerHTML = `

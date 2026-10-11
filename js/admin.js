@@ -9280,6 +9280,18 @@ document.addEventListener('DOMContentLoaded', async () => {
                     { pos: 7, nome: "GDAS Basket", j: 0, v: 0, d: 0, pm: 0, ps: 0, dif: 0, pts: 0 },
                     { pos: 8, nome: "ATC", j: 0, v: 0, d: 0, pm: 0, ps: 0, dif: 0, pts: 0 }
                 ];
+            } else if (sKey === 'cn2' || sKey.includes('cn2') || (comp.sigla || '').toLowerCase().includes('cn2') || (comp.escalao || '').toLowerCase().includes('sen')) {
+                currentEquipasSerie = [
+                    { pos: 1, nome: "BC Valença", j: 1, v: 1, d: 0, pm: 73, ps: 67, dif: 6, pts: 2 },
+                    { pos: 2, nome: "Monção BC", j: 1, v: 0, d: 1, pm: 67, ps: 73, dif: -6, pts: 1 },
+                    { pos: 3, nome: "CAAS Padaria Ribeiro", j: 0, v: 0, d: 0, pm: 0, ps: 0, dif: 0, pts: 0 },
+                    { pos: 4, nome: "CDJ Régio", j: 0, v: 0, d: 0, pm: 0, ps: 0, dif: 0, pts: 0 }
+                ];
+                if (currentJogosSerie.length === 0) {
+                    currentJogosSerie = [
+                        { id: 'cn2_j1_1', jornada: 1, data: '2026-10-10', equipa_casa: 'Monção BC', equipa_fora: 'BC Valença', pontos_casa: 67, pontos_fora: 73 }
+                    ];
+                }
             } else {
                 const equipasPadrao = SERIES_OFICIAIS_BCV_GLOBAL[sKey] || [];
                 if (equipasPadrao.length > 0) {
