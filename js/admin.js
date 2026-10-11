@@ -2379,11 +2379,27 @@ document.addEventListener('DOMContentLoaded', async () => {
             if (escalaoVal) {
                 const normFiltro = normalizeEscalao(escalaoVal);
                 const normAtleta = normalizeEscalao(atleta.escalao);
-                matchesEscalao = normAtleta === normFiltro || 
-                                 normAtleta.startsWith(normFiltro) ||
-                                 (normFiltro === 'seniores' && normAtleta.startsWith('senior')) ||
-                                 (normFiltro.includes('veterano') && (normAtleta.includes('veterano') || normAtleta.includes('master'))) ||
-                                 (normFiltro.includes('master') && (normAtleta.includes('veterano') || normAtleta.includes('master')));
+                const sexo = (atleta.sexo || '').toUpperCase();
+
+                if (escalaoVal === 'Sub 14' || normFiltro === 'sub14') {
+                    matchesEscalao = normAtleta.includes('sub14');
+                } else if (escalaoVal === 'Sub 14 Masculino') {
+                    matchesEscalao = normAtleta.includes('sub14') && (sexo === 'M' || !sexo);
+                } else if (escalaoVal === 'Sub 14 Feminino') {
+                    matchesEscalao = normAtleta.includes('sub14') && sexo === 'F';
+                } else if (escalaoVal === 'Sub 16 Feminino' || normFiltro === 'sub16') {
+                    matchesEscalao = normAtleta.includes('sub16');
+                } else if (escalaoVal === 'Sub 18 Masculino' || normFiltro === 'sub18') {
+                    matchesEscalao = normAtleta.includes('sub18');
+                } else if (escalaoVal === 'Seniores' || normFiltro === 'seniores') {
+                    matchesEscalao = normAtleta.startsWith('senior');
+                } else if (escalaoVal === 'Staff / Clube' || normFiltro.includes('staff')) {
+                    matchesEscalao = normAtleta.includes('staff') || normAtleta.includes('clube');
+                } else {
+                    matchesEscalao = normAtleta === normFiltro || 
+                                     normAtleta.startsWith(normFiltro) ||
+                                     normAtleta.includes(normFiltro);
+                }
             }
 
             return matchesSearch && matchesFuncao && matchesEpoca && matchesFPB && matchesEscalao;
@@ -6133,6 +6149,107 @@ document.addEventListener('DOMContentLoaded', async () => {
     // 15. GESTÃO DESPORTIVA (PRESENÇAS & FALTAS)
     // ====================================================================
     let currentDesportivaPresencas = [];
+    let currentDesportivaFiltrados = [];
+
+    function matchEscalaoPresenca(p, atl, filtro) {
+        if (!filtro) return true;
+        const f = filtro.toLowerCase().trim();
+        const escP = (p.escalao || '').toLowerCase();
+        const escA = (atl.escalao || '').toLowerCase();
+        const sexo = (atl.sexo || '').toUpperCase();
+
+        const isBaby = escP.includes('baby') || escA.includes('baby');
+        const isMini8 = escP.includes('mini 8') || escA.includes('mini 8') || escP.includes('mini8') || escA.includes('mini8');
+        const isMini10 = escP.includes('mini 10') || escA.includes('mini 10') || escP.includes('mini10') || escA.includes('mini10');
+        const isMini12 = escP.includes('mini 12') || escA.includes('mini 12') || escP.includes('mini12') || escA.includes('mini12');
+        const isSub14 = escP.includes('sub 14') || escP.includes('sub-14') || escP.includes('sub14') || escA.includes('sub 14') || escA.includes('sub-14') || escA.includes('sub14');
+        const isSub16 = escP.includes('sub 16') || escP.includes('sub-16') || escP.includes('sub16') || escA.includes('sub 16') || escA.includes('sub-16') || escA.includes('sub16');
+        const isSub18 = escP.includes('sub 18') || escP.includes('sub-18') || escP.includes('sub18') || escA.includes('sub 18') || escA.includes('sub-18') || escA.includes('sub18');
+        const isSeniores = escP.includes('sen') || escA.includes('sen');
+
+        const isFem = sexo === 'F' || escP.includes(' fem') || escP.includes(' f') || escA.includes('fem');
+        const isMasc = sexo === 'M' || escP.includes(' masc') || escP.includes(' m') || escA.includes('masc');
+
+        if (f === 'babybasket' || f === 'baby') return isBaby;
+        if (f === 'mini 8') return isMini8;
+        if (f === 'mini 10') return isMini10;
+        if (f === 'mini 12') return isMini12;
+        if (f === 'sub 14') return isSub14;
+        if (f === 'sub 14 masculino') return isSub14 && (isMasc || !isFem);
+        if (f === 'sub 14 feminino') return isSub14 && isFem;
+        if (f === 'sub 16' || f === 'sub 16 feminino') return isSub16;
+        if (f === 'sub 18' || f === 'sub 18 masculino') return isSub18;
+        if (f === 'seniores' || f === 'seniores masculinos') return isSeniores;
+
+        return escP.includes(f) || escA.includes(f);
+    }
+
+    function formatarBadgeEscalaoPresenca(p, atl) {
+        const escP = (p.escalao || '').trim();
+        const escA = (atl.escalao || '').trim();
+        const sexo = (atl.sexo || '').toUpperCase();
+
+        const combined = `${escP} ${escA}`.toLowerCase();
+        const isFem = sexo === 'F' || combined.includes(' fem') || combined.includes(' f');
+        const isMasc = sexo === 'M' || combined.includes(' masc') || combined.includes(' m');
+
+        if (combined.includes('sub 14') || combined.includes('sub-14') || combined.includes('sub14')) {
+            if (isFem) {
+                return '<span style="font-size:0.8rem; background:rgba(219, 39, 119, 0.12); color:#db2777; padding:3px 8px; border-radius:4px; font-weight:700; white-space:nowrap;">Sub 14 Fem</span>';
+            }
+            if (isMasc) {
+                return '<span style="font-size:0.8rem; background:rgba(37, 99, 235, 0.12); color:#2563eb; padding:3px 8px; border-radius:4px; font-weight:700; white-space:nowrap;">Sub 14 Masc</span>';
+            }
+            return '<span style="font-size:0.8rem; background:rgba(126, 34, 206, 0.12); color:#7e22ce; padding:3px 8px; border-radius:4px; font-weight:700; white-space:nowrap;">Sub 14</span>';
+        }
+        if (combined.includes('sub 16') || combined.includes('sub-16') || combined.includes('sub16')) {
+            return '<span style="font-size:0.8rem; background:rgba(219, 39, 119, 0.12); color:#db2777; padding:3px 8px; border-radius:4px; font-weight:700; white-space:nowrap;">Sub 16 Fem</span>';
+        }
+        if (combined.includes('sub 18') || combined.includes('sub-18') || combined.includes('sub18')) {
+            return '<span style="font-size:0.8rem; background:rgba(37, 99, 235, 0.12); color:#2563eb; padding:3px 8px; border-radius:4px; font-weight:700; white-space:nowrap;">Sub 18 Masc</span>';
+        }
+        if (combined.includes('sen')) {
+            return '<span style="font-size:0.8rem; background:rgba(126, 34, 206, 0.12); color:#7e22ce; padding:3px 8px; border-radius:4px; font-weight:700; white-space:nowrap;">Seniores</span>';
+        }
+        if (combined.includes('mini 12')) {
+            return '<span style="font-size:0.8rem; background:rgba(14, 165, 233, 0.12); color:#0284c7; padding:3px 8px; border-radius:4px; font-weight:700; white-space:nowrap;">Mini 12</span>';
+        }
+        if (combined.includes('mini 10')) {
+            return '<span style="font-size:0.8rem; background:rgba(245, 158, 11, 0.12); color:#d97706; padding:3px 8px; border-radius:4px; font-weight:700; white-space:nowrap;">Mini 10</span>';
+        }
+        if (combined.includes('mini 8')) {
+            return '<span style="font-size:0.8rem; background:rgba(16, 185, 129, 0.12); color:#059669; padding:3px 8px; border-radius:4px; font-weight:700; white-space:nowrap;">Mini 8</span>';
+        }
+        if (combined.includes('baby')) {
+            return '<span style="font-size:0.8rem; background:rgba(236, 72, 153, 0.12); color:#db2777; padding:3px 8px; border-radius:4px; font-weight:700; white-space:nowrap;">BabyBasket</span>';
+        }
+
+        const fallback = escP || escA || '-';
+        return `<span style="font-size:0.8rem; background:rgba(126, 34, 206, 0.08); color:#7e22ce; padding:3px 8px; border-radius:4px; font-weight:700; white-space:nowrap;">${fallback}</span>`;
+    }
+
+    function formatarTextoEscalaoPresenca(p, atl) {
+        const escP = (p.escalao || '').trim();
+        const escA = (atl.escalao || '').trim();
+        const sexo = (atl.sexo || '').toUpperCase();
+        const combined = `${escP} ${escA}`.toLowerCase();
+        const isFem = sexo === 'F' || combined.includes(' fem') || combined.includes(' f');
+        const isMasc = sexo === 'M' || combined.includes(' masc') || combined.includes(' m');
+
+        if (combined.includes('sub 14') || combined.includes('sub-14') || combined.includes('sub14')) {
+            if (isFem) return 'Sub 14 Feminino';
+            if (isMasc) return 'Sub 14 Masculino';
+            return 'Sub 14';
+        }
+        if (combined.includes('sub 16') || combined.includes('sub-16') || combined.includes('sub16')) return 'Sub 16 Feminino';
+        if (combined.includes('sub 18') || combined.includes('sub-18') || combined.includes('sub18')) return 'Sub 18 Masculino';
+        if (combined.includes('sen')) return 'Seniores';
+        if (combined.includes('mini 12')) return 'Mini 12';
+        if (combined.includes('mini 10')) return 'Mini 10';
+        if (combined.includes('mini 8')) return 'Mini 8';
+        if (combined.includes('baby')) return 'BabyBasket';
+        return escP || escA || '-';
+    }
 
     const despFilterEscalao = document.getElementById('desp-filter-escalao');
     const despFilterEstado = document.getElementById('desp-filter-estado');
@@ -6185,7 +6302,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     function renderDesportivaTable() {
         if (!desportivaTableBody) return;
 
-        const fEsc = (despFilterEscalao?.value || '').toLowerCase().trim();
+        const fEsc = (despFilterEscalao?.value || '').trim();
         const fEst = (despFilterEstado?.value || '').trim();
         const fTipo = (despFilterTipo?.value || '').trim();
         const fData = (despFilterData?.value || '').trim();
@@ -6197,11 +6314,10 @@ document.addEventListener('DOMContentLoaded', async () => {
 
         let filtrados = currentDesportivaPresencas.filter(p => {
             const atleta = atletaMap[p.atleta_id] || {};
-            const esc = (p.escalao || atleta.escalao || '').toLowerCase();
             const atlNome = (atleta.nome || '').toLowerCase();
             const atlNick = (atleta.nickname || '').toLowerCase();
 
-            if (fEsc && !esc.includes(fEsc.replace(/[-\s]/g, ''))) return false;
+            if (fEsc && !matchEscalaoPresenca(p, atleta, fEsc)) return false;
             if (fEst && p.estado !== fEst) return false;
             if (fTipo && p.tipo !== fTipo) return false;
             if (fData && p.data !== fData) return false;
@@ -6209,6 +6325,8 @@ document.addEventListener('DOMContentLoaded', async () => {
 
             return true;
         });
+
+        currentDesportivaFiltrados = filtrados;
 
         // Contadores e KPIs
         let total = filtrados.length;
@@ -6249,14 +6367,14 @@ document.addEventListener('DOMContentLoaded', async () => {
         desportivaTableBody.innerHTML = filtrados.map(p => {
             const atl = atletaMap[p.atleta_id] || {};
             const dorsal = atl.equipamento_numero_1 || atl.equipamento_numero_2 || atl.dorsal || '-';
-            const escFinal = p.escalao || atl.escalao || '-';
+            const escBadge = formatarBadgeEscalaoPresenca(p, atl);
             const badgeHtml = badgeMap[p.estado] || `<span class="badge">${p.estado}</span>`;
             
             return `
                 <tr style="border-bottom: 1px solid var(--border-color);">
                     <td style="padding: 10px; font-weight: 600;">${p.data || '-'}</td>
                     <td style="padding: 10px;"><span style="background: #f1f5f9; padding: 2px 6px; border-radius: 4px; font-size: 0.75rem; font-weight: 700;">${p.tipo || 'Treino'}</span></td>
-                    <td style="padding: 10px;"><span style="background: rgba(126, 34, 206, 0.08); color: #7e22ce; padding: 3px 8px; border-radius: 4px; font-size: 0.8rem; font-weight: 700; white-space: nowrap;">${escFinal}</span></td>
+                    <td style="padding: 10px;">${escBadge}</td>
                     <td style="padding: 10px; font-weight: 600;">${atl.nome || `Atleta #${p.atleta_id}`}</td>
                     <td style="padding: 10px; text-align: center;">${dorsal && dorsal !== '-' ? `<span style="background: #0f172a; color: #fff; padding: 2px 7px; border-radius: 4px; font-size: 0.78rem; font-weight: 700; white-space: nowrap; display: inline-block;">${dorsal}</span>` : '<span style="color: var(--text-secondary); opacity: 0.4;">-</span>'}</td>
                     <td style="padding: 10px; text-align: center;">${badgeHtml}</td>
@@ -6289,14 +6407,16 @@ document.addEventListener('DOMContentLoaded', async () => {
             const atletaMap = {};
             currentAtletas.forEach(a => { atletaMap[a.id] = a; });
 
+            const listaExport = (currentDesportivaFiltrados && currentDesportivaFiltrados.length > 0) ? currentDesportivaFiltrados : currentDesportivaPresencas;
             const headers = ['Data', 'Tipo', 'Escalao', 'Atleta', 'Dorsal', 'Estado', 'Registado_Por'];
-            const rows = currentDesportivaPresencas.map(p => {
+            const rows = listaExport.map(p => {
                 const atl = atletaMap[p.atleta_id] || {};
                 const dorsal = atl.equipamento_numero_1 || atl.equipamento_numero_2 || atl.dorsal || '';
+                const escText = formatarTextoEscalaoPresenca(p, atl);
                 return [
                     `"${p.data || ''}"`,
                     `"${p.tipo || 'Treino'}"`,
-                    `"${p.escalao || atl.escalao || ''}"`,
+                    `"${escText}"`,
                     `"${(atl.nome || '').replace(/"/g, '""')}"`,
                     `"${dorsal}"`,
                     `"${p.estado || ''}"`,
@@ -6323,6 +6443,7 @@ document.addEventListener('DOMContentLoaded', async () => {
             const atletaMap = {};
             currentAtletas.forEach(a => { atletaMap[a.id] = a; });
 
+            const listaExport = (currentDesportivaFiltrados && currentDesportivaFiltrados.length > 0) ? currentDesportivaFiltrados : currentDesportivaPresencas;
             const dataHoje = new Date().toLocaleDateString('pt-PT');
             const printWin = window.open('', '_blank');
             if (!printWin) {
@@ -6331,14 +6452,15 @@ document.addEventListener('DOMContentLoaded', async () => {
             }
 
             let rowsHtml = '';
-            currentDesportivaPresencas.forEach(p => {
+            listaExport.forEach(p => {
                 const atl = atletaMap[p.atleta_id] || {};
                 const dorsal = atl.equipamento_numero_1 || atl.equipamento_numero_2 || atl.dorsal || '-';
+                const escText = formatarTextoEscalaoPresenca(p, atl);
                 rowsHtml += `
                     <tr>
                         <td style="padding:6px; border:1px solid #ddd;">${p.data || '-'}</td>
                         <td style="padding:6px; border:1px solid #ddd;">${p.tipo || 'Treino'}</td>
-                        <td style="padding:6px; border:1px solid #ddd;">${p.escalao || atl.escalao || '-'}</td>
+                        <td style="padding:6px; border:1px solid #ddd;">${escText}</td>
                         <td style="padding:6px; border:1px solid #ddd; font-weight:600;">${atl.nome || `Atleta #${p.atleta_id}`}</td>
                         <td style="padding:6px; border:1px solid #ddd; text-align:center;">${dorsal}</td>
                         <td style="padding:6px; border:1px solid #ddd; text-align:center; font-weight:bold;">${p.estado}</td>
