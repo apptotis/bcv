@@ -3840,6 +3840,77 @@ document.addEventListener('DOMContentLoaded', async () => {
     if (inputAgendaLocal) inputAgendaLocal.addEventListener('input', atualizarBtnTesteMapsAdmin);
     if (inputAgendaMaps) inputAgendaMaps.addEventListener('input', atualizarBtnTesteMapsAdmin);
 
+    function matchEscalaoJogo(jogo, filtro) {
+        if (!filtro) return true;
+        const f = filtro.toLowerCase().trim();
+        const esc = (jogo.escalao || '').toLowerCase().trim();
+        const comp = (jogo.competicao || '').toLowerCase().trim();
+
+        if (f === 'sub 14 masculino' || f === 'sub 14 masc') {
+            const isSub14 = esc.includes('sub 14') || esc.includes('sub-14') || comp.includes('sub 14') || comp.includes('sub-14');
+            const isMasc = comp.includes('masc') || esc.includes('masc');
+            const isFem = comp.includes('fem') || esc.includes('fem');
+            return isSub14 && (isMasc || !isFem);
+        }
+        if (f === 'sub 14 feminino' || f === 'sub 14 fem') {
+            const isSub14 = esc.includes('sub 14') || esc.includes('sub-14') || comp.includes('sub 14') || comp.includes('sub-14');
+            const isFem = comp.includes('fem') || esc.includes('fem');
+            return isSub14 && isFem;
+        }
+        if (f === 'sub 14' || f === 'sub-14' || f === 'sub 14 (todos)') {
+            return esc.includes('sub 14') || esc.includes('sub-14') || comp.includes('sub 14') || comp.includes('sub-14');
+        }
+        if (f === 'sub 16' || f === 'sub 16 feminino' || f === 'sub-16') {
+            return esc.includes('sub 16') || esc.includes('sub-16') || comp.includes('sub 16') || comp.includes('sub-16');
+        }
+        if (f === 'sub 18' || f === 'sub 18 masculino' || f === 'sub-18') {
+            return esc.includes('sub 18') || esc.includes('sub-18') || comp.includes('sub 18') || comp.includes('sub-18');
+        }
+        if (f === 'seniores' || f === 'seniores masculinos' || f === 'cn2') {
+            return esc.includes('sen') || comp.includes('sen') || comp.includes('cn2');
+        }
+        if (f === 'mini 12') return esc.includes('mini 12') || comp.includes('mini 12');
+        if (f === 'mini 10') return esc.includes('mini 10') || comp.includes('mini 10');
+        if (f === 'mini 8') return esc.includes('mini 8') || comp.includes('mini 8');
+        if (f === 'babybasket' || f === 'baby') return esc.includes('baby') || comp.includes('baby');
+
+        return esc === f || comp.includes(f);
+    }
+
+    function formatarBadgeEscalaoJogo(jogo, contexto = 'resultado') {
+        if (!jogo) return 'BCV';
+        const esc = (jogo.escalao || '').trim();
+        const comp = (jogo.competicao || '').toLowerCase();
+
+        if (esc.toLowerCase() === 'sub 14' || esc.toLowerCase() === 'sub-14') {
+            if (comp.includes('fem')) {
+                return '<span style="font-size:0.8rem; background:rgba(219, 39, 119, 0.12); color:#db2777; padding:3px 8px; border-radius:4px; font-weight:700;">Sub 14 Fem</span>';
+            }
+            if (comp.includes('masc')) {
+                return '<span style="font-size:0.8rem; background:rgba(37, 99, 235, 0.12); color:#2563eb; padding:3px 8px; border-radius:4px; font-weight:700;">Sub 14 Masc</span>';
+            }
+            return `<span style="font-size:0.8rem; background:rgba(22, 163, 74, 0.12); color:#16a34a; padding:3px 8px; border-radius:4px; font-weight:600;">${esc}</span>`;
+        }
+        if (esc.toLowerCase().includes('sub 14 fem')) {
+            return '<span style="font-size:0.8rem; background:rgba(219, 39, 119, 0.12); color:#db2777; padding:3px 8px; border-radius:4px; font-weight:700;">Sub 14 Fem</span>';
+        }
+        if (esc.toLowerCase().includes('sub 14 masc')) {
+            return '<span style="font-size:0.8rem; background:rgba(37, 99, 235, 0.12); color:#2563eb; padding:3px 8px; border-radius:4px; font-weight:700;">Sub 14 Masc</span>';
+        }
+        if (esc.toLowerCase() === 'sub 16' || esc.toLowerCase() === 'sub-16' || esc.toLowerCase().includes('sub 16 fem')) {
+            return '<span style="font-size:0.8rem; background:rgba(219, 39, 119, 0.12); color:#db2777; padding:3px 8px; border-radius:4px; font-weight:700;">Sub 16 Fem</span>';
+        }
+        if (esc.toLowerCase() === 'sub 18' || esc.toLowerCase() === 'sub-18' || esc.toLowerCase().includes('sub 18 masc')) {
+            return '<span style="font-size:0.8rem; background:rgba(37, 99, 235, 0.12); color:#2563eb; padding:3px 8px; border-radius:4px; font-weight:700;">Sub 18 Masc</span>';
+        }
+        if (esc.toLowerCase().includes('sen')) {
+            return '<span style="font-size:0.8rem; background:rgba(126, 34, 206, 0.12); color:#7e22ce; padding:3px 8px; border-radius:4px; font-weight:700;">Seniores</span>';
+        }
+        const cor = contexto === 'agenda' ? '#7e22ce' : '#16a34a';
+        const bg = contexto === 'agenda' ? 'rgba(126, 34, 206, 0.12)' : 'rgba(22, 163, 74, 0.12)';
+        return `<span style="font-size:0.8rem; background:${bg}; color:${cor}; padding:3px 8px; border-radius:4px; font-weight:600;">${esc || 'BCV'}</span>`;
+    }
+
     function renderAgendaTable() {
         if (!agendaTableBody) return;
 
@@ -3850,7 +3921,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         let filtrados = currentAgendaGames.filter(jogo => {
             if (filtroEstado === 'sim' && jogo.publicado === false) return false;
             if (filtroEstado === 'nao' && jogo.publicado !== false) return false;
-            if (filtroEscalao && (jogo.escalao || '').toLowerCase() !== filtroEscalao.toLowerCase()) return false;
+            if (filtroEscalao && !matchEscalaoJogo(jogo, filtroEscalao)) return false;
             if (termoBusca) {
                 const matchCasa = (jogo.equipa_casa || '').toLowerCase().includes(termoBusca);
                 const matchFora = (jogo.equipa_fora || '').toLowerCase().includes(termoBusca);
@@ -3900,7 +3971,7 @@ document.addEventListener('DOMContentLoaded', async () => {
                     ${jogo.competicao ? `<br><small style="color:var(--text-secondary);">${jogo.competicao}</small>` : ''}
                 </td>
                 <td style="padding: 12px;">${localHtml}</td>
-                <td style="padding: 12px;"><span style="font-size:0.8rem; background:rgba(126, 34, 206, 0.12); color:#7e22ce; padding:3px 8px; border-radius:4px; font-weight:600;">${jogo.escalao || 'BCV'}</span></td>
+                <td style="padding: 12px;">${formatarBadgeEscalaoJogo(jogo, 'agenda')}</td>
                 <td style="padding: 12px; text-align: center; white-space: nowrap;">
                     <button class="btn-action" onclick="abrirModalFinalizarJogo('${jogo.id}')" title="Registar Resultado e Finalizar Jogo" style="background: rgba(22, 163, 74, 0.15); color: #16a34a; border: 1px solid rgba(22, 163, 74, 0.3); font-weight: bold; margin-right: 4px; padding: 4px 8px;">🏁 Resultado</button>
                     <button class="btn-action edit" onclick="editGame('${jogo.id}')" title="Editar">✏️</button>
@@ -4036,10 +4107,18 @@ document.addEventListener('DOMContentLoaded', async () => {
             document.getElementById('agenda-data').value = data.data_jogo;
             document.getElementById('agenda-hora').value = data.hora_jogo;
             document.getElementById('agenda-local').value = data.local || '';
-            if (document.getElementById('agenda-local-maps')) {
-                document.getElementById('agenda-local-maps').value = data.local_maps_url || '';
+            let escVal = data.escalao || '';
+            if (escVal.toLowerCase().includes('sub 14') || escVal.toLowerCase().includes('sub-14')) {
+                const comp = (data.competicao || '').toLowerCase();
+                escVal = comp.includes('fem') ? 'Sub 14 Feminino' : 'Sub 14 Masculino';
+            } else if (escVal.toLowerCase() === 'sub 16' || escVal.toLowerCase() === 'sub-16') {
+                escVal = 'Sub 16 Feminino';
+            } else if (escVal.toLowerCase() === 'sub 18' || escVal.toLowerCase() === 'sub-18') {
+                escVal = 'Sub 18 Masculino';
+            } else if (escVal.toLowerCase().includes('sen')) {
+                escVal = 'Seniores';
             }
-            document.getElementById('agenda-escalao').value = data.escalao;
+            document.getElementById('agenda-escalao').value = escVal;
             if (document.getElementById('agenda-publicado')) {
                 document.getElementById('agenda-publicado').checked = (data.publicado !== false);
             }
@@ -4273,12 +4352,13 @@ document.addEventListener('DOMContentLoaded', async () => {
         let filtrados = currentResultadosGames.filter(jogo => {
             if (filtroEstado === 'sim' && jogo.publicado === false) return false;
             if (filtroEstado === 'nao' && jogo.publicado !== false) return false;
-            if (filtroEscalao && (jogo.escalao || '').toLowerCase() !== filtroEscalao.toLowerCase()) return false;
+            if (filtroEscalao && !matchEscalaoJogo(jogo, filtroEscalao)) return false;
             if (termoBusca) {
                 const matchCasa = (jogo.equipa_casa || '').toLowerCase().includes(termoBusca);
                 const matchFora = (jogo.equipa_fora || '').toLowerCase().includes(termoBusca);
+                const matchComp = (jogo.competicao || '').toLowerCase().includes(termoBusca);
                 const matchEsc = (jogo.escalao || '').toLowerCase().includes(termoBusca);
-                if (!matchCasa && !matchFora && !matchEsc) return false;
+                if (!matchCasa && !matchFora && !matchComp && !matchEsc) return false;
             }
             return true;
         });
@@ -4312,7 +4392,7 @@ document.addEventListener('DOMContentLoaded', async () => {
                     ${jogo.local ? `<br><small style="color:var(--text-secondary);">${jogo.local}</small>` : ''}
                 </td>
                 <td style="padding: 12px;"><span style="background:linear-gradient(135deg, #7e22ce, #a855f7); color:#fff; padding:4px 10px; border-radius:6px; font-weight:800; font-size:0.95rem; box-shadow:0 2px 6px rgba(126,34,206,0.3);">${(jogo.pontos_casa !== null && jogo.pontos_casa !== undefined && jogo.pontos_fora !== null && jogo.pontos_fora !== undefined) ? `${jogo.pontos_casa} - ${jogo.pontos_fora}` : 'Adiado / Pendente'}</span></td>
-                <td style="padding: 12px;"><span style="font-size:0.8rem; background:rgba(22, 163, 74, 0.12); color:#16a34a; padding:3px 8px; border-radius:4px; font-weight:600;">${jogo.escalao || 'BCV'}</span></td>
+                <td style="padding: 12px;">${formatarBadgeEscalaoJogo(jogo, 'resultado')}</td>
                 <td style="padding: 12px; text-align: center; white-space: nowrap;">
                     <button class="btn-action edit" onclick="window.editResultado('${jogo.id}')" title="Editar Resultado" style="margin-right: 4px;">✏️</button>
                     <button class="btn-action delete" onclick="deleteResultado('${jogo.id}')" title="Eliminar Resultado">🗑️</button>
@@ -4355,8 +4435,18 @@ document.addEventListener('DOMContentLoaded', async () => {
         document.getElementById('resultado-fora').value = jogo.equipa_fora || '';
         document.getElementById('resultado-pontos-casa').value = jogo.pontos_casa ?? '';
         document.getElementById('resultado-pontos-fora').value = jogo.pontos_fora ?? '';
-        document.getElementById('resultado-data').value = jogo.data_jogo || '';
-        document.getElementById('resultado-escalao').value = jogo.escalao || '';
+        let escVal = jogo.escalao || '';
+        if (escVal.toLowerCase().includes('sub 14') || escVal.toLowerCase().includes('sub-14')) {
+            const comp = (jogo.competicao || '').toLowerCase();
+            escVal = comp.includes('fem') ? 'Sub 14 Feminino' : 'Sub 14 Masculino';
+        } else if (escVal.toLowerCase() === 'sub 16' || escVal.toLowerCase() === 'sub-16') {
+            escVal = 'Sub 16 Feminino';
+        } else if (escVal.toLowerCase() === 'sub 18' || escVal.toLowerCase() === 'sub-18') {
+            escVal = 'Sub 18 Masculino';
+        } else if (escVal.toLowerCase().includes('sen')) {
+            escVal = 'Seniores';
+        }
+        document.getElementById('resultado-escalao').value = escVal;
         if (document.getElementById('resultado-publicado')) {
             document.getElementById('resultado-publicado').checked = (jogo.publicado !== false);
         }
@@ -4458,16 +4548,16 @@ document.addEventListener('DOMContentLoaded', async () => {
                 const rawComp = compMatch ? compMatch[1].trim() : '';
 
                 let escalao = 'BCV';
-                if (/Sub\s*14/i.test(rawComp)) escalao = 'Sub 14';
-                else if (/Sub\s*16/i.test(rawComp)) escalao = 'Sub 16';
-                else if (/Sub\s*18/i.test(rawComp)) escalao = 'Sub 18';
-                else if (/Sub\s*20/i.test(rawComp)) escalao = 'Sub 20';
+                if (/Sub\s*14/i.test(rawComp)) {
+                    escalao = /Fem/i.test(rawComp) ? 'Sub 14 Feminino' : 'Sub 14 Masculino';
+                }
+                else if (/Sub\s*16/i.test(rawComp)) escalao = 'Sub 16 Feminino';
+                else if (/Sub\s*18/i.test(rawComp)) escalao = 'Sub 18 Masculino';
                 else if (/S[eé]nior|CN2|1ª Div/i.test(rawComp)) escalao = 'Seniores';
                 else if (/Mini\s*12/i.test(rawComp)) escalao = 'Mini 12';
                 else if (/Mini\s*10/i.test(rawComp)) escalao = 'Mini 10';
                 else if (/Mini\s*8/i.test(rawComp)) escalao = 'Mini 8';
                 else if (/Baby/i.test(rawComp)) escalao = 'BabyBasket';
-                else if (/Veterano/i.test(rawComp)) escalao = 'Veteranos';
 
                 // Verificar se é resultado com pontos (estrutura oficial .results_wrapper ou na div.hour)
                 let isResult = false;

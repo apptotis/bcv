@@ -56,4 +56,5 @@
 - [2026-10-11] Gemini: Correção do cálculo de pontuação federativa do Famalicense AC (Vitória=2pts, Derrota=1pt, eliminando falsa pontuação 0 para 20-0), ordenação correta por PTS/DIF no modal e competições públicas (admin.html, js/admin.js, competicoes.html, js/main.js, index.html).
 - [2026-10-11] Gemini: Ativação da aba e modal de Classificação Oficial para os Seniores Masculinos (CN2) em competicoes.html e js/main.js, com catálogo de equipas da série e suporte no Admin (js/admin.js).
 - [2026-10-11] Gemini: Mapeamento oficial dos 14 logótipos federativos FPB para todas as equipas do CN2 (FPB_CLUB_LOGOS em js/main.js e js/admin.js), suporte no modal de série e enriquecimento direto na BD Supabase.
+- [2026-10-11] Gemini: Alinhamento dos filtros e formulários de Resultados e Agenda no Admin com os escalões reais do BCV (BabyBasket, Minis, Sub 14 M/F, Sub 16 F, Sub 18 M, Seniores), eliminação de escalões obsoletos (Sub 20, Veteranos), filtragem resiliente por género e badges coloridos.
 
