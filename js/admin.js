@@ -8494,6 +8494,20 @@ document.addEventListener('DOMContentLoaded', async () => {
 
             if (data && Array.isArray(data.dados) && data.dados.length > 0) {
                 currentCompeticoes = data.dados;
+                // Auto-correção de consistência federativa em todas as tabelas de série (Vitória = 2 Pts, Derrota = 1 Pt)
+                currentCompeticoes.forEach(comp => {
+                    if (Array.isArray(comp.tabela_serie) && comp.tabela_serie.length > 0) {
+                        comp.tabela_serie.forEach(eq => {
+                            const v = Number(eq.v) || 0;
+                            const d = Number(eq.d) || 0;
+                            const j = Number(eq.j) || (v + d);
+                            const ptsMin = (v * 2) + (d * 1);
+                            if (eq.pts === undefined || eq.pts === null || (j > 0 && Number(eq.pts) < ptsMin)) {
+                                eq.pts = ptsMin;
+                            }
+                        });
+                    }
+                });
             } else {
                 // Primeira inicialização com valores predefinidos
                 currentCompeticoes = JSON.parse(JSON.stringify(DEFAULT_COMPETICOES_LIST));
@@ -9086,12 +9100,15 @@ document.addEventListener('DOMContentLoaded', async () => {
                 statsMap[cKey].v += 1;
                 statsMap[cKey].pts += 2; // Vitória FPB = 2 pts
                 statsMap[fKey].d += 1;
-                statsMap[fKey].pts += (pCasa === 20 && pFora === 0) ? 0 : 1; // Falta de comparência (0 pts) ou derrota (1 pt)
+                statsMap[fKey].pts += 1; // Derrota FPB = 1 pt (Regra Oficial: Vitória = 2 Pts | Derrota = 1 Pt)
             } else if (pFora > pCasa) {
                 statsMap[fKey].v += 1;
-                statsMap[fKey].pts += 2;
+                statsMap[fKey].pts += 2; // Vitória FPB = 2 pts
                 statsMap[cKey].d += 1;
-                statsMap[cKey].pts += (pFora === 20 && pCasa === 0) ? 0 : 1;
+                statsMap[cKey].pts += 1; // Derrota FPB = 1 pt
+            } else {
+                statsMap[cKey].pts += 1;
+                statsMap[fKey].pts += 1;
             }
         });
 
@@ -9199,6 +9216,35 @@ document.addEventListener('DOMContentLoaded', async () => {
 
         currentEquipasSerie = Array.isArray(comp.tabela_serie) ? JSON.parse(JSON.stringify(comp.tabela_serie)) : [];
         currentJogosSerie = Array.isArray(comp.jogos_serie) ? JSON.parse(JSON.stringify(comp.jogos_serie)) : [];
+
+        // Garantir coerência e integridade das pontuações segundo a Regra Oficial FPB (Vitória = 2 Pts, Derrota = 1 Pt)
+        if (Array.isArray(currentEquipasSerie) && currentEquipasSerie.length > 0) {
+            let alterouPontuacao = false;
+            currentEquipasSerie.forEach(eq => {
+                const v = Number(eq.v) || 0;
+                const d = Number(eq.d) || 0;
+                const j = Number(eq.j) || (v + d);
+                const ptsOficial = (v * 2) + (d * 1);
+                if (eq.pts === undefined || eq.pts === null || (j > 0 && Number(eq.pts) < ptsOficial)) {
+                    eq.pts = ptsOficial;
+                    alterouPontuacao = true;
+                }
+            });
+            if (alterouPontuacao) {
+                currentEquipasSerie.sort((a, b) => {
+                    const ptsA = Number(a.pts) || 0;
+                    const ptsB = Number(b.pts) || 0;
+                    if (ptsB !== ptsA) return ptsB - ptsA;
+                    const difA = (Number(a.pm) || 0) - (Number(a.ps) || 0);
+                    const difB = (Number(b.pm) || 0) - (Number(b.ps) || 0);
+                    if (difB !== difA) return difB - difA;
+                    return (Number(b.pm) || 0) - (Number(a.pm) || 0);
+                });
+                currentEquipasSerie.forEach((eq, idx) => {
+                    eq.pos = idx + 1;
+                });
+            }
+        }
 
         // Se estiver vazia ou com menos de 2 equipas, carregar por defeito as equipas conhecidas da série
         if (currentEquipasSerie.length < 2) {
@@ -9747,20 +9793,40 @@ document.addEventListener('DOMContentLoaded', async () => {
         const comp = currentCompeticoes.find(c => c.id === currentSerieCompId);
         if (!comp) return;
 
-        // Filtrar equipas com nome válido
+        // Filtrar equipas com nome válido e garantir coerência da regra oficial FPB (Vitória = 2 Pts, Derrota = 1 Pt)
         const equipasValidas = currentEquipasSerie
             .filter(eq => (eq.nome || '').trim().length > 0)
-            .map((eq, idx) => ({
-                pos: Number(eq.pos) || (idx + 1),
-                nome: (eq.nome || '').trim(),
-                j: Number(eq.j) || 0,
-                v: Number(eq.v) || 0,
-                d: Number(eq.d) || 0,
-                pm: Number(eq.pm) || 0,
-                ps: Number(eq.ps) || 0,
-                dif: (Number(eq.pm) || 0) - (Number(eq.ps) || 0),
-                pts: Number(eq.pts) !== undefined && !isNaN(Number(eq.pts)) ? Number(eq.pts) : ((Number(eq.v) || 0) * 2 + (Number(eq.d) || 0) * 1)
-            }));
+            .map((eq, idx) => {
+                const v = Number(eq.v) || 0;
+                const d = Number(eq.d) || 0;
+                const ptsMin = (v * 2) + (d * 1);
+                let ptsVal = Number(eq.pts);
+                if (isNaN(ptsVal) || ptsVal === undefined || ((v + d) > 0 && ptsVal < ptsMin)) {
+                    ptsVal = ptsMin;
+                }
+                return {
+                    pos: Number(eq.pos) || (idx + 1),
+                    nome: (eq.nome || '').trim(),
+                    j: Number(eq.j) || (v + d),
+                    v: v,
+                    d: d,
+                    pm: Number(eq.pm) || 0,
+                    ps: Number(eq.ps) || 0,
+                    dif: (Number(eq.pm) || 0) - (Number(eq.ps) || 0),
+                    pts: ptsVal
+                };
+            });
+
+        // Ordenar oficialmente antes de guardar (PTS > DIF > PM)
+        equipasValidas.sort((a, b) => {
+            if (b.pts !== a.pts) return b.pts - a.pts;
+            if (b.dif !== a.dif) return b.dif - a.dif;
+            if (a.pos && b.pos && a.pos !== b.pos) return a.pos - b.pos;
+            return b.pm - a.pm;
+        });
+        equipasValidas.forEach((eq, idx) => {
+            eq.pos = idx + 1;
+        });
 
         comp.tabela_serie = equipasValidas;
         comp.jogos_serie = currentJogosSerie || [];

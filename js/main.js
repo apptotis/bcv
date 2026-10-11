@@ -1297,13 +1297,17 @@ async function loadCompeticoesSection(supabase) {
             if (comp.tabela_serie && Array.isArray(comp.tabela_serie) && comp.tabela_serie.length >= 2) {
                 isTabelaSerieOficial = true;
                 equipas = comp.tabela_serie.map((eq, idx) => {
-                    const j = Number(eq.j) || 0;
                     const v = Number(eq.v) || 0;
                     const d = Number(eq.d) || 0;
+                    const j = Number(eq.j) || (v + d);
                     const pm = Number(eq.pm) || 0;
                     const ps = Number(eq.ps) || 0;
                     const dif = eq.dif !== undefined ? Number(eq.dif) : (pm - ps);
-                    const pts = Number(eq.pts) !== undefined && !isNaN(Number(eq.pts)) ? Number(eq.pts) : (v * 2 + d * 1);
+                    const ptsMin = (v * 2) + (d * 1);
+                    let pts = Number(eq.pts);
+                    if (isNaN(pts) || pts === undefined || ((v + d) > 0 && pts < ptsMin)) {
+                        pts = ptsMin;
+                    }
                     return {
                         pos: Number(eq.pos) || (idx + 1),
                         nome: normalizarNomeEquipa(eq.nome || ''),
@@ -1312,9 +1316,13 @@ async function loadCompeticoesSection(supabase) {
                     };
                 });
                 equipas.sort((a, b) => {
-                    if (a.pos && b.pos && a.pos !== b.pos) return a.pos - b.pos;
                     if (b.pts !== a.pts) return b.pts - a.pts;
-                    return b.dif - a.dif;
+                    if (b.dif !== a.dif) return b.dif - a.dif;
+                    if (a.pos && b.pos && a.pos !== b.pos) return a.pos - b.pos;
+                    return (b.pm || 0) - (a.pm || 0);
+                });
+                equipas.forEach((eq, idx) => {
+                    eq.pos = idx + 1;
                 });
             } else {
                 // 2. Apuramento Dinâmico Completo de Todas as Equipas da Mesma Série
