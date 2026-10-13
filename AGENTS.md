@@ -58,4 +58,4 @@
 - [2026-10-11] Gemini: Mapeamento oficial dos 14 logótipos federativos FPB para todas as equipas do CN2 (FPB_CLUB_LOGOS em js/main.js e js/admin.js), suporte no modal de série e enriquecimento direto na BD Supabase.
 - [2026-10-11] Gemini: Alinhamento dos filtros e formulários de Resultados e Agenda no Admin com os escalões reais do BCV (BabyBasket, Minis, Sub 14 M/F, Sub 16 F, Sub 18 M, Seniores), eliminação de escalões obsoletos (Sub 20, Veteranos), filtragem resiliente por género e badges coloridos.
 - [2026-10-11] Gemini: Alinhamento geral de escalões no Admin (Presenças/Diário Desportivo, Atletas, Equipamentos, Competições e Equipas): eliminação de Sub 20 e Veteranos, suporte a Sub 14 M/F, badges padronizados e exportação refinada.
-
+- [2026-10-13] Gemini: Implementação do Relatório de Aniversários na Gestão de Atletas (admin.html, js/admin.js): botão ao lado de Registar Treinador/Staff, modal com filtros por época (2026/2027 padrão), escalão, mês de aniversário, tipo de membro e ordenação, pré-visualização em tempo real e exportação direta para PDF oficial (pdf-lib) e folha CSV.

@@ -857,7 +857,10 @@
                 <div id="tab-atletas" class="tab-pane hidden">
                     <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; flex-wrap: wrap; gap: 10px;">
                         <h2>Gestão de Atletas & Staff</h2>
-                        <div style="display: flex; gap: 10px;">
+                        <div style="display: flex; gap: 10px; flex-wrap: wrap;">
+                            <button type="button" id="btn-relatorio-aniversarios" onclick="window.abrirModalRelatorioAniversarios()" class="btn-secondary" style="width: auto; padding: 10px 18px; display: inline-flex; align-items: center; gap: 8px; border-color: rgba(126, 34, 206, 0.4); color: #7e22ce; font-weight: 700;">
+                                🎂 Relatório Aniversários
+                            </button>
                             <button type="button" id="btn-toggle-form-staff" onclick="window.abrirModalCriarStaff()" class="btn-secondary" style="width: auto; padding: 10px 18px;">+ Registar Treinador / Staff</button>
                             <button type="button" id="btn-toggle-form-atleta" class="btn-primary" style="width: auto; padding: 10px 20px;">+ Adicionar Atleta</button>
                         </div>
@@ -2420,6 +2423,150 @@
                     </div>
                 </div>
 
+                <!-- Modal Relatório de Aniversários de Atletas -->
+                <div id="modal-relatorio-aniversarios" class="admin-modal-overlay hidden" style="position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.55); display: flex; align-items: center; justify-content: center; z-index: 9999;">
+                    <div class="admin-modal-content" style="max-width: 820px; width: 95%; max-height: 90vh; display: flex; flex-direction: column; padding: 22px; border-radius: 12px; box-shadow: 0 10px 30px rgba(0,0,0,0.25);">
+                        <!-- Cabeçalho do Modal -->
+                        <div class="admin-modal-header" style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 16px; border-bottom: 1px solid var(--border-color); padding-bottom: 12px;">
+                            <div style="display: flex; align-items: center; gap: 12px;">
+                                <div style="width: 44px; height: 44px; border-radius: 10px; background: rgba(126, 34, 206, 0.1); display: flex; align-items: center; justify-content: center; font-size: 1.6rem; color: #7e22ce;">
+                                    🎂
+                                </div>
+                                <div>
+                                    <h3 style="margin: 0; color: #7e22ce; font-size: 1.25rem; font-weight: 800;">Relatório de Aniversários</h3>
+                                    <p style="margin: 3px 0 0; font-size: 0.83rem; color: var(--text-secondary);">Gere a lista oficial com datas de nascimento, aniversários e idades em formato PDF ou folha de cálculo CSV.</p>
+                                </div>
+                            </div>
+                            <button type="button" onclick="window.fecharModalRelatorioAniversarios()" class="admin-modal-close" style="background: none; border: none; font-size: 1.6rem; cursor: pointer; color: var(--text-secondary); line-height: 1;" title="Fechar">&times;</button>
+                        </div>
+
+                        <!-- Painel de Filtros e Opções -->
+                        <div style="background: rgba(126, 34, 206, 0.03); border: 1px solid rgba(126, 34, 206, 0.15); border-radius: 8px; padding: 14px; margin-bottom: 14px;">
+                            <div style="font-weight: 700; font-size: 0.84rem; color: #7e22ce; margin-bottom: 10px; display: flex; align-items: center; gap: 6px;">
+                                <span>⚙️</span> Opções de Filtro & Apuramento:
+                            </div>
+                            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 10px;">
+                                <!-- Época Desportiva -->
+                                <div>
+                                    <label style="display: block; margin-bottom: 4px; font-size: 0.78rem; font-weight: 600; color: var(--text-secondary);">Época</label>
+                                    <select id="rel-aniv-filtro-epoca" class="admin-input" style="width: 100%; margin-bottom: 0; padding: 8px 10px; font-size: 0.82rem;">
+                                        <option value="2026/2027" selected>2026/2027 (Ativa)</option>
+                                        <option value="">Todas as Épocas</option>
+                                        <option value="2025/2026">2025/2026</option>
+                                    </select>
+                                </div>
+
+                                <!-- Escalão -->
+                                <div>
+                                    <label style="display: block; margin-bottom: 4px; font-size: 0.78rem; font-weight: 600; color: var(--text-secondary);">Escalão</label>
+                                    <select id="rel-aniv-filtro-escalao" class="admin-input" style="width: 100%; margin-bottom: 0; padding: 8px 10px; font-size: 0.82rem;">
+                                        <option value="">Todos os Escalões</option>
+                                        <option value="BabyBasket">BabyBasket</option>
+                                        <option value="Minis">Minis (Todos)</option>
+                                        <option value="Mini 8">Mini 8</option>
+                                        <option value="Mini 10">Mini 10</option>
+                                        <option value="Mini 12">Mini 12</option>
+                                        <option value="Sub 14">Sub 14 (Todos)</option>
+                                        <option value="Sub 14 M">Sub 14 M</option>
+                                        <option value="Sub 14 F">Sub 14 F</option>
+                                        <option value="Sub 16 F">Sub 16 F</option>
+                                        <option value="Sub 18 M">Sub 18 M</option>
+                                        <option value="Seniores">Seniores</option>
+                                    </select>
+                                </div>
+
+                                <!-- Mês de Aniversário -->
+                                <div>
+                                    <label style="display: block; margin-bottom: 4px; font-size: 0.78rem; font-weight: 600; color: var(--text-secondary);">Mês</label>
+                                    <select id="rel-aniv-filtro-mes" class="admin-input" style="width: 100%; margin-bottom: 0; padding: 8px 10px; font-size: 0.82rem;">
+                                        <option value="">Todos os Meses</option>
+                                        <option value="1">Janeiro (01)</option>
+                                        <option value="2">Fevereiro (02)</option>
+                                        <option value="3">Março (03)</option>
+                                        <option value="4">Abril (04)</option>
+                                        <option value="5">Maio (05)</option>
+                                        <option value="6">Junho (06)</option>
+                                        <option value="7">Julho (07)</option>
+                                        <option value="8">Agosto (08)</option>
+                                        <option value="9">Setembro (09)</option>
+                                        <option value="10">Outubro (10)</option>
+                                        <option value="11">Novembro (11)</option>
+                                        <option value="12">Dezembro (12)</option>
+                                    </select>
+                                </div>
+
+                                <!-- Membros / Função -->
+                                <div>
+                                    <label style="display: block; margin-bottom: 4px; font-size: 0.78rem; font-weight: 600; color: var(--text-secondary);">Membros</label>
+                                    <select id="rel-aniv-filtro-funcao" class="admin-input" style="width: 100%; margin-bottom: 0; padding: 8px 10px; font-size: 0.82rem;">
+                                        <option value="Jogador" selected>Apenas Atletas</option>
+                                        <option value="">Todos (Atletas e Staff)</option>
+                                        <option value="staff">Apenas Treinadores/Staff</option>
+                                    </select>
+                                </div>
+
+                                <!-- Ordenação -->
+                                <div>
+                                    <label style="display: block; margin-bottom: 4px; font-size: 0.78rem; font-weight: 600; color: var(--text-secondary);">Ordenação</label>
+                                    <select id="rel-aniv-filtro-ordem" class="admin-input" style="width: 100%; margin-bottom: 0; padding: 8px 10px; font-size: 0.82rem;">
+                                        <option value="aniversario" selected>Data Aniversário (Dia/Mês)</option>
+                                        <option value="escalao">Escalão & Data</option>
+                                        <option value="nome">Nome Alfabético (A-Z)</option>
+                                        <option value="nasc_asc">Data Nasc. (Mais Velhos)</option>
+                                        <option value="nasc_desc">Data Nasc. (Mais Novos)</option>
+                                    </select>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Barra de Resumo da Lista -->
+                        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; flex-wrap: wrap; gap: 6px;">
+                            <div id="rel-aniv-total-badge" style="font-size: 0.84rem; font-weight: 700; color: #7e22ce;">
+                                A apurar aniversariantes...
+                            </div>
+                            <div style="font-size: 0.76rem; color: var(--text-secondary);">
+                                Mostrando pré-visualização em tempo real
+                            </div>
+                        </div>
+
+                        <!-- Tabela de Pré-visualização -->
+                        <div style="flex: 1; min-height: 180px; max-height: 280px; overflow-y: auto; border: 1px solid var(--border-color); border-radius: 8px; margin-bottom: 16px; background: #fff;">
+                            <table style="width: 100%; border-collapse: collapse; font-size: 0.81rem; text-align: left;">
+                                <thead style="background: #f8fafc; position: sticky; top: 0; z-index: 2; border-bottom: 1px solid var(--border-color);">
+                                    <tr>
+                                        <th style="padding: 8px 10px; width: 35px; text-align: center;">#</th>
+                                        <th style="padding: 8px 10px;">Nome do Atleta</th>
+                                        <th style="padding: 8px 10px; width: 110px;">Escalão</th>
+                                        <th style="padding: 8px 10px; width: 100px;">Data Nasc.</th>
+                                        <th style="padding: 8px 10px; width: 130px; color: #7e22ce;">🎂 Aniversário</th>
+                                        <th style="padding: 8px 10px; width: 70px; text-align: center;">Idade</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="rel-aniv-preview-body">
+                                    <tr>
+                                        <td colspan="6" style="padding: 20px; text-align: center; color: var(--text-secondary);">A carregar dados...</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+
+                        <!-- Ações do Modal -->
+                        <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px; padding-top: 10px; border-top: 1px solid var(--border-color);">
+                            <button type="button" onclick="window.fecharModalRelatorioAniversarios()" class="btn-secondary" style="padding: 9px 18px; font-size: 0.85rem; border-color: var(--border-color);">
+                                Fechar
+                            </button>
+                            <div style="display: flex; gap: 10px; flex-wrap: wrap;">
+                                <button type="button" id="btn-rel-aniv-export-csv" onclick="window.exportarAniversariosCSV()" class="btn-secondary" style="padding: 9px 18px; font-size: 0.85rem; display: inline-flex; align-items: center; gap: 8px; font-weight: 700; border-color: #10b981; color: #059669; background: #ecfdf5;">
+                                    📥 Descarregar CSV
+                                </button>
+                                <button type="button" id="btn-rel-aniv-export-pdf" onclick="window.exportarAniversariosPDF()" class="btn-primary" style="padding: 9px 20px; font-size: 0.85rem; display: inline-flex; align-items: center; gap: 8px; font-weight: 700; background: linear-gradient(135deg, #7e22ce, #9333ea);">
+                                    📄 Gerar Relatório PDF
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
                 <!-- Modal Popup Global de Criação / Edição de Atleta -->
                 <div id="form-atleta-container" class="admin-modal-overlay hidden">
                     <div class="admin-modal-content">
@@ -3090,6 +3237,6 @@
 
     <!-- Scripts -->
     <script src="js/config.js"></script>
-    <script src="js/admin.js?v=20261011_1150"></script>
+    <script src="js/admin.js?v=20261013_0945"></script>
 </body>
 </html>

@@ -2431,6 +2431,538 @@ document.addEventListener('DOMContentLoaded', async () => {
         });
     }
 
+    // =========================================================================
+    // MÓDULO: RELATÓRIO DE ANIVERSÁRIOS DE ATLETAS (PDF & CSV)
+    // =========================================================================
+    const modalRelatorioAniversarios = document.getElementById('modal-relatorio-aniversarios');
+    const relAnivFiltroEpoca = document.getElementById('rel-aniv-filtro-epoca');
+    const relAnivFiltroEscalao = document.getElementById('rel-aniv-filtro-escalao');
+    const relAnivFiltroMes = document.getElementById('rel-aniv-filtro-mes');
+    const relAnivFiltroFuncao = document.getElementById('rel-aniv-filtro-funcao');
+    const relAnivFiltroOrdem = document.getElementById('rel-aniv-filtro-ordem');
+    const relAnivTotalBadge = document.getElementById('rel-aniv-total-badge');
+    const relAnivPreviewBody = document.getElementById('rel-aniv-preview-body');
+
+    // Variável interna para guardar os atletas apurados no modal
+    let atletasAniversarioFiltrados = [];
+
+    // Helper: Parse flexível e seguro de data de nascimento
+    function parseDataNascimentoAniv(str) {
+        if (!str || typeof str !== 'string') return null;
+        const s = str.trim().split('T')[0];
+        let dia, mes, ano;
+        if (s.includes('-')) {
+            const parts = s.split('-');
+            if (parts.length === 3) {
+                ano = parseInt(parts[0], 10);
+                mes = parseInt(parts[1], 10);
+                dia = parseInt(parts[2], 10);
+            }
+        } else if (s.includes('/')) {
+            const parts = s.split('/');
+            if (parts.length === 3) {
+                dia = parseInt(parts[0], 10);
+                mes = parseInt(parts[1], 10);
+                ano = parseInt(parts[2], 10);
+            }
+        }
+        if (!dia || !mes || !ano || isNaN(dia) || isNaN(mes) || isNaN(ano)) return null;
+
+        const nomesMeses = [
+            'Janeiro', 'Fevereiro', 'Março', 'Abril', 'Maio', 'Junho',
+            'Julho', 'Agosto', 'Setembro', 'Outubro', 'Novembro', 'Dezembro'
+        ];
+        const mesNome = nomesMeses[mes - 1] || '';
+
+        // Calcular idade atual
+        const hoje = new Date();
+        let idade = hoje.getFullYear() - ano;
+        const diffMes = (hoje.getMonth() + 1) - mes;
+        if (diffMes < 0 || (diffMes === 0 && hoje.getDate() < dia)) {
+            idade--;
+        }
+
+        return {
+            dia,
+            mes,
+            ano,
+            dataFmt: `${String(dia).padStart(2, '0')}/${String(mes).padStart(2, '0')}/${ano}`,
+            diaMesFmt: `${String(dia).padStart(2, '0')}/${String(mes).padStart(2, '0')}`,
+            aniversarioExtenso: `${dia} de ${mesNome}`,
+            mesExtenso: mesNome,
+            idade: Math.max(0, idade),
+            sortKeyAniv: mes * 100 + dia
+        };
+    }
+
+    // Abrir Modal de Relatório de Aniversários
+    window.abrirModalRelatorioAniversarios = async function() {
+        if (!modalRelatorioAniversarios) return;
+
+        // Se currentAtletas estiver vazio, garantir o carregamento prévio
+        if (!currentAtletas || currentAtletas.length === 0) {
+            if (typeof window.loadAtletas === 'function') {
+                await window.loadAtletas();
+            }
+        }
+
+        // Definir época padrão ativa 2026/2027 se não definida
+        if (relAnivFiltroEpoca && !relAnivFiltroEpoca.value) {
+            relAnivFiltroEpoca.value = '2026/2027';
+        }
+
+        modalRelatorioAniversarios.classList.remove('hidden');
+        window.atualizarPreviewRelatorioAniversarios();
+    };
+
+    // Fechar Modal
+    window.fecharModalRelatorioAniversarios = function() {
+        if (modalRelatorioAniversarios) {
+            modalRelatorioAniversarios.classList.add('hidden');
+        }
+    };
+
+    // Atualizar Pré-visualização com base nos filtros selecionados
+    window.atualizarPreviewRelatorioAniversarios = function() {
+        if (!relAnivPreviewBody) return;
+
+        const baseAtletas = (typeof currentAtletas !== 'undefined' && currentAtletas) ? currentAtletas : [];
+
+        const epocaFiltro = relAnivFiltroEpoca ? relAnivFiltroEpoca.value.trim() : '2026/2027';
+        const escalaoFiltro = relAnivFiltroEscalao ? relAnivFiltroEscalao.value.trim().toLowerCase() : '';
+        const mesFiltro = relAnivFiltroMes ? relAnivFiltroMes.value.trim() : '';
+        const funcaoFiltro = relAnivFiltroFuncao ? relAnivFiltroFuncao.value.trim() : 'Jogador';
+        const ordemFiltro = relAnivFiltroOrdem ? relAnivFiltroOrdem.value.trim() : 'aniversario';
+
+        // Filtrar
+        let filtrados = baseAtletas.filter(a => {
+            // 1. Época
+            if (epocaFiltro && a.epoca !== epocaFiltro) {
+                return false;
+            }
+
+            // 2. Função / Membros
+            if (funcaoFiltro === 'Jogador') {
+                if (a.funcao && a.funcao.toLowerCase() !== 'jogador') return false;
+            } else if (funcaoFiltro === 'staff') {
+                if (!a.funcao || a.funcao.toLowerCase() === 'jogador') return false;
+            }
+
+            // 3. Escalão
+            if (escalaoFiltro) {
+                const escAtleta = (a.escalao || '').toLowerCase();
+                if (escalaoFiltro === 'minis') {
+                    if (!escAtleta.includes('mini')) return false;
+                } else if (escalaoFiltro === 'sub 14') {
+                    if (!escAtleta.includes('sub 14') && !escAtleta.includes('sub-14')) return false;
+                } else if (escalaoFiltro === 'seniores') {
+                    if (!escAtleta.includes('senior') && !escAtleta.includes('sénior')) return false;
+                } else {
+                    if (escAtleta !== escalaoFiltro) return false;
+                }
+            }
+
+            // 4. Mês de Aniversário
+            const infoNasc = parseDataNascimentoAniv(a.data_nascimento);
+            if (mesFiltro) {
+                const mesNum = parseInt(mesFiltro, 10);
+                if (!infoNasc || infoNasc.mes !== mesNum) return false;
+            }
+
+            return true;
+        });
+
+        // Associar o objeto de nascimento para cada atleta
+        const listaComNasc = filtrados.map(a => {
+            return {
+                ...a,
+                _nasc: parseDataNascimentoAniv(a.data_nascimento)
+            };
+        });
+
+        // Ordenação
+        listaComNasc.sort((a, b) => {
+            if (ordemFiltro === 'aniversario') {
+                if (a._nasc && !b._nasc) return -1;
+                if (!a._nasc && b._nasc) return 1;
+                if (a._nasc && b._nasc) {
+                    if (a._nasc.sortKeyAniv !== b._nasc.sortKeyAniv) {
+                        return a._nasc.sortKeyAniv - b._nasc.sortKeyAniv;
+                    }
+                }
+                return (a.nome || '').localeCompare(b.nome || '');
+            } else if (ordemFiltro === 'escalao') {
+                const cmpEsc = (a.escalao || '').localeCompare(b.escalao || '');
+                if (cmpEsc !== 0) return cmpEsc;
+                if (a._nasc && b._nasc) {
+                    return a._nasc.sortKeyAniv - b._nasc.sortKeyAniv;
+                }
+                return (a.nome || '').localeCompare(b.nome || '');
+            } else if (ordemFiltro === 'nome') {
+                return (a.nome || '').localeCompare(b.nome || '');
+            } else if (ordemFiltro === 'nasc_asc') {
+                // Mais velhos primeiro
+                if (a._nasc && !b._nasc) return -1;
+                if (!a._nasc && b._nasc) return 1;
+                if (a._nasc && b._nasc) {
+                    if (a._nasc.ano !== b._nasc.ano) return a._nasc.ano - b._nasc.ano;
+                    return a._nasc.sortKeyAniv - b._nasc.sortKeyAniv;
+                }
+                return (a.nome || '').localeCompare(b.nome || '');
+            } else if (ordemFiltro === 'nasc_desc') {
+                // Mais novos primeiro
+                if (a._nasc && !b._nasc) return -1;
+                if (!a._nasc && b._nasc) return 1;
+                if (a._nasc && b._nasc) {
+                    if (a._nasc.ano !== b._nasc.ano) return b._nasc.ano - a._nasc.ano;
+                    return b._nasc.sortKeyAniv - b._nasc.sortKeyAniv;
+                }
+                return (a.nome || '').localeCompare(b.nome || '');
+            }
+            return 0;
+        });
+
+        atletasAniversarioFiltrados = listaComNasc;
+
+        // Atualizar Badge de Total
+        const total = atletasAniversarioFiltrados.length;
+        const epocaTxt = epocaFiltro ? `Época ${epocaFiltro}` : 'Todas as Épocas';
+        if (relAnivTotalBadge) {
+            relAnivTotalBadge.innerHTML = `🎂 <strong>${total}</strong> ${total === 1 ? 'membro registado' : 'membros registados'} (${escapeHtml(epocaTxt)})`;
+        }
+
+        // Renderizar Linhas da Tabela
+        relAnivPreviewBody.innerHTML = '';
+        if (total === 0) {
+            relAnivPreviewBody.innerHTML = `
+                <tr>
+                    <td colspan="6" style="padding: 24px; text-align: center; color: var(--text-secondary);">
+                        Nenhum atleta encontrado com as opções selecionadas.
+                    </td>
+                </tr>
+            `;
+            return;
+        }
+
+        atletasAniversarioFiltrados.forEach((atl, idx) => {
+            const tr = document.createElement('tr');
+            tr.style.borderBottom = '1px solid rgba(0,0,0,0.05)';
+            if (idx % 2 === 1) tr.style.background = 'rgba(0,0,0,0.015)';
+
+            const nasc = atl._nasc;
+            const dataNascHtml = nasc ? nasc.dataFmt : '<span style="color: #94a3b8; font-style: italic;">Sem data</span>';
+            const anivHtml = nasc ? `<span style="font-weight: 700; color: #7e22ce;">🎉 ${escapeHtml(nasc.aniversarioExtenso)}</span>` : '<span style="color: #94a3b8;">-</span>';
+            const idadeHtml = nasc ? `<strong>${nasc.idade}</strong> anos` : '<span style="color: #94a3b8;">-</span>';
+            const displayNome = atl.nickname ? `${escapeHtml(atl.nome)} <small style="color: #7e22ce; font-weight: 600;">("${escapeHtml(atl.nickname)}")</small>` : escapeHtml(atl.nome);
+
+            tr.innerHTML = `
+                <td style="padding: 7px 10px; text-align: center; color: var(--text-secondary); font-size: 0.78rem;">${idx + 1}</td>
+                <td style="padding: 7px 10px; font-weight: 600; color: var(--text-primary);">${displayNome}</td>
+                <td style="padding: 7px 10px; color: var(--text-secondary);">${escapeHtml(atl.escalao || '-')}</td>
+                <td style="padding: 7px 10px; font-family: monospace; font-size: 0.8rem;">${dataNascHtml}</td>
+                <td style="padding: 7px 10px;">${anivHtml}</td>
+                <td style="padding: 7px 10px; text-align: center; font-size: 0.8rem;">${idadeHtml}</td>
+            `;
+            relAnivPreviewBody.appendChild(tr);
+        });
+    };
+
+    // Vincular Eventos de Mudança nos Filtros do Modal
+    [relAnivFiltroEpoca, relAnivFiltroEscalao, relAnivFiltroMes, relAnivFiltroFuncao, relAnivFiltroOrdem].forEach(el => {
+        if (el) {
+            el.addEventListener('change', window.atualizarPreviewRelatorioAniversarios);
+            el.addEventListener('input', window.atualizarPreviewRelatorioAniversarios);
+        }
+    });
+
+    // -------------------------------------------------------------------------
+    // EXPORTAÇÃO CSV
+    // -------------------------------------------------------------------------
+    window.exportarAniversariosCSV = function() {
+        if (!atletasAniversarioFiltrados || atletasAniversarioFiltrados.length === 0) {
+            alert('Não existem registos apurados para exportar.');
+            return;
+        }
+
+        const epocaVal = relAnivFiltroEpoca?.value || 'Todas';
+
+        let csvContent = '\uFEFF'; // UTF-8 BOM para garantir acentos perfeitos no Excel
+        csvContent += 'Nº;Nome Atleta;Alcunha/Nickname;Escalão;Género;Função;Época;Data de Nascimento;Dia e Mês de Aniversário;Idade;Contacto / Telefone\n';
+
+        atletasAniversarioFiltrados.forEach((atl, idx) => {
+            const nasc = atl._nasc;
+            const dataFmt = nasc ? nasc.dataFmt : '';
+            const anivExtenso = nasc ? nasc.aniversarioExtenso : '';
+            const idade = nasc ? String(nasc.idade) : '';
+            const contacto = atl.telemovel_encarregado || atl.telefone || atl.telemovel || '';
+
+            const row = [
+                idx + 1,
+                `"${(atl.nome || '').replace(/"/g, '""')}"`,
+                `"${(atl.nickname || '').replace(/"/g, '""')}"`,
+                `"${(atl.escalao || '').replace(/"/g, '""')}"`,
+                `"${(atl.sexo || '').replace(/"/g, '""')}"`,
+                `"${(atl.funcao || 'Jogador').replace(/"/g, '""')}"`,
+                `"${(atl.epoca || '').replace(/"/g, '""')}"`,
+                `"${dataFmt.replace(/"/g, '""')}"`,
+                `"${anivExtenso.replace(/"/g, '""')}"`,
+                `"${idade.replace(/"/g, '""')}"`,
+                `"${contacto.replace(/"/g, '""')}"`
+            ];
+            csvContent += row.join(';') + '\n';
+        });
+
+        const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+        const url = URL.createObjectURL(blob);
+        const link = document.createElement('a');
+        link.href = url;
+        const dataHoje = new Date().toISOString().split('T')[0];
+        const epocaClean = epocaVal.replace(/[^a-zA-Z0-9]/g, '_');
+        link.download = `Aniversarios_BCV_Epoca_${epocaClean}_${dataHoje}.csv`;
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+        URL.revokeObjectURL(url);
+    };
+
+    // -------------------------------------------------------------------------
+    // EXPORTAÇÃO PDF OFICIAL (pdf-lib)
+    // -------------------------------------------------------------------------
+    window.exportarAniversariosPDF = async function() {
+        if (!atletasAniversarioFiltrados || atletasAniversarioFiltrados.length === 0) {
+            alert('Não existem registos apurados para exportar.');
+            return;
+        }
+
+        try {
+            // Garantir que a biblioteca PDFLib está carregada
+            if (!window.PDFLib) {
+                await new Promise((resolve, reject) => {
+                    const s = document.createElement('script');
+                    s.src = 'js/pdf-lib.min.js';
+                    s.onload = resolve;
+                    s.onerror = () => {
+                        const s2 = document.createElement('script');
+                        s2.src = 'https://cdn.jsdelivr.net/npm/pdf-lib@1.17.1/dist/pdf-lib.min.js';
+                        s2.onload = resolve;
+                        s2.onerror = () => reject(new Error('Falha ao carregar biblioteca de PDF'));
+                        document.head.appendChild(s2);
+                    };
+                    document.head.appendChild(s);
+                });
+            }
+
+            const { PDFDocument, rgb, StandardFonts } = window.PDFLib;
+            const pdfDoc = await PDFDocument.create();
+            const fontBold = await pdfDoc.embedFont(StandardFonts.HelveticaBold);
+            const fontRegular = await pdfDoc.embedFont(StandardFonts.Helvetica);
+
+            // Formato A4 Retrato: 595.28 pt (largura) x 841.89 pt (altura)
+            const pageWidth = 595.28;
+            const pageHeight = 841.89;
+            const margin = 32;
+            const rowsPerPage = 24;
+
+            const totalAtletas = atletasAniversarioFiltrados.length;
+            const totalPages = Math.ceil(totalAtletas / rowsPerPage) || 1;
+
+            const epocaVal = relAnivFiltroEpoca?.value || 'Todas as Épocas';
+            const escalaoVal = relAnivFiltroEscalao?.value ? relAnivFiltroEscalao.value : 'Todos os Escalões';
+            const mesVal = relAnivFiltroMes?.options[relAnivFiltroMes.selectedIndex]?.text || 'Ano Inteiro';
+            const dataEmissao = new Date().toLocaleDateString('pt-PT', {
+                day: '2-digit', month: '2-digit', year: 'numeric',
+                hour: '2-digit', minute: '2-digit'
+            });
+
+            // Helper para remover caracteres que quebrem fontes WinAnsi no pdf-lib
+            const cleanText = (str) => {
+                if (!str) return '';
+                return String(str)
+                    .replace(/[^\x20-\x7E\xA0-\xFF]/g, ' ')
+                    .trim();
+            };
+
+            for (let pageIdx = 0; pageIdx < totalPages; pageIdx++) {
+                const page = pdfDoc.addPage([pageWidth, pageHeight]);
+                let y = pageHeight - margin;
+
+                // 1. Faixa Superior Roxa Institucional BCV (#7e22ce)
+                page.drawRectangle({
+                    x: margin,
+                    y: y - 52,
+                    width: pageWidth - (margin * 2),
+                    height: 52,
+                    color: rgb(0.494, 0.133, 0.808)
+                });
+
+                // Título Clube
+                page.drawText('BASKET CLUBE DE VALENCA', {
+                    x: margin + 14,
+                    y: y - 24,
+                    size: 14,
+                    font: fontBold,
+                    color: rgb(1, 1, 1)
+                });
+
+                // Subtítulo
+                page.drawText(`RELATORIO DE ANIVERSARIOS • EPOCA ${epocaVal}`, {
+                    x: margin + 14,
+                    y: y - 42,
+                    size: 9.5,
+                    font: fontBold,
+                    color: rgb(0.92, 0.86, 1)
+                });
+
+                // Data de Emissão (canto direito do banner)
+                page.drawText(`Emitido em: ${dataEmissao}`, {
+                    x: pageWidth - margin - 150,
+                    y: y - 30,
+                    size: 8,
+                    font: fontRegular,
+                    color: rgb(0.95, 0.95, 0.95)
+                });
+
+                y -= 64;
+
+                // 2. Barra de Metadados / Filtros
+                const metaText = cleanText(`Filtros: Epoca: ${epocaVal} | Escalao: ${escalaoVal} | Mes: ${mesVal} | Total: ${totalAtletas} Membro(s)`);
+                page.drawText(metaText, {
+                    x: margin,
+                    y: y,
+                    size: 8.5,
+                    font: fontBold,
+                    color: rgb(0.25, 0.25, 0.25)
+                });
+
+                y -= 14;
+
+                // 3. Cabeçalho da Tabela
+                // Colunas: Nº(24), Nome(195), Escalão(85), Data Nasc.(68), Aniversário(115), Idade(44) = total 531 pt
+                const colWidths = [24, 195, 85, 68, 115, 44];
+                const colHeaders = ['Nº', 'Nome do Atleta / Membro', 'Escalao', 'Data Nasc.', 'Aniversario', 'Idade'];
+
+                page.drawRectangle({
+                    x: margin,
+                    y: y - 18,
+                    width: pageWidth - (margin * 2),
+                    height: 20,
+                    color: rgb(0.94, 0.95, 0.97)
+                });
+
+                let curX = margin + 4;
+                colHeaders.forEach((header, i) => {
+                    page.drawText(header, {
+                        x: curX,
+                        y: y - 13,
+                        size: 8,
+                        font: fontBold,
+                        color: rgb(0.15, 0.15, 0.15)
+                    });
+                    curX += colWidths[i];
+                });
+
+                y -= 20;
+
+                // 4. Linhas de Dados da Página Atual
+                const startIdx = pageIdx * rowsPerPage;
+                const endIdx = Math.min(startIdx + rowsPerPage, totalAtletas);
+                const pageRows = atletasAniversarioFiltrados.slice(startIdx, endIdx);
+
+                pageRows.forEach((atl, rIdx) => {
+                    const rowHeight = 20;
+                    const isEven = rIdx % 2 === 0;
+
+                    if (isEven) {
+                        page.drawRectangle({
+                            x: margin,
+                            y: y - 15,
+                            width: pageWidth - (margin * 2),
+                            height: rowHeight,
+                            color: rgb(0.985, 0.985, 0.995)
+                        });
+                    }
+
+                    // Linha divisória suave
+                    page.drawLine({
+                        start: { x: margin, y: y - 15 },
+                        end: { x: pageWidth - margin, y: y - 15 },
+                        thickness: 0.5,
+                        color: rgb(0.88, 0.88, 0.9)
+                    });
+
+                    const nasc = atl._nasc;
+                    const nomeCompleto = atl.nickname ? `${atl.nome} (${atl.nickname})` : (atl.nome || '-');
+
+                    const rowVals = [
+                        String(startIdx + rIdx + 1),
+                        cleanText(nomeCompleto).slice(0, 34),
+                        cleanText(atl.escalao || '-').slice(0, 16),
+                        nasc ? nasc.dataFmt : '-',
+                        nasc ? cleanText(nasc.aniversarioExtenso) : '-',
+                        nasc ? `${nasc.idade} anos` : '-'
+                    ];
+
+                    let cellX = margin + 4;
+                    rowVals.forEach((val, cIdx) => {
+                        const isBoldCell = (cIdx === 1 || cIdx === 4);
+                        page.drawText(val, {
+                            x: cellX,
+                            y: y - 10,
+                            size: 8,
+                            font: isBoldCell ? fontBold : fontRegular,
+                            color: cIdx === 4 ? rgb(0.49, 0.13, 0.81) : rgb(0.15, 0.15, 0.15)
+                        });
+                        cellX += colWidths[cIdx];
+                    });
+
+                    y -= rowHeight;
+                });
+
+                // 5. Rodapé
+                const rodapeY = 22;
+                page.drawLine({
+                    start: { x: margin, y: rodapeY + 12 },
+                    end: { x: pageWidth - margin, y: rodapeY + 12 },
+                    thickness: 0.5,
+                    color: rgb(0.8, 0.8, 0.85)
+                });
+
+                page.drawText('Basket Clube de Valenca • Relatorio Oficial de Aniversarios', {
+                    x: margin,
+                    y: rodapeY + 2,
+                    size: 7.5,
+                    font: fontRegular,
+                    color: rgb(0.5, 0.5, 0.55)
+                });
+
+                page.drawText(`Pagina ${pageIdx + 1} de ${totalPages}`, {
+                    x: pageWidth - margin - 60,
+                    y: rodapeY + 2,
+                    size: 7.5,
+                    font: fontBold,
+                    color: rgb(0.4, 0.4, 0.45)
+                });
+            }
+
+            const pdfBytes = await pdfDoc.save();
+            const blob = new Blob([pdfBytes], { type: 'application/pdf' });
+            const url = URL.createObjectURL(blob);
+            const link = document.createElement('a');
+            link.href = url;
+            const dataHoje = new Date().toISOString().split('T')[0];
+            const epocaClean = epocaVal.replace(/[^a-zA-Z0-9]/g, '_');
+            link.download = `Relatorio_Aniversarios_BCV_Epoca_${epocaClean}_${dataHoje}.pdf`;
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+            URL.revokeObjectURL(url);
+
+        } catch (err) {
+            console.error('Erro ao gerar PDF de aniversários:', err);
+            alert('Ocorreu um erro ao gerar o PDF: ' + err.message);
+        }
+    };
+
     window.abrirModalCriarStaff = function() {
         resetAtletaForm();
         if (formAtletaTitle) formAtletaTitle.textContent = 'Registar Treinador / Membro de Staff';
