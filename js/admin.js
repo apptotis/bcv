@@ -4756,6 +4756,19 @@ document.addEventListener('DOMContentLoaded', async () => {
                     await supabase.from('agenda_bcv').delete().eq('id', agendaId);
                 }
 
+                // 3. Sincronizar com a Série se aplicável
+                if (window.sincronizarResultadoComQuadroSerie) {
+                    await window.sincronizarResultadoComQuadroSerie({
+                        equipa_casa: equipaCasa,
+                        equipa_fora: equipaFora,
+                        pontos_casa: pontosCasa,
+                        pontos_fora: pontosFora,
+                        data_jogo: dataJogo,
+                        escalao: escalao,
+                        fpb_id: fpbId
+                    });
+                }
+
                 finalizarMsg.textContent = "✅ Resultado registado e jogo arquivado com sucesso!";
                 finalizarMsg.style.color = "#16a34a";
                 finalizarMsg.classList.remove('hidden');
@@ -4843,6 +4856,11 @@ document.addEventListener('DOMContentLoaded', async () => {
                 }
 
                 if (error) throw error;
+
+                // Sincronizar com o Quadro da Série correspondente se aplicável
+                if (window.sincronizarResultadoComQuadroSerie) {
+                    await window.sincronizarResultadoComQuadroSerie(resData);
+                }
 
                 resultadoMsg.textContent = "✅ Resultado guardado com sucesso!";
                 resultadoMsg.style.color = "#16a34a";
@@ -9851,8 +9869,32 @@ document.addEventListener('DOMContentLoaded', async () => {
         if (document.getElementById('btn-cancelar-edicao-jogo-serie')) document.getElementById('btn-cancelar-edicao-jogo-serie').style.display = 'none';
     };
 
-    window.removerJogoSerie = function(idx) {
-        if (!confirm("Tem a certeza que deseja eliminar este jogo da série?")) return;
+    window.removerJogoSerie = async function(idx) {
+        const j = currentJogosSerie[idx];
+        if (!j) return;
+        if (!confirm(`Tem a certeza que deseja eliminar o jogo "${j.equipa_casa} vs ${j.equipa_fora}" da série?`)) return;
+
+        const isBCV = /valen[cç]a|bcv/i.test(j.equipa_casa || '') || /valen[cç]a|bcv/i.test(j.equipa_fora || '');
+        if (isBCV && j.data) {
+            const removerPublico = confirm("Este jogo envolve o BC Valença. Deseja eliminá-lo também da Gestão de Resultados e do site público?");
+            if (removerPublico) {
+                try {
+                    const { data: resGames } = await supabase.from('resultados_bcv').select('id, data_jogo, equipa_casa, equipa_fora');
+                    const match = (resGames || []).find(r => 
+                        r.data_jogo === j.data && 
+                        compararEquipasIguais(r.equipa_casa, j.equipa_casa) && 
+                        compararEquipasIguais(r.equipa_fora, j.equipa_fora)
+                    );
+                    if (match) {
+                        await supabase.from('resultados_bcv').delete().eq('id', match.id);
+                        await loadResultados();
+                    }
+                } catch (e) {
+                    console.error("Erro ao remover de resultados_bcv:", e);
+                }
+            }
+        }
+
         currentJogosSerie.splice(idx, 1);
         renderJogosSerieModal();
         window.recalcularClassificacaoAutomaticamente(false);
@@ -10631,6 +10673,285 @@ document.addEventListener('DOMContentLoaded', async () => {
         }
     };
 
+    function compararEquipasIguais(eq1, eq2) {
+        if (!eq1 || !eq2) return false;
+        const n1 = eq1.toLowerCase().trim().replace(/[^a-z0-9]/g, '');
+        const n2 = eq2.toLowerCase().trim().replace(/[^a-z0-9]/g, '');
+        if (n1 === n2) return true;
+        const isBcv1 = n1.includes('valenca') || n1.includes('bcv');
+        const isBcv2 = n2.includes('valenca') || n2.includes('bcv');
+        if (isBcv1 && isBcv2) return true;
+        return (n1.length >= 4 && n2.includes(n1)) || (n2.length >= 4 && n1.includes(n2));
+    }
+    window.compararEquipasIguais = compararEquipasIguais;
+
+    function calcularClassificacaoEquipasSerie(equipasLista, jogosLista) {
+        if (!Array.isArray(equipasLista) || equipasLista.length === 0) return [];
+        const statsMap = {};
+        equipasLista.forEach(eq => {
+            const nome = (eq.nome || '').trim();
+            if (!nome) return;
+            statsMap[nome.toLowerCase()] = {
+                nome: nome,
+                logo: eq.logo || (window.obterLogoEquipa ? window.obterLogoEquipa(nome) : null),
+                j: 0,
+                v: 0,
+                d: 0,
+                pm: 0,
+                ps: 0,
+                pts: 0
+            };
+        });
+
+        (jogosLista || []).forEach(j => {
+            const cNome = (j.equipa_casa || '').trim();
+            const fNome = (j.equipa_fora || '').trim();
+            const cKey = cNome.toLowerCase();
+            const fKey = fNome.toLowerCase();
+
+            const pCasa = Number(j.pontos_casa);
+            const pFora = Number(j.pontos_fora);
+            if (isNaN(pCasa) || isNaN(pFora)) return;
+
+            if (!statsMap[cKey]) statsMap[cKey] = { nome: cNome, logo: (window.obterLogoEquipa ? window.obterLogoEquipa(cNome) : null), j: 0, v: 0, d: 0, pm: 0, ps: 0, pts: 0 };
+            if (!statsMap[fKey]) statsMap[fKey] = { nome: fNome, logo: (window.obterLogoEquipa ? window.obterLogoEquipa(fNome) : null), j: 0, v: 0, d: 0, pm: 0, ps: 0, pts: 0 };
+
+            statsMap[cKey].j += 1;
+            statsMap[fKey].j += 1;
+            statsMap[cKey].pm += pCasa;
+            statsMap[cKey].ps += pFora;
+            statsMap[fKey].pm += pFora;
+            statsMap[fKey].ps += pCasa;
+
+            if (pCasa > pFora) {
+                statsMap[cKey].v += 1;
+                statsMap[cKey].pts += 2;
+                statsMap[fKey].d += 1;
+                statsMap[fKey].pts += 1;
+            } else if (pFora > pCasa) {
+                statsMap[fKey].v += 1;
+                statsMap[fKey].pts += 2;
+                statsMap[cKey].d += 1;
+                statsMap[cKey].pts += 1;
+            } else {
+                statsMap[cKey].pts += 1;
+                statsMap[fKey].pts += 1;
+            }
+        });
+
+        const equipasCalculadas = Object.values(statsMap).map(eq => ({
+            ...eq,
+            dif: eq.pm - eq.ps
+        }));
+
+        equipasCalculadas.sort((a, b) => {
+            if (b.pts !== a.pts) return b.pts - a.pts;
+            if (b.dif !== a.dif) return b.dif - a.dif;
+            return b.pm - a.pm;
+        });
+
+        return equipasCalculadas.map((eq, idx) => ({
+            pos: idx + 1,
+            ...eq
+        }));
+    }
+    window.calcularClassificacaoEquipasSerie = calcularClassificacaoEquipasSerie;
+
+    async function sincronizarJogosSerieComResultados(comp, jogosSerie) {
+        if (!comp || !Array.isArray(jogosSerie) || jogosSerie.length === 0) return 0;
+
+        try {
+            const [resAgenda, resResultados] = await Promise.all([
+                supabase.from('agenda_bcv').select('*'),
+                supabase.from('resultados_bcv').select('*')
+            ]);
+
+            const agendaGames = resAgenda?.data || [];
+            const resultadosGames = resResultados?.data || [];
+
+            let sincronizados = 0;
+            let agendaRemovidos = 0;
+
+            for (const j of jogosSerie) {
+                const isCasaBCV = /valen[cç]a|bcv/i.test(j.equipa_casa || '');
+                const isForaBCV = /valen[cç]a|bcv/i.test(j.equipa_fora || '');
+                
+                // Só sincronizar jogos em que o BC Valença participe
+                if (!isCasaBCV && !isForaBCV) continue;
+
+                const pCasa = parseInt(j.pontos_casa, 10);
+                const pFora = parseInt(j.pontos_fora, 10);
+                if (isNaN(pCasa) || isNaN(pFora)) continue;
+
+                // 1. Procurar correspondência na agenda_bcv
+                const agendaMatchIdx = agendaGames.findIndex(a => {
+                    if (j.fpb_id && a.fpb_id && String(a.fpb_id) === String(j.fpb_id)) return true;
+                    const matchCasa = compararEquipasIguais(a.equipa_casa, j.equipa_casa);
+                    const matchFora = compararEquipasIguais(a.equipa_fora, j.equipa_fora);
+                    const matchData = !j.data || !a.data_jogo || a.data_jogo === j.data;
+                    return matchData && matchCasa && matchFora;
+                });
+
+                let agendaItem = null;
+                if (agendaMatchIdx !== -1) {
+                    agendaItem = agendaGames[agendaMatchIdx];
+                    agendaGames.splice(agendaMatchIdx, 1);
+                    // O jogo já foi jogado e tem resultado final: remover da agenda
+                    await supabase.from('agenda_bcv').delete().eq('id', agendaItem.id);
+                    agendaRemovidos++;
+                }
+
+                // 2. Procurar correspondência em resultados_bcv
+                const resMatch = resultadosGames.find(r => {
+                    if (j.fpb_id && r.fpb_id && String(r.fpb_id) === String(j.fpb_id)) return true;
+                    if (agendaItem && agendaItem.fpb_id && r.fpb_id && String(r.fpb_id) === String(agendaItem.fpb_id)) return true;
+                    const matchCasa = compararEquipasIguais(r.equipa_casa, j.equipa_casa);
+                    const matchFora = compararEquipasIguais(r.equipa_fora, j.equipa_fora);
+                    const matchData = (r.data_jogo === j.data);
+                    return matchData && matchCasa && matchFora;
+                });
+
+                const logoCasa = (agendaItem && agendaItem.logo_casa) 
+                    || (resMatch && resMatch.logo_casa) 
+                    || (window.obterLogoEquipa ? window.obterLogoEquipa(j.equipa_casa) : null);
+                const logoFora = (agendaItem && agendaItem.logo_fora) 
+                    || (resMatch && resMatch.logo_fora) 
+                    || (window.obterLogoEquipa ? window.obterLogoEquipa(j.equipa_fora) : null);
+
+                const escalaoJogo = comp.escalao || 'Sub 14';
+                const competicaoJogo = (agendaItem && agendaItem.competicao) 
+                    || (resMatch && resMatch.competicao) 
+                    || `${comp.escalao || ''} ${comp.sexo || ''} | ${comp.nome || comp.sigla || 'Oficial FPB'}`.trim();
+                const localJogo = (agendaItem && agendaItem.local) 
+                    || (resMatch && resMatch.local) 
+                    || (isCasaBCV ? 'Pav. M. Valença ,Valença' : '');
+                const fpbId = (agendaItem && agendaItem.fpb_id) || (resMatch && resMatch.fpb_id) || j.fpb_id || null;
+
+                if (resMatch) {
+                    // Atualizar resultado existente na base de dados
+                    await supabase.from('resultados_bcv').update({
+                        pontos_casa: pCasa,
+                        pontos_fora: pFora,
+                        data_jogo: j.data || resMatch.data_jogo,
+                        publicado: resMatch.publicado !== false,
+                        logo_casa: logoCasa,
+                        logo_fora: logoFora,
+                        escalao: escalaoJogo,
+                        competicao: competicaoJogo
+                    }).eq('id', resMatch.id);
+                    sincronizados++;
+                } else {
+                    // Inserir novo resultado na base de dados
+                    await supabase.from('resultados_bcv').insert([{
+                        equipa_casa: j.equipa_casa,
+                        equipa_fora: j.equipa_fora,
+                        pontos_casa: pCasa,
+                        pontos_fora: pFora,
+                        data_jogo: j.data || new Date().toISOString().split('T')[0],
+                        escalao: escalaoJogo,
+                        competicao: competicaoJogo,
+                        local: localJogo,
+                        fpb_id: fpbId,
+                        publicado: true,
+                        logo_casa: logoCasa,
+                        logo_fora: logoFora
+                    }]);
+                    sincronizados++;
+                }
+            }
+
+            // Recarregar listas do Admin para atualização instantânea na interface
+            await Promise.all([
+                loadResultados(),
+                loadAgenda()
+            ]);
+
+            console.log(`[Sincronização Série]: ${sincronizados} jogo(s) sincronizados com resultados_bcv, ${agendaRemovidos} removidos da agenda.`);
+            return sincronizados;
+        } catch (err) {
+            console.error("Erro ao sincronizar jogos da série com resultados:", err);
+            return 0;
+        }
+    }
+    window.sincronizarJogosSerieComResultados = sincronizarJogosSerieComResultados;
+
+    async function sincronizarResultadoComQuadroSerie(resData) {
+        if (!resData || !currentCompeticoes || currentCompeticoes.length === 0) return;
+        try {
+            const esc = (resData.escalao || '').toLowerCase();
+            const compNome = (resData.competicao || '').toLowerCase();
+            const casa = (resData.equipa_casa || '').trim();
+            const fora = (resData.equipa_fora || '').trim();
+            const dataJogo = resData.data_jogo;
+            const pCasa = parseInt(resData.pontos_casa, 10);
+            const pFora = parseInt(resData.pontos_fora, 10);
+
+            if (isNaN(pCasa) || isNaN(pFora)) return;
+
+            // Encontrar competição compatível
+            const comp = currentCompeticoes.find(c => {
+                const cEsc = (c.escalao || '').toLowerCase();
+                const cSigla = (c.sigla || '').toLowerCase();
+                const cSex = (c.sexo || '').toLowerCase();
+                
+                if (esc.includes('14') || cEsc.includes('14') || cSigla.includes('14')) {
+                    const isFem = esc.includes('fem') || compNome.includes('fem');
+                    return isFem ? (cSex === 'feminino' || cSigla.includes('fem')) : (cSex === 'masculino' || !cSigla.includes('fem'));
+                }
+                if (esc.includes('16') || cEsc.includes('16') || cSigla.includes('16')) {
+                    const isFem = esc.includes('fem') || compNome.includes('fem');
+                    return isFem ? (cSex === 'feminino' || cSigla.includes('fem')) : (cSex === 'masculino' || !cSigla.includes('fem'));
+                }
+                if (esc.includes('18') || cEsc.includes('18') || cSigla.includes('18')) {
+                    return true;
+                }
+                if (esc.includes('sen') || cEsc.includes('sen') || cSigla.includes('cn2')) {
+                    return true;
+                }
+                return false;
+            });
+
+            if (!comp) return;
+
+            if (!Array.isArray(comp.jogos_serie)) {
+                comp.jogos_serie = [];
+            }
+
+            const jogoExistente = comp.jogos_serie.find(j => 
+                j.data === dataJogo && 
+                compararEquipasIguais(j.equipa_casa, casa) && 
+                compararEquipasIguais(j.equipa_fora, fora)
+            );
+
+            if (jogoExistente) {
+                jogoExistente.pontos_casa = pCasa;
+                jogoExistente.pontos_fora = pFora;
+                jogoExistente.data = dataJogo;
+            } else {
+                comp.jogos_serie.push({
+                    id: 'bcv_' + (resData.fpb_id || Date.now()),
+                    jornada: 1,
+                    data: dataJogo,
+                    equipa_casa: casa,
+                    equipa_fora: fora,
+                    pontos_casa: pCasa,
+                    pontos_fora: pFora
+                });
+            }
+
+            // Recalcular classificação da série
+            if (Array.isArray(comp.tabela_serie) && comp.tabela_serie.length > 0) {
+                comp.tabela_serie = calcularClassificacaoEquipasSerie(comp.tabela_serie, comp.jogos_serie);
+            }
+
+            await saveCompeticoesToSupabase(currentCompeticoes, false);
+            console.log(`[Sincronização Inversa]: Jogo sincronizado na série de ${comp.sigla || comp.nome}.`);
+        } catch (err) {
+            console.warn("Aviso ao sincronizar resultado com quadro da série:", err);
+        }
+    }
+    window.sincronizarResultadoComQuadroSerie = sincronizarResultadoComQuadroSerie;
+
     window.salvarTabelaSerie = async function() {
         if (!currentSerieCompId) return;
         const comp = currentCompeticoes.find(c => c.id === currentSerieCompId);
@@ -10689,9 +11010,16 @@ document.addEventListener('DOMContentLoaded', async () => {
         }
 
         if (ok) {
+            // Sincronizar automaticamente os jogos do BC Valença com resultados_bcv e agenda_bcv
+            const countSinc = await sincronizarJogosSerieComResultados(comp, comp.jogos_serie);
+
             window.fecharModalTabelaSerie();
             renderCompeticoesAdmin();
-            showCompeticoesStatus(`✅ Quadro da série de "${comp.sigla || comp.nome}" guardado com sucesso!`, "#15803d");
+            if (countSinc > 0) {
+                showCompeticoesStatus(`✅ Quadro da série guardado e ${countSinc} resultado(s) do BC Valença sincronizados com a Gestão de Resultados e site público!`, "#15803d");
+            } else {
+                showCompeticoesStatus(`✅ Quadro da série de "${comp.sigla || comp.nome}" guardado com sucesso!`, "#15803d");
+            }
         }
     };
 
