@@ -1216,12 +1216,14 @@ async function loadCompeticoesSection(supabase) {
                 <div class="comp-games-list">
                     ${jogosOrdenados.map(j => {
                         const dataFmt = formatDataComp(j.data_jogo || j.data);
-                        const isCasaBCV = (j.equipa_casa || '').toLowerCase().includes('valença') || (j.equipa_casa || '').toLowerCase().includes('bcv');
-                        const isForaBCV = (j.equipa_fora || '').toLowerCase().includes('valença') || (j.equipa_fora || '').toLowerCase().includes('bcv');
+                        const nomeCasa = normalizarNomeEquipa(j.equipa_casa);
+                        const nomeFora = normalizarNomeEquipa(j.equipa_fora);
+                        const isCasaBCV = (nomeCasa || '').toLowerCase().includes('valença') || (nomeCasa || '').toLowerCase().includes('bcv');
+                        const isForaBCV = (nomeFora || '').toLowerCase().includes('valença') || (nomeFora || '').toLowerCase().includes('bcv');
                         const ptsCasa = Number(j.pontos_casa) || 0;
                         const ptsFora = Number(j.pontos_fora) || 0;
-                        const logoCasa = window.obterLogoEquipa ? window.obterLogoEquipa(j.equipa_casa, j.logo_casa) : '';
-                        const logoFora = window.obterLogoEquipa ? window.obterLogoEquipa(j.equipa_fora, j.logo_fora) : '';
+                        const logoCasa = window.obterLogoEquipa ? window.obterLogoEquipa(nomeCasa, j.logo_casa) : '';
+                        const logoFora = window.obterLogoEquipa ? window.obterLogoEquipa(nomeFora, j.logo_fora) : '';
                         let tagJornada = '';
                         if (j.jornada) {
                             tagJornada = `Jornada ${j.jornada}`;
@@ -1238,14 +1240,14 @@ async function loadCompeticoesSection(supabase) {
                                     <span class="game-hour">${tagJornada}</span>
                                 </div>
                                 <div class="comp-game-match-row">
-                                    <span class="comp-game-team ${isCasaBCV ? 'is-bcv' : ''}" title="${j.equipa_casa}">
+                                    <span class="comp-game-team ${isCasaBCV ? 'is-bcv' : ''}" title="${nomeCasa}">
                                         ${logoCasa ? `<img src="${logoCasa}" alt="" class="team-logo-icon" style="width: 17px; height: 17px;" onerror="this.style.display='none'">` : ''}
-                                        <span>${j.equipa_casa}</span>
+                                        <span>${nomeCasa}</span>
                                     </span>
                                     <span class="comp-game-score">${ptsCasa} - ${ptsFora}</span>
-                                    <span class="comp-game-team ${isForaBCV ? 'is-bcv' : ''}" title="${j.equipa_fora}">
+                                    <span class="comp-game-team ${isForaBCV ? 'is-bcv' : ''}" title="${nomeFora}">
                                         ${logoFora ? `<img src="${logoFora}" alt="" class="team-logo-icon" style="width: 17px; height: 17px;" onerror="this.style.display='none'">` : ''}
-                                        <span>${j.equipa_fora}</span>
+                                        <span>${nomeFora}</span>
                                     </span>
                                 </div>
                             </div>
@@ -1292,6 +1294,7 @@ async function loadCompeticoesSection(supabase) {
             const n = nome.trim();
             const l = n.toLowerCase();
             if (l.includes('valença') || l.includes('bcv')) return 'BC Valença';
+            if (l.includes('vigoros')) return 'ACR Vigorosa';
             return n;
         };
 
@@ -1342,29 +1345,49 @@ async function loadCompeticoesSection(supabase) {
             // 1. Prioridade Máxima: Quadro Oficial Completo Configurado no Admin (se tiver pelo menos 2 equipas)
             if (comp.tabela_serie && Array.isArray(comp.tabela_serie) && comp.tabela_serie.length >= 2) {
                 isTabelaSerieOficial = true;
-                equipas = comp.tabela_serie.map((eq, idx) => {
+                const mapEquipas = {};
+                comp.tabela_serie.forEach((eq, idx) => {
+                    const nomeNorm = normalizarNomeEquipa(eq.nome || '');
+                    if (!nomeNorm) return;
+                    const key = nomeNorm.toLowerCase();
                     const v = Number(eq.v) || 0;
                     const d = Number(eq.d) || 0;
                     const j = Number(eq.j) || (v + d);
                     const pm = Number(eq.pm) || 0;
                     const ps = Number(eq.ps) || 0;
-                    const dif = eq.dif !== undefined ? Number(eq.dif) : (pm - ps);
                     const ptsMin = (v * 2) + (d * 1);
                     let pts = Number(eq.pts);
                     if (isNaN(pts) || pts === undefined || ((v + d) > 0 && pts < ptsMin)) {
                         pts = ptsMin;
                     }
-                    return {
-                        pos: Number(eq.pos) || (idx + 1),
-                        nome: normalizarNomeEquipa(eq.nome || ''),
-                        logo: eq.logo || null,
-                        j, v, d, pm, ps, dif, pts
-                    };
+
+                    if (!mapEquipas[key]) {
+                        mapEquipas[key] = {
+                            nome: nomeNorm,
+                            logo: eq.logo || (window.obterLogoEquipa ? window.obterLogoEquipa(nomeNorm) : null),
+                            j, v, d, pm, ps, pts
+                        };
+                    } else {
+                        // Unificar estatísticas se veio duplicada (ex: ACR Vigoroso e ACR Vigorosa)
+                        mapEquipas[key].j += j;
+                        mapEquipas[key].v += v;
+                        mapEquipas[key].d += d;
+                        mapEquipas[key].pm += pm;
+                        mapEquipas[key].ps += ps;
+                        mapEquipas[key].pts += pts;
+                        if (!mapEquipas[key].logo && eq.logo) mapEquipas[key].logo = eq.logo;
+                    }
                 });
+
+                equipas = Object.values(mapEquipas).map(eq => ({
+                    ...eq,
+                    dif: eq.pm - eq.ps
+                }));
+
                 equipas.sort((a, b) => {
                     if (b.pts !== a.pts) return b.pts - a.pts;
                     if (b.dif !== a.dif) return b.dif - a.dif;
-                    if (a.pos && b.pos && a.pos !== b.pos) return a.pos - b.pos;
+                    if (b.v !== a.v) return b.v - a.v;
                     return (b.pm || 0) - (a.pm || 0);
                 });
                 equipas.forEach((eq, idx) => {

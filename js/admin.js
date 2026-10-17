@@ -9797,8 +9797,10 @@ document.addEventListener('DOMContentLoaded', async () => {
         const editIdx = parseInt(document.getElementById('serie-jogo-edit-idx')?.value ?? '-1', 10);
         const jornada = parseInt(document.getElementById('serie-novo-jornada')?.value || '1', 10) || 1;
         const data = document.getElementById('serie-novo-data')?.value || '';
-        const equipaCasa = document.getElementById('serie-novo-equipa-casa')?.value?.trim();
-        const equipaFora = document.getElementById('serie-novo-equipa-fora')?.value?.trim();
+        let equipaCasa = document.getElementById('serie-novo-equipa-casa')?.value?.trim() || '';
+        let equipaFora = document.getElementById('serie-novo-equipa-fora')?.value?.trim() || '';
+        if (/vigoros/i.test(equipaCasa)) equipaCasa = 'ACR Vigorosa';
+        if (/vigoros/i.test(equipaFora)) equipaFora = 'ACR Vigorosa';
         const ptsCasaRaw = document.getElementById('serie-novo-pts-casa')?.value;
         const ptsForaRaw = document.getElementById('serie-novo-pts-fora')?.value;
 
@@ -10061,6 +10063,57 @@ document.addEventListener('DOMContentLoaded', async () => {
 
         currentEquipasSerie = Array.isArray(comp.tabela_serie) ? JSON.parse(JSON.stringify(comp.tabela_serie)) : [];
         currentJogosSerie = Array.isArray(comp.jogos_serie) ? JSON.parse(JSON.stringify(comp.jogos_serie)) : [];
+
+        // Normalizar ACR Vigoroso para ACR Vigorosa nos jogos da série
+        if (Array.isArray(currentJogosSerie)) {
+            currentJogosSerie.forEach(j => {
+                if (j.equipa_casa && /vigoroso/i.test(j.equipa_casa)) j.equipa_casa = 'ACR Vigorosa';
+                if (j.equipa_fora && /vigoroso/i.test(j.equipa_fora)) j.equipa_fora = 'ACR Vigorosa';
+            });
+        }
+
+        // Unificar equipas duplicadas por grafia (ex: ACR Vigoroso -> ACR Vigorosa)
+        if (Array.isArray(currentEquipasSerie) && currentEquipasSerie.length > 0) {
+            const mapEq = {};
+            currentEquipasSerie.forEach(eq => {
+                let nome = (eq.nome || '').trim();
+                if (/vigoros/i.test(nome)) nome = 'ACR Vigorosa';
+                const key = nome.toLowerCase();
+                const v = Number(eq.v) || 0;
+                const d = Number(eq.d) || 0;
+                const j = Number(eq.j) || (v + d);
+                const pm = Number(eq.pm) || 0;
+                const ps = Number(eq.ps) || 0;
+                const ptsMin = (v * 2) + (d * 1);
+                let pts = Number(eq.pts);
+                if (isNaN(pts) || pts === undefined || ((v + d) > 0 && pts < ptsMin)) pts = ptsMin;
+
+                if (!mapEq[key]) {
+                    mapEq[key] = {
+                        pos: eq.pos,
+                        nome: nome,
+                        logo: eq.logo || (window.obterLogoEquipa ? window.obterLogoEquipa(nome) : null),
+                        j, v, d, pm, ps, pts
+                    };
+                } else {
+                    mapEq[key].j += j;
+                    mapEq[key].v += v;
+                    mapEq[key].d += d;
+                    mapEq[key].pm += pm;
+                    mapEq[key].ps += ps;
+                    mapEq[key].pts += pts;
+                    if (!mapEq[key].logo && eq.logo) mapEq[key].logo = eq.logo;
+                }
+            });
+            currentEquipasSerie = Object.values(mapEq).map(eq => ({ ...eq, dif: eq.pm - eq.ps }));
+            currentEquipasSerie.sort((a, b) => {
+                if (b.pts !== a.pts) return b.pts - a.pts;
+                if (b.dif !== a.dif) return b.dif - a.dif;
+                if (b.v !== a.v) return b.v - a.v;
+                return (b.pm || 0) - (a.pm || 0);
+            });
+            currentEquipasSerie.forEach((eq, idx) => { eq.pos = idx + 1; });
+        }
 
         // Garantir coerência e integridade das pontuações segundo a Regra Oficial FPB (Vitória = 2 Pts, Derrota = 1 Pt)
         if (Array.isArray(currentEquipasSerie) && currentEquipasSerie.length > 0) {
@@ -10465,6 +10518,7 @@ document.addEventListener('DOMContentLoaded', async () => {
             const n = nome.trim();
             const l = n.toLowerCase();
             if (l.includes('valença') || l.includes('bcv')) return 'BC Valença';
+            if (l.includes('vigoros')) return 'ACR Vigorosa';
             return n;
         };
 
@@ -10681,6 +10735,9 @@ document.addEventListener('DOMContentLoaded', async () => {
         const isBcv1 = n1.includes('valenca') || n1.includes('bcv');
         const isBcv2 = n2.includes('valenca') || n2.includes('bcv');
         if (isBcv1 && isBcv2) return true;
+        const isVig1 = n1.includes('vigoros');
+        const isVig2 = n2.includes('vigoros');
+        if (isVig1 && isVig2) return true;
         return (n1.length >= 4 && n2.includes(n1)) || (n2.length >= 4 && n1.includes(n2));
     }
     window.compararEquipasIguais = compararEquipasIguais;
