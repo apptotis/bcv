@@ -341,7 +341,10 @@ async function loadPortalHighlights(supabase) {
                 .order('data_jogo', { ascending: false })
                 .limit(10);
 
-            const resultadosPublicados = (resultados || []).filter(r => r.publicado !== false).slice(0, 5);
+            const resultadosPublicados = (resultados || [])
+                .filter(r => r.publicado !== false)
+                .sort((a, b) => (b.data_jogo || '').localeCompare(a.data_jogo || ''))
+                .slice(0, 5);
 
             if (!error && resultadosPublicados.length > 0) {
                 hasResultados = true;
@@ -1194,9 +1197,24 @@ async function loadCompeticoesSection(supabase) {
                     </div>
                 `;
             }
+
+            // Ordenar do mais recente ao mais antigo (Data Descendente > Jornada Descendente)
+            const jogosOrdenados = [...jogos].sort((a, b) => {
+                const dataA = a.data_jogo || a.data || '';
+                const dataB = b.data_jogo || b.data || '';
+                if (dataA && dataB && dataA !== dataB) {
+                    return dataB.localeCompare(dataA);
+                }
+                if (dataA && !dataB) return -1;
+                if (!dataA && dataB) return 1;
+                const jA = Number(a.jornada) || 0;
+                const jB = Number(b.jornada) || 0;
+                return jB - jA;
+            });
+
             return `
                 <div class="comp-games-list">
-                    ${jogos.map(j => {
+                    ${jogosOrdenados.map(j => {
                         const dataFmt = formatDataComp(j.data_jogo || j.data);
                         const isCasaBCV = (j.equipa_casa || '').toLowerCase().includes('valença') || (j.equipa_casa || '').toLowerCase().includes('bcv');
                         const isForaBCV = (j.equipa_fora || '').toLowerCase().includes('valença') || (j.equipa_fora || '').toLowerCase().includes('bcv');
@@ -1647,6 +1665,20 @@ async function loadCompeticoesSection(supabase) {
                     }
                 });
             }
+
+            // Ordenar do mais recente ao mais antigo (Data Descendente > Jornada Descendente)
+            jogosResultados.sort((a, b) => {
+                const dataA = a.data_jogo || a.data || '';
+                const dataB = b.data_jogo || b.data || '';
+                if (dataA && dataB && dataA !== dataB) {
+                    return dataB.localeCompare(dataA);
+                }
+                if (dataA && !dataB) return -1;
+                if (!dataA && dataB) return 1;
+                const jA = Number(a.jornada) || 0;
+                const jB = Number(b.jornada) || 0;
+                return jB - jA;
+            });
 
             // Omissão inteligente de redundâncias no cabeçalho
             const nomeComp = comp.nome || '';
