@@ -117,6 +117,73 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 });
 
+// ==========================================================================
+// CATÁLOGO GLOBAL DE LOGÓTIPOS E HELPERS DE EQUIPAS (FPB)
+// ==========================================================================
+const FPB_CLUB_LOGOS = {
+    'bc valença': 'https://sav2.fpb.pt/uploads/clubes/logotipo/CLU_6561737484866.png',
+    'cb viana': 'https://sav2.fpb.pt/old_uploads/CLU/CLU_723_LOGO.jpg',
+    'monção bc': 'https://sav2.fpb.pt/uploads/clubes/logotipo/CLU_8801736270009.png',
+    'famalicense ac': 'https://sav2.fpb.pt/uploads/clubes/logotipo/CLU_691693656807.png',
+    'famalicense ac - b': 'https://sav2.fpb.pt/uploads/clubes/logotipo/CLU_691693656807.png',
+    'bc limiense': 'https://sav2.fpb.pt/old_uploads/CLU/CLU_2920_LOGO.png',
+    'bc limiense - b': 'https://sav2.fpb.pt/old_uploads/CLU/CLU_2920_LOGO.png',
+    'restauradores da granja': 'https://sav2.fpb.pt/uploads/clubes/logotipo/CLU_28191667463213.jpg',
+    'futebol clube de vizela': 'https://sav2.fpb.pt/uploads/clubes/logotipo/CLU_33981702573447.png',
+    'fc vizela': 'https://sav2.fpb.pt/uploads/clubes/logotipo/CLU_33981702573447.png',
+    'caas padaria ribeiro': 'https://sav2.fpb.pt/uploads/clubes/logotipo/Centro_dos_Antigos_Alunos_Salesianos1639227568.png',
+    'sc braga b': 'https://sav2.fpb.pt/uploads/clubes/logotipo/CLU_24041710324824.png',
+    'sc braga': 'https://sav2.fpb.pt/uploads/clubes/logotipo/CLU_24041710324824.png',
+    'barca bc': 'https://sav2.fpb.pt/uploads/clubes/logotipo/Barca_Basket_Clube1639920613.png',
+    'sc maria da fonte': 'https://sav2.fpb.pt/uploads/clubes/logotipo/Sport_Clube_Maria_da_Fonte1639174733.png',
+    'cdj régio': 'https://sav2.fpb.pt/uploads/clubes/logotipo/CLU_3041717586387.png',
+    'uaa aroso': 'https://sav2.fpb.pt/uploads/clubes/logotipo/CLU_181.png',
+    'cd aves': 'https://sav2.fpb.pt/uploads/clubes/logotipo/CLU_36571695909164.png',
+    'gd bolacesto': 'https://sav2.fpb.pt/uploads/clubes/logotipo/CLU_1791790001218.png',
+    'sc muya': 'https://sav2.fpb.pt/uploads/clubes/logotipo/CLU_37781788717225.png',
+    'gdb leça': 'https://sav2.fpb.pt/uploads/clubes/logotipo/Grupo_Desportivo_Basquete_de_Leca1602618188.png',
+    'mirandela bc / o cerdoura': 'https://sav2.fpb.pt/uploads/clubes/logotipo/Mirandela_Basquete_Clube1600936996.png',
+    'mirandela bc': 'https://sav2.fpb.pt/uploads/clubes/logotipo/Mirandela_Basquete_Clube1600936996.png',
+    'acr vigorosa': 'https://sav2.fpb.pt/uploads/clubes/logotipo/CLU_24051677937068.png',
+    'acr vigoroso': 'https://sav2.fpb.pt/uploads/clubes/logotipo/CLU_24051677937068.png',
+    'ncr valongo/comida c amor': 'https://sav2.fpb.pt/uploads/clubes/logotipo/CLU_1721693497331.png',
+    'ncr valongo': 'https://sav2.fpb.pt/uploads/clubes/logotipo/CLU_1721693497331.png',
+    'maia basket b': 'https://sav2.fpb.pt/uploads/clubes/logotipo/CLU_7141746203247.png',
+    'maia basket': 'https://sav2.fpb.pt/uploads/clubes/logotipo/CLU_7141746203247.png'
+};
+
+function obterLogoEquipa(nomeEquipa, dbLogo) {
+    if (dbLogo && typeof dbLogo === 'string' && dbLogo.trim().startsWith('http')) {
+        return dbLogo.trim();
+    }
+    if (!nomeEquipa) return '';
+    const norm = nomeEquipa.toLowerCase().trim();
+    if (FPB_CLUB_LOGOS[norm]) return FPB_CLUB_LOGOS[norm];
+
+    for (const [chave, url] of Object.entries(FPB_CLUB_LOGOS)) {
+        if (norm.includes(chave) || chave.includes(norm)) {
+            return url;
+        }
+    }
+    return '';
+}
+
+function compararEquipasSimples(eq1, eq2) {
+    if (!eq1 || !eq2) return false;
+    const n1 = eq1.toLowerCase().trim().replace(/[^a-z0-9]/g, '');
+    const n2 = eq2.toLowerCase().trim().replace(/[^a-z0-9]/g, '');
+    if (n1 === n2) return true;
+    const isBcv1 = n1.includes('valenca') || n1.includes('bcv');
+    const isBcv2 = n2.includes('valenca') || n2.includes('bcv');
+    if (isBcv1 && isBcv2) return true;
+    return (n1.length >= 4 && n2.includes(n1)) || (n2.length >= 4 && n1.includes(n2));
+}
+
+// Exportar explicitamente para o objeto window
+window.FPB_CLUB_LOGOS = FPB_CLUB_LOGOS;
+window.obterLogoEquipa = obterLogoEquipa;
+window.compararEquipasSimples = compararEquipasSimples;
+
 async function loadPortalHighlights(supabase) {
     const sectionHighlights = document.getElementById('portal-highlights');
     const cardAgenda = document.getElementById('card-agenda-desportiva');
@@ -183,68 +250,6 @@ async function loadPortalHighlights(supabase) {
         return `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(queryBusca)}`;
     }
     window.gerarLinkGoogleMaps = gerarLinkGoogleMaps;
-
-    const FPB_CLUB_LOGOS = {
-        'bc valença': 'https://sav2.fpb.pt/uploads/clubes/logotipo/CLU_6561737484866.png',
-        'cb viana': 'https://sav2.fpb.pt/old_uploads/CLU/CLU_723_LOGO.jpg',
-        'monção bc': 'https://sav2.fpb.pt/uploads/clubes/logotipo/CLU_8801736270009.png',
-        'famalicense ac': 'https://sav2.fpb.pt/uploads/clubes/logotipo/CLU_691693656807.png',
-        'famalicense ac - b': 'https://sav2.fpb.pt/uploads/clubes/logotipo/CLU_691693656807.png',
-        'bc limiense': 'https://sav2.fpb.pt/old_uploads/CLU/CLU_2920_LOGO.png',
-        'bc limiense - b': 'https://sav2.fpb.pt/old_uploads/CLU/CLU_2920_LOGO.png',
-        'restauradores da granja': 'https://sav2.fpb.pt/uploads/clubes/logotipo/CLU_28191667463213.jpg',
-        'futebol clube de vizela': 'https://sav2.fpb.pt/uploads/clubes/logotipo/CLU_33981702573447.png',
-        'fc vizela': 'https://sav2.fpb.pt/uploads/clubes/logotipo/CLU_33981702573447.png',
-        'caas padaria ribeiro': 'https://sav2.fpb.pt/uploads/clubes/logotipo/Centro_dos_Antigos_Alunos_Salesianos1639227568.png',
-        'sc braga b': 'https://sav2.fpb.pt/uploads/clubes/logotipo/CLU_24041710324824.png',
-        'sc braga': 'https://sav2.fpb.pt/uploads/clubes/logotipo/CLU_24041710324824.png',
-        'barca bc': 'https://sav2.fpb.pt/uploads/clubes/logotipo/Barca_Basket_Clube1639920613.png',
-        'sc maria da fonte': 'https://sav2.fpb.pt/uploads/clubes/logotipo/Sport_Clube_Maria_da_Fonte1639174733.png',
-        'cdj régio': 'https://sav2.fpb.pt/uploads/clubes/logotipo/CLU_3041717586387.png',
-        'uaa aroso': 'https://sav2.fpb.pt/uploads/clubes/logotipo/CLU_181.png',
-        'cd aves': 'https://sav2.fpb.pt/uploads/clubes/logotipo/CLU_36571695909164.png',
-        'gd bolacesto': 'https://sav2.fpb.pt/uploads/clubes/logotipo/CLU_1791790001218.png',
-        'sc muya': 'https://sav2.fpb.pt/uploads/clubes/logotipo/CLU_37781788717225.png',
-        'gdb leça': 'https://sav2.fpb.pt/uploads/clubes/logotipo/Grupo_Desportivo_Basquete_de_Leca1602618188.png',
-        'mirandela bc / o cerdoura': 'https://sav2.fpb.pt/uploads/clubes/logotipo/Mirandela_Basquete_Clube1600936996.png',
-        'mirandela bc': 'https://sav2.fpb.pt/uploads/clubes/logotipo/Mirandela_Basquete_Clube1600936996.png',
-        'acr vigorosa': 'https://sav2.fpb.pt/uploads/clubes/logotipo/CLU_24051677937068.png',
-        'acr vigoroso': 'https://sav2.fpb.pt/uploads/clubes/logotipo/CLU_24051677937068.png',
-        'ncr valongo/comida c amor': 'https://sav2.fpb.pt/uploads/clubes/logotipo/CLU_1721693497331.png',
-        'ncr valongo': 'https://sav2.fpb.pt/uploads/clubes/logotipo/CLU_1721693497331.png',
-        'maia basket b': 'https://sav2.fpb.pt/uploads/clubes/logotipo/CLU_7141746203247.png',
-        'maia basket': 'https://sav2.fpb.pt/uploads/clubes/logotipo/CLU_7141746203247.png'
-    };
-
-    function obterLogoEquipa(nomeEquipa, dbLogo) {
-        if (dbLogo && typeof dbLogo === 'string' && dbLogo.trim().startsWith('http')) {
-            return dbLogo.trim();
-        }
-        if (!nomeEquipa) return '';
-        const norm = nomeEquipa.toLowerCase().trim();
-        if (FPB_CLUB_LOGOS[norm]) return FPB_CLUB_LOGOS[norm];
-
-        for (const [chave, url] of Object.entries(FPB_CLUB_LOGOS)) {
-            if (norm.includes(chave) || chave.includes(norm)) {
-                return url;
-            }
-        }
-        return '';
-    }
-    window.obterLogoEquipa = obterLogoEquipa;
-    window.FPB_CLUB_LOGOS = FPB_CLUB_LOGOS;
-
-    // Helper para comparar nomes de equipas
-    function compararEquipasSimples(eq1, eq2) {
-        if (!eq1 || !eq2) return false;
-        const n1 = eq1.toLowerCase().trim().replace(/[^a-z0-9]/g, '');
-        const n2 = eq2.toLowerCase().trim().replace(/[^a-z0-9]/g, '');
-        if (n1 === n2) return true;
-        const isBcv1 = n1.includes('valenca') || n1.includes('bcv');
-        const isBcv2 = n2.includes('valenca') || n2.includes('bcv');
-        if (isBcv1 && isBcv2) return true;
-        return (n1.length >= 4 && n2.includes(n1)) || (n2.length >= 4 && n1.includes(n2));
-    }
 
     try {
         const hoje = new Date();
