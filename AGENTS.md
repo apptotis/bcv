@@ -65,6 +65,7 @@
 - [2026-10-18] Gemini: Resolução e exibição imediata dos resultados da 2ª Divisão Masculina (CN2 - BC Valença 85 - 79 CAAS Padaria Ribeiro) e Sub 16 Feminino no index.html: sincronização no Supabase (resultados_bcv e agenda_bcv), unificação resiliente de jogos das séries em loadPortalHighlights, badge explícito '2ª Divisão Masc (CN2)', sincronização em lote de todas as séries no Admin e sincronizador automático em background.
 - [2026-10-18] Gemini: Sincronização do jogo Sub 14 Masculino (SC Braga B 20 - 82 BC Valença) e garantia de exclusão automática da Agenda de qualquer jogo concluído com resultado (em resultados_bcv ou séries), com limpeza assíncrona na tabela agenda_bcv tanto na Homepage (main.js) como nas Competições e Admin (admin.js).
 - [2026-10-18] Gemini: Correção de erro de escopo em js/main.js onde compararEquipasSimples e FPB_CLUB_LOGOS estavam fechados em loadPortalHighlights, causando ReferenceError e tela em branco na página competicoes.html em dispositivos móveis e desktop; exportação global e atualização dos cache-busters.
+- [2026-10-18] Gemini: Implementação do sistema de Streaming ao Vivo (BCV TV / YouTube): página dedicada direto.html (player 16:9 responsivo, sincronização permanente com canal @BCValenca ID UCEQdDGlXUdcHK5Ym5jqFQUg, chat ao vivo, partilha WhatsApp e agenda de jogos), banner dinâmico e pill pulsante 🔴 DIRETO na navbar/drawer, e módulo de gestão de transmissão no Admin (admin.html, js/admin.js, setup_transmissao_direto.sql).
 
 
 

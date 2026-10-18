@@ -5859,6 +5859,12 @@ document.addEventListener('DOMContentLoaded', async () => {
                     if (document.getElementById('cfg-ano-fundacao')) document.getElementById('cfg-ano-fundacao').value = dados.ano_fundacao || '';
                     if (document.getElementById('cfg-nif')) document.getElementById('cfg-nif').value = dados.nif || '';
                     if (document.getElementById('cfg-banner')) document.getElementById('cfg-banner').value = dados.banner_aniversario || '';
+                } else if (item.chave === 'transmissao_direto') {
+                    if (document.getElementById('cfg-direto-ativo')) document.getElementById('cfg-direto-ativo').value = String(dados.ativo === true);
+                    if (document.getElementById('cfg-direto-titulo')) document.getElementById('cfg-direto-titulo').value = dados.titulo || '';
+                    if (document.getElementById('cfg-direto-comp')) document.getElementById('cfg-direto-comp').value = dados.competicao || '';
+                    if (document.getElementById('cfg-direto-url')) document.getElementById('cfg-direto-url').value = dados.video_url || '';
+                    if (document.getElementById('cfg-direto-desc')) document.getElementById('cfg-direto-desc').value = dados.descricao || '';
                 }
             });
         } catch (err) {
@@ -6014,6 +6020,47 @@ document.addEventListener('DOMContentLoaded', async () => {
             } finally {
                 btn.disabled = false;
                 btn.textContent = "💾 Guardar Dados Gerais";
+                setTimeout(() => { msg.textContent = ''; }, 4000);
+            }
+        });
+    }
+
+    // Salvar Configurações (Transmissão em Direto / BCV TV)
+    const formConfigDireto = document.getElementById('form-config-direto');
+    if (formConfigDireto) {
+        formConfigDireto.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const btn = document.getElementById('btn-save-direto');
+            const msg = document.getElementById('msg-direto-status');
+            btn.disabled = true;
+            btn.textContent = "A guardar...";
+
+            const dados = {
+                ativo: document.getElementById('cfg-direto-ativo').value === 'true',
+                titulo: document.getElementById('cfg-direto-titulo').value.trim() || 'Basket Clube de Valença • Canal Oficial YouTube',
+                competicao: document.getElementById('cfg-direto-comp').value.trim() || 'Federação Portuguesa de Basquetebol',
+                video_url: document.getElementById('cfg-direto-url').value.trim(),
+                canal_id: 'UCEQdDGlXUdcHK5Ym5jqFQUg',
+                descricao: document.getElementById('cfg-direto-desc').value.trim() || 'Transmissão direta do Pavilhão Municipal de Valença.',
+                mostrar_chat: true
+            };
+
+            try {
+                const { error } = await supabase.from('clube_config').upsert({
+                    chave: 'transmissao_direto',
+                    dados: dados,
+                    updated_at: new Date()
+                });
+                if (error) throw error;
+                msg.textContent = dados.ativo ? "🔴 Transmissão ATIVADA em direto no site!" : "✅ Guardado com sucesso (Transmissão desligada).";
+                msg.style.color = dados.ativo ? "#dc2626" : "#16a34a";
+            } catch (err) {
+                console.error("Erro ao guardar transmissão em direto:", err);
+                msg.textContent = "❌ Erro ao guardar: " + err.message;
+                msg.style.color = "#dc2626";
+            } finally {
+                btn.disabled = false;
+                btn.textContent = "💾 Guardar Transmissão";
                 setTimeout(() => { msg.textContent = ''; }, 4000);
             }
         });

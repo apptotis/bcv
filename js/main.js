@@ -695,6 +695,37 @@ async function loadGlobalClubConfig(supabase) {
                 if (bannerEl && dados.banner_aniversario) {
                     bannerEl.innerHTML = dados.banner_aniversario;
                 }
+            } else if (item.chave === 'transmissao_direto') {
+                const isLive = dados.ativo === true;
+                const navLivePills = document.querySelectorAll('.nav-live-pill');
+                navLivePills.forEach(pill => {
+                    if (isLive) {
+                        pill.classList.add('is-live');
+                        const txt = pill.querySelector('.live-text');
+                        if (txt) txt.textContent = 'DIRETO';
+                    } else {
+                        pill.classList.remove('is-live');
+                    }
+                });
+
+                // Se estivermos na Homepage (index.html), exibir banner de transmissão no topo
+                const homePortal = document.querySelector('.portal-main');
+                const existingBanner = document.getElementById('live-broadcast-banner');
+                if (isLive && homePortal && !existingBanner) {
+                    const liveBanner = document.createElement('div');
+                    liveBanner.id = 'live-broadcast-banner';
+                    liveBanner.className = 'live-broadcast-banner';
+                    liveBanner.innerHTML = `
+                        <div class="live-banner-content">
+                            <span class="live-pulse-badge">🔴 EM DIRETO</span>
+                            <span class="live-banner-title">BCV TV: <strong>${dados.titulo || 'Transmissão ao Vivo'}</strong></span>
+                        </div>
+                        <a href="direto.html" class="live-banner-btn">Assistir em Direto ↗</a>
+                    `;
+                    homePortal.insertBefore(liveBanner, homePortal.firstChild);
+                } else if (!isLive && existingBanner) {
+                    existingBanner.remove();
+                }
             }
         });
     } catch (e) {

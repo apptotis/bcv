@@ -1,0 +1,610 @@
+<!DOCTYPE html>
+<html lang="pt-PT">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Em Direto • BCV TV | Basket Clube de Valença</title>
+    
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700;800&family=Outfit:wght@400;700;900&display=swap" rel="stylesheet">
+    
+    <!-- Main Stylesheet -->
+    <link rel="stylesheet" href="css/style.css?v=20261018_1630">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    
+    <!-- Favicon -->
+    <link rel="icon" type="image/png" href="assets/emblema_png.png">
+
+    <style>
+        /* ==========================================================================
+           ESTILOS ESPECÍFICOS - BCV TV / EM DIRETO
+           ========================================================================== */
+        .direto-header-box {
+            background: linear-gradient(135deg, #1e1136 0%, #0f0a1c 100%);
+            border: 1px solid rgba(168, 85, 247, 0.25);
+            border-radius: 16px;
+            padding: 24px;
+            margin-bottom: 24px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.25);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .direto-header-box::before {
+            content: '';
+            position: absolute;
+            top: -40px;
+            right: -40px;
+            width: 140px;
+            height: 140px;
+            background: radial-gradient(circle, rgba(168, 85, 247, 0.25) 0%, transparent 70%);
+            border-radius: 50%;
+            pointer-events: none;
+        }
+
+        .direto-status-row {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            flex-wrap: wrap;
+            gap: 12px;
+            margin-bottom: 12px;
+        }
+
+        .direto-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 6px 14px;
+            border-radius: 30px;
+            font-size: 0.8rem;
+            font-weight: 800;
+            letter-spacing: 0.5px;
+            text-transform: uppercase;
+        }
+
+        .direto-badge.is-live {
+            background: #ef4444;
+            color: #ffffff;
+            box-shadow: 0 0 16px rgba(239, 68, 68, 0.5);
+        }
+
+        .direto-badge.is-live .live-beacon-dot {
+            width: 9px;
+            height: 9px;
+            border-radius: 50%;
+            background: #ffffff;
+            animation: liveBeacon 1.2s infinite ease-in-out;
+        }
+
+        .direto-badge.is-standby {
+            background: rgba(255, 255, 255, 0.12);
+            color: #e2e8f0;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+
+        .direto-badge.is-standby .standby-dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: #94a3b8;
+        }
+
+        .direto-title {
+            color: #ffffff;
+            font-size: 1.6rem;
+            font-weight: 900;
+            margin: 0 0 8px 0;
+            line-height: 1.25;
+            font-family: 'Outfit', sans-serif;
+        }
+
+        .direto-subinfo {
+            color: rgba(255, 255, 255, 0.8);
+            font-size: 0.92rem;
+            display: flex;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 14px;
+        }
+
+        .direto-subinfo-item {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        /* Container do Player de Vídeo 16:9 */
+        .video-player-container {
+            position: relative;
+            width: 100%;
+            background: #000000;
+            border-radius: 16px;
+            overflow: hidden;
+            box-shadow: 0 16px 40px rgba(0, 0, 0, 0.4);
+            border: 1px solid rgba(168, 85, 247, 0.3);
+            margin-bottom: 20px;
+        }
+
+        .video-player-aspect {
+            position: relative;
+            padding-bottom: 56.25%; /* Proporção 16:9 */
+            height: 0;
+            overflow: hidden;
+        }
+
+        .video-player-aspect iframe {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            border: 0;
+        }
+
+        /* Barra de Ações Rápidas */
+        .direto-actions-bar {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            flex-wrap: wrap;
+            gap: 10px;
+            background: #ffffff;
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            padding: 14px 18px;
+            margin-bottom: 30px;
+            box-shadow: var(--shadow-sm);
+        }
+
+        .direto-actions-group {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+
+        .btn-direto-action {
+            display: inline-flex;
+            align-items: center;
+            gap: 7px;
+            padding: 8px 16px;
+            border-radius: 8px;
+            font-size: 0.85rem;
+            font-weight: 700;
+            text-decoration: none;
+            cursor: pointer;
+            border: 1px solid transparent;
+            transition: all 0.2s ease;
+        }
+
+        .btn-direto-yt {
+            background: #ff0000;
+            color: #ffffff;
+        }
+        .btn-direto-yt:hover {
+            background: #cc0000;
+            transform: translateY(-1px);
+        }
+
+        .btn-direto-wa {
+            background: #25d366;
+            color: #ffffff;
+        }
+        .btn-direto-wa:hover {
+            background: #1eb956;
+            transform: translateY(-1px);
+        }
+
+        .btn-direto-chat {
+            background: #f1f5f9;
+            color: #1e293b;
+            border-color: #cbd5e1;
+        }
+        .btn-direto-chat:hover {
+            background: #e2e8f0;
+        }
+
+        .btn-direto-chat.active {
+            background: #7e22ce;
+            color: #ffffff;
+            border-color: #7e22ce;
+        }
+
+        /* Painel de Chat em Direto */
+        #direto-chat-panel {
+            margin-top: -15px;
+            margin-bottom: 30px;
+            border-radius: 12px;
+            overflow: hidden;
+            border: 1px solid var(--border-color);
+            background: #ffffff;
+            box-shadow: var(--shadow-sm);
+        }
+
+        #direto-chat-panel iframe {
+            width: 100%;
+            height: 480px;
+            border: none;
+        }
+
+        /* Banner de Standby quando não há jogo */
+        .direto-standby-banner {
+            background: #ffffff;
+            border: 1px solid var(--border-color);
+            border-radius: 14px;
+            padding: 22px 24px;
+            margin-bottom: 30px;
+            display: flex;
+            align-items: center;
+            gap: 18px;
+            box-shadow: var(--shadow-sm);
+        }
+
+        .standby-icon {
+            font-size: 2.2rem;
+            background: #faf5ff;
+            color: #7e22ce;
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
+            border: 1px solid #e9d5ff;
+        }
+
+        @media (max-width: 768px) {
+            .direto-title {
+                font-size: 1.25rem;
+            }
+            .direto-actions-bar {
+                flex-direction: column;
+                align-items: stretch;
+            }
+            .direto-actions-group {
+                justify-content: stretch;
+            }
+            .btn-direto-action {
+                flex: 1;
+                justify-content: center;
+            }
+            .direto-standby-banner {
+                flex-direction: column;
+                text-align: center;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <!-- Background Elements -->
+    <div class="bg-shape shape-1"></div>
+    <div class="bg-shape shape-2"></div>
+
+    <!-- Header / Navbar (Logo Centered, Hamburger Left) -->
+    <header class="navbar" id="navbar">
+        <div class="navbar-grid">
+            <!-- Left Side: Hamburger Trigger -->
+            <div class="nav-left">
+                <button class="hamburger-btn" id="hamburger-trigger" aria-label="Abrir Menu" aria-expanded="false" aria-controls="drawer-menu">
+                    <span class="hamburger-line"></span>
+                    <span class="hamburger-line"></span>
+                    <span class="hamburger-line"></span>
+                </button>
+            </div>
+            
+            <!-- Center: Club Logo and Name -->
+            <div class="nav-center">
+                <a href="index.html" class="brand-logo-container">
+                    <img src="assets/emblema_png.png" alt="BCV Logo" class="brand-logo">
+                    <span class="brand-title-nav">Basket Clube de Valença</span>
+                </a>
+            </div>
+            
+            <!-- Right Side: Live Pill and Social Media Icons -->
+            <div class="nav-right">
+                <a href="direto.html" class="nav-live-pill is-live" id="nav-live-pill" title="BCV TV • Transmissões em Direto">
+                    <span class="live-dot"></span>
+                    <span class="live-text">DIRETO</span>
+                </a>
+                <div class="nav-social-btn">
+                    <a href="https://www.facebook.com/profile.php?id=100039859278453" target="_blank" aria-label="Facebook"><i class="fab fa-facebook"></i></a>
+                    <a href="https://www.instagram.com/bcvalenca" target="_blank" aria-label="Instagram"><i class="fab fa-instagram"></i></a>
+                    <a href="https://www.youtube.com/@BCValenca" target="_blank" aria-label="YouTube"><i class="fab fa-youtube"></i></a>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- Overlay Background (visible when menu is open) -->
+    <div class="drawer-overlay" id="drawer-overlay"></div>
+
+    <!-- Slide-in Drawer Navigation Menu -->
+    <nav class="drawer-menu" id="drawer-menu" aria-label="Menu Principal">
+        <div class="drawer-header">
+            <div class="drawer-header-row">
+                <div class="drawer-club-info">
+                    <img src="assets/emblema_png.png" alt="BCV Emblema" class="drawer-club-logo">
+                    <span class="drawer-club-name">BCV</span>
+                </div>
+                <button class="drawer-close-btn" id="drawer-close-btn" aria-label="Fechar Menu">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+        </div>
+
+        <ul class="drawer-links-list">
+            <li><a href="index.html" class="drawer-link">Início</a></li>
+            <li class="drawer-item">
+                <div style="display: flex; justify-content: space-between; align-items: center;">
+                    <a href="clube.html" class="drawer-link" style="flex: 1;">O Clube</a>
+                    <button class="drawer-dropdown-btn" id="dropdown-toggle" aria-label="Expandir submenu O Clube">
+                        <i class="fas fa-chevron-down"></i>
+                    </button>
+                </div>
+                <ul class="drawer-dropdown-content" id="dropdown-menu">
+                    <li><a href="clube.html#historia" class="drawer-dropdown-link">História</a></li>
+                    <li><a href="clube.html#orgaos-sociais" class="drawer-dropdown-link">Órgãos Sociais</a></li>
+                    <li><a href="clube.html#contactos" class="drawer-dropdown-link">Contactos</a></li>
+                </ul>
+            </li>
+            <li class="drawer-item">
+                <div style="display: flex; justify-content: space-between; align-items: center;">
+                    <a href="equipas.html" class="drawer-link" style="flex: 1;">Equipas</a>
+                    <button class="drawer-dropdown-btn" id="dropdown-equipas-toggle" aria-label="Expandir submenu Equipas">
+                        <i class="fas fa-chevron-down"></i>
+                    </button>
+                </div>
+                <ul class="drawer-dropdown-content" id="dropdown-equipas-menu">
+                    <!-- Preenchido via JS -->
+                </ul>
+            </li>
+            <li><a href="competicoes.html" class="drawer-link">Competições</a></li>
+            <li>
+                <a href="direto.html" class="drawer-link active" style="display: flex; align-items: center; justify-content: space-between;">
+                    <span>Em Direto (BCV TV)</span>
+                    <span style="background: #ef4444; color: #fff; font-size: 0.68rem; font-weight: 800; padding: 2px 7px; border-radius: 12px; letter-spacing: 0.5px;">AO VIVO</span>
+                </a>
+            </li>
+            <li><a href="index.html#noticias" class="drawer-link">Notícias</a></li>
+            <li><a href="index.html#agenda" class="drawer-link">Agenda</a></li>
+            <li><a href="index.html#galeria" class="drawer-link">Galeria</a></li>
+        </ul>
+
+        <div class="drawer-footer">
+            <p class="drawer-footer-text">
+                &copy; 2026 Basket Clube de Valença.<br>
+                Todos os direitos reservados.
+            </p>
+        </div>
+    </nav>
+
+    <main>
+        <!-- Anniversary Banner -->
+        <div class="anniversary-banner" style="position: relative; margin-top: 95px; width: 100%;">
+            BCV TV • O Basquetebol de Valença Transmitido ao Vivo 🎥
+        </div>
+
+        <div class="container section" style="padding-top: var(--spacing-xl);">
+            <div class="portal-container">
+                
+                <!-- Coluna Principal (70%) -->
+                <div class="portal-main">
+                    
+                    <!-- Cabeçalho da Transmissão Dinâmico -->
+                    <div class="direto-header-box">
+                        <div class="direto-status-row">
+                            <span class="direto-badge is-live" id="live-status-badge">
+                                <span class="live-beacon-dot"></span>
+                                <span id="live-status-text">EM DIRETO</span>
+                            </span>
+                            <span id="live-comp-badge" style="background: rgba(255,255,255,0.15); color: #ffffff; padding: 4px 12px; border-radius: 20px; font-size: 0.78rem; font-weight: 700; text-transform: uppercase;">
+                                🏆 Federação Portuguesa de Basquetebol
+                            </span>
+                        </div>
+
+                        <h1 class="direto-title" id="live-game-title">
+                            Basket Clube de Valença • Canal Oficial YouTube
+                        </h1>
+
+                        <div class="direto-subinfo">
+                            <span class="direto-subinfo-item">
+                                <i class="fas fa-map-marker-alt" style="color: #a855f7;"></i>
+                                <span id="live-venue-text">Pavilhão Municipal de Valença</span>
+                            </span>
+                            <span class="direto-subinfo-item">
+                                <i class="fab fa-youtube" style="color: #ef4444;"></i>
+                                <span>Canal Oficial: <strong>@BCValenca</strong></span>
+                            </span>
+                            <span class="direto-subinfo-item" id="live-desc-text" style="color: rgba(255,255,255,0.7); font-size: 0.85rem;">
+                                Transmissão aberta para todos os adeptos e familiares.
+                            </span>
+                        </div>
+                    </div>
+
+                    <!-- Player de Vídeo Responsivo (YouTube Embed) -->
+                    <div class="video-player-container">
+                        <div class="video-player-aspect">
+                            <iframe 
+                                id="youtube-live-iframe"
+                                src="https://www.youtube.com/embed/live_stream?channel=UCEQdDGlXUdcHK5Ym5jqFQUg&autoplay=1"
+                                title="Transmissão ao Vivo BCV TV"
+                                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+                                allowfullscreen>
+                            </iframe>
+                        </div>
+                    </div>
+
+                    <!-- Barra de Ações Rápidas -->
+                    <div class="direto-actions-bar">
+                        <div class="direto-actions-group">
+                            <a href="https://www.youtube.com/@BCValenca" target="_blank" rel="noopener noreferrer" class="btn-direto-action btn-direto-yt" id="btn-open-youtube">
+                                <i class="fab fa-youtube"></i>
+                                <span>Abrir no YouTube</span>
+                            </a>
+                            <button type="button" class="btn-direto-action btn-direto-chat" id="btn-toggle-chat">
+                                <i class="fas fa-comments"></i>
+                                <span>Chat ao Vivo</span>
+                            </button>
+                        </div>
+                        <div class="direto-actions-group">
+                            <a href="#" id="btn-share-whatsapp" class="btn-direto-action btn-direto-wa" target="_blank">
+                                <i class="fab fa-whatsapp"></i>
+                                <span>Partilhar no WhatsApp</span>
+                            </a>
+                            <button type="button" class="btn-direto-action" id="btn-copy-link" style="background: #f1f5f9; color: #334155;">
+                                <i class="fas fa-link"></i>
+                                <span>Copiar Link</span>
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Painel de Chat em Direto (Opcional / Toggle) -->
+                    <div id="direto-chat-panel" style="display: none;">
+                        <iframe id="youtube-chat-iframe" src="" allowfullscreen></iframe>
+                    </div>
+
+                    <!-- Banner de Apoio / Informação das Transmissões -->
+                    <div class="direto-standby-banner">
+                        <div class="standby-icon">
+                            <i class="fas fa-video"></i>
+                        </div>
+                        <div>
+                            <h3 style="font-size: 1.15rem; color: #1e293b; margin: 0 0 6px 0; font-weight: 800;">
+                                O Basquetebol do BCV Sempre Contigo
+                            </h3>
+                            <p style="font-size: 0.88rem; color: #64748b; margin: 0; line-height: 1.5;">
+                                O Basket Clube de Valença transmite em direto os seus jogos oficiais através do canal oficial de YouTube. Subscreve o canal <strong>@BCValenca</strong> e ativa o sino 🔔 para receberes alertas instantâneos no teu telemóvel logo que o jogo comece!
+                            </p>
+                        </div>
+                    </div>
+
+                    <!-- Secção de Próximos Jogos (Agenda Oficial) -->
+                    <div class="reveal active" style="margin-top: 40px;">
+                        <div class="portal-section-header">
+                            <div class="header-badge-icon">📅</div>
+                            <div>
+                                <h2 class="portal-section-title" style="margin: 0;">Próximas Transmissões & Jogos</h2>
+                                <p style="font-size: 0.85rem; color: var(--text-secondary); margin: 4px 0 0 0;">
+                                    Consulta a agenda dos nossos escalões para não perderes os próximos diretos.
+                                </p>
+                            </div>
+                        </div>
+
+                        <!-- Lista de Jogos Carregada Dinamicamente -->
+                        <div id="direto-agenda-list" style="display: flex; flex-direction: column; gap: 12px; margin-top: 15px;">
+                            <div style="text-align: center; padding: 25px; color: var(--text-secondary);">
+                                <i class="fas fa-spinner fa-spin"></i> A consultar agenda oficial...
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Banner de Inscrições / Junte-se ao BCV -->
+                    <section class="reveal active" style="padding-top: var(--spacing-xl); padding-bottom: var(--spacing-lg);">
+                        <div style="background: linear-gradient(135deg, #4c1d95 0%, #7e22ce 100%); color: #ffffff; border-radius: 16px; padding: 28px 20px; text-align: center; box-shadow: 0 12px 30px rgba(126,34,206,0.22); position: relative; overflow: hidden;">
+                            <div style="display: inline-flex; align-items: center; gap: 8px; background: rgba(255,255,255,0.18); padding: 5px 14px; border-radius: 20px; font-size: 0.78rem; font-weight: 800; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 12px;">
+                                🏀 Queres Jogar no BCV?
+                            </div>
+                            <h2 style="font-size: 1.5rem; font-weight: 800; color: #ffffff; margin-bottom: 8px; line-height: 1.2;">Vem Fazer Parte da Família BC Valença!</h2>
+                            <p style="font-size: 0.92rem; color: rgba(255,255,255,0.92); max-width: 580px; margin: 0 auto 18px auto; line-height: 1.5;">
+                                Inscrições abertas para todos os escalões (BabyBasket a Seniores). Junta-te às nossas equipas e compete nos campeonatos oficiais!
+                            </p>
+                            <a href="inscricao.html" class="btn" style="background: #ffffff; color: #7e22ce; font-weight: 800; font-size: 0.95rem; padding: 12px 30px; border-radius: 8px; box-shadow: 0 4px 15px rgba(0,0,0,0.2); transition: transform 0.2s ease; display: inline-block; text-decoration: none;">
+                                📝 Iniciar Inscrição Online →
+                            </a>
+                        </div>
+                    </section>
+
+                </div>
+
+                <!-- Coluna Lateral (30%) -->
+                <aside class="portal-sidebar">
+                    
+                    <!-- Card do Canal YouTube -->
+                    <div class="ad-widget" style="background: #ffffff; border: 1px solid var(--border-color); border-radius: 12px; padding: 22px; text-align: center; box-shadow: var(--shadow-sm); margin-bottom: 20px;">
+                        <div style="width: 56px; height: 56px; background: #fee2e2; color: #ef4444; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 1.8rem; margin: 0 auto 12px auto;">
+                            <i class="fab fa-youtube"></i>
+                        </div>
+                        <h3 style="font-size: 1.1rem; color: #1e293b; margin: 0 0 6px 0; font-weight: 800;">Canal @BCValenca</h3>
+                        <p style="font-size: 0.82rem; color: var(--text-secondary); margin: 0 0 16px 0; line-height: 1.4;">
+                            Revê os resumos, jogos gravados e melhores jogadas de todas as épocas do clube.
+                        </p>
+                        <a href="https://www.youtube.com/@BCValenca?sub_confirmation=1" target="_blank" rel="noopener noreferrer" style="display: inline-flex; align-items: center; justify-content: center; gap: 8px; width: 100%; background: #ef4444; color: #ffffff; padding: 10px 16px; border-radius: 8px; font-weight: 800; font-size: 0.88rem; text-decoration: none; box-shadow: 0 4px 12px rgba(239,68,68,0.25);">
+                            <i class="fab fa-youtube"></i> Subscrever no YouTube
+                        </a>
+                    </div>
+
+                    <!-- Espaço Publicitário 1 -->
+                    <div class="ad-widget ad-square">
+                        <span class="ad-label">Parceiro Oficial</span>
+                        <div style="text-align: center;">
+                            <div class="placeholder-icon">🏀</div>
+                            <h3 style="font-size: 1.1rem; margin: 10px 0;">Apoio ao Basquetebol</h3>
+                            <p style="font-size: 0.8rem; color: var(--text-secondary);">Juntos pelo desporto e formação dos jovens de Valença.</p>
+                        </div>
+                    </div>
+
+                    <!-- Espaço Publicitário 2 -->
+                    <div class="ad-widget ad-vertical">
+                        <span class="ad-label">Publicidade</span>
+                        <div style="text-align: center;">
+                            <div class="placeholder-icon">🚀</div>
+                            <h3 style="font-size: 1.1rem; margin: 10px 0;">Banner Vertical</h3>
+                            <p style="font-size: 0.8rem; color: var(--text-secondary);">Ideal para campanhas e destaques de parceiros.</p>
+                        </div>
+                    </div>
+
+                </aside>
+
+            </div>
+        </div>
+    </main>
+
+    <!-- Secção de Patrocinadores e Parceiros Oficiais -->
+    <section id="patrocinadores-section" class="sponsors-section" style="background: #ffffff; padding: 45px 0; border-top: 1px solid #e5e7eb; display: none;">
+        <div class="container">
+            <div style="text-align: center; margin-bottom: 25px;">
+                <span style="color: #7e22ce; font-weight: 700; font-size: 0.85rem; text-transform: uppercase; letter-spacing: 1px; display: block; margin-bottom: 6px;">Apoio & Parcerias</span>
+                <h2 style="font-size: 1.5rem; font-weight: 800; color: #1f2937; margin: 0;">Os Nossos Patrocinadores</h2>
+            </div>
+            <div id="patrocinadores-public-grid" style="display: flex; flex-wrap: wrap; justify-content: center; align-items: center; gap: 24px; max-width: 1100px; margin: 0 auto;">
+                <!-- Preenchido dinamicamente via JS -->
+            </div>
+        </div>
+    </section>
+
+    <!-- Rodapé Oficial -->
+    <footer id="contactos" class="footer" style="padding: 40px 0;">
+        <div class="container">
+            <div class="footer-content" style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 20px;">
+                <a href="index.html" class="brand" style="display: flex; align-items: center; gap: 15px;">
+                    <img src="assets/emblema_png.png" alt="BCV Logo" style="height: 60px; width: auto; border-radius: 8px;">
+                    <span class="brand-text" style="font-size: 1.2rem; color: #ffffff;">Basket Clube de Valença</span>
+                </a>
+                
+                <div class="social-links" style="display: flex; gap: 20px; font-size: 1.5rem;">
+                    <a href="https://www.facebook.com/profile.php?id=100039859278453" target="_blank" style="color: #ffffff; opacity: 0.8; transition: opacity 0.3s ease;"><i class="fab fa-facebook"></i></a>
+                    <a href="https://www.instagram.com/bcvalenca" target="_blank" style="color: #ffffff; opacity: 0.8; transition: opacity 0.3s ease;"><i class="fab fa-instagram"></i></a>
+                    <a href="https://www.youtube.com/@BCValenca" target="_blank" style="color: #ffffff; opacity: 0.8; transition: opacity 0.3s ease;"><i class="fab fa-youtube"></i></a>
+                    <a href="https://www.tiktok.com/@bcvalenca" target="_blank" style="color: #ffffff; opacity: 0.8; transition: opacity 0.3s ease;"><i class="fab fa-tiktok"></i></a>
+                </div>
+            </div>
+            
+            <div class="footer-bottom">
+                <p>&copy; 2026 Basket Clube de Valença. Todos os direitos reservados.</p>
+            </div>
+        </div>
+    </footer>
+
+    <!-- Scripts -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="js/config.js"></script>
+    <script src="js/main.js?v=20261018_1630"></script>
+    <script src="js/direto.js?v=20261018_1630"></script>
+</body>
+</html>

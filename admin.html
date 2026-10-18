@@ -2165,6 +2165,7 @@
                         <button type="button" class="btn-subconfig" data-sub="sub-contactos" style="padding: 8px 16px; border-radius: 8px; border: 1px solid var(--border-color); background: #f8fafc; color: var(--text-primary); font-weight: 600; cursor: pointer;">📍 Contactos & Pavilhão</button>
                         <button type="button" class="btn-subconfig" data-sub="sub-redes" style="padding: 8px 16px; border-radius: 8px; border: 1px solid var(--border-color); background: #f8fafc; color: var(--text-primary); font-weight: 600; cursor: pointer;">🌐 Redes Sociais</button>
                         <button type="button" class="btn-subconfig" data-sub="sub-geral" style="padding: 8px 16px; border-radius: 8px; border: 1px solid var(--border-color); background: #f8fafc; color: var(--text-primary); font-weight: 600; cursor: pointer;">🏢 Dados Gerais & Banner</button>
+                        <button type="button" class="btn-subconfig" data-sub="sub-direto" style="padding: 8px 16px; border-radius: 8px; border: 1px solid #fecaca; background: #fef2f2; color: #dc2626; font-weight: 700; cursor: pointer;">🔴 Transmissão ao Vivo (BCV TV)</button>
                     </div>
 
                     <!-- SUB-SECÇÃO 1: ÓRGÃOS SOCIAIS -->
@@ -2352,6 +2353,81 @@
                                 </div>
                                 <button type="submit" id="btn-save-geral" class="btn-primary" style="padding: 10px 24px;">💾 Guardar Dados Gerais</button>
                                 <span id="msg-geral-status" style="margin-left: 15px; font-size: 0.9rem; font-weight: 600;"></span>
+                            </form>
+                        </div>
+                    </div>
+
+                    <!-- SUB-SECÇÃO 6: TRANSMISSÃO AO VIVO (BCV TV) -->
+                    <div id="sub-direto" class="subconfig-content hidden">
+                        <div class="welcome-box" style="padding: 24px; background: #ffffff; border: 1px solid var(--border-color); border-radius: 12px; max-width: 780px;">
+                            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px; flex-wrap: wrap; gap: 10px;">
+                                <div>
+                                    <h3 style="color: #dc2626; margin: 0; display: flex; align-items: center; gap: 8px;">
+                                        <span>🔴</span> Transmissão em Direto (BCV TV)
+                                    </h3>
+                                    <p style="font-size: 0.85rem; color: var(--text-secondary); margin: 4px 0 0 0;">
+                                        Controle a transmissão de jogos oficiais e alerte os adeptos com transmissão ao vivo no site.
+                                    </p>
+                                </div>
+                                <a href="direto.html" target="_blank" class="btn-secondary" style="font-size: 0.82rem; padding: 6px 14px; text-decoration: none; display: inline-flex; align-items: center; gap: 6px;">
+                                    <span>👁️ Abrir direto.html</span> ↗
+                                </a>
+                            </div>
+
+                            <form id="form-config-direto">
+                                <!-- Interruptor Em Direto -->
+                                <div style="background: #fef2f2; border: 1px solid #fecaca; border-radius: 10px; padding: 16px; margin-bottom: 20px; display: flex; align-items: center; justify-content: space-between; gap: 15px; flex-wrap: wrap;">
+                                    <div>
+                                        <label for="cfg-direto-ativo" style="font-weight: 800; font-size: 0.95rem; color: #991b1b; display: block; margin-bottom: 3px; cursor: pointer;">
+                                            🚨 Ativar Transmissão em Direto no Site
+                                        </label>
+                                        <span style="font-size: 0.8rem; color: #b91c1c;">
+                                            Ao ativar, surge um banner na Homepage e o badge pulsante 🔴 DIRETO no menu de todo o site.
+                                        </span>
+                                    </div>
+                                    <select id="cfg-direto-ativo" class="admin-input" style="font-weight: 800; width: 160px; padding: 8px 12px; border-color: #f87171;">
+                                        <option value="false">⚪ Desligado</option>
+                                        <option value="true">🔴 EM DIRETO</option>
+                                    </select>
+                                </div>
+
+                                <div style="margin-bottom: 15px;">
+                                    <label style="display:block; margin-bottom: 5px; font-weight: 600; font-size: 0.85rem;">Título do Jogo / Transmissão <span class="req">*</span></label>
+                                    <input type="text" id="cfg-direto-titulo" class="admin-input" placeholder="Ex: Seniores Masculinos • BC Valença vs CAAS Padaria Ribeiro" style="width: 100%;">
+                                </div>
+
+                                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-bottom: 15px;">
+                                    <div>
+                                        <label style="display:block; margin-bottom: 5px; font-weight: 600; font-size: 0.85rem;">Competição / Escalão</label>
+                                        <input type="text" id="cfg-direto-comp" class="admin-input" placeholder="Ex: Campeonato Nacional da 2ª Divisão (CN2)" style="width: 100%;">
+                                    </div>
+                                    <div>
+                                        <label style="display:block; margin-bottom: 5px; font-weight: 600; font-size: 0.85rem;">Canal Oficial YouTube (ID)</label>
+                                        <input type="text" id="cfg-direto-canal" class="admin-input" value="UCEQdDGlXUdcHK5Ym5jqFQUg" readonly style="width: 100%; background: #f8fafc; color: #64748b;">
+                                    </div>
+                                </div>
+
+                                <div style="margin-bottom: 15px;">
+                                    <label style="display:block; margin-bottom: 5px; font-weight: 600; font-size: 0.85rem;">
+                                        Link do Vídeo / Live Específica (Opcional)
+                                    </label>
+                                    <input type="text" id="cfg-direto-url" class="admin-input" placeholder="https://youtube.com/watch?v=... ou deixe vazio para usar o direto do canal" style="width: 100%;">
+                                    <small style="color: #64748b; font-size: 0.78rem; display: block; margin-top: 4px;">
+                                        ℹ️ Se deixar em branco, o sistema transmite automaticamente o direto do canal oficial <strong>@BCValenca</strong>.
+                                    </small>
+                                </div>
+
+                                <div style="margin-bottom: 20px;">
+                                    <label style="display:block; margin-bottom: 5px; font-weight: 600; font-size: 0.85rem;">Descrição / Mensagem para os Adeptos</label>
+                                    <input type="text" id="cfg-direto-desc" class="admin-input" placeholder="Ex: Transmissão direta do Pavilhão Municipal de Valença. Apoia as nossas cores!" style="width: 100%;">
+                                </div>
+
+                                <div style="display: flex; align-items: center; gap: 12px;">
+                                    <button type="submit" id="btn-save-direto" class="btn-primary" style="padding: 10px 24px; background: #dc2626; border-color: #dc2626;">
+                                        💾 Guardar Transmissão
+                                    </button>
+                                    <span id="msg-direto-status" style="font-size: 0.9rem; font-weight: 600;"></span>
+                                </div>
                             </form>
                         </div>
                     </div>
