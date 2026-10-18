@@ -213,10 +213,10 @@ async function loadPortalHighlights(supabase) {
         }
 
         let esc = escStr || 'BCV';
-        const isFem = compLower.includes('fem') || compLower.includes('feminino');
-        const isMasc = compLower.includes('masc') || compLower.includes('masculino');
-        if (isFem && !esc.toLowerCase().includes('fem')) return esc + ' Feminino';
-        if (isMasc && !esc.toLowerCase().includes('masc')) return esc + ' Masculino';
+        const isFem = compLower.includes('fem') || compLower.includes('feminino') || escLower.includes('fem') || /\bf\b/i.test(escLower);
+        const isMasc = compLower.includes('masc') || compLower.includes('masculino') || escLower.includes('masc') || /\bm\b/i.test(escLower);
+        if (isFem && !esc.toLowerCase().includes('fem')) return esc.replace(/\s*f\b/i, '').trim() + ' Feminino';
+        if (isMasc && !esc.toLowerCase().includes('masc')) return esc.replace(/\s*m\b/i, '').trim() + ' Masculino';
         return esc;
     }
 
@@ -446,12 +446,16 @@ async function loadPortalHighlights(supabase) {
             }
         }
 
-        // 3. Renderizar Resultados (Últimos 5 jogos concluídos)
+        // 3. Renderizar Resultados (Últimos jogos concluídos cobrindo todos os escalões)
         if (resultadosContainer) {
             const resultadosPublicados = listaResultados
                 .filter(r => r.publicado !== false)
-                .sort((a, b) => (b.data_jogo || '').localeCompare(a.data_jogo || ''))
-                .slice(0, 5);
+                .sort((a, b) => {
+                    const diffData = (b.data_jogo || '').localeCompare(a.data_jogo || '');
+                    if (diffData !== 0) return diffData;
+                    return (Number(b.id) || 0) - (Number(a.id) || 0);
+                })
+                .slice(0, 8);
 
             if (resultadosPublicados.length > 0) {
                 hasResultados = true;

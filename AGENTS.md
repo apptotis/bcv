@@ -69,6 +69,8 @@
 - [2026-10-18] Gemini: Ocultação do ícone/pill do menu superior em mobile (.nav-live-pill display: none) e otimização dos espaçamentos do menu lateral (gap 10px, padding e delays escaláveis) para acomodar futuras opções sem criar scroll.
 - [2026-10-18] Gemini: Remoção da secção e chamada de 'Próximas Transmissões & Jogos' em direto.html e direto.js para evitar listar jogos que não tenham transmissão em direto garantida.
 - [2026-10-18] Gemini: Eliminação do badge estático 'Federação Portuguesa de Basquetebol' no card principal de transmissão em direto.html, js/direto.js e admin.js.
+- [2026-10-18] Gemini: Expansão do limite de Resultados Recentes no index.html de 5 para 8 jogos com critério de desempate por id/hora, garantindo a exibição de todos os escalões da jornada de fim de semana (incluindo a vitória das Sub 16 Feminino 96 - 17 FC Vizela).
+
 
 
 
