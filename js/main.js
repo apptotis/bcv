@@ -234,30 +234,116 @@ async function loadPortalHighlights(supabase) {
     window.obterLogoEquipa = obterLogoEquipa;
     window.FPB_CLUB_LOGOS = FPB_CLUB_LOGOS;
 
-    // 1. CARREGAR AGENDA (Próximos Jogos nos próximos 6 dias)
-    if (agendaContainer) {
-        try {
-            const hoje = new Date();
-            const ano = hoje.getFullYear();
-            const mes = String(hoje.getMonth() + 1).padStart(2, '0');
-            const dia = String(hoje.getDate()).padStart(2, '0');
-            const hojeStr = `${ano}-${mes}-${dia}`;
+    // Helper para comparar nomes de equipas
+    function compararEquipasSimples(eq1, eq2) {
+        if (!eq1 || !eq2) return false;
+        const n1 = eq1.toLowerCase().trim().replace(/[^a-z0-9]/g, '');
+        const n2 = eq2.toLowerCase().trim().replace(/[^a-z0-9]/g, '');
+        if (n1 === n2) return true;
+        const isBcv1 = n1.includes('valenca') || n1.includes('bcv');
+        const isBcv2 = n2.includes('valenca') || n2.includes('bcv');
+        if (isBcv1 && isBcv2) return true;
+        return (n1.length >= 4 && n2.includes(n1)) || (n2.length >= 4 && n1.includes(n2));
+    }
 
-            // Data limite: hoje + 6 dias (janela de 7 dias incluindo hoje)
-            const dataLimite = new Date(hoje);
-            dataLimite.setDate(hoje.getDate() + 6);
-            const anoLim = dataLimite.getFullYear();
-            const mesLim = String(dataLimite.getMonth() + 1).padStart(2, '0');
-            const diaLim = String(dataLimite.getDate()).padStart(2, '0');
-            const dataLimiteStr = `${anoLim}-${mesLim}-${diaLim}`;
+    try {
+        const hoje = new Date();
+        const ano = hoje.getFullYear();
+        const mes = String(hoje.getMonth() + 1).padStart(2, '0');
+        const dia = String(hoje.getDate()).padStart(2, '0');
+        const hojeStr = `${ano}-${mes}-${dia}`;
 
-            const { data: agenda, error } = await supabase
+        // Data limite: hoje + 6 dias (janela de 7 dias incluindo hoje)
+        const dataLimite = new Date(hoje);
+        dataLimite.setDate(hoje.getDate() + 6);
+        const anoLim = dataLimite.getFullYear();
+        const mesLim = String(dataLimite.getMonth() + 1).padStart(2, '0');
+        const diaLim = String(dataLimite.getDate()).padStart(2, '0');
+        const dataLimiteStr = `${anoLim}-${mesLim}-${diaLim}`;
+
+        // Carregar Agenda, Resultados e Séries em paralelo
+        const [resAgenda, resResultados, resConfig] = await Promise.all([
+            agendaContainer ? supabase
                 .from('agenda_bcv')
                 .select('*')
                 .gte('data_jogo', hojeStr)
                 .lte('data_jogo', dataLimiteStr)
-                .order('data_jogo', { ascending: true });
+                .order('data_jogo', { ascending: true }) : Promise.resolve({ data: [] }),
+            supabase
+                .from('resultados_bcv')
+                .select('*')
+                .order('data_jogo', { ascending: false })
+                .limit(15),
+            supabase
+                .from('clube_config')
+                .select('dados')
+                .eq('chave', 'competicoes')
+                .maybeSingle()
+        ]);
 
+        const rawResultados = resResultados?.data || [];
+        let listaResultados = [...rawResultados];
+
+        // 1. Integrar jogos com resultado registados nas Séries das Competições (ex: CN2, Sub 14, Sub 16, etc.)
+        if (resConfig?.data?.dados && Array.isArray(resConfig.data.dados)) {
+            resConfig.data.dados.forEach(comp => {
+                if (Array.isArray(comp.jogos_serie)) {
+                    comp.jogos_serie.forEach(j => {
+                        const isCasaBCV = /valen[cç]a|bcv/i.test(j.equipa_casa || '');
+                        const isForaBCV = /valen[cç]a|bcv/i.test(j.equipa_fora || '');
+                        if (!isCasaBCV && !isForaBCV) return;
+
+                        const pCasa = parseInt(j.pontos_casa, 10);
+                        const pFora = parseInt(j.pontos_fora, 10);
+                        if (isNaN(pCasa) || isNaN(pFora)) return;
+
+                        // Verificar se já existe na lista de resultados
+                        const jaExiste = listaResultados.some(r => 
+                            r.data_jogo === j.data &&
+                            compararEquipasSimples(r.equipa_casa, j.equipa_casa) &&
+                            compararEquipasSimples(r.equipa_fora, j.equipa_fora)
+                        );
+
+                        if (!jaExiste) {
+                            const isCN2 = comp.sigla === 'CN2' || /cn2|2ª\s*div/i.test(comp.nome || '');
+                            const escalaoJogo = isCN2 ? 'Seniores' : (comp.escalao || 'Sub 14');
+                            const competicaoJogo = isCN2 ? 'Sénior Masculino | 2ª Divisão Masculina' : `${comp.escalao || ''} ${comp.sexo || ''} | ${comp.nome || comp.sigla || 'Oficial FPB'}`.trim();
+                            const novoRes = {
+                                id: j.id,
+                                data_jogo: j.data,
+                                equipa_casa: j.equipa_casa,
+                                equipa_fora: j.equipa_fora,
+                                pontos_casa: pCasa,
+                                pontos_fora: pFora,
+                                escalao: escalaoJogo,
+                                competicao: competicaoJogo,
+                                publicado: true,
+                                logo_casa: j.logo_casa || obterLogoEquipa(j.equipa_casa),
+                                logo_fora: j.logo_fora || obterLogoEquipa(j.equipa_fora)
+                            };
+                            listaResultados.push(novoRes);
+
+                            // Sincronizar em background no Supabase em resultados_bcv
+                            supabase.from('resultados_bcv').insert([{
+                                equipa_casa: novoRes.equipa_casa,
+                                equipa_fora: novoRes.equipa_fora,
+                                pontos_casa: novoRes.pontos_casa,
+                                pontos_fora: novoRes.pontos_fora,
+                                data_jogo: novoRes.data_jogo,
+                                escalao: novoRes.escalao,
+                                competicao: novoRes.competicao,
+                                publicado: true,
+                                logo_casa: novoRes.logo_casa,
+                                logo_fora: novoRes.logo_fora
+                            }]).then(() => {}).catch(() => {});
+                        }
+                    });
+                }
+            });
+        }
+
+        // 2. Renderizar Agenda (filtrando e removendo automaticamente da agenda jogos que já tenham resultado)
+        if (agendaContainer) {
             function normalizarHoraParaMinutos(horaStr) {
                 if (!horaStr || typeof horaStr !== 'string') return 9999;
                 const limpo = horaStr.trim().toLowerCase();
@@ -269,8 +355,28 @@ async function loadPortalHighlights(supabase) {
                 return 9999;
             }
 
-            const agendaPublicada = (agenda || [])
-                .filter(j => j.publicado !== false && j.data_jogo >= hojeStr && j.data_jogo <= dataLimiteStr)
+            const rawAgenda = resAgenda?.data || [];
+            const agendaPublicada = rawAgenda
+                .filter(j => {
+                    if (j.publicado === false) return false;
+                    if (j.data_jogo < hojeStr || j.data_jogo > dataLimiteStr) return false;
+
+                    // Se este jogo já tem resultado final (em resultados_bcv ou nas séries), NUNCA exibir na Agenda
+                    const jaConcluido = listaResultados.some(r => {
+                        if (j.fpb_id && r.fpb_id && String(j.fpb_id) === String(r.fpb_id)) return true;
+                        const matchData = (r.data_jogo === j.data_jogo);
+                        const matchCasa = compararEquipasSimples(r.equipa_casa, j.equipa_casa);
+                        const matchFora = compararEquipasSimples(r.equipa_fora, j.equipa_fora);
+                        return matchData && matchCasa && matchFora;
+                    });
+
+                    if (jaConcluido) {
+                        // Limpeza automática da base de dados se ainda estiver presente em agenda_bcv
+                        supabase.from('agenda_bcv').delete().eq('id', j.id).then(() => {}).catch(() => {});
+                        return false;
+                    }
+                    return true;
+                })
                 .sort((a, b) => {
                     // Ordenar primeiramente por data crescente
                     if (a.data_jogo !== b.data_jogo) {
@@ -282,7 +388,7 @@ async function loadPortalHighlights(supabase) {
                     return minA - minB;
                 });
 
-            if (!error && agendaPublicada.length > 0) {
+            if (agendaPublicada.length > 0) {
                 hasAgenda = true;
                 agendaContainer.innerHTML = '';
                 
@@ -333,69 +439,10 @@ async function loadPortalHighlights(supabase) {
                     agendaContainer.appendChild(item);
                 });
             }
-        } catch (err) {
-            console.warn("Aviso ao carregar agenda:", err);
         }
-    }
 
-    // 2. CARREGAR RESULTADOS (Últimos jogos)
-    if (resultadosContainer) {
-        try {
-            const [resResultados, resConfig] = await Promise.all([
-                supabase
-                    .from('resultados_bcv')
-                    .select('*')
-                    .order('data_jogo', { ascending: false })
-                    .limit(10),
-                supabase
-                    .from('clube_config')
-                    .select('dados')
-                    .eq('chave', 'competicoes')
-                    .maybeSingle()
-            ]);
-
-            const resultados = resResultados?.data || [];
-            let listaResultados = [...resultados];
-
-            // Integrar com resiliência jogos com resultado registados nas Séries das Competições (ex: CN2)
-            if (resConfig?.data?.dados && Array.isArray(resConfig.data.dados)) {
-                resConfig.data.dados.forEach(comp => {
-                    if (Array.isArray(comp.jogos_serie)) {
-                        comp.jogos_serie.forEach(j => {
-                            const isCasaBCV = /valen[cç]a|bcv/i.test(j.equipa_casa || '');
-                            const isForaBCV = /valen[cç]a|bcv/i.test(j.equipa_fora || '');
-                            if (!isCasaBCV && !isForaBCV) return;
-
-                            const pCasa = parseInt(j.pontos_casa, 10);
-                            const pFora = parseInt(j.pontos_fora, 10);
-                            if (isNaN(pCasa) || isNaN(pFora)) return;
-
-                            // Verificar se já existe na lista
-                            const jaExiste = listaResultados.some(r => 
-                                r.data_jogo === j.data &&
-                                (/valen[cç]a|bcv/i.test(r.equipa_casa || '') === isCasaBCV)
-                            );
-
-                            if (!jaExiste) {
-                                listaResultados.push({
-                                    id: j.id,
-                                    data_jogo: j.data,
-                                    equipa_casa: j.equipa_casa,
-                                    equipa_fora: j.equipa_fora,
-                                    pontos_casa: pCasa,
-                                    pontos_fora: pFora,
-                                    escalao: comp.escalao || 'Seniores',
-                                    competicao: `${comp.escalao || 'Sénior'} ${comp.sexo || 'Masculino'} | ${comp.nome || comp.sigla || '2ª Divisão Masculina'}`,
-                                    publicado: true,
-                                    logo_casa: j.logo_casa || obterLogoEquipa(j.equipa_casa),
-                                    logo_fora: j.logo_fora || obterLogoEquipa(j.equipa_fora)
-                                });
-                            }
-                        });
-                    }
-                });
-            }
-
+        // 3. Renderizar Resultados (Últimos 5 jogos concluídos)
+        if (resultadosContainer) {
             const resultadosPublicados = listaResultados
                 .filter(r => r.publicado !== false)
                 .sort((a, b) => (b.data_jogo || '').localeCompare(a.data_jogo || ''))
@@ -444,9 +491,9 @@ async function loadPortalHighlights(supabase) {
                     resultadosContainer.appendChild(item);
                 });
             }
-        } catch (err) {
-            console.warn("Aviso ao carregar resultados:", err);
         }
+    } catch (err) {
+        console.warn("Aviso ao carregar destaques do portal:", err);
     }
 
     // 3. OCULTAÇÃO INTELIGENTE DE SECÇÕES VAZIAS
@@ -1103,6 +1150,17 @@ async function loadCompeticoesSection(supabase) {
             if (configRes && configRes.data && Array.isArray(configRes.data.dados) && configRes.data.dados.length > 0) {
                 competicoesList = configRes.data.dados;
             }
+
+            // Excluir da agenda das competições jogos que já tenham resultado final
+            allAgenda = allAgenda.filter(a => {
+                const jaJogado = allResultados.some(r => {
+                    if (a.fpb_id && r.fpb_id && String(a.fpb_id) === String(r.fpb_id)) return true;
+                    return a.data_jogo === r.data_jogo && 
+                        compararEquipasSimples(a.equipa_casa, r.equipa_casa) && 
+                        compararEquipasSimples(a.equipa_fora, r.equipa_fora);
+                });
+                return !jaJogado;
+            });
         }
 
         // Filtrar apenas competições com visibilidade ativa no site (Sim no Admin)

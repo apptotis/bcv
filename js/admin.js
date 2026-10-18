@@ -4344,14 +4344,54 @@ document.addEventListener('DOMContentLoaded', async () => {
         agendaTableBody.innerHTML = '<tr><td colspan="6" style="padding: 20px; text-align: center;">A carregar jogos...</td></tr>';
 
         try {
-            const { data, error } = await supabase
-                .from('agenda_bcv')
-                .select('*')
-                .order('data_jogo', { ascending: true });
+            const [agendaRes, resResultados, configRes] = await Promise.all([
+                supabase.from('agenda_bcv').select('*').order('data_jogo', { ascending: true }),
+                supabase.from('resultados_bcv').select('*'),
+                supabase.from('clube_config').select('dados').eq('chave', 'competicoes').maybeSingle()
+            ]);
 
-            if (error) throw error;
+            const resultados = resResultados?.data || [];
+            if (configRes?.data?.dados && Array.isArray(configRes.data.dados)) {
+                configRes.data.dados.forEach(c => {
+                    if (Array.isArray(c.jogos_serie)) {
+                        c.jogos_serie.forEach(j => {
+                            if (/valen[cç]a|bcv/i.test(j.equipa_casa || '') || /valen[cç]a|bcv/i.test(j.equipa_fora || '')) {
+                                if (j.pontos_casa !== null && j.pontos_fora !== null && !isNaN(Number(j.pontos_casa))) {
+                                    resultados.push({
+                                        data_jogo: j.data,
+                                        equipa_casa: j.equipa_casa,
+                                        equipa_fora: j.equipa_fora
+                                    });
+                                }
+                            }
+                        });
+                    }
+                });
+            }
 
-            currentAgendaGames = data || [];
+            const rawAgenda = agendaRes?.data || [];
+            const idsParaApagar = [];
+            currentAgendaGames = rawAgenda.filter(a => {
+                const jaJogado = resultados.some(r => {
+                    if (a.fpb_id && r.fpb_id && String(a.fpb_id) === String(r.fpb_id)) return true;
+                    return a.data_jogo === r.data_jogo && 
+                        (typeof compararEquipasIguais === 'function' 
+                            ? (compararEquipasIguais(a.equipa_casa, r.equipa_casa) && compararEquipasIguais(a.equipa_fora, r.equipa_fora))
+                            : (a.equipa_casa === r.equipa_casa && a.equipa_fora === r.equipa_fora));
+                });
+                if (jaJogado) {
+                    idsParaApagar.push(a.id);
+                    return false;
+                }
+                return true;
+            });
+
+            if (idsParaApagar.length > 0) {
+                idsParaApagar.forEach(id => {
+                    supabase.from('agenda_bcv').delete().eq('id', id).then(() => {}).catch(() => {});
+                });
+            }
+
             renderAgendaTable();
         } catch (err) {
             console.error("Erro ao carregar agenda:", err);

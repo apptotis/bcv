@@ -63,6 +63,9 @@
 - [2026-10-17] Gemini: Ordenação cronológica rigorosa de resultados (do mais recente ao mais antigo) no separador de Competições (competicoes.html / main.js) e na secção de Resultados da Homepage (index.html / main.js).
 - [2026-10-18] Gemini: Correção oficial do nome da equipa 'ACR Vigorosa' no CN2 (2ª Divisão Masculina): unificação automática de duplicados por grafia ('ACR Vigoroso' -> 'ACR Vigorosa'), consolidação de pontuações na classificação pública e séries (js/main.js, js/admin.js, corrigir_nome_acr_vigorosa.sql).
 - [2026-10-18] Gemini: Resolução e exibição imediata dos resultados da 2ª Divisão Masculina (CN2 - BC Valença 85 - 79 CAAS Padaria Ribeiro) e Sub 16 Feminino no index.html: sincronização no Supabase (resultados_bcv e agenda_bcv), unificação resiliente de jogos das séries em loadPortalHighlights, badge explícito '2ª Divisão Masc (CN2)', sincronização em lote de todas as séries no Admin e sincronizador automático em background.
+- [2026-10-18] Gemini: Sincronização do jogo Sub 14 Masculino (SC Braga B 20 - 82 BC Valença) e garantia de exclusão automática da Agenda de qualquer jogo concluído com resultado (em resultados_bcv ou séries), com limpeza assíncrona na tabela agenda_bcv tanto na Homepage (main.js) como nas Competições e Admin (admin.js).
+
+
 
 
 
