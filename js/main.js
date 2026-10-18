@@ -130,16 +130,22 @@ async function loadPortalHighlights(supabase) {
 
     function extrairEscalaoCompleto(jogo) {
         if (!jogo) return 'BCV';
-        if (jogo.competicao && typeof jogo.competicao === 'string') {
-            const compTrim = jogo.competicao.trim();
-            if (compTrim.includes('|')) {
-                const primeiraParte = compTrim.split('|')[0].trim();
-                if (primeiraParte) return primeiraParte;
-            }
+        const compStr = (jogo.competicao || '').trim();
+        const escStr = (jogo.escalao || '').trim();
+        const compLower = compStr.toLowerCase();
+        const escLower = escStr.toLowerCase();
+
+        // Se for Campeonato Nacional da 2ª Divisão Masculina / CN2
+        if (/2ª\s*div|2a\s*div|cn2/i.test(compLower) || /2ª\s*div|2a\s*div|cn2/i.test(escLower)) {
+            return '2ª Divisão Masc (CN2)';
         }
-        let esc = (jogo.escalao || '').trim();
-        if (!esc) esc = 'BCV';
-        const compLower = (jogo.competicao || '').toLowerCase();
+
+        if (compStr.includes('|')) {
+            const primeiraParte = compStr.split('|')[0].trim();
+            if (primeiraParte) return primeiraParte;
+        }
+
+        let esc = escStr || 'BCV';
         const isFem = compLower.includes('fem') || compLower.includes('feminino');
         const isMasc = compLower.includes('masc') || compLower.includes('masculino');
         if (isFem && !esc.toLowerCase().includes('fem')) return esc + ' Feminino';
@@ -335,18 +341,67 @@ async function loadPortalHighlights(supabase) {
     // 2. CARREGAR RESULTADOS (Últimos jogos)
     if (resultadosContainer) {
         try {
-            const { data: resultados, error } = await supabase
-                .from('resultados_bcv')
-                .select('*')
-                .order('data_jogo', { ascending: false })
-                .limit(10);
+            const [resResultados, resConfig] = await Promise.all([
+                supabase
+                    .from('resultados_bcv')
+                    .select('*')
+                    .order('data_jogo', { ascending: false })
+                    .limit(10),
+                supabase
+                    .from('clube_config')
+                    .select('dados')
+                    .eq('chave', 'competicoes')
+                    .maybeSingle()
+            ]);
 
-            const resultadosPublicados = (resultados || [])
+            const resultados = resResultados?.data || [];
+            let listaResultados = [...resultados];
+
+            // Integrar com resiliência jogos com resultado registados nas Séries das Competições (ex: CN2)
+            if (resConfig?.data?.dados && Array.isArray(resConfig.data.dados)) {
+                resConfig.data.dados.forEach(comp => {
+                    if (Array.isArray(comp.jogos_serie)) {
+                        comp.jogos_serie.forEach(j => {
+                            const isCasaBCV = /valen[cç]a|bcv/i.test(j.equipa_casa || '');
+                            const isForaBCV = /valen[cç]a|bcv/i.test(j.equipa_fora || '');
+                            if (!isCasaBCV && !isForaBCV) return;
+
+                            const pCasa = parseInt(j.pontos_casa, 10);
+                            const pFora = parseInt(j.pontos_fora, 10);
+                            if (isNaN(pCasa) || isNaN(pFora)) return;
+
+                            // Verificar se já existe na lista
+                            const jaExiste = listaResultados.some(r => 
+                                r.data_jogo === j.data &&
+                                (/valen[cç]a|bcv/i.test(r.equipa_casa || '') === isCasaBCV)
+                            );
+
+                            if (!jaExiste) {
+                                listaResultados.push({
+                                    id: j.id,
+                                    data_jogo: j.data,
+                                    equipa_casa: j.equipa_casa,
+                                    equipa_fora: j.equipa_fora,
+                                    pontos_casa: pCasa,
+                                    pontos_fora: pFora,
+                                    escalao: comp.escalao || 'Seniores',
+                                    competicao: `${comp.escalao || 'Sénior'} ${comp.sexo || 'Masculino'} | ${comp.nome || comp.sigla || '2ª Divisão Masculina'}`,
+                                    publicado: true,
+                                    logo_casa: j.logo_casa || obterLogoEquipa(j.equipa_casa),
+                                    logo_fora: j.logo_fora || obterLogoEquipa(j.equipa_fora)
+                                });
+                            }
+                        });
+                    }
+                });
+            }
+
+            const resultadosPublicados = listaResultados
                 .filter(r => r.publicado !== false)
                 .sort((a, b) => (b.data_jogo || '').localeCompare(a.data_jogo || ''))
                 .slice(0, 5);
 
-            if (!error && resultadosPublicados.length > 0) {
+            if (resultadosPublicados.length > 0) {
                 hasResultados = true;
                 resultadosContainer.innerHTML = '';
 

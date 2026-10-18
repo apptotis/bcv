@@ -9280,6 +9280,21 @@ document.addEventListener('DOMContentLoaded', async () => {
                 renderCompeticoesAdmin();
             }
 
+            // Sincronização automática em background de jogos concluídos das séries
+            if (Array.isArray(currentCompeticoes)) {
+                setTimeout(async () => {
+                    try {
+                        for (const c of currentCompeticoes) {
+                            if (c && Array.isArray(c.jogos_serie) && c.jogos_serie.length > 0) {
+                                await sincronizarJogosSerieComResultados(c, c.jogos_serie);
+                            }
+                        }
+                    } catch (e) {
+                        console.warn("Sincronização em background de séries:", e);
+                    }
+                }, 1200);
+            }
+
         } catch (err) {
             console.error("Erro ao carregar competições no admin:", err);
             if (tbody) {
@@ -10875,10 +10890,11 @@ document.addEventListener('DOMContentLoaded', async () => {
                     || (resMatch && resMatch.logo_fora) 
                     || (window.obterLogoEquipa ? window.obterLogoEquipa(j.equipa_fora) : null);
 
-                const escalaoJogo = comp.escalao || 'Sub 14';
+                const isCN2 = comp.sigla === 'CN2' || /cn2|2ª\s*div/i.test(comp.nome || '');
+                const escalaoJogo = isCN2 ? 'Seniores' : (comp.escalao || 'Sub 14');
                 const competicaoJogo = (agendaItem && agendaItem.competicao) 
                     || (resMatch && resMatch.competicao) 
-                    || `${comp.escalao || ''} ${comp.sexo || ''} | ${comp.nome || comp.sigla || 'Oficial FPB'}`.trim();
+                    || (isCN2 ? 'Sénior Masculino | 2ª Divisão Masculina' : `${comp.escalao || ''} ${comp.sexo || ''} | ${comp.nome || comp.sigla || 'Oficial FPB'}`.trim());
                 const localJogo = (agendaItem && agendaItem.local) 
                     || (resMatch && resMatch.local) 
                     || (isCasaBCV ? 'Pav. M. Valença ,Valença' : '');
@@ -11067,8 +11083,13 @@ document.addEventListener('DOMContentLoaded', async () => {
         }
 
         if (ok) {
-            // Sincronizar automaticamente os jogos do BC Valença com resultados_bcv e agenda_bcv
-            const countSinc = await sincronizarJogosSerieComResultados(comp, comp.jogos_serie);
+            // Sincronizar automaticamente todos os jogos do BC Valença com resultados_bcv e agenda_bcv
+            let countSinc = 0;
+            for (const c of (currentCompeticoes || [])) {
+                if (c && Array.isArray(c.jogos_serie) && c.jogos_serie.length > 0) {
+                    countSinc += await sincronizarJogosSerieComResultados(c, c.jogos_serie);
+                }
+            }
 
             window.fecharModalTabelaSerie();
             renderCompeticoesAdmin();
