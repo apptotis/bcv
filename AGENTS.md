@@ -66,6 +66,8 @@
 - [2026-10-18] Gemini: Sincronização do jogo Sub 14 Masculino (SC Braga B 20 - 82 BC Valença) e garantia de exclusão automática da Agenda de qualquer jogo concluído com resultado (em resultados_bcv ou séries), com limpeza assíncrona na tabela agenda_bcv tanto na Homepage (main.js) como nas Competições e Admin (admin.js).
 - [2026-10-18] Gemini: Implementação do sistema de Streaming ao Vivo (BCV TV / YouTube): página dedicada direto.html, banner dinâmico e gestão no Admin (admin.html, js/admin.js).
 - [2026-10-18] Gemini: Atualização do item de menu mobile/nav para 'BCV TV' com badge dinâmico 'AO VIVO': vermelho (.is-offline, #dc2626) sem transmissão ativa e verde (.is-live, #16a34a) quando em direto, em todas as páginas públicas (index, competicoes, direto, clube, equipas).
+- [2026-10-18] Gemini: Ocultação do ícone/pill do menu superior em mobile (.nav-live-pill display: none) e otimização dos espaçamentos do menu lateral (gap 10px, padding e delays escaláveis) para acomodar futuras opções sem criar scroll.
+
 
 
 

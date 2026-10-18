@@ -226,6 +226,10 @@ img {
     .brand-title-nav {
         display: none;
     }
+    /* Eliminar ícone no menu superior em dispositivos móveis */
+    .nav-live-pill {
+        display: none !important;
+    }
 }
 
 /* Right Column: Empty or placeholder for balanced centering */
@@ -488,7 +492,7 @@ img {
     box-shadow: var(--shadow-lg);
     display: flex;
     flex-direction: column;
-    padding: 30px 40px 40px 40px;
+    padding: 24px 30px 24px 30px;
     overflow-y: auto;
 }
 
@@ -523,10 +527,10 @@ img {
     background: none;
     border: none;
     color: rgba(255, 255, 255, 0.7);
-    font-size: 1.5rem;
+    font-size: 1.35rem;
     cursor: pointer;
     transition: var(--transition-fast);
-    padding: 5px;
+    padding: 4px;
     display: flex;
     align-items: center;
     justify-content: center;
@@ -547,19 +551,19 @@ img {
 }
 
 .drawer-header {
-    margin-bottom: 40px;
+    margin-bottom: 18px;
     border-bottom: 1px solid rgba(255, 255, 255, 0.1);
-    padding-bottom: 20px;
+    padding-bottom: 12px;
 }
 
 .drawer-club-info {
     display: flex;
     align-items: center;
-    gap: 15px;
+    gap: 12px;
 }
 
 .drawer-club-logo {
-    height: 45px;
+    height: 38px;
     width: auto;
     object-fit: contain;
 }
@@ -568,7 +572,7 @@ img {
     font-family: var(--font-heading);
     font-weight: 700;
     color: #ffffff;
-    font-size: 1rem;
+    font-size: 0.95rem;
     text-transform: uppercase;
     letter-spacing: 1px;
 }
@@ -578,7 +582,7 @@ img {
     list-style: none;
     display: flex;
     flex-direction: column;
-    gap: 20px;
+    gap: 10px;
 }
 
 .drawer-item {
@@ -587,20 +591,20 @@ img {
 
 .drawer-link {
     font-family: var(--font-heading);
-    font-size: 1.15rem;
+    font-size: 1.05rem;
     font-weight: 700;
     text-transform: uppercase;
     color: rgba(255, 255, 255, 0.85);
     display: flex;
     justify-content: space-between;
     align-items: center;
-    padding: 5px 0;
+    padding: 3px 0;
     transition: var(--transition-fast);
 }
 
 .drawer-link:hover {
     color: #ffffff;
-    padding-left: 8px;
+    padding-left: 6px;
 }
 
 /* Dropdown specific in drawer */
@@ -609,8 +613,8 @@ img {
     border: none;
     color: rgba(255, 255, 255, 0.85);
     cursor: pointer;
-    font-size: 1rem;
-    padding: 5px;
+    font-size: 0.95rem;
+    padding: 3px 6px;
     transition: transform var(--transition-fast);
 }
 
@@ -626,10 +630,10 @@ img {
     max-height: 0;
     overflow: hidden;
     list-style: none;
-    padding-left: 20px;
+    padding-left: 18px;
     transition: max-height 0.3s ease-out;
     background: rgba(0, 0, 0, 0.1);
-    margin-top: 5px;
+    margin-top: 4px;
 }
 
 .drawer-dropdown-content.is-open {
@@ -638,9 +642,9 @@ img {
 
 .drawer-dropdown-link {
     display: block;
-    padding: 10px 0;
+    padding: 6px 0;
     font-family: var(--font-body);
-    font-size: 0.95rem;
+    font-size: 0.9rem;
     color: rgba(255, 255, 255, 0.7);
     font-weight: 500;
     transition: var(--transition-fast);
@@ -654,12 +658,12 @@ img {
 /* Footer of the drawer */
 .drawer-footer {
     margin-top: auto;
-    padding-top: 40px;
+    padding-top: 16px;
     border-top: 1px solid rgba(255, 255, 255, 0.1);
 }
 
 .drawer-footer-text {
-    font-size: 0.75rem;
+    font-size: 0.72rem;
     color: rgba(255, 255, 255, 0.5);
     line-height: 1.4;
 }
@@ -667,24 +671,30 @@ img {
 /* Animation entry delays for links (sequential fade-in) */
 .drawer-menu.is-open .drawer-links-list li,
 .drawer-menu.active .drawer-links-list li {
-    animation: fadeInSlideRight 0.4s ease forwards;
+    animation: fadeInSlideRight 0.35s ease forwards;
     opacity: 0;
 }
 
 .drawer-menu.is-open .drawer-links-list li:nth-child(1),
-.drawer-menu.active .drawer-links-list li:nth-child(1) { animation-delay: 0.1s; }
+.drawer-menu.active .drawer-links-list li:nth-child(1) { animation-delay: 0.06s; }
 .drawer-menu.is-open .drawer-links-list li:nth-child(2),
-.drawer-menu.active .drawer-links-list li:nth-child(2) { animation-delay: 0.15s; }
+.drawer-menu.active .drawer-links-list li:nth-child(2) { animation-delay: 0.1s; }
 .drawer-menu.is-open .drawer-links-list li:nth-child(3),
-.drawer-menu.active .drawer-links-list li:nth-child(3) { animation-delay: 0.2s; }
+.drawer-menu.active .drawer-links-list li:nth-child(3) { animation-delay: 0.14s; }
 .drawer-menu.is-open .drawer-links-list li:nth-child(4),
-.drawer-menu.active .drawer-links-list li:nth-child(4) { animation-delay: 0.25s; }
+.drawer-menu.active .drawer-links-list li:nth-child(4) { animation-delay: 0.18s; }
 .drawer-menu.is-open .drawer-links-list li:nth-child(5),
-.drawer-menu.active .drawer-links-list li:nth-child(5) { animation-delay: 0.3s; }
+.drawer-menu.active .drawer-links-list li:nth-child(5) { animation-delay: 0.22s; }
 .drawer-menu.is-open .drawer-links-list li:nth-child(6),
-.drawer-menu.active .drawer-links-list li:nth-child(6) { animation-delay: 0.35s; }
+.drawer-menu.active .drawer-links-list li:nth-child(6) { animation-delay: 0.26s; }
 .drawer-menu.is-open .drawer-links-list li:nth-child(7),
-.drawer-menu.active .drawer-links-list li:nth-child(7) { animation-delay: 0.4s; }
+.drawer-menu.active .drawer-links-list li:nth-child(7) { animation-delay: 0.3s; }
+.drawer-menu.is-open .drawer-links-list li:nth-child(8),
+.drawer-menu.active .drawer-links-list li:nth-child(8) { animation-delay: 0.34s; }
+.drawer-menu.is-open .drawer-links-list li:nth-child(9),
+.drawer-menu.active .drawer-links-list li:nth-child(9) { animation-delay: 0.38s; }
+.drawer-menu.is-open .drawer-links-list li:nth-child(10),
+.drawer-menu.active .drawer-links-list li:nth-child(10) { animation-delay: 0.42s; }
 
 @keyframes fadeInSlideRight {
     from {
