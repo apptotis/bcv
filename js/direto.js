@@ -94,7 +94,9 @@ document.addEventListener('DOMContentLoaded', async () => {
             if (isLive) {
                 if (liveBadge) {
                     liveBadge.className = 'direto-badge is-live';
-                    liveStatusText.textContent = 'EM DIRETO AGORA';
+                    liveBadge.style.background = '#16a34a';
+                    liveBadge.style.boxShadow = '0 0 16px rgba(22, 163, 74, 0.5)';
+                    liveStatusText.textContent = 'AO VIVO (EM DIRETO)';
                 }
                 if (liveGameTitle && config.titulo) {
                     liveGameTitle.textContent = config.titulo;
@@ -105,11 +107,14 @@ document.addEventListener('DOMContentLoaded', async () => {
                 if (liveDescText && config.descricao) {
                     liveDescText.textContent = config.descricao;
                 }
-                document.title = `🔴 EM DIRETO • ${config.titulo || 'BCV TV'} | BCV`;
+                document.title = `🟢 AO VIVO • ${config.titulo || 'BCV TV'} | BCV`;
             } else {
                 if (liveBadge) {
-                    liveBadge.className = 'direto-badge is-standby';
-                    liveStatusText.textContent = 'CANAL OFICIAL • BCV TV';
+                    liveBadge.className = 'direto-badge is-offline';
+                    liveBadge.style.background = '#dc2626';
+                    liveBadge.style.color = '#ffffff';
+                    liveBadge.style.boxShadow = '0 0 10px rgba(220, 38, 38, 0.35)';
+                    liveStatusText.textContent = 'AO VIVO';
                 }
                 if (liveGameTitle) {
                     liveGameTitle.textContent = config.titulo || "Basket Clube de Valença • Canal Oficial YouTube";

@@ -698,29 +698,45 @@ async function loadGlobalClubConfig(supabase) {
             } else if (item.chave === 'transmissao_direto') {
                 const isLive = dados.ativo === true;
                 const navLivePills = document.querySelectorAll('.nav-live-pill');
+                const drawerBadges = document.querySelectorAll('.drawer-live-badge, .live-pill-badge');
+
                 navLivePills.forEach(pill => {
+                    const txt = pill.querySelector('.live-text');
+                    if (txt) txt.textContent = 'BCV TV';
                     if (isLive) {
+                        pill.classList.remove('is-offline');
                         pill.classList.add('is-live');
-                        const txt = pill.querySelector('.live-text');
-                        if (txt) txt.textContent = 'DIRETO';
                     } else {
                         pill.classList.remove('is-live');
+                        pill.classList.add('is-offline');
                     }
                 });
 
-                // Se estivermos na Homepage (index.html), exibir banner de transmissão no topo
+                drawerBadges.forEach(badge => {
+                    badge.textContent = 'AO VIVO';
+                    if (isLive) {
+                        badge.classList.remove('is-offline');
+                        badge.classList.add('is-live');
+                    } else {
+                        badge.classList.remove('is-live');
+                        badge.classList.add('is-offline');
+                    }
+                });
+
+                // Se estivermos na Homepage (index.html), exibir banner de transmissão no topo quando em direto
                 const homePortal = document.querySelector('.portal-main');
                 const existingBanner = document.getElementById('live-broadcast-banner');
                 if (isLive && homePortal && !existingBanner) {
                     const liveBanner = document.createElement('div');
                     liveBanner.id = 'live-broadcast-banner';
                     liveBanner.className = 'live-broadcast-banner';
+                    liveBanner.style.background = 'linear-gradient(135deg, #14532d 0%, #16a34a 50%, #15803d 100%)';
                     liveBanner.innerHTML = `
                         <div class="live-banner-content">
-                            <span class="live-pulse-badge">🔴 EM DIRETO</span>
+                            <span class="live-pulse-badge" style="color: #16a34a;">🟢 EM DIRETO</span>
                             <span class="live-banner-title">BCV TV: <strong>${dados.titulo || 'Transmissão ao Vivo'}</strong></span>
                         </div>
-                        <a href="direto.html" class="live-banner-btn">Assistir em Direto ↗</a>
+                        <a href="direto.html" class="live-banner-btn" style="color: #15803d;">Assistir em Direto ↗</a>
                     `;
                     homePortal.insertBefore(liveBanner, homePortal.firstChild);
                 } else if (!isLive && existingBanner) {
