@@ -6038,7 +6038,7 @@ document.addEventListener('DOMContentLoaded', async () => {
             const dados = {
                 ativo: document.getElementById('cfg-direto-ativo').value === 'true',
                 titulo: document.getElementById('cfg-direto-titulo').value.trim() || 'Basket Clube de Valença • Canal Oficial YouTube',
-                competicao: document.getElementById('cfg-direto-comp').value.trim() || 'Federação Portuguesa de Basquetebol',
+                competicao: document.getElementById('cfg-direto-comp').value.trim() || '',
                 video_url: document.getElementById('cfg-direto-url').value.trim(),
                 canal_id: 'UCEQdDGlXUdcHK5Ym5jqFQUg',
                 descricao: document.getElementById('cfg-direto-desc').value.trim() || 'Transmissão direta do Pavilhão Municipal de Valença.',

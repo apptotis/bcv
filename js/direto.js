@@ -77,7 +77,7 @@ document.addEventListener('DOMContentLoaded', async () => {
             const config = configRow?.dados || {
                 ativo: false,
                 titulo: "Basket Clube de Valença • Canal Oficial YouTube",
-                competicao: "Federação Portuguesa de Basquetebol",
+                competicao: "",
                 video_url: "",
                 descricao: "Transmissões dos jogos oficiais do Basket Clube de Valença.",
                 mostrar_chat: true
@@ -90,6 +90,17 @@ document.addEventListener('DOMContentLoaded', async () => {
                 videoIframe.src = embedSrc;
             }
 
+            // Tratamento do badge de competição: não exibir se for vazio ou 'Federação Portuguesa de Basquetebol'
+            if (liveCompBadge) {
+                const compStr = (config.competicao || '').trim();
+                if (compStr && !/federa[cç][aã]o\s+portuguesa\s+de\s+basquetebol/i.test(compStr)) {
+                    liveCompBadge.textContent = `🏆 ${compStr}`;
+                    liveCompBadge.style.display = 'inline-block';
+                } else {
+                    liveCompBadge.style.display = 'none';
+                }
+            }
+
             if (isLive) {
                 if (liveBadge) {
                     liveBadge.className = 'direto-badge is-live';
@@ -99,9 +110,6 @@ document.addEventListener('DOMContentLoaded', async () => {
                 }
                 if (liveGameTitle && config.titulo) {
                     liveGameTitle.textContent = config.titulo;
-                }
-                if (liveCompBadge && config.competicao) {
-                    liveCompBadge.textContent = `🏆 ${config.competicao}`;
                 }
                 if (liveDescText && config.descricao) {
                     liveDescText.textContent = config.descricao;
