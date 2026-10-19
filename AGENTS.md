@@ -71,6 +71,7 @@
 - [2026-10-18] Gemini: Eliminação do badge estático 'Federação Portuguesa de Basquetebol' no card principal de transmissão em direto.html, js/direto.js e admin.js.
 - [2026-10-18] Gemini: Expansão do limite de Resultados Recentes no index.html de 5 para 8 jogos com critério de desempate por id/hora, garantindo a exibição de todos os escalões da jornada de fim de semana (incluindo a vitória das Sub 16 Feminino 96 - 17 FC Vizela).
 - [2026-10-19] Gemini: Correção de duplicados de jogos (BC Limiense vs BC Valença Sub 16 Fem): remoção de registo espúrio na BD, correção da data da Jornada 2 de 04/10 para 11/10 em jogos_serie (clube_config), eliminação do fallback enganoso 'Jornada 1', e deduplicação defensiva resiliente por equipas/resultado no frontend e admin (main.js, admin.js).
+- [2026-10-19] Gemini: Correção da classificação de Seniores (CN2): retificação do jogo da Jornada 2 inserido erroneamente como BC Limiense vs BC Valença (corrigido para o confronto real oficial FPB: BC Limiense 31 - 91 Maia Basket B), remoção do registo espúrio na BD e recálculo da tabela classificativa (BC Valença com os 2 jogos e 2 vitórias reais).
 
 
 
