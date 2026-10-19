@@ -10966,8 +10966,10 @@ document.addEventListener('DOMContentLoaded', async () => {
                     if (agendaItem && agendaItem.fpb_id && r.fpb_id && String(r.fpb_id) === String(agendaItem.fpb_id)) return true;
                     const matchCasa = compararEquipasIguais(r.equipa_casa, j.equipa_casa);
                     const matchFora = compararEquipasIguais(r.equipa_fora, j.equipa_fora);
+                    if (!matchCasa || !matchFora) return false;
                     const matchData = (r.data_jogo === j.data);
-                    return matchData && matchCasa && matchFora;
+                    const matchPontos = (Number(r.pontos_casa) === pCasa && Number(r.pontos_fora) === pFora);
+                    return matchData || matchPontos;
                 });
 
                 const logoCasa = (agendaItem && agendaItem.logo_casa) 

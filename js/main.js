@@ -302,12 +302,15 @@ async function loadPortalHighlights(supabase) {
                         const pFora = parseInt(j.pontos_fora, 10);
                         if (isNaN(pCasa) || isNaN(pFora)) return;
 
-                        // Verificar se já existe na lista de resultados
-                        const jaExiste = listaResultados.some(r => 
-                            r.data_jogo === j.data &&
-                            compararEquipasSimples(r.equipa_casa, j.equipa_casa) &&
-                            compararEquipasSimples(r.equipa_fora, j.equipa_fora)
-                        );
+                        // Verificar se já existe na lista de resultados (por data OU por confronto com mesmo placar)
+                        const jaExiste = listaResultados.some(r => {
+                            const mesmoConfronto = compararEquipasSimples(r.equipa_casa, j.equipa_casa) &&
+                                                   compararEquipasSimples(r.equipa_fora, j.equipa_fora);
+                            if (!mesmoConfronto) return false;
+                            const mesmaData = (r.data_jogo === j.data);
+                            const mesmosPontos = (Number(r.pontos_casa) === pCasa && Number(r.pontos_fora) === pFora);
+                            return mesmaData || mesmosPontos;
+                        });
 
                         if (!jaExiste) {
                             const isCN2 = comp.sigla === 'CN2' || /cn2|2ª\s*div/i.test(comp.nome || '');
@@ -1399,14 +1402,12 @@ async function loadCompeticoesSection(supabase) {
                         } else if (j.competicao && /jornada\s*\d+/i.test(j.competicao)) {
                             const m = j.competicao.match(/jornada\s*\d+/i);
                             tagJornada = m ? m[0] : j.competicao;
-                        } else {
-                            tagJornada = 'Jornada 1';
                         }
                         return `
                             <div class="comp-game-card">
                                 <div class="comp-game-date-row">
                                     <span>📅 ${dataFmt}</span>
-                                    <span class="game-hour">${tagJornada}</span>
+                                    ${tagJornada ? `<span class="game-hour">${tagJornada}</span>` : ''}
                                 </div>
                                 <div class="comp-game-match-row">
                                     <span class="comp-game-team ${isCasaBCV ? 'is-bcv' : ''}" title="${nomeCasa}">
@@ -1833,15 +1834,22 @@ async function loadCompeticoesSection(supabase) {
                 comp.jogos_serie.forEach(js => {
                     const cNome = (js.equipa_casa || '').trim().toLowerCase();
                     const fNome = (js.equipa_fora || '').trim().toLowerCase();
-                    const jogoExistente = jogosResultados.find(jb => 
-                        (jb.equipa_casa || '').trim().toLowerCase() === cNome &&
-                        (jb.equipa_fora || '').trim().toLowerCase() === fNome &&
-                        (jb.data_jogo === js.data || !js.data)
-                    );
+                    const jogoExistente = jogosResultados.find(jb => {
+                        const matchCasa = (jb.equipa_casa || '').trim().toLowerCase() === cNome;
+                        const matchFora = (jb.equipa_fora || '').trim().toLowerCase() === fNome;
+                        if (!matchCasa || !matchFora) return false;
+                        const matchData = (jb.data_jogo === js.data || !js.data || !jb.data_jogo);
+                        const matchPts = (Number(jb.pontos_casa) === Number(js.pontos_casa) && Number(jb.pontos_fora) === Number(js.pontos_fora));
+                        const matchJornada = (jb.jornada && js.jornada && Number(jb.jornada) === Number(js.jornada));
+                        return matchData || matchPts || matchJornada;
+                    });
                     if (jogoExistente) {
                         if (js.jornada) {
                             jogoExistente.jornada = js.jornada;
                             jogoExistente.competicao = `Jornada ${js.jornada}`;
+                        }
+                        if (!jogoExistente.data_jogo && js.data) {
+                            jogoExistente.data_jogo = js.data;
                         }
                     } else {
                         jogosResultados.push({
@@ -1857,6 +1865,26 @@ async function loadCompeticoesSection(supabase) {
                     }
                 });
             }
+
+            // Deduplicação defensiva extra para garantir que nunca haja cartões duplicados do mesmo jogo
+            const jogosUnicos = [];
+            jogosResultados.forEach(j => {
+                const jaAdicionado = jogosUnicos.some(u => {
+                    const cNomeU = (u.equipa_casa || '').trim().toLowerCase();
+                    const fNomeU = (u.equipa_fora || '').trim().toLowerCase();
+                    const cNomeJ = (j.equipa_casa || '').trim().toLowerCase();
+                    const fNomeJ = (j.equipa_fora || '').trim().toLowerCase();
+                    if (cNomeU !== cNomeJ || fNomeU !== fNomeJ) return false;
+                    const mesmaData = (u.data_jogo && j.data_jogo && u.data_jogo === j.data_jogo);
+                    const mesmosPontos = (Number(u.pontos_casa) === Number(j.pontos_casa) && Number(u.pontos_fora) === Number(j.pontos_fora));
+                    const mesmaJornada = (u.jornada && j.jornada && Number(u.jornada) === Number(j.jornada));
+                    return mesmaData || mesmosPontos || mesmaJornada;
+                });
+                if (!jaAdicionado) {
+                    jogosUnicos.push(j);
+                }
+            });
+            jogosResultados = jogosUnicos;
 
             // Ordenar do mais recente ao mais antigo (Data Descendente > Jornada Descendente)
             jogosResultados.sort((a, b) => {
