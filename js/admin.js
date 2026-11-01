@@ -4963,7 +4963,9 @@ document.addEventListener('DOMContentLoaded', async () => {
 
     async function loadResultados() {
         if (!resultadosTableBody) return;
-        resultadosTableBody.innerHTML = '<tr><td colspan="6" style="padding: 20px; text-align: center;">A carregar resultados...</td></tr>';
+        if (!currentResultadosGames || currentResultadosGames.length === 0) {
+            resultadosTableBody.innerHTML = '<tr><td colspan="6" style="padding: 20px; text-align: center;">A carregar resultados...</td></tr>';
+        }
 
         try {
             const { data, error } = await supabase
@@ -9436,21 +9438,6 @@ document.addEventListener('DOMContentLoaded', async () => {
                 renderCompeticoesAdmin();
             }
 
-            // Sincronização automática em background de jogos concluídos das séries
-            if (Array.isArray(currentCompeticoes)) {
-                setTimeout(async () => {
-                    try {
-                        for (const c of currentCompeticoes) {
-                            if (c && Array.isArray(c.jogos_serie) && c.jogos_serie.length > 0) {
-                                await sincronizarJogosSerieComResultados(c, c.jogos_serie);
-                            }
-                        }
-                    } catch (e) {
-                        console.warn("Sincronização em background de séries:", e);
-                    }
-                }, 1200);
-            }
-
         } catch (err) {
             console.error("Erro ao carregar competições no admin:", err);
             if (tbody) {
@@ -11266,12 +11253,10 @@ document.addEventListener('DOMContentLoaded', async () => {
         }
 
         if (ok) {
-            // Sincronizar automaticamente todos os jogos do BC Valença com resultados_bcv e agenda_bcv
+            // Sincronizar automaticamente os jogos da série guardada com resultados_bcv e agenda_bcv
             let countSinc = 0;
-            for (const c of (currentCompeticoes || [])) {
-                if (c && Array.isArray(c.jogos_serie) && c.jogos_serie.length > 0) {
-                    countSinc += await sincronizarJogosSerieComResultados(c, c.jogos_serie);
-                }
+            if (comp && Array.isArray(comp.jogos_serie) && comp.jogos_serie.length > 0) {
+                countSinc = await sincronizarJogosSerieComResultados(comp, comp.jogos_serie);
             }
 
             window.fecharModalTabelaSerie();
