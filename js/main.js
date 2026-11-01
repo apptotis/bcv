@@ -170,12 +170,16 @@ function obterLogoEquipa(nomeEquipa, dbLogo) {
 
 function compararEquipasSimples(eq1, eq2) {
     if (!eq1 || !eq2) return false;
-    const n1 = eq1.toLowerCase().trim().replace(/[^a-z0-9]/g, '');
-    const n2 = eq2.toLowerCase().trim().replace(/[^a-z0-9]/g, '');
+    const norm = (s) => s.toLowerCase().trim().normalize('NFD').replace(/[\u0300-\u036f]/g, '').replace(/[^a-z0-9]/g, '');
+    const n1 = norm(eq1);
+    const n2 = norm(eq2);
     if (n1 === n2) return true;
     const isBcv1 = n1.includes('valenca') || n1.includes('bcv');
     const isBcv2 = n2.includes('valenca') || n2.includes('bcv');
     if (isBcv1 && isBcv2) return true;
+    const isVig1 = n1.includes('vigoros');
+    const isVig2 = n2.includes('vigoros');
+    if (isVig1 && isVig2) return true;
     return (n1.length >= 4 && n2.includes(n1)) || (n2.length >= 4 && n1.includes(n2));
 }
 
@@ -278,7 +282,7 @@ async function loadPortalHighlights(supabase) {
                 .from('resultados_bcv')
                 .select('*')
                 .order('data_jogo', { ascending: false })
-                .limit(15),
+                .limit(100),
             supabase
                 .from('clube_config')
                 .select('dados')
@@ -287,7 +291,20 @@ async function loadPortalHighlights(supabase) {
         ]);
 
         const rawResultados = resResultados?.data || [];
-        let listaResultados = [...rawResultados];
+        let listaResultados = [];
+        // Deduplicar registos vindos da BD por segurança
+        rawResultados.forEach(r => {
+            const dup = listaResultados.some(u => {
+                const mesmoConfronto = compararEquipasSimples(u.equipa_casa, r.equipa_casa) &&
+                                       compararEquipasSimples(u.equipa_fora, r.equipa_fora);
+                if (!mesmoConfronto) return false;
+                const mesmoEscalao = (u.escalao || '').toLowerCase().trim() === (r.escalao || '').toLowerCase().trim();
+                const mesmaData = (u.data_jogo === r.data_jogo);
+                const mesmosPontos = (Number(u.pontos_casa) === Number(r.pontos_casa) && Number(u.pontos_fora) === Number(r.pontos_fora));
+                return mesmaData || (mesmoEscalao && mesmosPontos);
+            });
+            if (!dup) listaResultados.push(r);
+        });
 
         // 1. Integrar jogos com resultado registados nas Séries das Competições (ex: CN2, Sub 14, Sub 16, etc.)
         if (resConfig?.data?.dados && Array.isArray(resConfig.data.dados)) {
@@ -330,20 +347,6 @@ async function loadPortalHighlights(supabase) {
                                 logo_fora: j.logo_fora || obterLogoEquipa(j.equipa_fora)
                             };
                             listaResultados.push(novoRes);
-
-                            // Sincronizar em background no Supabase em resultados_bcv
-                            supabase.from('resultados_bcv').insert([{
-                                equipa_casa: novoRes.equipa_casa,
-                                equipa_fora: novoRes.equipa_fora,
-                                pontos_casa: novoRes.pontos_casa,
-                                pontos_fora: novoRes.pontos_fora,
-                                data_jogo: novoRes.data_jogo,
-                                escalao: novoRes.escalao,
-                                competicao: novoRes.competicao,
-                                publicado: true,
-                                logo_casa: novoRes.logo_casa,
-                                logo_fora: novoRes.logo_fora
-                            }]).then(() => {}).catch(() => {});
                         }
                     });
                 }

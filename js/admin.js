@@ -4777,19 +4777,42 @@ document.addEventListener('DOMContentLoaded', async () => {
             submitBtn.textContent = "A guardar resultado...";
 
             try {
-                // 1. Inserir em resultados_bcv
-                const { error: insertError } = await supabase.from('resultados_bcv').insert([{
-                    equipa_casa: equipaCasa,
-                    equipa_fora: equipaFora,
-                    pontos_casa: pontosCasa,
-                    pontos_fora: pontosFora,
-                    data_jogo: dataJogo,
-                    escalao: escalao,
-                    local: local,
-                    fpb_id: fpbId
-                }]);
+                // 1. Verificar se já existe em resultados_bcv para evitar duplicados
+                const existente = (currentResultadosGames || []).find(r => {
+                    if (fpbId && r.fpb_id && String(r.fpb_id) === String(fpbId)) return true;
+                    return r.data_jogo === dataJogo &&
+                           compararEquipasIguais(r.equipa_casa, equipaCasa) &&
+                           compararEquipasIguais(r.equipa_fora, equipaFora);
+                });
 
-                if (insertError) throw insertError;
+                let saveError = null;
+                if (existente) {
+                    const { error: upErr } = await supabase.from('resultados_bcv').update({
+                        equipa_casa: equipaCasa,
+                        equipa_fora: equipaFora,
+                        pontos_casa: pontosCasa,
+                        pontos_fora: pontosFora,
+                        data_jogo: dataJogo,
+                        escalao: escalao,
+                        local: local || existente.local,
+                        fpb_id: fpbId || existente.fpb_id
+                    }).eq('id', existente.id);
+                    saveError = upErr;
+                } else {
+                    const { error: inErr } = await supabase.from('resultados_bcv').insert([{
+                        equipa_casa: equipaCasa,
+                        equipa_fora: equipaFora,
+                        pontos_casa: pontosCasa,
+                        pontos_fora: pontosFora,
+                        data_jogo: dataJogo,
+                        escalao: escalao,
+                        local: local,
+                        fpb_id: fpbId
+                    }]);
+                    saveError = inErr;
+                }
+
+                if (saveError) throw saveError;
 
                 // 2. Apagar da agenda_bcv
                 if (agendaId) {
@@ -4887,8 +4910,17 @@ document.addEventListener('DOMContentLoaded', async () => {
 
             try {
                 let error;
-                if (id) {
-                    const { error: err } = await supabase.from('resultados_bcv').update(resData).eq('id', id);
+                let targetId = id;
+                if (!targetId) {
+                    const dup = (currentResultadosGames || []).find(r =>
+                        r.data_jogo === resData.data_jogo &&
+                        compararEquipasIguais(r.equipa_casa, resData.equipa_casa) &&
+                        compararEquipasIguais(r.equipa_fora, resData.equipa_fora)
+                    );
+                    if (dup) targetId = dup.id;
+                }
+                if (targetId) {
+                    const { error: err } = await supabase.from('resultados_bcv').update(resData).eq('id', targetId);
                     error = err;
                 } else {
                     const { error: err } = await supabase.from('resultados_bcv').insert([resData]);
@@ -4940,7 +4972,44 @@ document.addEventListener('DOMContentLoaded', async () => {
                 .order('data_jogo', { ascending: false });
 
             if (error) throw error;
-            currentResultadosGames = data || [];
+            const rawList = data || [];
+            const unicos = [];
+            const idsDuplicados = [];
+
+            // Ordenar priorizando registos mais completos (com local e fpb_id) antes de deduplicar
+            const sortedForDedup = [...rawList].sort((a, b) => {
+                if (a.data_jogo !== b.data_jogo) return (b.data_jogo || '').localeCompare(a.data_jogo || '');
+                const scoreA = (a.local ? 2 : 0) + (a.fpb_id ? 1 : 0);
+                const scoreB = (b.local ? 2 : 0) + (b.fpb_id ? 1 : 0);
+                if (scoreB !== scoreA) return scoreB - scoreA;
+                return (Number(a.id) || 0) - (Number(b.id) || 0);
+            });
+
+            sortedForDedup.forEach(item => {
+                const jaExiste = unicos.find(u => {
+                    if (item.fpb_id && u.fpb_id && String(item.fpb_id) === String(u.fpb_id)) return true;
+                    const mesmoConfronto = compararEquipasIguais(u.equipa_casa, item.equipa_casa) &&
+                                           compararEquipasIguais(u.equipa_fora, item.equipa_fora);
+                    if (!mesmoConfronto) return false;
+                    const mesmaData = (u.data_jogo === item.data_jogo);
+                    const mesmoEscalao = (u.escalao || '').toLowerCase().trim() === (item.escalao || '').toLowerCase().trim();
+                    const mesmosPontos = (Number(u.pontos_casa) === Number(item.pontos_casa) && Number(u.pontos_fora) === Number(item.pontos_fora));
+                    return mesmaData || (mesmoEscalao && mesmosPontos);
+                });
+
+                if (jaExiste) {
+                    if (item.id) idsDuplicados.push(item.id);
+                } else {
+                    unicos.push(item);
+                }
+            });
+
+            if (idsDuplicados.length > 0) {
+                console.log(`[Limpeza Duplicados]: A remover ${idsDuplicados.length} resultado(s) duplicado(s) da base de dados...`);
+                supabase.from('resultados_bcv').delete().in('id', idsDuplicados).then(() => {}).catch(err => console.warn("Aviso ao limpar duplicados:", err));
+            }
+
+            currentResultadosGames = unicos;
             renderResultadosTable();
         } catch (err) {
             console.error("Erro ao carregar resultados:", err);
@@ -10831,8 +10900,9 @@ document.addEventListener('DOMContentLoaded', async () => {
 
     function compararEquipasIguais(eq1, eq2) {
         if (!eq1 || !eq2) return false;
-        const n1 = eq1.toLowerCase().trim().replace(/[^a-z0-9]/g, '');
-        const n2 = eq2.toLowerCase().trim().replace(/[^a-z0-9]/g, '');
+        const norm = (s) => s.toLowerCase().trim().normalize('NFD').replace(/[\u0300-\u036f]/g, '').replace(/[^a-z0-9]/g, '');
+        const n1 = norm(eq1);
+        const n2 = norm(eq2);
         if (n1 === n2) return true;
         const isBcv1 = n1.includes('valenca') || n1.includes('bcv');
         const isBcv2 = n2.includes('valenca') || n2.includes('bcv');
@@ -10916,8 +10986,11 @@ document.addEventListener('DOMContentLoaded', async () => {
     }
     window.calcularClassificacaoEquipasSerie = calcularClassificacaoEquipasSerie;
 
+    let isSyncingSerieResultados = false;
     async function sincronizarJogosSerieComResultados(comp, jogosSerie) {
         if (!comp || !Array.isArray(jogosSerie) || jogosSerie.length === 0) return 0;
+        if (isSyncingSerieResultados) return 0;
+        isSyncingSerieResultados = true;
 
         try {
             const [resAgenda, resResultados] = await Promise.all([
@@ -10990,21 +11063,28 @@ document.addEventListener('DOMContentLoaded', async () => {
                 const fpbId = (agendaItem && agendaItem.fpb_id) || (resMatch && resMatch.fpb_id) || j.fpb_id || null;
 
                 if (resMatch) {
-                    // Atualizar resultado existente na base de dados
-                    await supabase.from('resultados_bcv').update({
-                        pontos_casa: pCasa,
-                        pontos_fora: pFora,
-                        data_jogo: j.data || resMatch.data_jogo,
-                        publicado: resMatch.publicado !== false,
-                        logo_casa: logoCasa,
-                        logo_fora: logoFora,
-                        escalao: escalaoJogo,
-                        competicao: competicaoJogo
-                    }).eq('id', resMatch.id);
-                    sincronizados++;
+                    // Atualizar resultado existente na base de dados apenas se os pontos ou data mudaram
+                    const mudouPontos = Number(resMatch.pontos_casa) !== pCasa || Number(resMatch.pontos_fora) !== pFora;
+                    const mudouData = j.data && resMatch.data_jogo !== j.data;
+                    if (mudouPontos || mudouData) {
+                        await supabase.from('resultados_bcv').update({
+                            pontos_casa: pCasa,
+                            pontos_fora: pFora,
+                            data_jogo: j.data || resMatch.data_jogo,
+                            publicado: resMatch.publicado !== false,
+                            logo_casa: logoCasa,
+                            logo_fora: logoFora,
+                            escalao: escalaoJogo,
+                            competicao: competicaoJogo
+                        }).eq('id', resMatch.id);
+                        resMatch.pontos_casa = pCasa;
+                        resMatch.pontos_fora = pFora;
+                        resMatch.data_jogo = j.data || resMatch.data_jogo;
+                        sincronizados++;
+                    }
                 } else {
                     // Inserir novo resultado na base de dados
-                    await supabase.from('resultados_bcv').insert([{
+                    const novoRegisto = {
                         equipa_casa: j.equipa_casa,
                         equipa_fora: j.equipa_fora,
                         pontos_casa: pCasa,
@@ -11017,22 +11097,36 @@ document.addEventListener('DOMContentLoaded', async () => {
                         publicado: true,
                         logo_casa: logoCasa,
                         logo_fora: logoFora
-                    }]);
+                    };
+                    const { data: insertedRows, error: inErr } = await supabase.from('resultados_bcv').insert([novoRegisto]).select();
+                    if (inErr && inErr.message && inErr.message.includes('logo_')) {
+                        delete novoRegisto.logo_casa;
+                        delete novoRegisto.logo_fora;
+                        const { data: retryRows } = await supabase.from('resultados_bcv').insert([novoRegisto]).select();
+                        if (retryRows && retryRows[0]) resultadosGames.push(retryRows[0]);
+                        else resultadosGames.push(novoRegisto);
+                    } else {
+                        if (insertedRows && insertedRows[0]) resultadosGames.push(insertedRows[0]);
+                        else resultadosGames.push(novoRegisto);
+                    }
                     sincronizados++;
                 }
             }
 
-            // Recarregar listas do Admin para atualização instantânea na interface
-            await Promise.all([
-                loadResultados(),
-                loadAgenda()
-            ]);
-
-            console.log(`[Sincronização Série]: ${sincronizados} jogo(s) sincronizados com resultados_bcv, ${agendaRemovidos} removidos da agenda.`);
+            // Recarregar listas do Admin apenas se houve alterações reais
+            if (sincronizados > 0 || agendaRemovidos > 0) {
+                await Promise.all([
+                    loadResultados(),
+                    loadAgenda()
+                ]);
+                console.log(`[Sincronização Série]: ${sincronizados} jogo(s) sincronizados com resultados_bcv, ${agendaRemovidos} removidos da agenda.`);
+            }
             return sincronizados;
         } catch (err) {
             console.error("Erro ao sincronizar jogos da série com resultados:", err);
             return 0;
+        } finally {
+            isSyncingSerieResultados = false;
         }
     }
     window.sincronizarJogosSerieComResultados = sincronizarJogosSerieComResultados;
