@@ -1210,3 +1210,298 @@ body {
     color: var(--text-muted);
     font-size: 0.85rem;
 }
+
+/* ====================================================================
+   MÓDULO: RELATÓRIOS & MAPAS MENSAIS DE PRESENÇAS
+   ==================================================================== */
+
+.relatorio-filter-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(130px, 1fr));
+    gap: 10px;
+    margin-bottom: 12px;
+}
+
+.relatorio-filter-item {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+.relatorio-filter-label {
+    font-size: 0.74rem;
+    font-weight: 700;
+    color: var(--text-muted);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.relatorio-actions-bar {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    flex-wrap: wrap;
+    padding-top: 10px;
+    border-top: 1px solid var(--border);
+}
+
+.btn-rel-action {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    padding: 9px 14px;
+    border-radius: var(--radius-sm);
+    font-size: 0.82rem;
+    font-weight: 700;
+    cursor: pointer;
+    border: none;
+    transition: all 0.2s ease;
+}
+
+.btn-rel-action:active {
+    transform: scale(0.97);
+}
+
+.btn-rel-refresh {
+    background: #f1f5f9;
+    color: #334155;
+    border: 1px solid var(--border);
+}
+.btn-rel-refresh:hover {
+    background: #e2e8f0;
+}
+
+.btn-rel-pdf {
+    background: linear-gradient(135deg, #7e22ce, #9333ea);
+    color: #ffffff;
+    box-shadow: 0 2px 8px rgba(126, 34, 206, 0.3);
+}
+.btn-rel-pdf:hover {
+    background: linear-gradient(135deg, #6b21a8, #7e22ce);
+}
+
+.btn-rel-excel {
+    background: linear-gradient(135deg, #059669, #10b981);
+    color: #ffffff;
+    box-shadow: 0 2px 8px rgba(16, 185, 129, 0.3);
+}
+.btn-rel-excel:hover {
+    background: linear-gradient(135deg, #047857, #059669);
+}
+
+/* KPIs de Resumo do Mês */
+.relatorio-kpis-container {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 10px;
+    margin-bottom: 12px;
+}
+
+@media (min-width: 640px) {
+    .relatorio-kpis-container {
+        grid-template-columns: repeat(4, 1fr);
+    }
+}
+
+.rel-kpi-card {
+    background: #ffffff;
+    border: 1px solid var(--border);
+    border-radius: var(--radius-md);
+    padding: 12px 14px;
+    box-shadow: var(--shadow-sm);
+    display: flex;
+    flex-direction: column;
+    gap: 3px;
+}
+
+.rel-kpi-title {
+    font-size: 0.72rem;
+    font-weight: 700;
+    color: var(--text-muted);
+    text-transform: uppercase;
+}
+
+.rel-kpi-value {
+    font-size: 1.35rem;
+    font-weight: 800;
+    color: var(--text-main);
+    display: flex;
+    align-items: baseline;
+    gap: 4px;
+}
+
+.rel-kpi-subtitle {
+    font-size: 0.72rem;
+    color: var(--text-light);
+}
+
+/* Barra de Legenda */
+.relatorio-legenda-bar {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    flex-wrap: wrap;
+    background: #ffffff;
+    border: 1px solid var(--border);
+    border-radius: var(--radius-md);
+    padding: 8px 12px;
+    margin-bottom: 12px;
+    font-size: 0.74rem;
+    color: var(--text-muted);
+}
+
+.legenda-item {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    font-weight: 600;
+}
+
+.badge-mini {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 20px;
+    height: 20px;
+    border-radius: 4px;
+    font-size: 0.72rem;
+    font-weight: 800;
+}
+
+.badge-p {
+    background: #dcfce7;
+    color: #15803d;
+    border: 1px solid #86efac;
+}
+
+.badge-f {
+    background: #fee2e2;
+    color: #b91c1c;
+    border: 1px solid #fca5a5;
+}
+
+.badge-j {
+    background: #fef3c7;
+    color: #b45309;
+    border: 1px solid #fde68a;
+}
+
+.badge-l {
+    background: #f3e8ff;
+    color: #7e22ce;
+    border: 1px solid #d8b4fe;
+}
+
+.badge-none {
+    background: #f1f5f9;
+    color: #94a3b8;
+    border: 1px solid #e2e8f0;
+}
+
+/* Tabela Matricial Mensal */
+.relatorio-matrix-card {
+    background: #ffffff;
+    border: 1px solid var(--border);
+    border-radius: var(--radius-md);
+    overflow: hidden;
+    box-shadow: var(--shadow-sm);
+    margin-bottom: 24px;
+}
+
+.relatorio-matrix-wrapper {
+    width: 100%;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+}
+
+.relatorio-matrix-table {
+    width: 100%;
+    border-collapse: separate;
+    border-spacing: 0;
+    font-size: 0.78rem;
+    min-width: 600px;
+}
+
+.relatorio-matrix-table th {
+    background: #f8fafc;
+    color: var(--text-main);
+    font-weight: 700;
+    padding: 8px 6px;
+    border-bottom: 2px solid var(--border);
+    border-right: 1px solid var(--border);
+    text-align: center;
+    white-space: nowrap;
+}
+
+.relatorio-matrix-table th.th-atleta {
+    position: sticky;
+    left: 0;
+    background: #f8fafc;
+    z-index: 3;
+    text-align: left;
+    padding-left: 12px;
+    min-width: 140px;
+    border-right: 2px solid var(--border);
+}
+
+.relatorio-matrix-table th.th-day {
+    min-width: 38px;
+    font-size: 0.72rem;
+    line-height: 1.2;
+}
+
+.relatorio-matrix-table th.th-totais {
+    background: #f1f5f9;
+    min-width: 42px;
+}
+
+.relatorio-matrix-table td {
+    padding: 6px 4px;
+    border-bottom: 1px solid #f1f5f9;
+    border-right: 1px solid #f1f5f9;
+    text-align: center;
+    white-space: nowrap;
+}
+
+.relatorio-matrix-table tr:hover td {
+    background-color: #faf5ff;
+}
+
+.relatorio-matrix-table tr:hover td.td-atleta {
+    background-color: #f3e8ff;
+}
+
+.relatorio-matrix-table td.td-atleta {
+    position: sticky;
+    left: 0;
+    background: #ffffff;
+    z-index: 2;
+    text-align: left;
+    padding: 8px 10px 8px 12px;
+    font-weight: 600;
+    border-right: 2px solid var(--border);
+    box-shadow: 2px 0 5px rgba(0,0,0,0.02);
+}
+
+.relatorio-matrix-table td.td-totais {
+    background: #fbfbfe;
+    font-weight: 700;
+    font-size: 0.8rem;
+}
+
+.relatorio-matrix-table td.td-taxa {
+    background: #fbfbfe;
+    font-weight: 800;
+}
+
+.rate-pill-mini {
+    display: inline-block;
+    padding: 2px 6px;
+    border-radius: 9999px;
+    font-size: 0.72rem;
+    font-weight: 800;
+}
+.rate-pill-mini.high { background: #dcfce7; color: #15803d; }
+.rate-pill-mini.medium { background: #fef3c7; color: #b45309; }
+.rate-pill-mini.low { background: #fee2e2; color: #b91c1c; }

@@ -340,6 +340,15 @@ document.addEventListener('DOMContentLoaded', async () => {
             if (multiEscalaoBar) multiEscalaoBar.style.display = 'none';
             if (drawerSectionEscaloes) drawerSectionEscaloes.style.display = 'none';
         }
+
+        // 3. Atualizar Select de Equipas na aba de Relatórios
+        const relEquipaSelect = document.getElementById('relatorio-equipa-select');
+        if (relEquipaSelect && userTeams.length > 0) {
+            relEquipaSelect.innerHTML = userTeams.map(t => {
+                const isSelected = activeTeam && String(t.id) === String(activeTeam.id);
+                return `<option value="${t.id}" ${isSelected ? 'selected' : ''}>${escapeHtml(t.nome)}</option>`;
+            }).join('');
+        }
     }
 
     // Função global para alternar equipa ativa
@@ -457,6 +466,8 @@ document.addEventListener('DOMContentLoaded', async () => {
                 renderPlantel();
             } else if (targetTabId === 'tab-sos') {
                 renderSos();
+            } else if (targetTabId === 'tab-relatorios') {
+                loadRelatorioPresencas();
             }
         });
     });
@@ -480,6 +491,8 @@ document.addEventListener('DOMContentLoaded', async () => {
         if (listaPresencasContainer) listaPresencasContainer.innerHTML = msgHtml;
         if (listaPlantelContainer) listaPlantelContainer.innerHTML = msgHtml;
         if (listaSosContainer) listaSosContainer.innerHTML = msgHtml;
+        const relContainer = document.getElementById('relatorio-matrix-container');
+        if (relContainer) relContainer.innerHTML = msgHtml;
 
         const stickySaveBar = document.querySelector('.sticky-save-bar');
         if (stickySaveBar) stickySaveBar.style.display = 'none';
@@ -583,6 +596,9 @@ document.addEventListener('DOMContentLoaded', async () => {
             await loadPresencas();
             renderPlantel();
             renderSos();
+            if (document.getElementById('tab-relatorios')?.classList.contains('active')) {
+                loadRelatorioPresencas();
+            }
 
         } catch (error) {
             console.error("Erro ao carregar atletas da equipa:", error);
@@ -1161,6 +1177,778 @@ document.addEventListener('DOMContentLoaded', async () => {
     if (filtroSos) {
         filtroSos.addEventListener('input', renderSos);
     }
+
+    // ====================================================================
+    // MÓDULO 4: RELATÓRIOS (MAPA MENSAL DE PRESENÇAS, PDF & EXCEL)
+    // ====================================================================
+    const relatorioEquipaSelect = document.getElementById('relatorio-equipa-select');
+    const relatorioMesSelect = document.getElementById('relatorio-mes-select');
+    const relatorioAnoSelect = document.getElementById('relatorio-ano-select');
+    const relatorioTipoSelect = document.getElementById('relatorio-tipo-select');
+    const btnRelAtualizar = document.getElementById('btn-rel-atualizar');
+    const btnRelExportPdf = document.getElementById('btn-rel-export-pdf');
+    const btnRelExportExcel = document.getElementById('btn-rel-export-excel');
+    const relatorioKpisContainer = document.getElementById('relatorio-kpis-container');
+    const relatorioMatrixContainer = document.getElementById('relatorio-matrix-container');
+
+    const NOMES_MESES = [
+        'Janeiro', 'Fevereiro', 'Março', 'Abril', 'Maio', 'Junho',
+        'Julho', 'Agosto', 'Setembro', 'Outubro', 'Novembro', 'Dezembro'
+    ];
+    const DIAS_SEMANA_ABREV = ['Dom', 'Seg', 'Ter', 'Qua', 'Qui', 'Sex', 'Sáb'];
+
+    let currentRelatorioData = null; // Armazena a matriz e métricas do relatório atual para exportação
+
+    // Inicializar Seletores de Data dos Relatórios
+    function initRelatorioDateSelectors() {
+        const hoje = new Date();
+        const anoAtual = hoje.getFullYear();
+        const mesAtual = hoje.getMonth() + 1; // 1-12
+
+        // 1. Preencher select de Anos (ano anterior, atual e seguinte)
+        if (relatorioAnoSelect) {
+            relatorioAnoSelect.innerHTML = '';
+            for (let ano = anoAtual - 1; ano <= anoAtual + 1; ano++) {
+                const opt = document.createElement('option');
+                opt.value = ano;
+                opt.textContent = ano;
+                if (ano === anoAtual) opt.selected = true;
+                relatorioAnoSelect.appendChild(opt);
+            }
+        }
+
+        // 2. Definir Mês Atual
+        if (relatorioMesSelect) {
+            relatorioMesSelect.value = String(mesAtual);
+        }
+    }
+    initRelatorioDateSelectors();
+
+    // Consultar e Renderizar Mapa Mensal de Presenças
+    async function loadRelatorioPresencas() {
+        if (!relatorioMatrixContainer) return;
+
+        if (!activeTeam || userTeams.length === 0) {
+            renderEmptyNoTeams();
+            return;
+        }
+
+        const mes = parseInt(relatorioMesSelect?.value || (new Date().getMonth() + 1), 10);
+        const ano = parseInt(relatorioAnoSelect?.value || new Date().getFullYear(), 10);
+        const tipoFiltro = relatorioTipoSelect?.value || 'todos';
+        const nomeMes = NOMES_MESES[mes - 1] || `Mês ${mes}`;
+
+        relatorioMatrixContainer.innerHTML = `
+            <div style="text-align: center; padding: 30px; color: var(--text-muted);">
+                <div style="font-size: 1.8rem; margin-bottom: 8px;">⏳</div>
+                A compilar mapa mensal de presenças de <strong>${escapeHtml(activeTeam.nome)}</strong> (${nomeMes} de ${ano})...
+            </div>
+        `;
+
+        if (relatorioKpisContainer) {
+            relatorioKpisContainer.innerHTML = '';
+        }
+
+        try {
+            // Datas Limites do Mês
+            const ultimoDiaMes = new Date(ano, mes, 0).getDate();
+            const dataInicio = `${ano}-${String(mes).padStart(2, '0')}-01`;
+            const dataFim = `${ano}-${String(mes).padStart(2, '0')}-${String(ultimoDiaMes).padStart(2, '0')}`;
+
+            // Consultar presenças do mês na base de dados
+            let query = supabase
+                .from('presencas')
+                .select('*')
+                .gte('data', dataInicio)
+                .lte('data', dataFim)
+                .order('data', { ascending: true });
+
+            if (tipoFiltro && tipoFiltro !== 'todos') {
+                query = query.eq('tipo', tipoFiltro);
+            }
+
+            const { data: presencasDb, error } = await query;
+            if (error && error.code !== '42P01') {
+                throw error;
+            }
+
+            // Filtrar apenas registos dos atletas que pertencem ao plantel ativo
+            const idsAtletasSet = new Set((currentAtletas || []).map(a => a.id));
+            const presencasFiltradas = (presencasDb || []).filter(p => idsAtletasSet.has(p.atleta_id));
+
+            // Apurar dias únicos de sessão (treino ou jogo) registados no mês
+            const sessoesMap = {}; // data -> { data, tipo, diaSemana, diaNum }
+            presencasFiltradas.forEach(p => {
+                if (!sessoesMap[p.data]) {
+                    const dt = new Date(p.data + 'T12:00:00');
+                    sessoesMap[p.data] = {
+                        data: p.data,
+                        tipo: p.tipo || 'Treino',
+                        diaNum: p.data.split('-')[2],
+                        diaSemana: isNaN(dt.getTime()) ? '' : DIAS_SEMANA_ABREV[dt.getDay()]
+                    };
+                }
+            });
+
+            const diasSessao = Object.keys(sessoesMap).sort();
+
+            // Guardar dados estruturados para exportação
+            currentRelatorioData = {
+                equipa: activeTeam,
+                ano,
+                mes,
+                nomeMes,
+                tipoFiltro,
+                atletas: currentAtletas || [],
+                diasSessao: diasSessao.map(d => sessoesMap[d]),
+                presencas: presencasFiltradas
+            };
+
+            // SE NÃO HOUVER NENHUMA SESSÃO REGISTADA NO MÊS
+            if (diasSessao.length === 0) {
+                if (relatorioKpisContainer) {
+                    relatorioKpisContainer.innerHTML = `
+                        <div class="rel-kpi-card" style="grid-column: 1 / -1; text-align: center; padding: 18px;">
+                            <div class="rel-kpi-title">Sem Registos</div>
+                            <div class="rel-kpi-value" style="font-size: 1.1rem; justify-content: center; color: var(--text-muted);">
+                                Nenhuma presença registada em ${nomeMes} de ${ano}
+                            </div>
+                            <div class="rel-kpi-subtitle">
+                                As presenças registadas no <strong>Diário Desportivo</strong> surgirão automaticamente aqui compiladas em grelha.
+                            </div>
+                        </div>
+                    `;
+                }
+
+                relatorioMatrixContainer.innerHTML = `
+                    <div style="text-align: center; padding: 40px 20px; color: var(--text-muted);">
+                        <span style="font-size: 2.4rem; display: block; margin-bottom: 10px;">📋</span>
+                        <h4 style="color: var(--text-main); margin-bottom: 6px;">Nenhuma sessão encontrada para este período</h4>
+                        <p style="font-size: 0.85rem; max-width: 380px; margin: 0 auto 16px;">
+                            Não existem treinos ou jogos com chamada registada em <strong>${nomeMes} de ${ano}</strong> para a equipa <strong>${escapeHtml(activeTeam.nome)}</strong>.
+                        </p>
+                        <button type="button" class="btn-rel-action btn-rel-pdf" onclick="document.querySelector('[data-tab=\\'tab-presencas\\']')?.click()">
+                            📖 Fazer Chamada no Diário Desportivo
+                        </button>
+                    </div>
+                `;
+                return;
+            }
+
+            // PROCESSAR ESTATÍSTICAS E MATRIZ POR ATLETA
+            let somaTotalPresentes = 0;
+            let somaTotalFaltas = 0;
+            let somaTotalJustificados = 0;
+            let somaTotalLesionados = 0;
+
+            const atletasMatriz = (currentAtletas || []).map(atleta => {
+                let pCount = 0, fCount = 0, jCount = 0, lCount = 0;
+                const statusPorDia = {};
+
+                diasSessao.forEach(dia => {
+                    const reg = presencasFiltradas.find(p => p.atleta_id === atleta.id && p.data === dia);
+                    const st = reg ? (reg.estado || 'Presente') : '-';
+                    statusPorDia[dia] = st;
+
+                    if (st === 'Presente') pCount++;
+                    else if (st === 'Falta') fCount++;
+                    else if (st === 'Justificado') jCount++;
+                    else if (st === 'Lesionado') lCount++;
+                });
+
+                somaTotalPresentes += pCount;
+                somaTotalFaltas += fCount;
+                somaTotalJustificados += jCount;
+                somaTotalLesionados += lCount;
+
+                const totalSessoes = diasSessao.length;
+                const taxa = totalSessoes > 0 ? Math.round((pCount / totalSessoes) * 100) : 0;
+
+                return {
+                    atleta,
+                    statusPorDia,
+                    pCount,
+                    fCount,
+                    jCount,
+                    lCount,
+                    taxa
+                };
+            });
+
+            // Adicionar à estrutura de dados
+            currentRelatorioData.atletasMatriz = atletasMatriz;
+
+            // Estatísticas Globais da Equipa
+            const totalSessoesMes = diasSessao.length;
+            const totalAtletasPlantel = currentAtletas.length;
+            const mediaAssiduidade = atletasMatriz.length > 0 
+                ? Math.round(atletasMatriz.reduce((acc, a) => acc + a.taxa, 0) / atletasMatriz.length) 
+                : 0;
+
+            currentRelatorioData.metricas = {
+                totalSessoesMes,
+                totalAtletasPlantel,
+                mediaAssiduidade,
+                somaTotalPresentes,
+                somaTotalFaltas,
+                somaTotalJustificados,
+                somaTotalLesionados
+            };
+
+            // 1. RENDERIZAR OS KPIS DO MÊS
+            if (relatorioKpisContainer) {
+                const badgeColorRate = mediaAssiduidade >= 80 ? '#10b981' : (mediaAssiduidade >= 60 ? '#f59e0b' : '#ef4444');
+                relatorioKpisContainer.innerHTML = `
+                    <div class="rel-kpi-card">
+                        <span class="rel-kpi-title">📅 Sessões no Mês</span>
+                        <div class="rel-kpi-value">${totalSessoesMes}</div>
+                        <span class="rel-kpi-subtitle">${tipoFiltro === 'Treino' ? 'Treinos' : (tipoFiltro === 'Jogo' ? 'Jogos' : 'Treinos & Jogos')}</span>
+                    </div>
+
+                    <div class="rel-kpi-card">
+                        <span class="rel-kpi-title">👥 Plantel</span>
+                        <div class="rel-kpi-value">${totalAtletasPlantel}</div>
+                        <span class="rel-kpi-subtitle">Atletas Convocáveis</span>
+                    </div>
+
+                    <div class="rel-kpi-card">
+                        <span class="rel-kpi-title">📈 Assiduidade Média</span>
+                        <div class="rel-kpi-value" style="color: ${badgeColorRate};">
+                            ${mediaAssiduidade}%
+                        </div>
+                        <span class="rel-kpi-subtitle">${mediaAssiduidade >= 80 ? 'Excelente assiduidade' : (mediaAssiduidade >= 60 ? 'Média estável' : 'Abaixo do esperado')}</span>
+                    </div>
+
+                    <div class="rel-kpi-card">
+                        <span class="rel-kpi-title">🎯 Presenças vs Faltas</span>
+                        <div class="rel-kpi-value" style="font-size: 1.15rem;">
+                            <span style="color: #10b981;">${somaTotalPresentes} P</span>
+                            <span style="color: var(--text-light); font-size: 0.85rem; font-weight: 400;">/</span>
+                            <span style="color: #ef4444;">${somaTotalFaltas} F</span>
+                        </div>
+                        <span class="rel-kpi-subtitle">${somaTotalJustificados} just. • ${somaTotalLesionados} les.</span>
+                    </div>
+                `;
+            }
+
+            // 2. RENDERIZAR TABELA MATRICIAL
+            let tableHtml = `
+                <table class="relatorio-matrix-table">
+                    <thead>
+                        <tr>
+                            <th class="th-atleta">Atleta</th>
+            `;
+
+            // Colunas de Dias
+            diasSessao.forEach(dia => {
+                const s = sessoesMap[dia];
+                const tipoBadge = s.tipo === 'Jogo' 
+                    ? '<span style="color: #7e22ce; font-weight: 800;">J</span>' 
+                    : '<span style="color: #0284c7; font-weight: 800;">T</span>';
+                tableHtml += `
+                    <th class="th-day" title="${dia} (${s.tipo})">
+                        <div>${s.diaNum}</div>
+                        <div style="font-size: 0.65rem; color: var(--text-light);">${s.diaSemana}</div>
+                        <div style="font-size: 0.62rem; margin-top: 1px;">${tipoBadge}</div>
+                    </th>
+                `;
+            });
+
+            // Colunas de Totais
+            tableHtml += `
+                            <th class="th-totais" title="Total Presente">P</th>
+                            <th class="th-totais" title="Total Falta">F</th>
+                            <th class="th-totais" title="Total Justificado">J</th>
+                            <th class="th-totais" title="Total Lesionado">L</th>
+                            <th class="th-totais" style="min-width: 58px;" title="Taxa de Assiduidade">%</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+            `;
+
+            // Linhas dos Atletas
+            atletasMatriz.forEach(({ atleta, statusPorDia, pCount, fCount, jCount, lCount, taxa }) => {
+                const dorsal = atleta.dorsal_equipa || atleta.equipamento_numero_1 || atleta.dorsal || '-';
+                const rateClass = taxa >= 80 ? 'high' : (taxa >= 60 ? 'medium' : 'low');
+
+                tableHtml += `
+                    <tr>
+                        <td class="td-atleta" title="${escapeHtml(atleta.nome)}">
+                            <div style="display: flex; align-items: center; gap: 6px;">
+                                <span class="badge-numero" style="font-size: 0.68rem; padding: 1px 5px;">${dorsal}</span>
+                                <span style="font-size: 0.82rem; font-weight: 700; color: var(--text-main); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 150px;">
+                                    ${escapeHtml(atleta.nome)}
+                                </span>
+                            </div>
+                        </td>
+                `;
+
+                // Células de cada dia
+                diasSessao.forEach(dia => {
+                    const st = statusPorDia[dia] || '-';
+                    let badgeHtml = '';
+                    if (st === 'Presente') badgeHtml = `<span class="badge-mini badge-p" title="Presente">P</span>`;
+                    else if (st === 'Falta') badgeHtml = `<span class="badge-mini badge-f" title="Falta">F</span>`;
+                    else if (st === 'Justificado') badgeHtml = `<span class="badge-mini badge-j" title="Justificado">J</span>`;
+                    else if (st === 'Lesionado') badgeHtml = `<span class="badge-mini badge-l" title="Lesionado">L</span>`;
+                    else badgeHtml = `<span class="badge-mini badge-none" title="Sem registo">-</span>`;
+
+                    tableHtml += `<td>${badgeHtml}</td>`;
+                });
+
+                // Células de Totais
+                tableHtml += `
+                        <td class="td-totais" style="color: #15803d;">${pCount}</td>
+                        <td class="td-totais" style="color: #b91c1c;">${fCount}</td>
+                        <td class="td-totais" style="color: #b45309;">${jCount}</td>
+                        <td class="td-totais" style="color: #7e22ce;">${lCount}</td>
+                        <td class="td-taxa">
+                            <span class="rate-pill-mini ${rateClass}">${taxa}%</span>
+                        </td>
+                    </tr>
+                `;
+            });
+
+            // Linha de Rodapé com Totais de Presenças em cada sessão
+            tableHtml += `
+                    </tbody>
+                    <tfoot>
+                        <tr style="background: #f8fafc; font-weight: 800; border-top: 2px solid var(--border);">
+                            <td class="td-atleta" style="background: #f8fafc; font-size: 0.75rem; text-transform: uppercase;">
+                                Total Presentes
+                            </td>
+            `;
+
+            diasSessao.forEach(dia => {
+                let presentesNoDia = 0;
+                atletasMatriz.forEach(a => {
+                    if (a.statusPorDia[dia] === 'Presente') presentesNoDia++;
+                });
+                tableHtml += `
+                    <td style="font-weight: 800; color: #15803d; font-size: 0.78rem;" title="${presentesNoDia} de ${atletasMatriz.length} atletas">
+                        ${presentesNoDia}
+                    </td>
+                `;
+            });
+
+            tableHtml += `
+                            <td class="td-totais" style="color: #15803d;">${somaTotalPresentes}</td>
+                            <td class="td-totais" style="color: #b91c1c;">${somaTotalFaltas}</td>
+                            <td class="td-totais" style="color: #b45309;">${somaTotalJustificados}</td>
+                            <td class="td-totais" style="color: #7e22ce;">${somaTotalLesionados}</td>
+                            <td class="td-taxa">
+                                <span class="rate-pill-mini ${mediaAssiduidade >= 80 ? 'high' : (mediaAssiduidade >= 60 ? 'medium' : 'low')}">
+                                    ${mediaAssiduidade}%
+                                </span>
+                            </td>
+                        </tr>
+                    </tfoot>
+                </table>
+            `;
+
+            relatorioMatrixContainer.innerHTML = tableHtml;
+
+        } catch (err) {
+            console.error("Erro ao gerar relatório mensal:", err);
+            relatorioMatrixContainer.innerHTML = `
+                <div style="color: var(--danger); text-align: center; padding: 24px;">
+                    ❌ Erro ao carregar relatório: ${err.message}
+                </div>
+            `;
+        }
+    }
+
+    // -------------------------------------------------------------------------
+    // EXPORTAÇÃO PDF OFICIAL (A4 Paisagem com Cabeçalho Institucional BCV)
+    // -------------------------------------------------------------------------
+    function exportarRelatorioPresencasPDF() {
+        if (!currentRelatorioData || !currentRelatorioData.atletasMatriz || currentRelatorioData.atletasMatriz.length === 0) {
+            alert('Não existem dados carregados no relatório para exportar. Por favor selecione uma equipa e mês válidos.');
+            return;
+        }
+
+        const { equipa, nomeMes, ano, diasSessao, atletasMatriz, metricas } = currentRelatorioData;
+        const dataEmissao = new Date().toLocaleDateString('pt-PT', {
+            day: '2-digit', month: '2-digit', year: 'numeric',
+            hour: '2-digit', minute: '2-digit'
+        });
+        const treinadorNome = userProfile?.nome || currentUser?.email || 'Treinador BCV';
+
+        const printWin = window.open('', '_blank');
+        if (!printWin) {
+            alert('Por favor, permita popups no seu navegador para gerar e imprimir o PDF.');
+            return;
+        }
+
+        // Montar linhas da tabela HTML para o PDF
+        let rowsHtml = '';
+        atletasMatriz.forEach(({ atleta, statusPorDia, pCount, fCount, jCount, lCount, taxa }) => {
+            const dorsal = atleta.dorsal_equipa || atleta.equipamento_numero_1 || atleta.dorsal || '-';
+            const nicknameStr = atleta.nickname ? ` "${escapeHtml(atleta.nickname)}"` : '';
+
+            rowsHtml += `
+                <tr>
+                    <td class="col-num">${dorsal}</td>
+                    <td class="col-nome">${escapeHtml(atleta.nome)}${nicknameStr}</td>
+            `;
+
+            diasSessao.forEach(s => {
+                const st = statusPorDia[s.data] || '-';
+                let cls = 'badge-dash';
+                let letter = '-';
+                if (st === 'Presente') { cls = 'badge-p'; letter = 'P'; }
+                else if (st === 'Falta') { cls = 'badge-f'; letter = 'F'; }
+                else if (st === 'Justificado') { cls = 'badge-j'; letter = 'J'; }
+                else if (st === 'Lesionado') { cls = 'badge-l'; letter = 'L'; }
+
+                rowsHtml += `<td class="col-day"><span class="${cls}">${letter}</span></td>`;
+            });
+
+            rowsHtml += `
+                    <td class="col-tot tot-p">${pCount}</td>
+                    <td class="col-tot tot-f">${fCount}</td>
+                    <td class="col-tot tot-j">${jCount}</td>
+                    <td class="col-tot tot-l">${lCount}</td>
+                    <td class="col-tot tot-taxa"><strong>${taxa}%</strong></td>
+                </tr>
+            `;
+        });
+
+        // Cabeçalhos dos Dias
+        let thDaysHtml = '';
+        diasSessao.forEach(s => {
+            thDaysHtml += `
+                <th class="th-day">
+                    <div>${s.diaNum}</div>
+                    <div class="th-sub">${s.diaSemana}</div>
+                    <div class="th-tag">${s.tipo === 'Jogo' ? 'JOG' : 'TRE'}</div>
+                </th>
+            `;
+        });
+
+        // Totais de rodapé por dia
+        let tfootDaysHtml = '';
+        diasSessao.forEach(s => {
+            let presentes = 0;
+            atletasMatriz.forEach(a => {
+                if (a.statusPorDia[s.data] === 'Presente') presentes++;
+            });
+            tfootDaysHtml += `<td class="col-day" style="font-weight: bold; color: #15803d;">${presentes}</td>`;
+        });
+
+        const htmlContent = `
+            <!DOCTYPE html>
+            <html lang="pt">
+            <head>
+                <meta charset="UTF-8">
+                <title>Relatório de Presenças - ${escapeHtml(equipa.nome)} - ${nomeMes} ${ano}</title>
+                <style>
+                    @page {
+                        size: A4 landscape;
+                        margin: 8mm 10mm;
+                    }
+                    * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Helvetica Neue', Arial, sans-serif; }
+                    body { color: #1e293b; font-size: 10px; line-height: 1.3; background: #fff; padding: 10px; }
+                    
+                    /* Cabeçalho Oficial */
+                    .doc-header {
+                        display: flex;
+                        align-items: center;
+                        justify-content: space-between;
+                        border-bottom: 2.5px solid #7e22ce;
+                        padding-bottom: 8px;
+                        margin-bottom: 10px;
+                    }
+                    .header-left {
+                        display: flex;
+                        align-items: center;
+                        gap: 12px;
+                    }
+                    .header-logo {
+                        width: 44px;
+                        height: 44px;
+                        object-fit: contain;
+                    }
+                    .doc-title {
+                        font-size: 15px;
+                        font-weight: 800;
+                        color: #7e22ce;
+                        text-transform: uppercase;
+                        letter-spacing: 0.5px;
+                    }
+                    .doc-subtitle {
+                        font-size: 11px;
+                        font-weight: 700;
+                        color: #0f172a;
+                        margin-top: 2px;
+                    }
+                    .header-meta {
+                        text-align: right;
+                        font-size: 9px;
+                        color: #64748b;
+                        line-height: 1.4;
+                    }
+
+                    /* Barra de Metadados / Resumo */
+                    .meta-bar {
+                        display: flex;
+                        gap: 16px;
+                        background: #f8fafc;
+                        border: 1px solid #e2e8f0;
+                        border-radius: 6px;
+                        padding: 6px 12px;
+                        margin-bottom: 10px;
+                        font-size: 9.5px;
+                    }
+                    .meta-item strong { color: #0f172a; }
+
+                    /* Tabela Matricial */
+                    table {
+                        width: 100%;
+                        border-collapse: collapse;
+                        font-size: 8.5px;
+                        margin-bottom: 12px;
+                    }
+                    th {
+                        background: #f1f5f9;
+                        color: #0f172a;
+                        font-weight: 700;
+                        border: 1px solid #cbd5e1;
+                        padding: 4px 2px;
+                        text-align: center;
+                    }
+                    th.th-atleta { text-align: left; padding-left: 6px; }
+                    th.th-day { min-width: 24px; }
+                    .th-sub { font-size: 7px; color: #64748b; font-weight: normal; }
+                    .th-tag { font-size: 6.5px; color: #7e22ce; font-weight: bold; }
+
+                    td {
+                        border: 1px solid #e2e8f0;
+                        padding: 3.5px 2px;
+                        text-align: center;
+                    }
+                    tr:nth-child(even) { background-color: #fbfbfe; }
+                    td.col-num { width: 22px; font-weight: bold; color: #64748b; }
+                    td.col-nome { text-align: left; padding-left: 6px; font-weight: 600; white-space: nowrap; max-width: 160px; overflow: hidden; }
+                    
+                    /* Badges nos dias */
+                    .badge-p { display: inline-block; width: 14px; height: 14px; line-height: 14px; background: #dcfce7; color: #15803d; font-weight: 800; border-radius: 3px; font-size: 7.5px; }
+                    .badge-f { display: inline-block; width: 14px; height: 14px; line-height: 14px; background: #fee2e2; color: #b91c1c; font-weight: 800; border-radius: 3px; font-size: 7.5px; }
+                    .badge-j { display: inline-block; width: 14px; height: 14px; line-height: 14px; background: #fef3c7; color: #b45309; font-weight: 800; border-radius: 3px; font-size: 7.5px; }
+                    .badge-l { display: inline-block; width: 14px; height: 14px; line-height: 14px; background: #f3e8ff; color: #7e22ce; font-weight: 800; border-radius: 3px; font-size: 7.5px; }
+                    .badge-dash { color: #cbd5e1; font-weight: bold; }
+
+                    td.col-tot { font-weight: bold; }
+                    .tot-p { color: #15803d; background: #f0fdf4; }
+                    .tot-f { color: #b91c1c; background: #fef2f2; }
+                    .tot-j { color: #b45309; }
+                    .tot-l { color: #7e22ce; }
+                    .tot-taxa { background: #f8fafc; font-size: 9px; }
+
+                    /* Rodapé e Assinaturas */
+                    .doc-footer {
+                        display: flex;
+                        justify-content: space-between;
+                        align-items: flex-end;
+                        margin-top: 18px;
+                        padding-top: 10px;
+                        page-break-inside: avoid;
+                    }
+                    .legenda-pdf {
+                        font-size: 8px;
+                        color: #64748b;
+                        display: flex;
+                        gap: 10px;
+                        align-items: center;
+                    }
+                    .sign-box {
+                        width: 220px;
+                        text-align: center;
+                        border-top: 1px solid #94a3b8;
+                        padding-top: 4px;
+                        font-size: 9px;
+                        font-weight: 600;
+                        color: #334155;
+                    }
+                </style>
+            </head>
+            <body>
+                <div class="doc-header">
+                    <div class="header-left">
+                        <img src="assets/emblema_png.png" class="header-logo" alt="BCV" onerror="this.style.display='none'">
+                        <div>
+                            <div class="doc-title">Basket Clube de Valença</div>
+                            <div class="doc-subtitle">Relatório Mensal de Presenças • ${escapeHtml(equipa.nome)}</div>
+                        </div>
+                    </div>
+                    <div class="header-meta">
+                        <div><strong>Período:</strong> ${nomeMes} de ${ano}</div>
+                        <div><strong>Emitido por:</strong> ${escapeHtml(treinadorNome)}</div>
+                        <div><strong>Data:</strong> ${dataEmissao}</div>
+                    </div>
+                </div>
+
+                <div class="meta-bar">
+                    <div class="meta-item"><strong>Plantel:</strong> ${metricas.totalAtletasPlantel} Atletas</div>
+                    <div class="meta-item"><strong>Sessões Realizadas:</strong> ${metricas.totalSessoesMes}</div>
+                    <div class="meta-item"><strong>Total Presenças:</strong> <span style="color: #15803d;">${metricas.somaTotalPresentes}</span></div>
+                    <div class="meta-item"><strong>Total Faltas:</strong> <span style="color: #b91c1c;">${metricas.somaTotalFaltas}</span></div>
+                    <div class="meta-item"><strong>Assiduidade Média:</strong> <strong>${metricas.mediaAssiduidade}%</strong></div>
+                </div>
+
+                <table>
+                    <thead>
+                        <tr>
+                            <th style="width: 20px;">Nº</th>
+                            <th class="th-atleta">Nome do Atleta</th>
+                            ${thDaysHtml}
+                            <th style="width: 24px; background:#e2fbe8; color:#15803d;">P</th>
+                            <th style="width: 24px; background:#fde8e8; color:#b91c1c;">F</th>
+                            <th style="width: 24px; background:#fef3c7; color:#b45309;">J</th>
+                            <th style="width: 24px; background:#f3e8ff; color:#7e22ce;">L</th>
+                            <th style="width: 38px;">% Ass.</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        ${rowsHtml}
+                    </tbody>
+                    <tfoot>
+                        <tr style="background: #f1f5f9; font-weight: bold;">
+                            <td colspan="2" style="text-align: right; padding-right: 8px; font-weight: bold;">TOTAL PRESENTES:</td>
+                            ${tfootDaysHtml}
+                            <td class="col-tot tot-p">${metricas.somaTotalPresentes}</td>
+                            <td class="col-tot tot-f">${metricas.somaTotalFaltas}</td>
+                            <td class="col-tot tot-j">${metricas.somaTotalJustificados}</td>
+                            <td class="col-tot tot-l">${metricas.somaTotalLesionados}</td>
+                            <td class="col-tot tot-taxa"><strong>${metricas.mediaAssiduidade}%</strong></td>
+                        </tr>
+                    </tfoot>
+                </table>
+
+                <div class="doc-footer">
+                    <div class="legenda-pdf">
+                        <span><strong>Legenda:</strong></span>
+                        <span><strong style="color:#15803d;">P</strong> = Presente</span>
+                        <span><strong style="color:#b91c1c;">F</strong> = Falta</span>
+                        <span><strong style="color:#b45309;">J</strong> = Justificado</span>
+                        <span><strong style="color:#7e22ce;">L</strong> = Lesionado</span>
+                    </div>
+
+                    <div style="display: flex; gap: 30px;">
+                        <div class="sign-box">O Treinador</div>
+                        <div class="sign-box">A Coordenação Desportiva</div>
+                    </div>
+                </div>
+
+                <script>
+                    window.onload = function() {
+                        setTimeout(function() {
+                            window.print();
+                        }, 300);
+                    };
+                </script>
+            </body>
+            </html>
+        `;
+
+        printWin.document.open();
+        printWin.document.write(htmlContent);
+        printWin.document.close();
+    }
+
+    // -------------------------------------------------------------------------
+    // EXPORTAÇÃO EXCEL (.CSV formatado em Matriz com UTF-8 BOM)
+    // -------------------------------------------------------------------------
+    function exportarRelatorioPresencasExcel() {
+        if (!currentRelatorioData || !currentRelatorioData.atletasMatriz || currentRelatorioData.atletasMatriz.length === 0) {
+            alert('Não existem dados carregados no relatório para exportar.');
+            return;
+        }
+
+        const { equipa, nomeMes, ano, diasSessao, atletasMatriz, metricas } = currentRelatorioData;
+        const dataHoje = new Date().toLocaleDateString('pt-PT');
+        const treinadorNome = userProfile?.nome || currentUser?.email || 'Treinador BCV';
+
+        let csv = '\uFEFF'; // UTF-8 BOM para abrir com acentos perfeitos no Microsoft Excel
+
+        // Metadados iniciais
+        csv += `BASKET CLUBE DE VALENÇA - MAPA MENSAL DE PRESENÇAS\r\n`;
+        csv += `Equipa;${equipa.nome};Mês;${nomeMes} de ${ano};Emitido em;${dataHoje};Treinador;${treinadorNome}\r\n`;
+        csv += `Sessões Realizadas;${metricas.totalSessoesMes};Total Atletas;${metricas.totalAtletasPlantel};Assiduidade Média;${metricas.mediaAssiduidade}%\r\n\r\n`;
+
+        // Cabeçalhos da Tabela
+        const headers = ['Nº', 'Nome do Atleta', 'Alcunha'];
+        diasSessao.forEach(s => {
+            headers.push(`${s.diaNum}/${String(currentRelatorioData.mes).padStart(2, '0')} (${s.tipo})`);
+        });
+        headers.push('Total Presentes (P)', 'Total Faltas (F)', 'Total Justificados (J)', 'Total Lesionados (L)', 'Taxa Assiduidade (%)');
+        csv += headers.join(';') + '\r\n';
+
+        // Linhas de cada atleta
+        atletasMatriz.forEach(({ atleta, statusPorDia, pCount, fCount, jCount, lCount, taxa }) => {
+            const dorsal = atleta.dorsal_equipa || atleta.equipamento_numero_1 || atleta.dorsal || '';
+            const row = [
+                dorsal,
+                `"${(atleta.nome || '').replace(/"/g, '""')}"`,
+                `"${(atleta.nickname || '').replace(/"/g, '""')}"`
+            ];
+
+            diasSessao.forEach(s => {
+                const st = statusPorDia[s.data] || '-';
+                let code = '-';
+                if (st === 'Presente') code = 'P';
+                else if (st === 'Falta') code = 'F';
+                else if (st === 'Justificado') code = 'J';
+                else if (st === 'Lesionado') code = 'L';
+                row.push(code);
+            });
+
+            row.push(pCount, fCount, jCount, lCount, `${taxa}%`);
+            csv += row.join(';') + '\r\n';
+        });
+
+        // Linha de Totais da Equipa
+        const totRow = ['', 'TOTAL PRESENTES NA SESSÃO', ''];
+        diasSessao.forEach(s => {
+            let pNoDia = 0;
+            atletasMatriz.forEach(a => {
+                if (a.statusPorDia[s.data] === 'Presente') pNoDia++;
+            });
+            totRow.push(pNoDia);
+        });
+        totRow.push(metricas.somaTotalPresentes, metricas.somaTotalFaltas, metricas.somaTotalJustificados, metricas.somaTotalLesionados, `${metricas.mediaAssiduidade}%`);
+        csv += totRow.join(';') + '\r\n';
+
+        // Disparar Download
+        const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+        const url = URL.createObjectURL(blob);
+        const link = document.createElement('a');
+        const equipaSlug = (equipa.nome || 'BCV').replace(/[^a-zA-Z0-9]/g, '_');
+        link.href = url;
+        link.download = `Mapa_Presencas_BCV_${equipaSlug}_${ano}_${String(currentRelatorioData.mes).padStart(2, '0')}.csv`;
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+        URL.revokeObjectURL(url);
+    }
+
+    if (btnRelAtualizar) btnRelAtualizar.addEventListener('click', loadRelatorioPresencas);
+    if (btnRelExportPdf) btnRelExportPdf.addEventListener('click', exportarRelatorioPresencasPDF);
+    if (btnRelExportExcel) btnRelExportExcel.addEventListener('click', exportarRelatorioPresencasExcel);
+
+    if (relatorioMesSelect) relatorioMesSelect.addEventListener('change', loadRelatorioPresencas);
+    if (relatorioAnoSelect) relatorioAnoSelect.addEventListener('change', loadRelatorioPresencas);
+    if (relatorioTipoSelect) relatorioTipoSelect.addEventListener('change', loadRelatorioPresencas);
+    if (relatorioEquipaSelect) {
+        relatorioEquipaSelect.addEventListener('change', (e) => {
+            window.switchTeam(e.target.value);
+        });
+    }
+
+    // Expor globalmente para uso direto
+    window.loadRelatorioPresencas = loadRelatorioPresencas;
+    window.exportarRelatorioPresencasPDF = exportarRelatorioPresencasPDF;
+    window.exportarRelatorioPresencasExcel = exportarRelatorioPresencasExcel;
 
     // Inicialização da Sessão
     checkSession();

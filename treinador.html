@@ -17,7 +17,7 @@
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     
     <!-- CSS Partilhado Mobile BCV -->
-    <link rel="stylesheet" href="css/diretor.css?v=20260908_4">
+    <link rel="stylesheet" href="css/diretor.css?v=20261105_1">
 </head>
 <body>
 
@@ -114,6 +114,14 @@
                         <div class="item-text">
                             <span class="item-label">Contactos SOS</span>
                             <span class="item-desc">Contactos rápidos dos encarregados</span>
+                        </div>
+                    </button>
+
+                    <button type="button" class="drawer-item" data-tab="tab-relatorios">
+                        <span class="item-icon">📊</span>
+                        <div class="item-text">
+                            <span class="item-label">Relatórios</span>
+                            <span class="item-desc">Mapa mensal de presenças (PDF / Excel)</span>
                         </div>
                     </button>
                 </div>
@@ -218,6 +226,97 @@
                 </div>
             </section>
 
+            <!-- ======================================================= -->
+            <!-- ABA 4: RELATÓRIOS & MAPAS MENSAIS DE PRESENÇAS          -->
+            <!-- ======================================================= -->
+            <section id="tab-relatorios" class="tab-content">
+                <!-- Painel de Filtros e Seleção -->
+                <div class="control-card">
+                    <div class="relatorio-filter-grid">
+                        <!-- Seleção de Equipa -->
+                        <div class="relatorio-filter-item">
+                            <label for="relatorio-equipa-select" class="relatorio-filter-label">🏀 Equipa:</label>
+                            <select id="relatorio-equipa-select" class="mobile-select">
+                                <!-- Preenchido dinamicamente com as equipas do treinador -->
+                            </select>
+                        </div>
+
+                        <!-- Seleção do Mês -->
+                        <div class="relatorio-filter-item">
+                            <label for="relatorio-mes-select" class="relatorio-filter-label">📅 Mês:</label>
+                            <select id="relatorio-mes-select" class="mobile-select">
+                                <option value="1">Janeiro</option>
+                                <option value="2">Fevereiro</option>
+                                <option value="3">Março</option>
+                                <option value="4">Abril</option>
+                                <option value="5">Maio</option>
+                                <option value="6">Junho</option>
+                                <option value="7">Julho</option>
+                                <option value="8">Agosto</option>
+                                <option value="9">Setembro</option>
+                                <option value="10">Outubro</option>
+                                <option value="11">Novembro</option>
+                                <option value="12">Dezembro</option>
+                            </select>
+                        </div>
+
+                        <!-- Seleção do Ano -->
+                        <div class="relatorio-filter-item">
+                            <label for="relatorio-ano-select" class="relatorio-filter-label">📆 Ano:</label>
+                            <select id="relatorio-ano-select" class="mobile-select">
+                                <!-- Preenchido com o ano atual e anos adjacentes -->
+                            </select>
+                        </div>
+
+                        <!-- Tipo de Sessão -->
+                        <div class="relatorio-filter-item">
+                            <label for="relatorio-tipo-select" class="relatorio-filter-label">🏷️ Sessão:</label>
+                            <select id="relatorio-tipo-select" class="mobile-select">
+                                <option value="todos">Todos (Treinos & Jogos)</option>
+                                <option value="Treino">Apenas Treinos</option>
+                                <option value="Jogo">Apenas Jogos</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <!-- Botões de Ação / Exportação -->
+                    <div class="relatorio-actions-bar">
+                        <button type="button" id="btn-rel-atualizar" class="btn-rel-action btn-rel-refresh" title="Atualizar Dados">
+                            🔄 Atualizar
+                        </button>
+                        <button type="button" id="btn-rel-export-pdf" class="btn-rel-action btn-rel-pdf" title="Exportar Relatório PDF em A4 Horizontal">
+                            📄 Exportar PDF
+                        </button>
+                        <button type="button" id="btn-rel-export-excel" class="btn-rel-action btn-rel-excel" title="Exportar Ficheiro Excel (.csv)">
+                            📊 Exportar Excel
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Resumo / KPIs do Mês -->
+                <div id="relatorio-kpis-container" class="relatorio-kpis-container">
+                    <!-- Gerado dinamicamente: Total Sessões, Atletas, Taxa Média, Presenças/Faltas -->
+                </div>
+
+                <!-- Legenda Rápida -->
+                <div class="relatorio-legenda-bar">
+                    <span class="legenda-item"><span class="badge-mini badge-p">P</span> Presente</span>
+                    <span class="legenda-item"><span class="badge-mini badge-f">F</span> Falta</span>
+                    <span class="legenda-item"><span class="badge-mini badge-j">J</span> Justificado</span>
+                    <span class="legenda-item"><span class="badge-mini badge-l">L</span> Lesionado</span>
+                    <span class="legenda-item"><span class="badge-mini badge-none">-</span> Sem Registo</span>
+                </div>
+
+                <!-- Tabela Matricial Mensal -->
+                <div class="relatorio-matrix-card">
+                    <div id="relatorio-matrix-container" class="relatorio-matrix-wrapper">
+                        <div style="text-align: center; padding: 30px; color: var(--text-muted);">
+                            A carregar mapa de presenças do mês...
+                        </div>
+                    </div>
+                </div>
+            </section>
+
         </main>
 
         <!-- ======================================================= -->
@@ -245,6 +344,6 @@
 
     <!-- Scripts -->
     <script src="js/config.js"></script>
-    <script src="js/treinador.js?v=20260928_1"></script>
+    <script src="js/treinador.js?v=20261105_1"></script>
 </body>
 </html>
