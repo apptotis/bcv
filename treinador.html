@@ -17,7 +17,7 @@
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     
     <!-- CSS Partilhado Mobile BCV -->
-    <link rel="stylesheet" href="css/diretor.css?v=20261105_1">
+    <link rel="stylesheet" href="css/diretor.css?v=20261105_2">
 </head>
 <body>
 
@@ -109,19 +109,19 @@
                         </div>
                     </button>
 
-                    <button type="button" class="drawer-item" data-tab="tab-sos">
-                        <span class="item-icon">🆘</span>
-                        <div class="item-text">
-                            <span class="item-label">Contactos SOS</span>
-                            <span class="item-desc">Contactos rápidos dos encarregados</span>
-                        </div>
-                    </button>
-
                     <button type="button" class="drawer-item" data-tab="tab-relatorios">
                         <span class="item-icon">📊</span>
                         <div class="item-text">
                             <span class="item-label">Relatórios</span>
                             <span class="item-desc">Mapa mensal de presenças (PDF / Excel)</span>
+                        </div>
+                    </button>
+
+                    <button type="button" class="drawer-item" data-tab="tab-sos">
+                        <span class="item-icon">🆘</span>
+                        <div class="item-text">
+                            <span class="item-label">Contactos SOS</span>
+                            <span class="item-desc">Contactos rápidos dos encarregados</span>
                         </div>
                     </button>
                 </div>
@@ -211,23 +211,7 @@
             </section>
 
             <!-- ======================================================= -->
-            <!-- ABA 3: CONTACTOS SOS (EMERGÊNCIA & ENCARREGADOS)        -->
-            <!-- ======================================================= -->
-            <section id="tab-sos" class="tab-content">
-                <div class="control-card">
-                    <input type="text" id="filtro-sos" class="mobile-input" placeholder="🔍 Pesquisar atleta ou encarregado...">
-                </div>
-
-                <!-- Lista de Contactos de Emergência -->
-                <div id="lista-sos-container">
-                    <div style="text-align: center; padding: 20px; color: var(--text-muted);">
-                        A carregar contactos SOS...
-                    </div>
-                </div>
-            </section>
-
-            <!-- ======================================================= -->
-            <!-- ABA 4: RELATÓRIOS & MAPAS MENSAIS DE PRESENÇAS          -->
+            <!-- ABA 3: RELATÓRIOS & MAPAS MENSAIS DE PRESENÇAS          -->
             <!-- ======================================================= -->
             <section id="tab-relatorios" class="tab-content">
                 <!-- Painel de Filtros e Seleção -->
@@ -317,6 +301,22 @@
                 </div>
             </section>
 
+            <!-- ======================================================= -->
+            <!-- ABA 4: CONTACTOS SOS (EMERGÊNCIA & ENCARREGADOS)        -->
+            <!-- ======================================================= -->
+            <section id="tab-sos" class="tab-content">
+                <div class="control-card">
+                    <input type="text" id="filtro-sos" class="mobile-input" placeholder="🔍 Pesquisar atleta ou encarregado...">
+                </div>
+
+                <!-- Lista de Contactos de Emergência -->
+                <div id="lista-sos-container">
+                    <div style="text-align: center; padding: 20px; color: var(--text-muted);">
+                        A carregar contactos SOS...
+                    </div>
+                </div>
+            </section>
+
         </main>
 
         <!-- ======================================================= -->
@@ -344,6 +344,6 @@
 
     <!-- Scripts -->
     <script src="js/config.js"></script>
-    <script src="js/treinador.js?v=20261105_1"></script>
+    <script src="js/treinador.js?v=20261105_2"></script>
 </body>
 </html>
