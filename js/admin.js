@@ -11131,30 +11131,49 @@ document.addEventListener('DOMContentLoaded', async () => {
 
             if (isNaN(pCasa) || isNaN(pFora)) return;
 
-            // Encontrar competição compatível
+            // Determinar características do resultado
+            const isRes14 = esc.includes('14');
+            const isRes16 = esc.includes('16');
+            const isRes18 = esc.includes('18');
+            const isResSen = esc.includes('sen') || compNome.includes('cn2') || compNome.includes('2ª divisão') || compNome.includes('2a divisao');
+
+            const isResFem = esc.includes('fem') || compNome.includes('fem');
+            const isResMasc = esc.includes('masc') || compNome.includes('masc') || (!isResFem && !esc.includes('fem'));
+
+            // Encontrar competição estritamente compatível
             const comp = currentCompeticoes.find(c => {
                 const cEsc = (c.escalao || '').toLowerCase();
                 const cSigla = (c.sigla || '').toLowerCase();
+                const cNome = (c.nome || '').toLowerCase();
                 const cSex = (c.sexo || '').toLowerCase();
                 
-                if (esc.includes('14') || cEsc.includes('14') || cSigla.includes('14')) {
-                    const isFem = esc.includes('fem') || compNome.includes('fem');
-                    return isFem ? (cSex === 'feminino' || cSigla.includes('fem')) : (cSex === 'masculino' || !cSigla.includes('fem'));
-                }
-                if (esc.includes('16') || cEsc.includes('16') || cSigla.includes('16')) {
-                    const isFem = esc.includes('fem') || compNome.includes('fem');
-                    return isFem ? (cSex === 'feminino' || cSigla.includes('fem')) : (cSex === 'masculino' || !cSigla.includes('fem'));
-                }
-                if (esc.includes('18') || cEsc.includes('18') || cSigla.includes('18')) {
-                    return true;
-                }
-                if (esc.includes('sen') || cEsc.includes('sen') || cSigla.includes('cn2')) {
-                    return true;
-                }
+                const isComp14 = cEsc.includes('14') || cSigla.includes('14');
+                const isComp16 = cEsc.includes('16') || cSigla.includes('16');
+                const isComp18 = cEsc.includes('18') || cSigla.includes('18');
+                const isCompSen = cEsc.includes('sen') || cSigla.includes('cn2') || cNome.includes('cn2') || cNome.includes('2ª divisão');
+
+                const isCompFem = cSex.includes('fem') || cSigla.includes('fem') || cNome.includes('fem');
+                const isCompMasc = cSex.includes('masc') || cSigla.includes('masc') || (!isCompFem && !cSigla.includes('fem') && !cNome.includes('fem'));
+
+                if (isRes14 && isComp14) return isResFem ? isCompFem : isCompMasc;
+                if (isRes16 && isComp16) return isResFem ? isCompFem : isCompMasc;
+                if (isRes18 && isComp18) return isResFem ? isCompFem : isCompMasc;
+                if (isResSen && isCompSen) return isResFem ? isCompFem : isCompMasc;
                 return false;
             });
 
             if (!comp) return;
+
+            // Proteção adicional: Se a competição tiver equipas na tabela_serie, 
+            // verificar se pelo menos uma das equipas pertence à série
+            if (Array.isArray(comp.tabela_serie) && comp.tabela_serie.length > 0) {
+                const pertenceCasa = comp.tabela_serie.some(eq => compararEquipasIguais(eq.nome, casa));
+                const pertenceFora = comp.tabela_serie.some(eq => compararEquipasIguais(eq.nome, fora));
+                if (!pertenceCasa && !pertenceFora) {
+                    console.warn(`[Sincronização]: Jogo ${casa} vs ${fora} rejeitado da série ${comp.sigla || comp.id} pois nenhuma equipa pertence à série.`);
+                    return;
+                }
+            }
 
             if (!Array.isArray(comp.jogos_serie)) {
                 comp.jogos_serie = [];
