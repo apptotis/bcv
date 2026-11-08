@@ -9414,8 +9414,29 @@ document.addEventListener('DOMContentLoaded', async () => {
 
             if (data && Array.isArray(data.dados) && data.dados.length > 0) {
                 currentCompeticoes = data.dados;
+                let precisouLimpar = false;
                 // Auto-correção de consistência federativa em todas as tabelas de série (Vitória = 2 Pts, Derrota = 1 Pt)
                 currentCompeticoes.forEach(comp => {
+                    const isCN2 = comp.id === 'cn2' || (comp.sigla || '').toLowerCase() === 'cn2';
+                    if (isCN2) {
+                        if (Array.isArray(comp.jogos_serie)) {
+                            const lenAntes = comp.jogos_serie.length;
+                            comp.jogos_serie = comp.jogos_serie.filter(j => {
+                                const c = (j.equipa_casa || '').toLowerCase();
+                                const f = (j.equipa_fora || '').toLowerCase();
+                                return !c.includes('maria') && !f.includes('maria');
+                            });
+                            if (comp.jogos_serie.length !== lenAntes) precisouLimpar = true;
+                        }
+                        if (Array.isArray(comp.tabela_serie)) {
+                            const lenAntesEq = comp.tabela_serie.length;
+                            comp.tabela_serie = comp.tabela_serie.filter(eq => !((eq.nome || '').toLowerCase().includes('maria')));
+                            if (comp.tabela_serie.length !== lenAntesEq) precisouLimpar = true;
+                            if (precisouLimpar && window.calcularClassificacaoEquipasSerie) {
+                                comp.tabela_serie = window.calcularClassificacaoEquipasSerie(comp.tabela_serie, comp.jogos_serie);
+                            }
+                        }
+                    }
                     if (Array.isArray(comp.tabela_serie) && comp.tabela_serie.length > 0) {
                         comp.tabela_serie.forEach(eq => {
                             const v = Number(eq.v) || 0;
@@ -9428,6 +9449,10 @@ document.addEventListener('DOMContentLoaded', async () => {
                         });
                     }
                 });
+                if (precisouLimpar) {
+                    await saveCompeticoesToSupabase(currentCompeticoes, false);
+                    console.log("[Admin Auto-Fix]: CN2 limpo e persistido com sucesso no Supabase!");
+                }
             } else {
                 // Primeira inicialização com valores predefinidos
                 currentCompeticoes = JSON.parse(JSON.stringify(DEFAULT_COMPETICOES_LIST));
