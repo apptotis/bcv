@@ -79,3 +79,4 @@ SELECT
 FROM public.clube_config,
 LATERAL jsonb_array_elements(dados) AS comp
 WHERE chave = 'competicoes' AND (comp->>'id' = 'cn2' OR comp->>'sigla' = 'CN2');
+

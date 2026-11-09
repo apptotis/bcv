@@ -10137,7 +10137,10 @@ document.addEventListener('DOMContentLoaded', async () => {
                 statsMap[cKey].d += 1;
                 statsMap[cKey].pts += 1; // Derrota FPB = 1 pt
             } else {
+                // Jogo 0 - 0 / Empate FPB (Opção A): Ambas as equipas ganham 1 ponto e registam 1 derrota (J = V + D)
+                statsMap[cKey].d += 1;
                 statsMap[cKey].pts += 1;
+                statsMap[fKey].d += 1;
                 statsMap[fKey].pts += 1;
             }
         });
@@ -10806,7 +10809,8 @@ document.addEventListener('DOMContentLoaded', async () => {
                     map[fNome].v += 1; map[fNome].pts += 2;
                     map[cNome].d += 1; map[cNome].pts += 1;
                 } else {
-                    map[cNome].pts += 1; map[fNome].pts += 1;
+                    map[cNome].d += 1; map[cNome].pts += 1;
+                    map[fNome].d += 1; map[fNome].pts += 1;
                 }
             });
 
@@ -10842,7 +10846,8 @@ document.addEventListener('DOMContentLoaded', async () => {
                     map[fNome].v += 1; map[fNome].pts += 2;
                     map[cNome].d += 1; map[cNome].pts += 1;
                 } else {
-                    map[cNome].pts += 1; map[fNome].pts += 1;
+                    map[cNome].d += 1; map[cNome].pts += 1;
+                    map[fNome].d += 1; map[fNome].pts += 1;
                 }
             });
 
@@ -10975,7 +10980,10 @@ document.addEventListener('DOMContentLoaded', async () => {
                 statsMap[cKey].d += 1;
                 statsMap[cKey].pts += 1;
             } else {
+                // Jogo 0 - 0 / Empate FPB (Opção A): Ambas as equipas ganham 1 ponto e registam 1 derrota (J = V + D)
+                statsMap[cKey].d += 1;
                 statsMap[cKey].pts += 1;
+                statsMap[fKey].d += 1;
                 statsMap[fKey].pts += 1;
             }
         });

@@ -1705,7 +1705,10 @@ async function loadCompeticoesSection(supabase) {
                         tabelaMap[cNome].d += 1;
                         tabelaMap[cNome].pts += 1;
                     } else {
+                        // Jogo 0 - 0 / Empate FPB (Opção A): Ambas as equipas ganham 1 ponto e registam 1 derrota (J = V + D)
+                        tabelaMap[cNome].d += 1;
                         tabelaMap[cNome].pts += 1;
+                        tabelaMap[fNome].d += 1;
                         tabelaMap[fNome].pts += 1;
                     }
                 });
@@ -1762,6 +1765,12 @@ async function loadCompeticoesSection(supabase) {
                         tabelaMap[fNome].pts += 2;
                         tabelaMap[cNome].d += 1;
                         tabelaMap[cNome].pts += 1;
+                    } else {
+                        // Jogo 0 - 0 / Empate FPB (Opção A): Ambas as equipas ganham 1 ponto e registam 1 derrota (J = V + D)
+                        tabelaMap[cNome].d += 1;
+                        tabelaMap[cNome].pts += 1;
+                        tabelaMap[fNome].d += 1;
+                        tabelaMap[fNome].pts += 1;
                     }
                 });
 
