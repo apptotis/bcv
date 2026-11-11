@@ -432,34 +432,18 @@ async function loadPortalHighlights(supabase) {
 
                     if (isTorneio) {
                         const nomeTorneio = jogo.nome_evento || jogo.equipa_casa || 'Torneio / Concentração';
-                        const equipasStr = jogo.equipas_participantes || (jogo.equipa_fora !== 'Múltiplas Equipas' ? jogo.equipa_fora : '');
-                        const listaEquipas = equipasStr ? equipasStr.split(',').map(s => s.trim()).filter(Boolean) : [];
+                        const horaFormatada = horaJogo ? `• ⏰ ${horaJogo}` : '';
 
                         item.innerHTML = `
                             <div class="game-schedule-top">
                                 <span class="game-escalao-badge">${escalaoCompleto}</span>
-                                <span class="tournament-tag-badge">🏆 Torneio / Concentração</span>
-                                <span class="game-date-badge">${dataJogo} ${horaJogo ? '• ' + horaJogo : ''}</span>
+                                <span class="game-date-badge">${dataJogo} ${horaFormatada}</span>
                             </div>
-                            <div class="tournament-card-body">
-                                <div class="tournament-event-title">${nomeTorneio}</div>
-                                ${listaEquipas.length > 0 ? `
-                                    <div class="tournament-teams-container">
-                                        <div class="tournament-teams-label">Equipas Participantes:</div>
-                                        <div class="tournament-teams-pills">
-                                            ${listaEquipas.map(eq => {
-                                                const isBCV = /valen[cç]a|bcv/i.test(eq);
-                                                const logo = obterLogoEquipa(eq);
-                                                return `
-                                                    <span class="tournament-team-pill ${isBCV ? 'is-bcv' : ''}">
-                                                        ${logo ? `<img src="${logo}" alt="" class="team-pill-icon" onerror="this.style.display='none'">` : '🏀'}
-                                                        <span>${eq}</span>
-                                                    </span>
-                                                `;
-                                            }).join('')}
-                                        </div>
-                                    </div>
-                                ` : ''}
+                            <div class="tournament-hero-body">
+                                <div class="tournament-hero-icon-title">
+                                    <span class="tournament-trophy-icon">🏆</span>
+                                    <div class="tournament-main-title">${nomeTorneio}</div>
+                                </div>
                             </div>
                             <div class="game-schedule-venue">
                                 <a href="${linkMaps}" target="_blank" rel="noopener noreferrer" class="venue-maps-link" title="Abrir localização no Google Maps">
@@ -1430,33 +1414,18 @@ async function loadCompeticoesSection(supabase) {
 
                         if (isTorneio) {
                             const nomeTorneio = j.nome_evento || j.equipa_casa || 'Torneio / Concentração';
-                            const equipasStr = j.equipas_participantes || (j.equipa_fora !== 'Múltiplas Equipas' ? j.equipa_fora : '');
-                            const listaEquipas = equipasStr ? equipasStr.split(',').map(s => s.trim()).filter(Boolean) : [];
 
                             return `
                                 <div class="comp-game-card comp-tournament-card">
                                     <div class="comp-game-date-row">
                                         <span>📅 ${dataFmt}</span>
-                                        <span class="game-hour">${horaFmt}</span>
+                                        <span class="game-hour">⏰ ${horaFmt}</span>
                                         <span class="tournament-mini-badge">🏆 Torneio</span>
                                     </div>
-                                    <div class="comp-tournament-title-row">
+                                    <div class="comp-tournament-hero-title">
+                                        <span>🏆</span>
                                         <strong>${nomeTorneio}</strong>
                                     </div>
-                                    ${listaEquipas.length > 0 ? `
-                                        <div class="comp-tournament-teams-row">
-                                            ${listaEquipas.map(eq => {
-                                                const isBCV = /valen[cç]a|bcv/i.test(eq);
-                                                const logo = window.obterLogoEquipa ? window.obterLogoEquipa(eq) : '';
-                                                return `
-                                                    <span class="tournament-team-pill ${isBCV ? 'is-bcv' : ''}">
-                                                        ${logo ? `<img src="${logo}" alt="" class="team-pill-icon" onerror="this.style.display='none'">` : '🏀'}
-                                                        <span>${eq}</span>
-                                                    </span>
-                                                `;
-                                            }).join('')}
-                                        </div>
-                                    ` : ''}
                                     ${j.local ? `
                                         <div class="comp-game-venue">
                                             <a href="${gerarLinkGoogleMaps(j.local, j.local_maps_url)}" target="_blank" rel="noopener noreferrer" class="venue-maps-link" title="Abrir localização no Google Maps">

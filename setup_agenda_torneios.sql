@@ -17,3 +17,4 @@ GRANT ALL ON TABLE public.agenda_bcv TO anon, authenticated, service_role;
 SELECT column_name, data_type 
 FROM information_schema.columns 
 WHERE table_name = 'agenda_bcv';
+
