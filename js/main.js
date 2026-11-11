@@ -423,38 +423,84 @@ async function loadPortalHighlights(supabase) {
                     const localNome = (jogo.local && jogo.local.trim()) ? jogo.local.trim() : 'Pavilhão Municipal de Valença';
                     const linkMaps = gerarLinkGoogleMaps(localNome, jogo.local_maps_url);
 
+                    const isTorneio = jogo.tipo_evento === 'torneio' || 
+                                      Boolean(jogo.nome_evento) || 
+                                      Boolean(jogo.equipas_participantes);
+
                     const item = document.createElement('div');
-                    item.className = 'game-schedule-item';
-                    item.innerHTML = `
-                        <div class="game-schedule-top">
-                            <span class="game-escalao-badge">${escalaoCompleto}</span>
-                            <span class="game-date-badge">${dataJogo} ${horaJogo ? '• ' + horaJogo : ''}</span>
-                        </div>
-                        <div class="matchup-row-aligned">
-                            <div class="matchup-team-col team-casa ${isCasaBCV ? 'team-bcv' : ''}">
-                                <div class="team-logo-wrap">
-                                    ${logoCasa ? `<img src="${logoCasa}" alt="${jogo.equipa_casa}" class="team-logo-large" onerror="this.parentElement.innerHTML='🏀'">` : '<span class="team-logo-placeholder">🏀</span>'}
+                    item.className = 'game-schedule-item' + (isTorneio ? ' is-tournament-item' : '');
+
+                    if (isTorneio) {
+                        const nomeTorneio = jogo.nome_evento || jogo.equipa_casa || 'Torneio / Concentração';
+                        const equipasStr = jogo.equipas_participantes || (jogo.equipa_fora !== 'Múltiplas Equipas' ? jogo.equipa_fora : '');
+                        const listaEquipas = equipasStr ? equipasStr.split(',').map(s => s.trim()).filter(Boolean) : [];
+
+                        item.innerHTML = `
+                            <div class="game-schedule-top">
+                                <span class="game-escalao-badge">${escalaoCompleto}</span>
+                                <span class="tournament-tag-badge">🏆 Torneio / Concentração</span>
+                                <span class="game-date-badge">${dataJogo} ${horaJogo ? '• ' + horaJogo : ''}</span>
+                            </div>
+                            <div class="tournament-card-body">
+                                <div class="tournament-event-title">${nomeTorneio}</div>
+                                ${listaEquipas.length > 0 ? `
+                                    <div class="tournament-teams-container">
+                                        <div class="tournament-teams-label">Equipas Participantes:</div>
+                                        <div class="tournament-teams-pills">
+                                            ${listaEquipas.map(eq => {
+                                                const isBCV = /valen[cç]a|bcv/i.test(eq);
+                                                const logo = obterLogoEquipa(eq);
+                                                return `
+                                                    <span class="tournament-team-pill ${isBCV ? 'is-bcv' : ''}">
+                                                        ${logo ? `<img src="${logo}" alt="" class="team-pill-icon" onerror="this.style.display='none'">` : '🏀'}
+                                                        <span>${eq}</span>
+                                                    </span>
+                                                `;
+                                            }).join('')}
+                                        </div>
+                                    </div>
+                                ` : ''}
+                            </div>
+                            <div class="game-schedule-venue">
+                                <a href="${linkMaps}" target="_blank" rel="noopener noreferrer" class="venue-maps-link" title="Abrir localização no Google Maps">
+                                    <span class="venue-pin">📍</span>
+                                    <span class="venue-name">${localNome}</span>
+                                    <span class="venue-external-icon">↗</span>
+                                </a>
+                            </div>
+                        `;
+                    } else {
+                        item.innerHTML = `
+                            <div class="game-schedule-top">
+                                <span class="game-escalao-badge">${escalaoCompleto}</span>
+                                <span class="game-date-badge">${dataJogo} ${horaJogo ? '• ' + horaJogo : ''}</span>
+                            </div>
+                            <div class="matchup-row-aligned">
+                                <div class="matchup-team-col team-casa ${isCasaBCV ? 'team-bcv' : ''}">
+                                    <div class="team-logo-wrap">
+                                        ${logoCasa ? `<img src="${logoCasa}" alt="${jogo.equipa_casa}" class="team-logo-large" onerror="this.parentElement.innerHTML='🏀'">` : '<span class="team-logo-placeholder">🏀</span>'}
+                                    </div>
+                                    <div class="team-name">${jogo.equipa_casa}</div>
                                 </div>
-                                <div class="team-name">${jogo.equipa_casa}</div>
-                            </div>
-                            <div class="matchup-center-badge">
-                                <span class="game-vs-tag">vs</span>
-                            </div>
-                            <div class="matchup-team-col team-fora ${isForaBCV ? 'team-bcv' : ''}">
-                                <div class="team-logo-wrap">
-                                    ${logoFora ? `<img src="${logoFora}" alt="${jogo.equipa_fora}" class="team-logo-large" onerror="this.parentElement.innerHTML='🏀'">` : '<span class="team-logo-placeholder">🏀</span>'}
+                                <div class="matchup-center-badge">
+                                    <span class="game-vs-tag">vs</span>
                                 </div>
-                                <div class="team-name">${jogo.equipa_fora}</div>
+                                <div class="matchup-team-col team-fora ${isForaBCV ? 'team-bcv' : ''}">
+                                    <div class="team-logo-wrap">
+                                        ${logoFora ? `<img src="${logoFora}" alt="${jogo.equipa_fora}" class="team-logo-large" onerror="this.parentElement.innerHTML='🏀'">` : '<span class="team-logo-placeholder">🏀</span>'}
+                                    </div>
+                                    <div class="team-name">${jogo.equipa_fora}</div>
+                                </div>
                             </div>
-                        </div>
-                        <div class="game-schedule-venue">
-                            <a href="${linkMaps}" target="_blank" rel="noopener noreferrer" class="venue-maps-link" title="Abrir localização no Google Maps">
-                                <span class="venue-pin">📍</span>
-                                <span class="venue-name">${localNome}</span>
-                                <span class="venue-external-icon">↗</span>
-                            </a>
-                        </div>
-                    `;
+                            <div class="game-schedule-venue">
+                                <a href="${linkMaps}" target="_blank" rel="noopener noreferrer" class="venue-maps-link" title="Abrir localização no Google Maps">
+                                    <span class="venue-pin">📍</span>
+                                    <span class="venue-name">${localNome}</span>
+                                    <span class="venue-external-icon">↗</span>
+                                </a>
+                            </div>
+                        `;
+                    }
                     agendaContainer.appendChild(item);
                 });
             }
@@ -1380,6 +1426,50 @@ async function loadCompeticoesSection(supabase) {
                     ${jogos.map(j => {
                         const dataFmt = formatDataComp(j.data_jogo);
                         const horaFmt = j.hora_jogo ? j.hora_jogo.substring(0, 5) : 'Hora a def.';
+                        const isTorneio = j.tipo_evento === 'torneio' || Boolean(j.nome_evento) || Boolean(j.equipas_participantes);
+
+                        if (isTorneio) {
+                            const nomeTorneio = j.nome_evento || j.equipa_casa || 'Torneio / Concentração';
+                            const equipasStr = j.equipas_participantes || (j.equipa_fora !== 'Múltiplas Equipas' ? j.equipa_fora : '');
+                            const listaEquipas = equipasStr ? equipasStr.split(',').map(s => s.trim()).filter(Boolean) : [];
+
+                            return `
+                                <div class="comp-game-card comp-tournament-card">
+                                    <div class="comp-game-date-row">
+                                        <span>📅 ${dataFmt}</span>
+                                        <span class="game-hour">${horaFmt}</span>
+                                        <span class="tournament-mini-badge">🏆 Torneio</span>
+                                    </div>
+                                    <div class="comp-tournament-title-row">
+                                        <strong>${nomeTorneio}</strong>
+                                    </div>
+                                    ${listaEquipas.length > 0 ? `
+                                        <div class="comp-tournament-teams-row">
+                                            ${listaEquipas.map(eq => {
+                                                const isBCV = /valen[cç]a|bcv/i.test(eq);
+                                                const logo = window.obterLogoEquipa ? window.obterLogoEquipa(eq) : '';
+                                                return `
+                                                    <span class="tournament-team-pill ${isBCV ? 'is-bcv' : ''}">
+                                                        ${logo ? `<img src="${logo}" alt="" class="team-pill-icon" onerror="this.style.display='none'">` : '🏀'}
+                                                        <span>${eq}</span>
+                                                    </span>
+                                                `;
+                                            }).join('')}
+                                        </div>
+                                    ` : ''}
+                                    ${j.local ? `
+                                        <div class="comp-game-venue">
+                                            <a href="${gerarLinkGoogleMaps(j.local, j.local_maps_url)}" target="_blank" rel="noopener noreferrer" class="venue-maps-link" title="Abrir localização no Google Maps">
+                                                <span class="venue-pin">📍</span>
+                                                <span class="venue-name">${j.local}</span>
+                                                <span class="venue-external-icon">↗</span>
+                                            </a>
+                                        </div>
+                                    ` : ''}
+                                </div>
+                            `;
+                        }
+
                         const isCasaBCV = (j.equipa_casa || '').toLowerCase().includes('valença') || (j.equipa_casa || '').toLowerCase().includes('bcv');
                         const isForaBCV = (j.equipa_fora || '').toLowerCase().includes('valença') || (j.equipa_fora || '').toLowerCase().includes('bcv');
                         const logoCasa = window.obterLogoEquipa ? window.obterLogoEquipa(j.equipa_casa, j.logo_casa) : '';

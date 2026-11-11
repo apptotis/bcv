@@ -4549,19 +4549,40 @@ document.addEventListener('DOMContentLoaded', async () => {
                 </a>
             ` : '<span style="color:var(--text-secondary);">--</span>';
 
+            const isTorneio = jogo.tipo_evento === 'torneio' || 
+                              Boolean(jogo.nome_evento) || 
+                              Boolean(jogo.equipas_participantes);
+
+            let detalhesHtml = '';
+            if (isTorneio) {
+                const nomeTorneio = jogo.nome_evento || jogo.equipa_casa || 'Torneio / Concentração';
+                const equipas = jogo.equipas_participantes || (jogo.equipa_fora !== 'Múltiplas Equipas' ? jogo.equipa_fora : '');
+                detalhesHtml = `
+                    <div style="display:inline-flex; align-items:center; gap:6px; margin-bottom:4px;">
+                        <span style="font-size:0.75rem; background:rgba(22, 163, 74, 0.15); color:#16a34a; padding:2px 8px; border-radius:4px; font-weight:800;">🏆 Torneio</span>
+                        <strong style="color:var(--text-primary); font-size:0.95rem;">${escapeHtml(nomeTorneio)}</strong>
+                    </div>
+                    ${equipas ? `<div style="font-size:0.8rem; color:var(--text-secondary); margin-top:2px;">👥 <strong>Equipas:</strong> ${escapeHtml(equipas)}</div>` : ''}
+                `;
+            } else {
+                detalhesHtml = `
+                    <strong>${escapeHtml(jogo.equipa_casa)}</strong> vs <strong>${escapeHtml(jogo.equipa_fora)}</strong>
+                    ${jogo.competicao ? `<br><small style="color:var(--text-secondary);">${escapeHtml(jogo.competicao)}</small>` : ''}
+                `;
+            }
+
             tr.innerHTML = `
                 <td style="padding: 12px; text-align: center; white-space: nowrap;">
                     ${btnVisibilidade}
                 </td>
                 <td style="padding: 12px;"><strong>${formatDate(jogo.data_jogo)}</strong><br><small style="color:var(--text-secondary);">${jogo.hora_jogo || 'Hora a definir'}</small></td>
                 <td style="padding: 12px;">
-                    <strong>${jogo.equipa_casa}</strong> vs <strong>${jogo.equipa_fora}</strong>
-                    ${jogo.competicao ? `<br><small style="color:var(--text-secondary);">${jogo.competicao}</small>` : ''}
+                    ${detalhesHtml}
                 </td>
                 <td style="padding: 12px;">${localHtml}</td>
                 <td style="padding: 12px;">${formatarBadgeEscalaoJogo(jogo, 'agenda')}</td>
                 <td style="padding: 12px; text-align: center; white-space: nowrap;">
-                    <button class="btn-action" onclick="abrirModalFinalizarJogo('${jogo.id}')" title="Registar Resultado e Finalizar Jogo" style="background: rgba(22, 163, 74, 0.15); color: #16a34a; border: 1px solid rgba(22, 163, 74, 0.3); font-weight: bold; margin-right: 4px; padding: 4px 8px;">🏁 Resultado</button>
+                    ${!isTorneio ? `<button class="btn-action" onclick="abrirModalFinalizarJogo('${jogo.id}')" title="Registar Resultado e Finalizar Jogo" style="background: rgba(22, 163, 74, 0.15); color: #16a34a; border: 1px solid rgba(22, 163, 74, 0.3); font-weight: bold; margin-right: 4px; padding: 4px 8px;">🏁 Resultado</button>` : ''}
                     <button class="btn-action edit" onclick="editGame('${jogo.id}')" title="Editar">✏️</button>
                     <button class="btn-action delete" onclick="deleteGame('${jogo.id}')" title="Eliminar">🗑️</button>
                 </td>
@@ -4601,6 +4622,58 @@ document.addEventListener('DOMContentLoaded', async () => {
     if (filtroAgendaEstado) filtroAgendaEstado.addEventListener('change', renderAgendaTable);
     if (filtroAgendaEscalao) filtroAgendaEscalao.addEventListener('change', renderAgendaTable);
 
+    // Controlo de Modo de Evento: Jogo Oficial vs Torneio / Concentração
+    function alternarTipoEventoAgenda(tipo) {
+        const blocoJogo = document.getElementById('bloco-agenda-jogo');
+        const blocoTorneio = document.getElementById('bloco-agenda-torneio');
+        const labelJogo = document.getElementById('label-tipo-jogo');
+        const labelTorneio = document.getElementById('label-tipo-torneio');
+        const inputCasa = document.getElementById('agenda-casa');
+        const inputFora = document.getElementById('agenda-fora');
+        const inputNomeTorneio = document.getElementById('agenda-nome-torneio');
+
+        if (tipo === 'torneio') {
+            if (blocoJogo) blocoJogo.style.display = 'none';
+            if (blocoTorneio) blocoTorneio.style.display = 'grid';
+            if (inputCasa) inputCasa.required = false;
+            if (inputFora) inputFora.required = false;
+            if (inputNomeTorneio) inputNomeTorneio.required = true;
+
+            if (labelJogo) {
+                labelJogo.style.background = 'transparent';
+                labelJogo.style.borderColor = 'var(--border-color, #e2e8f0)';
+                labelJogo.style.color = 'var(--text-secondary)';
+            }
+            if (labelTorneio) {
+                labelTorneio.style.background = 'rgba(22, 163, 74, 0.15)';
+                labelTorneio.style.borderColor = '#16a34a';
+                labelTorneio.style.color = '#15803d';
+            }
+        } else {
+            if (blocoJogo) blocoJogo.style.display = 'grid';
+            if (blocoTorneio) blocoTorneio.style.display = 'none';
+            if (inputCasa) inputCasa.required = true;
+            if (inputFora) inputFora.required = true;
+            if (inputNomeTorneio) inputNomeTorneio.required = false;
+
+            if (labelJogo) {
+                labelJogo.style.background = 'rgba(126, 34, 206, 0.15)';
+                labelJogo.style.borderColor = '#7e22ce';
+                labelJogo.style.color = '#7e22ce';
+            }
+            if (labelTorneio) {
+                labelTorneio.style.background = 'transparent';
+                labelTorneio.style.borderColor = 'var(--border-color, #e2e8f0)';
+                labelTorneio.style.color = 'var(--text-secondary)';
+            }
+        }
+    }
+
+    const radioJogo = document.getElementById('tipo-evento-jogo');
+    const radioTorneio = document.getElementById('tipo-evento-torneio');
+    if (radioJogo) radioJogo.addEventListener('change', () => alternarTipoEventoAgenda('jogo'));
+    if (radioTorneio) radioTorneio.addEventListener('change', () => alternarTipoEventoAgenda('torneio'));
+
     if (formAgenda) {
         formAgenda.addEventListener('submit', async (e) => {
             e.preventDefault();
@@ -4608,10 +4681,29 @@ document.addEventListener('DOMContentLoaded', async () => {
             const publicadoCb = document.getElementById('agenda-publicado');
             const localVal = document.getElementById('agenda-local')?.value?.trim() || '';
             const localMapsVal = document.getElementById('agenda-local-maps')?.value?.trim() || null;
+            const isTorneio = document.getElementById('tipo-evento-torneio')?.checked;
+
+            let equipaCasa = '';
+            let equipaFora = '';
+            let nomeEvento = null;
+            let equipasPart = null;
+
+            if (isTorneio) {
+                nomeEvento = document.getElementById('agenda-nome-torneio')?.value?.trim() || 'Torneio / Concentração';
+                equipasPart = document.getElementById('agenda-equipas-participantes')?.value?.trim() || '';
+                equipaCasa = nomeEvento;
+                equipaFora = equipasPart || 'Múltiplas Equipas';
+            } else {
+                equipaCasa = document.getElementById('agenda-casa')?.value?.trim() || '';
+                equipaFora = document.getElementById('agenda-fora')?.value?.trim() || '';
+            }
 
             const gameData = {
-                equipa_casa: document.getElementById('agenda-casa').value,
-                equipa_fora: document.getElementById('agenda-fora').value,
+                tipo_evento: isTorneio ? 'torneio' : 'jogo',
+                nome_evento: nomeEvento,
+                equipas_participantes: equipasPart,
+                equipa_casa: equipaCasa,
+                equipa_fora: equipaFora,
                 data_jogo: document.getElementById('agenda-data').value,
                 hora_jogo: document.getElementById('agenda-hora').value,
                 local: localVal,
@@ -4624,30 +4716,40 @@ document.addEventListener('DOMContentLoaded', async () => {
             btnSaveAgenda.textContent = "A guardar...";
 
             try {
-                let error;
-                if (id) {
-                    const { error: err } = await supabase.from('agenda_bcv').update(gameData).eq('id', id);
-                    if (err && err.message && (err.message.includes('local_maps_url') || err.code === '42703')) {
-                        delete gameData.local_maps_url;
-                        const { error: retryErr } = await supabase.from('agenda_bcv').update(gameData).eq('id', id);
-                        error = retryErr;
+                // Função resiliente de gravação com fallback automático se colunas novas ainda não existirem
+                async function salvarAgendaResiliente(payload, targetId) {
+                    let err;
+                    if (targetId) {
+                        const { error } = await supabase.from('agenda_bcv').update(payload).eq('id', targetId);
+                        err = error;
                     } else {
-                        error = err;
+                        const { error } = await supabase.from('agenda_bcv').insert([payload]);
+                        err = error;
                     }
-                } else {
-                    const { error: err } = await supabase.from('agenda_bcv').insert([gameData]);
-                    if (err && err.message && (err.message.includes('local_maps_url') || err.code === '42703')) {
-                        delete gameData.local_maps_url;
-                        const { error: retryErr } = await supabase.from('agenda_bcv').insert([gameData]);
-                        error = retryErr;
-                    } else {
-                        error = err;
+
+                    if (err && err.message && (err.message.includes('column') || err.code === '42703')) {
+                        console.warn("Aviso de schema em agenda_bcv. Aplicando fallback defensivo:", err.message);
+                        const fallbackData = { ...payload };
+                        delete fallbackData.local_maps_url;
+                        delete fallbackData.tipo_evento;
+                        delete fallbackData.nome_evento;
+                        delete fallbackData.equipas_participantes;
+
+                        if (targetId) {
+                            const { error: retryErr } = await supabase.from('agenda_bcv').update(fallbackData).eq('id', targetId);
+                            return retryErr;
+                        } else {
+                            const { error: retryErr } = await supabase.from('agenda_bcv').insert([fallbackData]);
+                            return retryErr;
+                        }
                     }
+                    return err;
                 }
 
+                const error = await salvarAgendaResiliente(gameData, id);
                 if (error) throw error;
 
-                agendaMsg.textContent = "✅ Jogo guardado com sucesso!";
+                agendaMsg.textContent = isTorneio ? "✅ Torneio / Concentração guardado com sucesso!" : "✅ Jogo guardado com sucesso!";
                 agendaMsg.style.color = "#4caf50";
                 agendaMsg.classList.remove('hidden');
                 
@@ -4656,13 +4758,13 @@ document.addEventListener('DOMContentLoaded', async () => {
                 setTimeout(() => agendaMsg.classList.add('hidden'), 3000);
 
             } catch (err) {
-                console.error("Erro ao guardar jogo:", err);
+                console.error("Erro ao guardar na agenda:", err);
                 agendaMsg.textContent = "❌ Erro: " + err.message;
                 agendaMsg.style.color = "#ff5252";
                 agendaMsg.classList.remove('hidden');
             } finally {
                 btnSaveAgenda.disabled = false;
-                btnSaveAgenda.textContent = id ? "Guardar Alterações" : "Guardar Jogo";
+                btnSaveAgenda.textContent = id ? "Guardar Alterações" : (isTorneio ? "Guardar Torneio" : "Guardar Jogo");
             }
         });
     }
@@ -4670,13 +4772,21 @@ document.addEventListener('DOMContentLoaded', async () => {
     function resetAgendaForm() {
         formAgenda.reset();
         document.getElementById('agenda-id').value = '';
+        if (radioJogo) radioJogo.checked = true;
+        alternarTipoEventoAgenda('jogo');
+        if (document.getElementById('agenda-nome-torneio')) {
+            document.getElementById('agenda-nome-torneio').value = '';
+        }
+        if (document.getElementById('agenda-equipas-participantes')) {
+            document.getElementById('agenda-equipas-participantes').value = '';
+        }
         if (document.getElementById('agenda-local-maps')) {
             document.getElementById('agenda-local-maps').value = '';
         }
         if (document.getElementById('agenda-publicado')) {
             document.getElementById('agenda-publicado').checked = true;
         }
-        document.getElementById('form-agenda-title').textContent = "Adicionar Novo Jogo Manual";
+        document.getElementById('form-agenda-title').textContent = "Adicionar Novo Jogo / Evento na Agenda";
         btnSaveAgenda.textContent = "Guardar Jogo";
         btnCancelAgenda.classList.add('hidden');
         atualizarBtnTesteMapsAdmin();
@@ -4690,11 +4800,34 @@ document.addEventListener('DOMContentLoaded', async () => {
         const { data, error } = await supabase.from('agenda_bcv').select('*').eq('id', id).single();
         if (data) {
             document.getElementById('agenda-id').value = data.id;
-            document.getElementById('agenda-casa').value = data.equipa_casa;
-            document.getElementById('agenda-fora').value = data.equipa_fora;
-            document.getElementById('agenda-data').value = data.data_jogo;
-            document.getElementById('agenda-hora').value = data.hora_jogo;
+
+            const isTorneio = data.tipo_evento === 'torneio' || 
+                              Boolean(data.nome_evento) || 
+                              Boolean(data.equipas_participantes);
+
+            if (isTorneio) {
+                if (radioTorneio) radioTorneio.checked = true;
+                alternarTipoEventoAgenda('torneio');
+                if (document.getElementById('agenda-nome-torneio')) {
+                    document.getElementById('agenda-nome-torneio').value = data.nome_evento || data.equipa_casa || '';
+                }
+                if (document.getElementById('agenda-equipas-participantes')) {
+                    document.getElementById('agenda-equipas-participantes').value = data.equipas_participantes || (data.equipa_fora !== 'Múltiplas Equipas' ? data.equipa_fora : '');
+                }
+            } else {
+                if (radioJogo) radioJogo.checked = true;
+                alternarTipoEventoAgenda('jogo');
+                document.getElementById('agenda-casa').value = data.equipa_casa || '';
+                document.getElementById('agenda-fora').value = data.equipa_fora || '';
+            }
+
+            document.getElementById('agenda-data').value = data.data_jogo || '';
+            document.getElementById('agenda-hora').value = data.hora_jogo || '';
             document.getElementById('agenda-local').value = data.local || '';
+            if (document.getElementById('agenda-local-maps')) {
+                document.getElementById('agenda-local-maps').value = data.local_maps_url || '';
+            }
+
             let escVal = data.escalao || '';
             if (escVal.toLowerCase().includes('sub 14') || escVal.toLowerCase().includes('sub-14')) {
                 const comp = (data.competicao || '').toLowerCase();
@@ -4712,7 +4845,7 @@ document.addEventListener('DOMContentLoaded', async () => {
             }
 
             atualizarBtnTesteMapsAdmin();
-            document.getElementById('form-agenda-title').textContent = "Editar Jogo";
+            document.getElementById('form-agenda-title').textContent = isTorneio ? "Editar Torneio / Concentração" : "Editar Jogo";
             btnSaveAgenda.textContent = "Guardar Alterações";
             btnCancelAgenda.classList.remove('hidden');
             formAgenda.scrollIntoView({ behavior: 'smooth' });
