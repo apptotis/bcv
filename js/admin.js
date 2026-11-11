@@ -4549,13 +4549,15 @@ document.addEventListener('DOMContentLoaded', async () => {
                 </a>
             ` : '<span style="color:var(--text-secondary);">--</span>';
 
-            const isTorneio = jogo.tipo_evento === 'torneio' || 
-                              Boolean(jogo.nome_evento) || 
-                              Boolean(jogo.equipas_participantes);
+            const isTorneio = (typeof window.verificarSeTorneio === 'function')
+                ? window.verificarSeTorneio(jogo)
+                : (jogo.tipo_evento === 'torneio' || Boolean(jogo.nome_evento) || Boolean(jogo.equipas_participantes) || /m[úu]ltiplas|tourn|torneio|concentra|circuito|festival/i.test(jogo.equipa_casa || '') || /m[úu]ltiplas|tourn|torneio|concentra|circuito|festival/i.test(jogo.equipa_fora || ''));
 
             let detalhesHtml = '';
             if (isTorneio) {
-                const nomeTorneio = jogo.nome_evento || jogo.equipa_casa || 'Torneio / Concentração';
+                const nomeTorneio = (typeof window.extrairTituloTorneio === 'function')
+                    ? window.extrairTituloTorneio(jogo)
+                    : (jogo.nome_evento || jogo.equipa_casa || 'Torneio / Concentração');
                 const equipas = jogo.equipas_participantes || (jogo.equipa_fora !== 'Múltiplas Equipas' ? jogo.equipa_fora : '');
                 detalhesHtml = `
                     <div style="display:inline-flex; align-items:center; gap:6px; margin-bottom:4px;">
@@ -4801,15 +4803,18 @@ document.addEventListener('DOMContentLoaded', async () => {
         if (data) {
             document.getElementById('agenda-id').value = data.id;
 
-            const isTorneio = data.tipo_evento === 'torneio' || 
-                              Boolean(data.nome_evento) || 
-                              Boolean(data.equipas_participantes);
+            const isTorneio = (typeof window.verificarSeTorneio === 'function')
+                ? window.verificarSeTorneio(data)
+                : (data.tipo_evento === 'torneio' || Boolean(data.nome_evento) || Boolean(data.equipas_participantes) || /m[úu]ltiplas|tourn|torneio|concentra|circuito|festival/i.test(data.equipa_casa || '') || /m[úu]ltiplas|tourn|torneio|concentra|circuito|festival/i.test(data.equipa_fora || ''));
 
             if (isTorneio) {
                 if (radioTorneio) radioTorneio.checked = true;
                 alternarTipoEventoAgenda('torneio');
                 if (document.getElementById('agenda-nome-torneio')) {
-                    document.getElementById('agenda-nome-torneio').value = data.nome_evento || data.equipa_casa || '';
+                    const nomeT = (typeof window.extrairTituloTorneio === 'function')
+                        ? window.extrairTituloTorneio(data)
+                        : (data.nome_evento || data.equipa_casa || '');
+                    document.getElementById('agenda-nome-torneio').value = nomeT;
                 }
                 if (document.getElementById('agenda-equipas-participantes')) {
                     document.getElementById('agenda-equipas-participantes').value = data.equipas_participantes || (data.equipa_fora !== 'Múltiplas Equipas' ? data.equipa_fora : '');

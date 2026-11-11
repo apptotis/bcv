@@ -255,6 +255,44 @@ async function loadPortalHighlights(supabase) {
     }
     window.gerarLinkGoogleMaps = gerarLinkGoogleMaps;
 
+    function verificarSeTorneio(jogo) {
+        if (!jogo) return false;
+        if (jogo.tipo_evento === 'torneio') return true;
+        if (jogo.nome_evento && String(jogo.nome_evento).trim()) return true;
+        if (jogo.equipas_participantes && String(jogo.equipas_participantes).trim()) return true;
+
+        const casa = String(jogo.equipa_casa || '').trim();
+        const fora = String(jogo.equipa_fora || '').trim();
+
+        const regexMultiplas = /m[úu]ltiplas equipas|v[áa]rias equipas|diversas equipas|multiplas|v[áa]rias/i;
+        const regexTermosTorneio = /tourn[ée]e|torneio|concentra[çc][ãa]o|circuito|festival|conv[íi]vio|encontro|festa|etapa/i;
+
+        if (regexMultiplas.test(casa) || regexMultiplas.test(fora)) return true;
+        if (regexTermosTorneio.test(casa) || regexTermosTorneio.test(fora)) return true;
+
+        return false;
+    }
+    window.verificarSeTorneio = verificarSeTorneio;
+
+    function extrairTituloTorneio(jogo) {
+        if (!jogo) return 'Torneio / Concentração';
+        if (jogo.nome_evento && String(jogo.nome_evento).trim()) {
+            return String(jogo.nome_evento).trim();
+        }
+        const casa = String(jogo.equipa_casa || '').trim();
+        const fora = String(jogo.equipa_fora || '').trim();
+        const regexMultiplas = /m[úu]ltiplas equipas|v[áa]rias equipas|diversas equipas|multiplas|v[áa]rias/i;
+        const regexTermosTorneio = /tourn[ée]e|torneio|concentra[çc][ãa]o|circuito|festival|conv[íi]vio|encontro|festa|etapa/i;
+
+        if (regexTermosTorneio.test(casa)) return casa;
+        if (regexTermosTorneio.test(fora)) return fora;
+        if (regexMultiplas.test(fora) && casa) return casa;
+        if (regexMultiplas.test(casa) && fora) return fora;
+
+        return casa || fora || 'Torneio / Concentração';
+    }
+    window.extrairTituloTorneio = extrairTituloTorneio;
+
     try {
         const hoje = new Date();
         const ano = hoje.getFullYear();
@@ -423,15 +461,13 @@ async function loadPortalHighlights(supabase) {
                     const localNome = (jogo.local && jogo.local.trim()) ? jogo.local.trim() : 'Pavilhão Municipal de Valença';
                     const linkMaps = gerarLinkGoogleMaps(localNome, jogo.local_maps_url);
 
-                    const isTorneio = jogo.tipo_evento === 'torneio' || 
-                                      Boolean(jogo.nome_evento) || 
-                                      Boolean(jogo.equipas_participantes);
+                    const isTorneio = verificarSeTorneio(jogo);
 
                     const item = document.createElement('div');
                     item.className = 'game-schedule-item' + (isTorneio ? ' is-tournament-item' : '');
 
                     if (isTorneio) {
-                        const nomeTorneio = jogo.nome_evento || jogo.equipa_casa || 'Torneio / Concentração';
+                        const nomeTorneio = extrairTituloTorneio(jogo);
                         const horaFormatada = horaJogo ? `• ⏰ ${horaJogo}` : '';
 
                         item.innerHTML = `
@@ -1410,10 +1446,10 @@ async function loadCompeticoesSection(supabase) {
                     ${jogos.map(j => {
                         const dataFmt = formatDataComp(j.data_jogo);
                         const horaFmt = j.hora_jogo ? j.hora_jogo.substring(0, 5) : 'Hora a def.';
-                        const isTorneio = j.tipo_evento === 'torneio' || Boolean(j.nome_evento) || Boolean(j.equipas_participantes);
+                        const isTorneio = verificarSeTorneio(j);
 
                         if (isTorneio) {
-                            const nomeTorneio = j.nome_evento || j.equipa_casa || 'Torneio / Concentração';
+                            const nomeTorneio = extrairTituloTorneio(j);
 
                             return `
                                 <div class="comp-game-card comp-tournament-card">
