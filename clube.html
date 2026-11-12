@@ -418,23 +418,16 @@
                 
                 <!-- Sidebar Lateral (30%) -->
                 <aside class="portal-sidebar reveal">
-                    <!-- Espaço Publicitário 1: Patrocinador Oficial (300x250) -->
-                    <div class="ad-widget ad-square has-adserver">
-                        <span class="ad-label">Publicidade</span>
-                        <!-- Espaço Publicitário: Patrocinio Oficial (300x250) -->
-                        <div data-pub-zone="pub_zn_24pynkpv1ci99t"></div>
-                        <script async src="https://pub-adserver-worker.nwaltercarvalho.workers.dev/pub.js"></script>
-                    </div>
-
-                    <!-- Espaço Publicitário 2 -->
-                    <div class="ad-widget ad-vertical">
-                        <span class="ad-label">Publicidade</span>
-                        <div style="text-align: center;">
-                            <div class="placeholder-icon">🚀</div>
-                            <h3 style="font-size: 1.1rem; margin: 10px 0;">Banner Vertical</h3>
-                            <p style="font-size: 0.8rem; color: var(--text-secondary);">Ideal para campanhas e destaques de parceiros.</p>
+                    <!-- Stack Dinâmica de Zonas Publicitárias (AdServer 300x250) -->
+                    <div id="sidebar-ads-container" class="sidebar-ads-stack">
+                        <!-- Espaço Publicitário 1 (Fallback Inicial) -->
+                        <div class="ad-widget ad-square has-adserver" data-zona-id="pub_zona_1">
+                            <span class="ad-label">Publicidade</span>
+                            <!-- Espaço Publicitário: Patrocinio Oficial (300x250) -->
+                            <div data-pub-zone="pub_zn_24pynkpv1ci99t"></div>
                         </div>
                     </div>
+                    <script async src="https://pub-adserver-worker.nwaltercarvalho.workers.dev/pub.js"></script>
                 </aside>
             </div>
         </div>
@@ -465,7 +458,7 @@
     <!-- Scripts -->
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script src="js/config.js"></script>
-    <script src="js/main.js?v=20261112_1210"></script>
+    <script src="js/main.js?v=20261112_1230"></script>
     <script src="js/clube.js?v=20261112_1210"></script>
 </body>
 </html>

@@ -114,6 +114,7 @@ document.addEventListener('DOMContentLoaded', () => {
         loadEquipasMenu(supabase);
         loadGlobalClubConfig(supabase);
         loadPatrocinadoresPublic(supabase);
+        carregarZonasPublicidade(supabase);
     }
 });
 
@@ -1175,6 +1176,109 @@ async function loadPatrocinadoresPublic(supabase) {
         console.warn("Aviso ao carregar patrocinadores públicos:", err);
     }
 }
+
+// 5.1 Carregar Zonas Dinâmicas de Publicidade (AdServer / clube_config)
+async function carregarZonasPublicidade(supabaseClient) {
+    const containers = document.querySelectorAll('.portal-sidebar');
+    if (!containers || containers.length === 0) return;
+
+    try {
+        const client = supabaseClient || (typeof window.supabase !== 'undefined' && typeof SUPABASE_URL !== 'undefined' ? window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY) : null);
+        if (!client) return;
+
+        let zonas = [];
+        const { data, error } = await client
+            .from('clube_config')
+            .select('dados')
+            .eq('chave', 'publicidade_adserver')
+            .maybeSingle();
+
+        if (error) {
+            console.warn("Aviso ao consultar publicidade_adserver em clube_config:", error);
+        }
+
+        if (data && Array.isArray(data.dados) && data.dados.length > 0) {
+            zonas = data.dados;
+        } else {
+            // Fallback de segurança: Zona 1 padrão ativa
+            zonas = [
+                {
+                    id: "pub_zona_1",
+                    nome: "Zona 1 - Sidebar Topo (300x250)",
+                    ativo: true,
+                    tipo: "adserver",
+                    pub_zone_id: "pub_zn_24pynkpv1ci99t",
+                    script_url: "https://pub-adserver-worker.nwaltercarvalho.workers.dev/pub.js",
+                    codigo_html: "",
+                    ordem: 1
+                }
+            ];
+        }
+
+        // Apenas zonas ativas que tenham pub_zone_id ou codigo_html
+        const zonasAtivas = zonas
+            .filter(z => !!z.ativo && ((z.pub_zone_id && z.pub_zone_id.trim()) || (z.codigo_html && z.codigo_html.trim())))
+            .sort((a, b) => (Number(a.ordem) || 0) - (Number(b.ordem) || 0));
+
+        if (zonasAtivas.length === 0) return;
+
+        containers.forEach(sidebar => {
+            let stack = sidebar.querySelector('#sidebar-ads-container');
+            if (!stack) {
+                // Procurar os widgets de publicidade antigos e substituí-los
+                const widgetsAntigos = sidebar.querySelectorAll('.ad-widget');
+                stack = document.createElement('div');
+                stack.id = 'sidebar-ads-container';
+                stack.className = 'sidebar-ads-stack';
+
+                if (widgetsAntigos.length > 0) {
+                    sidebar.insertBefore(stack, widgetsAntigos[0]);
+                    widgetsAntigos.forEach(w => w.remove());
+                } else {
+                    sidebar.appendChild(stack);
+                }
+            } else {
+                stack.innerHTML = '';
+            }
+
+            zonasAtivas.forEach(z => {
+                const widget = document.createElement('div');
+                widget.className = 'ad-widget ad-square has-adserver';
+                widget.setAttribute('data-zona-id', z.id);
+
+                if (z.codigo_html && z.codigo_html.trim()) {
+                    widget.innerHTML = `
+                        <span class="ad-label">Publicidade</span>
+                        ${z.codigo_html}
+                    `;
+                } else {
+                    widget.innerHTML = `
+                        <span class="ad-label">Publicidade</span>
+                        <!-- Espaço Publicitário: ${z.nome || 'Patrocínio Oficial'} (300x250) -->
+                        <div data-pub-zone="${z.pub_zone_id.trim()}"></div>
+                    `;
+                }
+                stack.appendChild(widget);
+            });
+        });
+
+        // Injetar script do AdServer se houver zona com data-pub-zone
+        const temPubZone = zonasAtivas.some(z => z.pub_zone_id && z.pub_zone_id.trim());
+        if (temPubZone) {
+            const scriptUrl = zonasAtivas[0]?.script_url || 'https://pub-adserver-worker.nwaltercarvalho.workers.dev/pub.js';
+            if (!document.querySelector('script[src*="pub-adserver-worker"]')) {
+                const s = document.createElement('script');
+                s.async = true;
+                s.src = scriptUrl;
+                document.body.appendChild(s);
+            }
+        }
+
+    } catch (err) {
+        console.warn("Aviso ao carregar zonas dinâmicas de publicidade:", err);
+    }
+}
+window.carregarZonasPublicidade = carregarZonasPublicidade;
 
 // 6. Carregar Competições Oficiais do BCV (#competicoes)
 async function loadCompeticoesSection(supabase) {

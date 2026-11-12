@@ -146,6 +146,7 @@ document.addEventListener('DOMContentLoaded', async () => {
             { tab: 'tab-equipas', allow: isAdmin || userPerms.includes('equipas') || role === 'treinador' },
             { tab: 'tab-competicoes', allow: isAdmin || role === 'diretor' || userPerms.includes('competicoes') || userPerms.includes('resultados') || userPerms.includes('equipas') || userPerms.length === 0 },
             { tab: 'tab-patrocinadores', allow: isAdmin || userPerms.includes('patrocinadores') },
+            { tab: 'tab-publicidade', allow: isAdmin || userPerms.includes('publicidade') || userPerms.includes('patrocinadores') },
             { tab: 'tab-config', allow: isAdmin || userPerms.includes('config') }
         ];
 
@@ -11468,6 +11469,306 @@ document.addEventListener('DOMContentLoaded', async () => {
         }
     });
 
+    // =========================================================================
+    // 14. GESTÃO DE ESPAÇOS PUBLICITÁRIOS (clube_config -> 'publicidade_adserver')
+    // =========================================================================
+    let currentZonasPub = [];
+
+    const DEFAULT_PUBLICIDADE_ZONAS = [
+        {
+            id: "pub_zona_1",
+            nome: "Zona 1 - Sidebar Topo (300x250)",
+            ativo: true,
+            tipo: "adserver",
+            pub_zone_id: "pub_zn_24pynkpv1ci99t",
+            script_url: "https://pub-adserver-worker.nwaltercarvalho.workers.dev/pub.js",
+            codigo_html: "",
+            ordem: 1
+        },
+        {
+            id: "pub_zona_2",
+            nome: "Zona 2 - Sidebar Posição 2 (300x250)",
+            ativo: false,
+            tipo: "adserver",
+            pub_zone_id: "",
+            script_url: "https://pub-adserver-worker.nwaltercarvalho.workers.dev/pub.js",
+            codigo_html: "",
+            ordem: 2
+        },
+        {
+            id: "pub_zona_3",
+            nome: "Zona 3 - Sidebar Posição 3 (300x250)",
+            ativo: false,
+            tipo: "adserver",
+            pub_zone_id: "",
+            script_url: "https://pub-adserver-worker.nwaltercarvalho.workers.dev/pub.js",
+            codigo_html: "",
+            ordem: 3
+        },
+        {
+            id: "pub_zona_4",
+            nome: "Zona 4 - Sidebar Posição 4 (300x250)",
+            ativo: false,
+            tipo: "adserver",
+            pub_zone_id: "",
+            script_url: "https://pub-adserver-worker.nwaltercarvalho.workers.dev/pub.js",
+            codigo_html: "",
+            ordem: 4
+        }
+    ];
+
+    async function loadPublicidadeAdmin() {
+        const tbody = document.getElementById('lista-zonas-pub');
+        if (!tbody) return;
+
+        try {
+            const { data, error } = await supabase
+                .from('clube_config')
+                .select('dados')
+                .eq('chave', 'publicidade_adserver')
+                .maybeSingle();
+
+            if (error) {
+                console.warn("Aviso ao carregar publicidade_adserver:", error);
+            }
+
+            if (data && Array.isArray(data.dados) && data.dados.length > 0) {
+                currentZonasPub = data.dados;
+            } else {
+                currentZonasPub = JSON.parse(JSON.stringify(DEFAULT_PUBLICIDADE_ZONAS));
+                // Guardar configuração inicial se não existir
+                await supabase.from('clube_config').upsert({
+                    chave: 'publicidade_adserver',
+                    dados: currentZonasPub
+                });
+            }
+
+            // Ordenar por ordem ascendente
+            currentZonasPub.sort((a, b) => (Number(a.ordem) || 0) - (Number(b.ordem) || 0));
+            renderPublicidadeAdmin();
+        } catch (err) {
+            console.error("Erro ao carregar zonas de publicidade:", err);
+            tbody.innerHTML = `<tr><td colspan="6" style="padding: 20px; text-align: center; color: #dc2626;">Erro ao carregar zonas: ${err.message}</td></tr>`;
+        }
+    }
+
+    function renderPublicidadeAdmin() {
+        const tbody = document.getElementById('lista-zonas-pub');
+        if (!tbody) return;
+
+        const kpiTotal = document.getElementById('kpi-pub-total');
+        const kpiAtivas = document.getElementById('kpi-pub-ativas');
+        if (kpiTotal) kpiTotal.textContent = currentZonasPub.length;
+        if (kpiAtivas) kpiAtivas.textContent = currentZonasPub.filter(z => z.ativo).length;
+
+        if (currentZonasPub.length === 0) {
+            tbody.innerHTML = `
+                <tr>
+                    <td colspan="6" style="padding: 30px; text-align: center; color: var(--text-secondary);">
+                        Nenhuma zona de publicidade configurada. Clique em <strong>➕ Nova Zona Publicitária</strong> para criar a primeira.
+                    </td>
+                </tr>
+            `;
+            return;
+        }
+
+        tbody.innerHTML = currentZonasPub.map((z, idx) => {
+            const isAtivo = !!z.ativo;
+            const hasId = Boolean(z.pub_zone_id && z.pub_zone_id.trim());
+            const hasHtml = Boolean(z.codigo_html && z.codigo_html.trim());
+            const infoAd = hasId ? `<code style="background: rgba(126, 34, 206, 0.08); color: #7e22ce; padding: 2px 6px; border-radius: 4px; font-weight: 700;">${z.pub_zone_id}</code>` 
+                                 : (hasHtml ? '<span style="color:#0284c7; font-weight:600;">HTML Personalizado</span>' : '<span style="color:#dc2626; font-style:italic;">Por configurar (sem ID)</span>');
+
+            return `
+                <tr style="border-bottom: 1px solid var(--border-color); ${!isAtivo ? 'opacity: 0.65; background: #fafafa;' : ''}">
+                    <td style="padding: 12px 10px; text-align: center; font-weight: 700; color: var(--text-secondary);">
+                        ${z.ordem || idx + 1}
+                    </td>
+                    <td style="padding: 12px 10px;">
+                        <strong style="color: var(--text-primary); font-size: 0.95rem;">${escapeHtml(z.nome || 'Zona ' + (idx + 1))}</strong>
+                        ${z.script_url ? `<br><small style="color: var(--text-secondary); font-size: 0.75rem;">${escapeHtml(z.script_url)}</small>` : ''}
+                    </td>
+                    <td style="padding: 12px 10px;">
+                        ${infoAd}
+                    </td>
+                    <td style="padding: 12px 10px; text-align: center;">
+                        <span style="background: #f1f5f9; color: #475569; font-size: 0.75rem; font-weight: 700; padding: 2px 8px; border-radius: 4px; border: 1px solid #cbd5e1;">300x250</span>
+                    </td>
+                    <td style="padding: 12px 10px; text-align: center;">
+                        <button type="button" onclick="window.togglePublicidadeAtiva('${z.id}', ${isAtivo})" title="Clique para alternar visibilidade no site" style="background: ${isAtivo ? '#dcfce7' : '#fee2e2'}; color: ${isAtivo ? '#15803d' : '#b91c1c'}; border: 1px solid ${isAtivo ? '#86efac' : '#fca5a5'}; border-radius: 20px; padding: 4px 12px; font-size: 0.78rem; font-weight: 800; cursor: pointer; display: inline-flex; align-items: center; gap: 4px;">
+                            ${isAtivo ? '● Sim (Ativo)' : '○ Não (Oculto)'}
+                        </button>
+                    </td>
+                    <td style="padding: 12px 10px; text-align: center; white-space: nowrap;">
+                        <button type="button" onclick="window.editPublicidadeZona('${z.id}')" title="Editar Zona" class="btn-secondary" style="padding: 5px 10px; font-size: 0.82rem; margin-right: 4px;">
+                            ✏️ Editar
+                        </button>
+                        <button type="button" onclick="window.deletePublicidadeZona('${z.id}')" title="Eliminar Zona" style="background: #fee2e2; color: #b91c1c; border: 1px solid #fca5a5; border-radius: 6px; padding: 5px 9px; font-size: 0.82rem; cursor: pointer;">
+                            🗑️
+                        </button>
+                    </td>
+                </tr>
+            `;
+        }).join('');
+    }
+
+    window.togglePublicidadeAtiva = async function(id, estadoAtual) {
+        const zona = currentZonasPub.find(z => z.id === id);
+        if (!zona) return;
+
+        zona.ativo = !estadoAtual;
+
+        renderPublicidadeAdmin();
+
+        try {
+            const { error } = await supabase.from('clube_config').upsert({
+                chave: 'publicidade_adserver',
+                dados: currentZonasPub
+            });
+            if (error) throw error;
+        } catch (err) {
+            console.error("Erro ao alternar estado da zona de publicidade:", err);
+            zona.ativo = estadoAtual;
+            renderPublicidadeAdmin();
+            alert("Erro ao atualizar visibilidade da publicidade: " + err.message);
+        }
+    };
+
+    window.editPublicidadeZona = function(id) {
+        const modal = document.getElementById('modal-zona-pub');
+        const form = document.getElementById('form-zona-pub');
+        if (!modal || !form) return;
+
+        const zona = currentZonasPub.find(z => z.id === id);
+        if (!zona) return;
+
+        document.getElementById('modal-pub-title').textContent = "Editar Zona de Publicidade";
+        document.getElementById('pub-id').value = zona.id;
+        document.getElementById('pub-nome').value = zona.nome || '';
+        document.getElementById('pub-zone-id').value = zona.pub_zone_id || '';
+        document.getElementById('pub-script-url').value = zona.script_url || 'https://pub-adserver-worker.nwaltercarvalho.workers.dev/pub.js';
+        document.getElementById('pub-codigo-html').value = zona.codigo_html || '';
+        document.getElementById('pub-ordem').value = zona.ordem || 1;
+        document.getElementById('pub-ativo').checked = !!zona.ativo;
+
+        modal.classList.remove('hidden');
+    };
+
+    window.deletePublicidadeZona = async function(id) {
+        const zona = currentZonasPub.find(z => z.id === id);
+        if (!zona) return;
+
+        if (!confirm(`Tem a certeza que deseja eliminar o espaço "${zona.nome || 'Zona'}"?`)) {
+            return;
+        }
+
+        currentZonasPub = currentZonasPub.filter(z => z.id !== id);
+        renderPublicidadeAdmin();
+
+        try {
+            const { error } = await supabase.from('clube_config').upsert({
+                chave: 'publicidade_adserver',
+                dados: currentZonasPub
+            });
+            if (error) throw error;
+        } catch (err) {
+            console.error("Erro ao eliminar zona de publicidade:", err);
+            alert("Erro ao eliminar: " + err.message);
+            loadPublicidadeAdmin();
+        }
+    };
+
+    window.fecharModalPublicidade = function() {
+        const modal = document.getElementById('modal-zona-pub');
+        if (modal) modal.classList.add('hidden');
+    };
+
+    // Listeners do Módulo de Publicidade
+    const btnNovaZonaPub = document.getElementById('btn-nova-zona-pub');
+    if (btnNovaZonaPub) {
+        btnNovaZonaPub.addEventListener('click', () => {
+            const modal = document.getElementById('modal-zona-pub');
+            const form = document.getElementById('form-zona-pub');
+            if (!modal || !form) return;
+
+            document.getElementById('modal-pub-title').textContent = "Nova Zona de Publicidade (300x250)";
+            form.reset();
+            document.getElementById('pub-id').value = '';
+            document.getElementById('pub-script-url').value = 'https://pub-adserver-worker.nwaltercarvalho.workers.dev/pub.js';
+            document.getElementById('pub-ordem').value = currentZonasPub.length + 1;
+            document.getElementById('pub-ativo').checked = true;
+
+            modal.classList.remove('hidden');
+        });
+    }
+
+    const btnRecarregarPub = document.getElementById('btn-recarregar-pub');
+    if (btnRecarregarPub) {
+        btnRecarregarPub.addEventListener('click', loadPublicidadeAdmin);
+    }
+
+    const btnFecharModalPub = document.getElementById('btn-fechar-modal-pub');
+    if (btnFecharModalPub) btnFecharModalPub.addEventListener('click', window.fecharModalPublicidade);
+
+    const btnCancelarPub = document.getElementById('btn-cancelar-pub');
+    if (btnCancelarPub) btnCancelarPub.addEventListener('click', window.fecharModalPublicidade);
+
+    const formZonaPub = document.getElementById('form-zona-pub');
+    if (formZonaPub) {
+        formZonaPub.addEventListener('submit', async (e) => {
+            e.preventDefault();
+
+            const id = document.getElementById('pub-id').value;
+            const nome = document.getElementById('pub-nome').value.trim();
+            const pubZoneId = document.getElementById('pub-zone-id').value.trim();
+            const scriptUrl = document.getElementById('pub-script-url').value.trim();
+            const codigoHtml = document.getElementById('pub-codigo-html').value.trim();
+            const ordem = parseInt(document.getElementById('pub-ordem').value, 10) || 1;
+            const ativo = document.getElementById('pub-ativo').checked;
+
+            if (id) {
+                // Atualizar existente
+                const zona = currentZonasPub.find(z => z.id === id);
+                if (zona) {
+                    zona.nome = nome;
+                    zona.pub_zone_id = pubZoneId;
+                    zona.script_url = scriptUrl;
+                    zona.codigo_html = codigoHtml;
+                    zona.ordem = ordem;
+                    zona.ativo = ativo;
+                }
+            } else {
+                // Nova zona
+                const newId = 'pub_zona_' + Date.now();
+                currentZonasPub.push({
+                    id: newId,
+                    nome: nome,
+                    pub_zone_id: pubZoneId,
+                    script_url: scriptUrl,
+                    codigo_html: codigoHtml,
+                    ordem: ordem,
+                    ativo: ativo,
+                    tipo: 'adserver'
+                });
+            }
+
+            currentZonasPub.sort((a, b) => (Number(a.ordem) || 0) - (Number(b.ordem) || 0));
+            window.fecharModalPublicidade();
+            renderPublicidadeAdmin();
+
+            try {
+                const { error } = await supabase.from('clube_config').upsert({
+                    chave: 'publicidade_adserver',
+                    dados: currentZonasPub
+                });
+                if (error) throw error;
+            } catch (err) {
+                console.error("Erro ao guardar zona de publicidade:", err);
+                alert("Erro ao guardar no Supabase: " + err.message);
+            }
+        });
+    }
+
     // Iniciar carregamento das tabs quando ativadas
     const tabButtons = document.querySelectorAll('.tab-btn');
     tabButtons.forEach(btn => {
@@ -11495,6 +11796,7 @@ document.addEventListener('DOMContentLoaded', async () => {
             if (target === 'tab-equipas') loadEquipas();
             if (target === 'tab-competicoes') loadCompeticoesAdmin();
             if (target === 'tab-patrocinadores') loadPatrocinadores();
+            if (target === 'tab-publicidade') loadPublicidadeAdmin();
             if (target === 'tab-config') loadConfiguracoes();
             if (target === 'tab-equipamentos') loadEquipamentos();
             if (target === 'tab-desportiva') loadDesportiva();

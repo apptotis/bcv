@@ -2121,6 +2121,13 @@ img {
 }
 
 /* Espaço Publicitário AdServer (300x250) */
+.sidebar-ads-stack {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+    width: 100%;
+}
+
 .ad-widget.has-adserver,
 .ad-widget:has([data-pub-zone]) {
     padding: 12px 6px !important;

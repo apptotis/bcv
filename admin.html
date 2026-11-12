@@ -70,6 +70,7 @@
                     <li><a href="#" class="tab-btn" data-tab="tab-resultados"><span class="icon">🏆</span> Resultados</a></li>
                     <li><a href="#" class="tab-btn" data-tab="tab-galeria"><span class="icon">📸</span> Galeria</a></li>
                     <li><a href="#" class="tab-btn" data-tab="tab-patrocinadores"><span class="icon">🤝</span> Patrocinadores</a></li>
+                    <li><a href="#" class="tab-btn" data-tab="tab-publicidade"><span class="icon">📢</span> Publicidade</a></li>
                     <li><a href="#" class="tab-btn" data-tab="tab-config"><span class="icon">⚙️</span> Configurações</a></li>
                 </ul>
             </nav>
@@ -209,6 +210,9 @@
                                     </label>
                                     <label style="display: flex; align-items: center; gap: 8px; cursor: pointer; font-size: 0.9rem; color: var(--text-primary);">
                                         <input type="checkbox" name="user_permissoes" value="patrocinadores"> 🤝 Patrocinadores
+                                    </label>
+                                    <label style="display: flex; align-items: center; gap: 8px; cursor: pointer; font-size: 0.9rem; color: var(--text-primary);">
+                                        <input type="checkbox" name="user_permissoes" value="publicidade"> 📢 Publicidade
                                     </label>
                                     <label style="display: flex; align-items: center; gap: 8px; cursor: pointer; font-size: 0.9rem; color: var(--text-primary);">
                                         <input type="checkbox" name="user_permissoes" value="competicoes"> 🏆 Competições
@@ -2184,6 +2188,117 @@
                     </div>
                 </div>
 
+                <!-- TAB: GESTÃO DE ESPAÇOS PUBLICITÁRIOS (ADSERVER) -->
+                <div id="tab-publicidade" class="tab-pane hidden">
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; flex-wrap: wrap; gap: 15px;">
+                        <div>
+                            <h2>📢 Gestão de Espaços Publicitários (AdServer)</h2>
+                            <p style="color: var(--text-secondary); font-size: 0.9rem;">Controle as zonas de anúncios (300x250) apresentadas nas barras laterais do site oficial. Ative ou desative cada anúncio com 1 clique.</p>
+                        </div>
+                        <button type="button" id="btn-nova-zona-pub" class="btn-primary" style="display: flex; align-items: center; gap: 8px;">
+                            <span>➕</span> Nova Zona Publicitária
+                        </button>
+                    </div>
+
+                    <!-- KPIs Rápidos -->
+                    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px; margin-bottom: 25px;">
+                        <div class="admin-card" style="padding: 16px; border-left: 4px solid var(--accent-primary);">
+                            <span style="font-size: 0.85rem; color: var(--text-secondary); font-weight: 600;">Total de Zonas</span>
+                            <div id="kpi-pub-total" style="font-size: 1.8rem; font-weight: 800; color: var(--text-primary); margin-top: 4px;">0</div>
+                        </div>
+                        <div class="admin-card" style="padding: 16px; border-left: 4px solid #16a34a;">
+                            <span style="font-size: 0.85rem; color: var(--text-secondary); font-weight: 600;">Zonas Ativas no Site</span>
+                            <div id="kpi-pub-ativas" style="font-size: 1.8rem; font-weight: 800; color: #16a34a; margin-top: 4px;">0</div>
+                        </div>
+                        <div class="admin-card" style="padding: 16px; border-left: 4px solid #9333ea;">
+                            <span style="font-size: 0.85rem; color: var(--text-secondary); font-weight: 600;">Formato Padrão</span>
+                            <div style="font-size: 1.4rem; font-weight: 800; color: #7e22ce; margin-top: 6px;">300 x 250 px</div>
+                        </div>
+                        <div class="admin-card" style="padding: 16px; border-left: 4px solid #0284c7;">
+                            <span style="font-size: 0.85rem; color: var(--text-secondary); font-weight: 600;">Servidor de Anúncios</span>
+                            <div style="font-size: 1.1rem; font-weight: 700; color: #0284c7; margin-top: 8px;">AdServer Cloudflare</div>
+                        </div>
+                    </div>
+
+                    <!-- Tabela de Zonas de Publicidade -->
+                    <div class="admin-card" style="padding: 20px; overflow-x: auto;">
+                        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
+                            <h3 style="margin: 0; color: var(--text-primary); font-size: 1.1rem;">Lista de Zonas Configuradas</h3>
+                            <button type="button" id="btn-recarregar-pub" class="btn-secondary" style="padding: 5px 12px; font-size: 0.82rem;">🔄 Atualizar</button>
+                        </div>
+                        <table class="admin-table" style="width: 100%; border-collapse: collapse; text-align: left;">
+                            <thead>
+                                <tr style="border-bottom: 2px solid var(--border-color); color: var(--text-secondary); font-size: 0.85rem;">
+                                    <th style="padding: 10px; width: 60px; text-align: center;">Ordem</th>
+                                    <th style="padding: 10px;">Espaço / Identificação</th>
+                                    <th style="padding: 10px;">ID Zona AdServer (data-pub-zone)</th>
+                                    <th style="padding: 10px; text-align: center;">Formato</th>
+                                    <th style="padding: 10px; text-align: center; width: 110px;">Visível no Site</th>
+                                    <th style="padding: 10px; text-align: center; width: 140px;">Ações</th>
+                                </tr>
+                            </thead>
+                            <tbody id="lista-zonas-pub">
+                                <tr>
+                                    <td colspan="6" style="padding: 20px; text-align: center; color: var(--text-secondary);">A carregar zonas de publicidade...</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+
+                    <!-- Modal Adicionar / Editar Zona Publicitária -->
+                    <div id="modal-zona-pub" class="modal-overlay hidden" style="position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.6); display: flex; align-items: center; justify-content: center; z-index: 9999;">
+                        <div class="modal-content" style="background: #ffffff; border-radius: 12px; width: 90%; max-width: 580px; padding: 25px; box-shadow: 0 10px 25px rgba(0,0,0,0.2); max-height: 90vh; overflow-y: auto;">
+                            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+                                <h3 id="modal-pub-title" style="margin: 0; color: var(--text-primary); font-size: 1.2rem;">Editar Zona de Publicidade</h3>
+                                <button type="button" id="btn-fechar-modal-pub" style="background: none; border: none; font-size: 1.4rem; cursor: pointer; color: var(--text-secondary);">&times;</button>
+                            </div>
+                            <form id="form-zona-pub">
+                                <input type="hidden" id="pub-id">
+                                
+                                <div style="margin-bottom: 16px;">
+                                    <label style="display: block; font-weight: 600; font-size: 0.85rem; margin-bottom: 6px;">Nome / Identificação do Espaço *</label>
+                                    <input type="text" id="pub-nome" class="admin-input" placeholder="Ex: Zona 1 - Sidebar Topo (300x250)" required style="width: 100%;">
+                                </div>
+
+                                <div style="margin-bottom: 16px;">
+                                    <label style="display: block; font-weight: 600; font-size: 0.85rem; margin-bottom: 6px;">ID da Zona AdServer (data-pub-zone) *</label>
+                                    <input type="text" id="pub-zone-id" class="admin-input" placeholder="Ex: pub_zn_24pynkpv1ci99t" style="width: 100%; font-family: monospace;">
+                                    <small style="color: var(--text-secondary); display: block; margin-top: 4px;">Identificador gerado no seu painel AdServer (Worker Cloudflare).</small>
+                                </div>
+
+                                <div style="margin-bottom: 16px;">
+                                    <label style="display: block; font-weight: 600; font-size: 0.85rem; margin-bottom: 6px;">URL do Script AdServer (pub.js)</label>
+                                    <input type="url" id="pub-script-url" class="admin-input" value="https://pub-adserver-worker.nwaltercarvalho.workers.dev/pub.js" style="width: 100%; font-family: monospace;">
+                                </div>
+
+                                <div style="margin-bottom: 16px;">
+                                    <label style="display: block; font-weight: 600; font-size: 0.85rem; margin-bottom: 6px;">Código HTML Personalizado (Opcional)</label>
+                                    <textarea id="pub-codigo-html" class="admin-input" rows="3" placeholder="Se deixar vazio, será gerado automaticamente o código padrão do AdServer com o ID da Zona acima." style="width: 100%; font-family: monospace; font-size: 0.82rem;"></textarea>
+                                </div>
+
+                                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-bottom: 20px;">
+                                    <div>
+                                        <label style="display: block; font-weight: 600; font-size: 0.85rem; margin-bottom: 6px;">Ordem de Exibição</label>
+                                        <input type="number" id="pub-ordem" class="admin-input" value="1" min="1" max="20" style="width: 100%;">
+                                    </div>
+                                    <div style="display: flex; flex-direction: column; justify-content: center;">
+                                        <label style="font-weight: 600; font-size: 0.85rem; margin-bottom: 8px;">Estado no Site</label>
+                                        <label style="display: flex; align-items: center; gap: 8px; cursor: pointer; font-size: 0.9rem; font-weight: 700;">
+                                            <input type="checkbox" id="pub-ativo" checked style="width: 18px; height: 18px; accent-color: #16a34a;">
+                                            <span>Ativo no Site</span>
+                                        </label>
+                                    </div>
+                                </div>
+
+                                <div style="display: flex; justify-content: flex-end; gap: 10px;">
+                                    <button type="button" id="btn-cancelar-pub" class="btn-secondary" style="padding: 10px 20px;">Cancelar</button>
+                                    <button type="submit" id="btn-salvar-pub" class="btn-primary" style="padding: 10px 24px;">💾 Guardar Zona</button>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+
                 <!-- TAB: CONFIGURAÇÕES GERAIS E ÓRGÃOS SOCIAIS -->
                 <div id="tab-config" class="tab-pane hidden">
                     <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; flex-wrap: wrap; gap: 10px;">
@@ -3348,6 +3463,6 @@
 
     <!-- Scripts -->
     <script src="js/config.js"></script>
-    <script src="js/admin.js?v=20261111_1730"></script>
+    <script src="js/admin.js?v=20261112_1230"></script>
 </body>
 </html>
