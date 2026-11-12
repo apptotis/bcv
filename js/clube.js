@@ -274,7 +274,7 @@ document.addEventListener('DOMContentLoaded', () => {
             if (!data || data.length === 0) return;
 
             const adSquare = document.querySelector('.ad-widget.ad-square');
-            if (adSquare) {
+            if (adSquare && !adSquare.querySelector('[data-pub-zone]')) {
                 const principal = data.find(p => p.categoria === 'Principal') || data[0];
                 if (principal) {
                     adSquare.innerHTML = `

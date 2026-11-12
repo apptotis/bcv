@@ -1153,9 +1153,9 @@ async function loadPatrocinadoresPublic(supabase) {
 
         section.style.display = 'block';
 
-        // Atualizar widgets de publicidade lateral se houver parceiros
+        // Atualizar widgets de publicidade lateral se houver parceiros (ignora se tiver adserver [data-pub-zone])
         const adSquare = document.querySelector('.ad-widget.ad-square');
-        if (adSquare && data.length > 0) {
+        if (adSquare && !adSquare.querySelector('[data-pub-zone]') && data.length > 0) {
             const principal = data.find(p => p.categoria === 'Principal') || data[0];
             if (principal) {
                 adSquare.innerHTML = `

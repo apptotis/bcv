@@ -2120,6 +2120,55 @@ img {
     background: var(--bg-secondary);
 }
 
+/* Espaço Publicitário AdServer (300x250) */
+.ad-widget.has-adserver,
+.ad-widget:has([data-pub-zone]) {
+    padding: 12px 6px !important;
+    min-height: 270px;
+    aspect-ratio: auto !important;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    background: #ffffff !important;
+    border: 1px solid var(--border-color);
+    border-radius: var(--border-radius-md);
+    box-shadow: var(--shadow-sm);
+}
+
+.ad-widget.has-adserver .ad-label,
+.ad-widget:has([data-pub-zone]) .ad-label {
+    position: static !important;
+    display: block;
+    width: 100%;
+    text-align: right;
+    margin-bottom: 6px;
+    padding-right: 6px;
+    font-size: 0.65rem;
+    color: var(--text-secondary);
+    text-transform: uppercase;
+    letter-spacing: 1px;
+}
+
+[data-pub-zone] {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 100%;
+    min-height: 250px;
+    text-align: center;
+    overflow: hidden;
+}
+
+[data-pub-zone] iframe,
+[data-pub-zone] img,
+[data-pub-zone] a {
+    max-width: 100%;
+    height: auto;
+    display: block;
+    margin: 0 auto;
+}
+
 .ad-square .placeholder-icon {
     font-size: 3rem;
     margin-bottom: 10px;
