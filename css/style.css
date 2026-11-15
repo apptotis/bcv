@@ -2278,6 +2278,21 @@ img {
 }
 
 @media (max-width: 991px) {
+    /* Alinhamento do Ícone Hambúrguer e Navbar com os Cards em Mobile */
+    .navbar-grid {
+        padding: 0 15px !important;
+    }
+    .nav-left {
+        justify-content: flex-start !important;
+    }
+    .hamburger-btn {
+        padding: 8px 10px 8px 0 !important;
+        width: 35px !important;
+        margin-left: 0 !important;
+    }
+    .container {
+        padding: 0 15px !important;
+    }
     main {
         padding-top: 80px !important;
     }
@@ -2360,11 +2375,11 @@ img {
 
 @media (max-width: 768px) {
     .container {
-        padding: 0 20px;
+        padding: 0 15px;
     }
 
     .nav-container {
-        padding: 0 20px;
+        padding: 0 15px;
     }
 
     .brand-text {
