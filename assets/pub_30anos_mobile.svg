@@ -26,9 +26,9 @@
     </filter>
   </defs>
 
-  <!-- Fundo com Cantos Arredondados -->
-  <rect width="600" height="240" rx="16" fill="url(#bgGradient)" />
-  <rect width="600" height="240" rx="16" fill="url(#glow)" />
+  <!-- Fundo com Cantos Retos -->
+  <rect width="600" height="240" rx="0" fill="url(#bgGradient)" />
+  <rect width="600" height="240" rx="0" fill="url(#glow)" />
 
   <!-- Linhas Decorativas de Campo de Basquetebol -->
   <g stroke="rgba(255,255,255,0.06)" stroke-width="2" fill="none">
@@ -40,7 +40,7 @@
   </g>
 
   <!-- Borda Sutil Dourada -->
-  <rect x="1" y="1" width="598" height="238" rx="15" fill="none" stroke="url(#goldGrad)" stroke-width="1.5" stroke-opacity="0.5" />
+  <rect x="1" y="1" width="598" height="238" rx="0" fill="none" stroke="url(#goldGrad)" stroke-width="1.5" stroke-opacity="0.5" />
 
   <!-- Emblema do Clube (Esquerda) -->
   <g filter="url(#dropShadow)">

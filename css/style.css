@@ -2273,21 +2273,43 @@ img {
 .mobile-ad-banner-wrap {
     display: none;
     width: 100%;
-    margin-top: 15px;
-    margin-bottom: 24px;
+    margin-top: 6px;
+    margin-bottom: 8px;
 }
 
 @media (max-width: 991px) {
+    main {
+        padding-top: 80px !important;
+    }
     .mobile-ad-banner-wrap {
         display: block !important;
+        margin-top: 6px !important;
+        margin-bottom: 8px !important;
+    }
+    .mobile-ad-banner-wrap .container {
+        padding: 0 15px !important;
+    }
+    /* Reduzir ao mínimo a distância para a Agenda Desportiva e Conteúdo Principal */
+    .container.section,
+    main > .container.section {
+        padding-top: 0 !important;
+        padding-bottom: 16px !important;
+    }
+    #portal-highlights {
+        padding-top: 0 !important;
+        padding-bottom: 12px !important;
+    }
+    .portal-highlights-grid {
+        margin-top: 0 !important;
+        gap: 12px !important;
     }
 }
 
 .mobile-ad-card {
     background: #ffffff;
     border: 1px solid var(--border-color);
-    border-radius: 12px;
-    padding: 8px;
+    border-radius: 0 !important; /* Cantos retos idênticos à Agenda Desportiva */
+    padding: 6px;
     text-align: center;
     position: relative;
     box-shadow: var(--shadow-sm);
@@ -2301,20 +2323,21 @@ img {
     display: block;
     width: 100%;
     text-decoration: none;
+    border-radius: 0 !important;
 }
 
 .mobile-ad-banner-img {
     width: 100%;
     max-width: 100%;
     height: auto;
-    border-radius: 10px;
+    border-radius: 0 !important; /* Cantos retos */
     display: block;
-    box-shadow: 0 4px 15px rgba(126, 34, 206, 0.2);
+    box-shadow: none !important;
     transition: transform 0.2s ease;
 }
 
 .mobile-ad-banner-img:hover {
-    transform: scale(1.008);
+    transform: scale(1.005);
 }
 
 /* ==========================================================================

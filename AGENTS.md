@@ -84,3 +84,4 @@
 - [2026-11-12] Gemini: Implementação completa do Módulo de Gestão de Publicidade & AdServer no Admin (tab-publicidade, admin.html, admin.js) com controlo de zonas (300x250), ativação Sim/Não em 1 toque, inserção direta de data-pub-zone, script setup_publicidade_adserver.sql e renderização dinâmica na sidebar de todas as páginas públicas (js/main.js, style.css).
 - [2026-11-15] Gemini: Dropdowns de resultados/classificações, unificação oficial FPB, card mobile 30 anos (assets/pub_30anos_mobile.svg), faixa desktop no topo e blindagem da sidebar.
 - [2026-11-15] Gemini: Zonas de Publicidade Mobile/Desktop com segmentação por Página/Destino no Admin (admin.html, admin.js) e resolução dinâmica hierárquica no frontend (js/main.js).
+- [2026-11-15] Gemini: Otimização mobile do card de publicidade: cantos retos (border-radius: 0 no card, banner e SVG 30 anos) idêntico à Agenda Desportiva, e redução ao mínimo do espaçamento de topo e transição.
