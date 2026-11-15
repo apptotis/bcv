@@ -3459,5 +3459,54 @@ img {
     }
 }
 
+/* ==========================================================================
+   Filter Pills & Badges (Resultados & Classificações)
+   ========================================================================== */
+.filter-pill {
+    background: #ffffff;
+    border: 1px solid var(--border-color, #e2e8f0);
+    color: var(--text-primary, #1e293b);
+    padding: 7px 14px;
+    border-radius: 20px;
+    font-size: 0.82rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    user-select: none;
+}
+
+.filter-pill:hover {
+    background: #faf5ff;
+    border-color: #a855f7;
+    color: #7e22ce;
+    transform: translateY(-1px);
+}
+
+.filter-pill.active {
+    background: #7e22ce;
+    border-color: #7e22ce;
+    color: #ffffff;
+    font-weight: 700;
+    box-shadow: 0 2px 8px rgba(126, 34, 206, 0.25);
+}
+
+.result-badge-win {
+    background: #dcfce7;
+    color: #15803d;
+    border: 1px solid #bbf7d0;
+    font-weight: 800;
+}
+
+.result-badge-loss {
+    background: #fee2e2;
+    color: #b91c1c;
+    border: 1px solid #fecaca;
+    font-weight: 800;
+}
+
+
 
 

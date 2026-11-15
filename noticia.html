@@ -32,7 +32,7 @@
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700;800&family=Outfit:wght@400;700;900&display=swap" rel="stylesheet">
     
     <!-- Stylesheets -->
-    <link rel="stylesheet" href="/css/style.css?v=20260925_5">
+    <link rel="stylesheet" href="/css/style.css?v=20261115_1600">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     
     <!-- Favicon -->
@@ -267,7 +267,52 @@
                     <!-- Preenchido via JS -->
                 </ul>
             </li>
-            <li><a href="competicoes.html" class="drawer-link">Competições</a></li>
+
+            <!-- Resultados -->
+            <li class="drawer-item">
+                <div style="display: flex; justify-content: space-between; align-items: center;">
+                    <a href="/resultados.html" class="drawer-link" style="flex: 1;">Resultados</a>
+                    <button class="drawer-dropdown-btn" id="dropdown-resultados-toggle" aria-label="Expandir submenu Resultados">
+                        <i class="fas fa-chevron-down"></i>
+                    </button>
+                </div>
+                <ul class="drawer-dropdown-content" id="dropdown-resultados-menu">
+                    <li><a href="/resultados.html" class="drawer-dropdown-link" style="font-weight: 700; color: #ffffff;">🏀 Todos os Resultados</a></li>
+                    <li><a href="/resultados.html?escalao=Sub+12+Mas" class="drawer-dropdown-link">Sub 12 Masc</a></li>
+                    <li><a href="/resultados.html?escalao=Sub+12+Fem" class="drawer-dropdown-link">Sub 12 Fem</a></li>
+                    <li><a href="/resultados.html?escalao=Sub+14+Mas" class="drawer-dropdown-link">Sub 14 Masc</a></li>
+                    <li><a href="/resultados.html?escalao=Sub+16+Fem" class="drawer-dropdown-link">Sub 16 Fem</a></li>
+                    <li><a href="/resultados.html?escalao=Sub+18+Mas" class="drawer-dropdown-link">Sub 18 Masc</a></li>
+                    <li><a href="/resultados.html?escalao=Seniores" class="drawer-dropdown-link">Seniores</a></li>
+                </ul>
+            </li>
+
+            <!-- Classificações -->
+            <li class="drawer-item">
+                <div style="display: flex; justify-content: space-between; align-items: center;">
+                    <a href="/classificacoes.html" class="drawer-link" style="flex: 1;">Classificações</a>
+                    <button class="drawer-dropdown-btn" id="dropdown-classificacoes-toggle" aria-label="Expandir submenu Classificações">
+                        <i class="fas fa-chevron-down"></i>
+                    </button>
+                </div>
+                <ul class="drawer-dropdown-content" id="dropdown-classificacoes-menu">
+                    <li><a href="/classificacoes.html" class="drawer-dropdown-link" style="font-weight: 700; color: #ffffff;">🏆 Todas as Classificações</a></li>
+                    <li><a href="/classificacoes.html?escalao=Sub+12+Mas" class="drawer-dropdown-link">Sub 12 Masc</a></li>
+                    <li><a href="/classificacoes.html?escalao=Sub+12+Fem" class="drawer-dropdown-link">Sub 12 Fem</a></li>
+                    <li><a href="/classificacoes.html?escalao=Sub+14+Mas" class="drawer-dropdown-link">Sub 14 Masc</a></li>
+                    <li><a href="/classificacoes.html?escalao=Sub+16+Fem" class="drawer-dropdown-link">Sub 16 Fem</a></li>
+                    <li><a href="/classificacoes.html?escalao=Sub+18+Mas" class="drawer-dropdown-link">Sub 18 Masc</a></li>
+                    <li><a href="/classificacoes.html?escalao=Seniores" class="drawer-dropdown-link">Seniores</a></li>
+                </ul>
+            </li>
+
+            <li><a href="/competicoes.html" class="drawer-link">Competições</a></li>
+            <li>
+                <a href="/direto.html" class="drawer-link nav-direto-link" style="display: flex; align-items: center; justify-content: space-between;">
+                    <span>BCV TV</span>
+                    <span class="drawer-live-badge is-offline">AO VIVO</span>
+                </a>
+            </li>
             <li><a href="/index.html#noticias" class="drawer-link">Notícias</a></li>
             <li><a href="/index.html#agenda" class="drawer-link">Agenda</a></li>
             <li><a href="/index.html#galeria" class="drawer-link">Galeria</a></li>
@@ -363,7 +408,7 @@
     <!-- Scripts -->
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script src="/js/config.js"></script>
-    <script src="/js/main.js?v=20260925_5"></script>
+    <script src="/js/main.js?v=20261115_1600"></script>
     <script>
         document.addEventListener('DOMContentLoaded', async () => {
             // Carregar Notícia por ID

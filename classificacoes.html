@@ -1,0 +1,302 @@
+<!DOCTYPE html>
+<html lang="pt-PT">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Classificações Oficiais | Basket Clube de Valença</title>
+    
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;800&family=Outfit:wght@400;700;900&display=swap" rel="stylesheet">
+    
+    <!-- Main Stylesheet -->
+    <link rel="stylesheet" href="css/style.css?v=20261115_1600">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    
+    <!-- Favicon -->
+    <link rel="icon" type="image/png" href="assets/emblema_png.png">
+</head>
+
+<body>
+    <!-- Background Elements -->
+    <div class="bg-shape shape-1"></div>
+    <div class="bg-shape shape-2"></div>
+
+    <!-- Header / Navbar (Logo Centered, Hamburger Left) -->
+    <header class="navbar" id="navbar">
+        <div class="navbar-grid">
+            <!-- Left Side: Hamburger Trigger -->
+            <div class="nav-left">
+                <button class="hamburger-btn" id="hamburger-trigger" aria-label="Abrir Menu" aria-expanded="false" aria-controls="drawer-menu">
+                    <span class="hamburger-line"></span>
+                    <span class="hamburger-line"></span>
+                    <span class="hamburger-line"></span>
+                </button>
+            </div>
+            
+            <!-- Center: Club Logo and Name -->
+            <div class="nav-center">
+                <a href="index.html" class="brand-logo-container">
+                    <img src="assets/emblema_png.png" alt="BCV Logo" class="brand-logo">
+                    <span class="brand-title-nav">Basket Clube de Valença</span>
+                </a>
+            </div>
+            
+            <!-- Right Side: Live Pill and Social Media Icons -->
+            <div class="nav-right">
+                <a href="direto.html" class="nav-live-pill is-offline" id="nav-live-pill" title="BCV TV • Transmissões em Direto">
+                    <span class="live-dot"></span>
+                    <span class="live-text">BCV TV</span>
+                </a>
+                <div class="nav-social-btn">
+                    <a href="https://www.facebook.com/profile.php?id=100039859278453" target="_blank" aria-label="Facebook"><i class="fab fa-facebook"></i></a>
+                    <a href="https://www.instagram.com/bcvalenca" target="_blank" aria-label="Instagram"><i class="fab fa-instagram"></i></a>
+                    <a href="https://www.youtube.com/@BCValenca" target="_blank" aria-label="YouTube"><i class="fab fa-youtube"></i></a>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- Overlay Background (visible when menu is open) -->
+    <div class="drawer-overlay" id="drawer-overlay"></div>
+
+    <!-- Slide-in Drawer Navigation Menu -->
+    <nav class="drawer-menu" id="drawer-menu" aria-label="Menu Principal">
+        <div class="drawer-header">
+            <div class="drawer-header-row">
+                <div class="drawer-club-info">
+                    <img src="assets/emblema_png.png" alt="BCV Emblema" class="drawer-club-logo">
+                    <span class="drawer-club-name">BCV</span>
+                </div>
+                <button class="drawer-close-btn" id="drawer-close-btn" aria-label="Fechar Menu">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+        </div>
+
+        <ul class="drawer-links-list">
+            <li><a href="index.html" class="drawer-link">Início</a></li>
+            
+            <!-- Clube -->
+            <li class="drawer-item">
+                <div style="display: flex; justify-content: space-between; align-items: center;">
+                    <a href="clube.html" class="drawer-link" style="flex: 1;">O Clube</a>
+                    <button class="drawer-dropdown-btn" id="dropdown-toggle" aria-label="Expandir submenu O Clube">
+                        <i class="fas fa-chevron-down"></i>
+                    </button>
+                </div>
+                <ul class="drawer-dropdown-content" id="dropdown-menu">
+                    <li><a href="clube.html#historia" class="drawer-dropdown-link">História</a></li>
+                    <li><a href="clube.html#orgaos-sociais" class="drawer-dropdown-link">Órgãos Sociais</a></li>
+                    <li><a href="clube.html#contactos" class="drawer-dropdown-link">Contactos</a></li>
+                </ul>
+            </li>
+
+            <!-- Equipas -->
+            <li class="drawer-item">
+                <div style="display: flex; justify-content: space-between; align-items: center;">
+                    <a href="equipas.html" class="drawer-link" style="flex: 1;">Equipas</a>
+                    <button class="drawer-dropdown-btn" id="dropdown-equipas-toggle" aria-label="Expandir submenu Equipas">
+                        <i class="fas fa-chevron-down"></i>
+                    </button>
+                </div>
+                <ul class="drawer-dropdown-content" id="dropdown-equipas-menu">
+                    <!-- Preenchido via JS -->
+                </ul>
+            </li>
+
+            <!-- Resultados -->
+            <li class="drawer-item">
+                <div style="display: flex; justify-content: space-between; align-items: center;">
+                    <a href="resultados.html" class="drawer-link" style="flex: 1;">Resultados</a>
+                    <button class="drawer-dropdown-btn" id="dropdown-resultados-toggle" aria-label="Expandir submenu Resultados">
+                        <i class="fas fa-chevron-down"></i>
+                    </button>
+                </div>
+                <ul class="drawer-dropdown-content" id="dropdown-resultados-menu">
+                    <li><a href="resultados.html" class="drawer-dropdown-link" style="font-weight: 700; color: #ffffff;">🏀 Todos os Resultados</a></li>
+                    <li><a href="resultados.html?escalao=Sub+12+Mas" class="drawer-dropdown-link">Sub 12 Masc</a></li>
+                    <li><a href="resultados.html?escalao=Sub+12+Fem" class="drawer-dropdown-link">Sub 12 Fem</a></li>
+                    <li><a href="resultados.html?escalao=Sub+14+Mas" class="drawer-dropdown-link">Sub 14 Masc</a></li>
+                    <li><a href="resultados.html?escalao=Sub+16+Fem" class="drawer-dropdown-link">Sub 16 Fem</a></li>
+                    <li><a href="resultados.html?escalao=Sub+18+Mas" class="drawer-dropdown-link">Sub 18 Masc</a></li>
+                    <li><a href="resultados.html?escalao=Seniores" class="drawer-dropdown-link">Seniores</a></li>
+                </ul>
+            </li>
+
+            <!-- Classificações -->
+            <li class="drawer-item">
+                <div style="display: flex; justify-content: space-between; align-items: center;">
+                    <a href="classificacoes.html" class="drawer-link active" style="flex: 1;">Classificações</a>
+                    <button class="drawer-dropdown-btn" id="dropdown-classificacoes-toggle" aria-label="Expandir submenu Classificações">
+                        <i class="fas fa-chevron-down"></i>
+                    </button>
+                </div>
+                <ul class="drawer-dropdown-content" id="dropdown-classificacoes-menu">
+                    <li><a href="classificacoes.html" class="drawer-dropdown-link" style="font-weight: 700; color: #ffffff;">🏆 Todas as Classificações</a></li>
+                    <li><a href="classificacoes.html?escalao=Sub+12+Mas" class="drawer-dropdown-link">Sub 12 Masc</a></li>
+                    <li><a href="classificacoes.html?escalao=Sub+12+Fem" class="drawer-dropdown-link">Sub 12 Fem</a></li>
+                    <li><a href="classificacoes.html?escalao=Sub+14+Mas" class="drawer-dropdown-link">Sub 14 Masc</a></li>
+                    <li><a href="classificacoes.html?escalao=Sub+16+Fem" class="drawer-dropdown-link">Sub 16 Fem</a></li>
+                    <li><a href="classificacoes.html?escalao=Sub+18+Mas" class="drawer-dropdown-link">Sub 18 Masc</a></li>
+                    <li><a href="classificacoes.html?escalao=Seniores" class="drawer-dropdown-link">Seniores</a></li>
+                </ul>
+            </li>
+
+            <li><a href="competicoes.html" class="drawer-link">Competições</a></li>
+            <li>
+                <a href="direto.html" class="drawer-link nav-direto-link" style="display: flex; align-items: center; justify-content: space-between;">
+                    <span>BCV TV</span>
+                    <span class="drawer-live-badge is-offline">AO VIVO</span>
+                </a>
+            </li>
+            <li><a href="index.html#noticias" class="drawer-link">Notícias</a></li>
+            <li><a href="index.html#agenda" class="drawer-link">Agenda</a></li>
+            <li><a href="index.html#galeria" class="drawer-link">Galeria</a></li>
+        </ul>
+
+        <div class="drawer-footer">
+            <p class="drawer-footer-text">
+                &copy; 2026 Basket Clube de Valença.<br>
+                Todos os direitos reservados.
+            </p>
+        </div>
+    </nav>
+
+    <main>
+        <!-- Anniversary Banner -->
+        <div class="anniversary-banner" style="position: relative; margin-top: 95px; width: 100%;">
+            Quadro Oficial de Classificações • Época 2026/2027 🏆
+        </div>
+
+        <div class="container section" style="padding-top: var(--spacing-xl);">
+            <div class="portal-container">
+                
+                <!-- Coluna Principal (70%) -->
+                <div class="portal-main">
+                    
+                    <div class="reveal active">
+                        <div class="portal-section-header">
+                            <div class="header-badge-icon">🏆</div>
+                            <div>
+                                <h1 class="portal-section-title" style="margin: 0;">Classificações Oficiais</h1>
+                                <p style="color: var(--text-secondary); margin: 4px 0 0 0; font-size: 0.92rem;">
+                                    Tabelas classificativas e apuramento federativo das nossas equipas em competição.
+                                </p>
+                            </div>
+                        </div>
+
+                        <!-- Barra de Filtros / Seletor de Escalão -->
+                        <div class="classificacoes-filter-container" style="margin-bottom: 22px;">
+                            <div class="classificacoes-filter-pills" id="classificacoes-filter-pills" style="display: flex; flex-wrap: wrap; gap: 8px;">
+                                <button type="button" class="filter-pill active" data-escalao="todos">🏆 Todas as Séries</button>
+                                <button type="button" class="filter-pill" data-escalao="Sub 12 Mas">Sub 12 Masc</button>
+                                <button type="button" class="filter-pill" data-escalao="Sub 12 Fem">Sub 12 Fem</button>
+                                <button type="button" class="filter-pill" data-escalao="Sub 14 Mas">Sub 14 Masc</button>
+                                <button type="button" class="filter-pill" data-escalao="Sub 16 Fem">Sub 16 Fem</button>
+                                <button type="button" class="filter-pill" data-escalao="Sub 18 Mas">Sub 18 Masc</button>
+                                <button type="button" class="filter-pill" data-escalao="Seniores">Seniores</button>
+                            </div>
+                        </div>
+
+                        <!-- Container Dinâmico de Tabelas de Classificação -->
+                        <div id="classificacoes-page-list" style="display: flex; flex-direction: column; gap: 24px;">
+                            <div style="padding: 40px 20px; text-align: center; color: var(--text-secondary); background: #ffffff; border-radius: 12px; border: 1px solid var(--border-color);">
+                                <div style="font-size: 2rem; margin-bottom: 10px;">🏆</div>
+                                <p style="margin: 0; font-weight: 600;">A carregar classificações oficiais da FPB...</p>
+                            </div>
+                        </div>
+
+                    </div>
+
+                    <!-- CTA Inscrições -->
+                    <section class="reveal" style="padding-top: var(--spacing-xl); padding-bottom: var(--spacing-lg);">
+                        <div style="background: linear-gradient(135deg, #4c1d95 0%, #7e22ce 100%); color: #ffffff; border-radius: 16px; padding: 28px 20px; text-align: center; box-shadow: 0 12px 30px rgba(126,34,206,0.22); position: relative; overflow: hidden;">
+                            <div style="display: inline-flex; align-items: center; gap: 8px; background: rgba(255,255,255,0.18); padding: 5px 14px; border-radius: 20px; font-size: 0.78rem; font-weight: 800; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 12px;">
+                                🏀 Queres Competir Connosco?
+                            </div>
+                            <h2 style="font-size: 1.5rem; font-weight: 800; color: #ffffff; margin-bottom: 8px; line-height: 1.2;">Vem Jogar no Basket Clube de Valença!</h2>
+                            <p style="font-size: 0.92rem; color: rgba(255,255,255,0.92); max-width: 580px; margin: 0 auto 18px auto; line-height: 1.5;">
+                                Inscrições abertas para todos os escalões (BabyBasket a Seniores). Junta-te às nossas equipas e participa nos campeonatos oficiais!
+                            </p>
+                            <a href="inscricao.html" class="btn" style="background: #ffffff; color: #7e22ce; font-weight: 800; font-size: 0.95rem; padding: 12px 30px; border-radius: 8px; box-shadow: 0 4px 15px rgba(0,0,0,0.2); transition: transform 0.2s ease; display: inline-block; text-decoration: none;">
+                                📝 Iniciar Inscrição Online →
+                            </a>
+                        </div>
+                    </section>
+
+                </div>
+
+                <!-- Coluna Lateral (30%) -->
+                <aside class="portal-sidebar">
+                    <!-- Atalho para Resultados -->
+                    <div class="portal-card" style="padding: 18px; margin-bottom: 16px; border-left: 4px solid #16a34a;">
+                        <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 8px;">
+                            <span style="font-size: 1.3rem;">📊</span>
+                            <strong style="color: var(--text-primary); font-size: 1rem;">Resultados de Jogos</strong>
+                        </div>
+                        <p style="font-size: 0.82rem; color: var(--text-secondary); margin: 0 0 12px 0;">
+                            Consulte os marcadores e resultados detalhados de cada jornada de todos os escalões.
+                        </p>
+                        <a href="resultados.html" class="btn-primary" style="display: block; text-align: center; text-decoration: none; padding: 8px 14px; font-size: 0.85rem; border-radius: 8px; font-weight: 700; background: #16a34a;">
+                            Ver Resultados →
+                        </a>
+                    </div>
+
+                    <!-- Stack Dinâmica de Zonas Publicitárias (AdServer 300x250) -->
+                    <div id="sidebar-ads-container" class="sidebar-ads-stack">
+                        <div class="ad-widget ad-square has-adserver" data-zona-id="pub_zona_1">
+                            <span class="ad-label">Publicidade</span>
+                            <div data-pub-zone="pub_zn_24pynkpv1ci99t"></div>
+                        </div>
+                    </div>
+                    <script async src="https://pub-adserver-worker.nwaltercarvalho.workers.dev/pub.js"></script>
+                </aside>
+
+            </div>
+        </div>
+    </main>
+
+    <!-- Secção de Patrocinadores -->
+    <section id="patrocinadores-section" class="sponsors-section" style="background: #ffffff; padding: 45px 0; border-top: 1px solid #e5e7eb; display: none;">
+        <div class="container">
+            <div style="text-align: center; margin-bottom: 25px;">
+                <span style="color: #7e22ce; font-weight: 700; font-size: 0.85rem; text-transform: uppercase; letter-spacing: 1px; display: block; margin-bottom: 6px;">Apoio & Parcerias</span>
+                <h2 style="font-size: 1.5rem; font-weight: 800; color: #1f2937; margin: 0;">Os Nossos Patrocinadores</h2>
+            </div>
+            <div id="patrocinadores-public-grid" style="display: flex; flex-wrap: wrap; justify-content: center; align-items: center; gap: 24px; max-width: 1100px; margin: 0 auto;"></div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="footer" style="padding: 40px 0;">
+        <div class="container">
+            <div class="footer-content" style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 20px;">
+                <div class="footer-brand" style="display: flex; align-items: center; gap: 15px;">
+                    <img src="assets/emblema_png.png" alt="BCV Logo" style="height: 50px;">
+                    <div>
+                        <h4 style="margin: 0; color: var(--text-primary); font-size: 1.1rem;">Basket Clube de Valença</h4>
+                        <p style="margin: 0; color: var(--text-secondary); font-size: 0.85rem;">Fundado em 1996 • 30 Anos a Formar Atletas</p>
+                    </div>
+                </div>
+                <div class="footer-links" style="display: flex; gap: 20px; font-size: 0.9rem;">
+                    <a href="clube.html#contactos" style="color: var(--text-secondary); text-decoration: none;">Contactos</a>
+                    <a href="inscricao.html" style="color: var(--text-secondary); text-decoration: none;">Inscrições</a>
+                    <a href="admin.html" style="color: var(--accent-primary); text-decoration: none; font-weight: 600;">Área Reservada</a>
+                </div>
+            </div>
+            <div style="text-align: center; margin-top: 25px; padding-top: 15px; border-top: 1px solid var(--border-color); color: var(--text-secondary); font-size: 0.8rem;">
+                &copy; 2026 Basket Clube de Valença. Todos os direitos reservados.
+            </div>
+        </div>
+    </footer>
+
+    <!-- Scripts -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="js/config.js"></script>
+    <script src="js/main.js?v=20261115_1600"></script>
+    <script src="js/classificacoes.js?v=20261115_1600"></script>
+</body>
+</html>

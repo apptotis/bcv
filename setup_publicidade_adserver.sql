@@ -54,3 +54,4 @@ ON CONFLICT (chave) DO NOTHING;
 
 -- 2. Garantir permissões de leitura e escrita
 GRANT ALL ON TABLE public.clube_config TO anon, authenticated, service_role;
+

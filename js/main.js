@@ -59,6 +59,28 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
+    const dropdownResultadosToggle = document.getElementById('dropdown-resultados-toggle');
+    const dropdownResultadosMenu = document.getElementById('dropdown-resultados-menu');
+    if (dropdownResultadosToggle && dropdownResultadosMenu) {
+        dropdownResultadosToggle.addEventListener('click', (e) => {
+            e.preventDefault();
+            e.stopPropagation();
+            dropdownResultadosToggle.classList.toggle('is-active');
+            dropdownResultadosMenu.classList.toggle('is-open');
+        });
+    }
+
+    const dropdownClassificacoesToggle = document.getElementById('dropdown-classificacoes-toggle');
+    const dropdownClassificacoesMenu = document.getElementById('dropdown-classificacoes-menu');
+    if (dropdownClassificacoesToggle && dropdownClassificacoesMenu) {
+        dropdownClassificacoesToggle.addEventListener('click', (e) => {
+            e.preventDefault();
+            e.stopPropagation();
+            dropdownClassificacoesToggle.classList.toggle('is-active');
+            dropdownClassificacoesMenu.classList.toggle('is-open');
+        });
+    }
+
     // Close drawer when clicking links (excluding expander targets)
     const menuLinks = document.querySelectorAll('.drawer-link, .drawer-dropdown-link');
     menuLinks.forEach(link => {
