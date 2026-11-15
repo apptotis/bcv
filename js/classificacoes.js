@@ -144,30 +144,6 @@ document.addEventListener('DOMContentLoaded', async () => {
                         ativo: true,
                         ordem: 5,
                         url_fpb: "https://www.fpb.pt/classificacao/associacao_5/"
-                    },
-                    {
-                        id: "sub12_masc",
-                        sigla: "Sub 12 Masc",
-                        nome: "Circuito Regional de Minibasquete Sub 12 Masculino",
-                        escalao: "Mini 12",
-                        tipo: "Regional",
-                        organizador: "ABVC",
-                        fase: "Etapas e Torneios",
-                        ativo: true,
-                        ordem: 5,
-                        url_fpb: "https://www.fpb.pt/classificacao/associacao_5/"
-                    },
-                    {
-                        id: "sub12_fem",
-                        sigla: "Sub 12 Fem",
-                        nome: "Circuito Regional de Minibasquete Sub 12 Feminino",
-                        escalao: "Mini 12",
-                        tipo: "Regional",
-                        organizador: "ABVC",
-                        fase: "Etapas e Torneios",
-                        ativo: true,
-                        ordem: 6,
-                        url_fpb: "https://www.fpb.pt/classificacao/associacao_5/"
                     }
                 ];
             }
