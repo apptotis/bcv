@@ -1285,26 +1285,23 @@ async function carregarZonasPublicidade(supabaseClient) {
             });
         });
 
-        // Preencher também os Cards de Publicidade Mobile (se existirem)
-        if (mobileCards && mobileCards.length > 0) {
-            const zonaMobile = zonasAtivas[0];
-            if (zonaMobile) {
-                mobileCards.forEach(card => {
-                    card.setAttribute('data-zona-id', zonaMobile.id);
-                    if (zonaMobile.codigo_html && zonaMobile.codigo_html.trim()) {
-                        card.innerHTML = `
-                            <span class="ad-label">Publicidade</span>
-                            ${zonaMobile.codigo_html}
-                        `;
-                    } else {
-                        card.innerHTML = `
-                            <span class="ad-label">Publicidade</span>
-                            <!-- Espaço Publicitário Mobile (300x250) -->
-                            <div data-pub-zone="${zonaMobile.pub_zone_id.trim()}"></div>
-                        `;
-                    }
-                });
-            }
+        // Preencher também os Cards de Publicidade Mobile (apenas se houver zona específica mobile ativa)
+        const zonaExplicitaMobile = zonasAtivas.find(z => z.tipo === 'mobile' || (z.id && z.id.includes('mobile')));
+        if (mobileCards && mobileCards.length > 0 && zonaExplicitaMobile) {
+            mobileCards.forEach(card => {
+                card.setAttribute('data-zona-id', zonaExplicitaMobile.id);
+                if (zonaExplicitaMobile.codigo_html && zonaExplicitaMobile.codigo_html.trim()) {
+                    card.innerHTML = `
+                        <span class="ad-label">Publicidade</span>
+                        ${zonaExplicitaMobile.codigo_html}
+                    `;
+                } else if (zonaExplicitaMobile.pub_zone_id) {
+                    card.innerHTML = `
+                        <span class="ad-label">Publicidade</span>
+                        <div data-pub-zone="${zonaExplicitaMobile.pub_zone_id.trim()}"></div>
+                    `;
+                }
+            });
         }
 
         // Injetar script do AdServer se houver zona com data-pub-zone

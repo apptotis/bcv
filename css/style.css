@@ -2276,6 +2276,20 @@ img {
     overflow: hidden;
 }
 
+.mobile-ad-banner-img {
+    width: 100%;
+    max-width: 100%;
+    height: auto;
+    border-radius: 10px;
+    display: block;
+    box-shadow: 0 4px 15px rgba(126, 34, 206, 0.2);
+    transition: transform 0.2s ease;
+}
+
+.mobile-ad-banner-img:hover {
+    transform: scale(1.008);
+}
+
 /* ==========================================================================
    Responsive Design
    ========================================================================== */
