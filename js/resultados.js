@@ -20,11 +20,27 @@ document.addEventListener('DOMContentLoaded', async () => {
     let filtroEscalaoAtual = 'todos';
     let termoBuscaAtual = '';
 
+    function formatarNomeEscalao(param) {
+        if (!param) return '';
+        const p = param.toLowerCase().replace(/[^a-z0-9]/g, '');
+        if (p.includes('14') && p.includes('mas')) return 'Sub 14 Masculino';
+        if (p.includes('14') && p.includes('fem')) return 'Sub 14 Feminino';
+        if (p.includes('16') && p.includes('fem')) return 'Sub 16 Feminino';
+        if (p.includes('18') && p.includes('mas')) return 'Sub 18 Masculino';
+        if (p.includes('sen') || p.includes('cn2')) return 'Seniores (CN2)';
+        return param;
+    }
+
     // Ler parâmetro da URL (ex: ?escalao=Sub+14+Mas)
     const urlParams = new URLSearchParams(window.location.search);
     const paramEscalao = urlParams.get('escalao') || urlParams.get('equipa') || '';
-    if (paramEscalao) {
+    if (paramEscalao && paramEscalao !== 'todos') {
         filtroEscalaoAtual = paramEscalao;
+        const titleEl = document.getElementById('resultados-page-title');
+        const subtitleEl = document.getElementById('resultados-page-subtitle');
+        const nomeFormatado = formatarNomeEscalao(paramEscalao);
+        if (titleEl) titleEl.textContent = `Resultados • ${nomeFormatado}`;
+        if (subtitleEl) subtitleEl.textContent = `Histórico e marcadores da equipa ${nomeFormatado} do BC Valença em competições oficiais.`;
     }
 
     // Inicializar listeners de UI
