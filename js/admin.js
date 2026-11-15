@@ -11580,7 +11580,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         if (zonasExibidas.length === 0) {
             tbody.innerHTML = `
                 <tr>
-                    <td colspan="7" style="padding: 30px; text-align: center; color: var(--text-secondary);">
+                    <td colspan="8" style="padding: 30px; text-align: center; color: var(--text-secondary);">
                         Nenhuma zona de publicidade encontrada para este filtro. Clique em <strong>➕ Nova Zona Publicitária</strong> para criar.
                     </td>
                 </tr>
@@ -11605,6 +11605,20 @@ document.addEventListener('DOMContentLoaded', async () => {
                 badgeDisp = `<span style="background: rgba(37, 99, 235, 0.1); color: #2563eb; font-size: 0.75rem; font-weight: 800; padding: 3px 8px; border-radius: 6px; border: 1px solid rgba(37, 99, 235, 0.2);">🖥️ Desktop</span>`;
             }
 
+            const pag = z.pagina || 'todas';
+            const mapPaginas = {
+                'todas': { label: '🌐 Global', bg: '#f1f5f9', color: '#475569', border: '#cbd5e1' },
+                'index.html': { label: '🏠 Homepage', bg: 'rgba(59, 130, 246, 0.1)', color: '#2563eb', border: 'rgba(59, 130, 246, 0.2)' },
+                'resultados.html': { label: '🏆 Resultados', bg: 'rgba(22, 163, 74, 0.1)', color: '#15803d', border: 'rgba(22, 163, 74, 0.2)' },
+                'classificacoes.html': { label: '📊 Classificações', bg: 'rgba(234, 179, 8, 0.1)', color: '#a16207', border: 'rgba(234, 179, 8, 0.2)' },
+                'competicoes.html': { label: '📅 Competições', bg: 'rgba(126, 34, 206, 0.1)', color: '#7e22ce', border: 'rgba(126, 34, 206, 0.2)' },
+                'equipas.html': { label: '👥 Equipas', bg: 'rgba(249, 115, 22, 0.1)', color: '#c2410c', border: 'rgba(249, 115, 22, 0.2)' },
+                'clube.html': { label: '🏛️ O Clube', bg: 'rgba(71, 85, 105, 0.1)', color: '#334155', border: 'rgba(71, 85, 105, 0.2)' },
+                'direto.html': { label: '📺 BCV TV', bg: 'rgba(220, 38, 38, 0.1)', color: '#dc2626', border: 'rgba(220, 38, 38, 0.2)' }
+            };
+            const confPag = mapPaginas[pag] || { label: pag, bg: '#f1f5f9', color: '#475569', border: '#cbd5e1' };
+            const badgePagina = `<span style="background: ${confPag.bg}; color: ${confPag.color}; font-size: 0.75rem; font-weight: 700; padding: 3px 8px; border-radius: 6px; border: 1px solid ${confPag.border};">${confPag.label}</span>`;
+
             const formatoLabel = z.formato || (disp === 'mobile' ? 'Card Responsivo' : '300x250');
 
             return `
@@ -11614,6 +11628,9 @@ document.addEventListener('DOMContentLoaded', async () => {
                     </td>
                     <td style="padding: 12px 10px; text-align: center;">
                         ${badgeDisp}
+                    </td>
+                    <td style="padding: 12px 10px; text-align: center;">
+                        ${badgePagina}
                     </td>
                     <td style="padding: 12px 10px;">
                         <strong style="color: var(--text-primary); font-size: 0.95rem;">${escapeHtml(z.nome || 'Zona ' + (idx + 1))}</strong>
@@ -11679,6 +11696,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         document.getElementById('pub-id').value = zona.id;
         document.getElementById('pub-nome').value = zona.nome || '';
         document.getElementById('pub-dispositivo').value = disp;
+        document.getElementById('pub-pagina').value = zona.pagina || 'todas';
         document.getElementById('pub-formato').value = zona.formato || (disp === 'mobile' ? 'Card Responsivo' : '300x250');
         document.getElementById('pub-zone-id').value = zona.pub_zone_id || '';
         document.getElementById('pub-script-url').value = zona.script_url || 'https://pub-adserver-worker.nwaltercarvalho.workers.dev/pub.js';
@@ -11730,6 +11748,7 @@ document.addEventListener('DOMContentLoaded', async () => {
             form.reset();
             document.getElementById('pub-id').value = '';
             document.getElementById('pub-dispositivo').value = 'desktop';
+            document.getElementById('pub-pagina').value = 'todas';
             document.getElementById('pub-formato').value = '300x250';
             document.getElementById('pub-script-url').value = 'https://pub-adserver-worker.nwaltercarvalho.workers.dev/pub.js';
             document.getElementById('pub-ordem').value = currentZonasPub.length + 1;
@@ -11794,6 +11813,7 @@ document.addEventListener('DOMContentLoaded', async () => {
             const id = document.getElementById('pub-id').value;
             const nome = document.getElementById('pub-nome').value.trim();
             const dispositivo = document.getElementById('pub-dispositivo').value || 'desktop';
+            const pagina = document.getElementById('pub-pagina').value || 'todas';
             const formato = document.getElementById('pub-formato').value.trim() || (dispositivo === 'mobile' ? 'Card Responsivo' : '300x250');
             const pubZoneId = document.getElementById('pub-zone-id').value.trim();
             const scriptUrl = document.getElementById('pub-script-url').value.trim();
@@ -11807,6 +11827,7 @@ document.addEventListener('DOMContentLoaded', async () => {
                 if (zona) {
                     zona.nome = nome;
                     zona.dispositivo = dispositivo;
+                    zona.pagina = pagina;
                     zona.formato = formato;
                     zona.pub_zone_id = pubZoneId;
                     zona.script_url = scriptUrl;
@@ -11821,6 +11842,7 @@ document.addEventListener('DOMContentLoaded', async () => {
                     id: newId,
                     nome: nome,
                     dispositivo: dispositivo,
+                    pagina: pagina,
                     formato: formato,
                     pub_zone_id: pubZoneId,
                     script_url: scriptUrl,

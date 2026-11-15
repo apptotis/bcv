@@ -2236,8 +2236,9 @@
                         <table class="admin-table" style="width: 100%; border-collapse: collapse; text-align: left;">
                             <thead>
                                 <tr style="border-bottom: 2px solid var(--border-color); color: var(--text-secondary); font-size: 0.85rem;">
-                                    <th style="padding: 10px; width: 50px; text-align: center;">Ordem</th>
-                                    <th style="padding: 10px; width: 110px; text-align: center;">Dispositivo</th>
+                                    <th style="padding: 10px; width: 45px; text-align: center;">Ordem</th>
+                                    <th style="padding: 10px; width: 100px; text-align: center;">Dispositivo</th>
+                                    <th style="padding: 10px; width: 125px; text-align: center;">Destino</th>
                                     <th style="padding: 10px;">Espaço / Identificação</th>
                                     <th style="padding: 10px;">ID Zona AdServer (data-pub-zone)</th>
                                     <th style="padding: 10px; text-align: center;">Formato</th>
@@ -2247,7 +2248,7 @@
                             </thead>
                             <tbody id="lista-zonas-pub">
                                 <tr>
-                                    <td colspan="7" style="padding: 20px; text-align: center; color: var(--text-secondary);">A carregar zonas de publicidade...</td>
+                                    <td colspan="8" style="padding: 20px; text-align: center; color: var(--text-secondary);">A carregar zonas de publicidade...</td>
                                 </tr>
                             </tbody>
                         </table>
@@ -2255,7 +2256,7 @@
 
                     <!-- Modal Adicionar / Editar Zona Publicitária -->
                     <div id="modal-zona-pub" class="modal-overlay hidden" style="position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.6); display: flex; align-items: center; justify-content: center; z-index: 9999;">
-                        <div class="modal-content" style="background: #ffffff; border-radius: 12px; width: 90%; max-width: 580px; padding: 25px; box-shadow: 0 10px 25px rgba(0,0,0,0.2); max-height: 90vh; overflow-y: auto;">
+                        <div class="modal-content" style="background: #ffffff; border-radius: 12px; width: 90%; max-width: 620px; padding: 25px; box-shadow: 0 10px 25px rgba(0,0,0,0.2); max-height: 90vh; overflow-y: auto;">
                             <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
                                 <h3 id="modal-pub-title" style="margin: 0; color: var(--text-primary); font-size: 1.2rem;">Editar Zona de Publicidade</h3>
                                 <button type="button" id="btn-fechar-modal-pub" style="background: none; border: none; font-size: 1.4rem; cursor: pointer; color: var(--text-secondary);">&times;</button>
@@ -2268,19 +2269,34 @@
                                         <label style="display: block; font-weight: 600; font-size: 0.85rem; margin-bottom: 6px;">Dispositivo / Posição *</label>
                                         <select id="pub-dispositivo" class="admin-input" style="width: 100%; font-weight: 600;">
                                             <option value="desktop">🖥️ Desktop (Sidebar 300x250)</option>
-                                            <option value="mobile">📱 Mobile (Card de Topo)</option>
+                                            <option value="mobile">📱 Mobile (Card no Topo)</option>
                                             <option value="ambos">🌐 Ambos (Desktop & Mobile)</option>
                                         </select>
+                                    </div>
+                                    <div>
+                                        <label style="display: block; font-weight: 600; font-size: 0.85rem; margin-bottom: 6px;">Página / Destino *</label>
+                                        <select id="pub-pagina" class="admin-input" style="width: 100%; font-weight: 600;">
+                                            <option value="todas">🌐 Todas as Páginas (Global)</option>
+                                            <option value="index.html">🏠 Apenas Homepage (index)</option>
+                                            <option value="resultados.html">🏆 Resultados de Jogos (resultados)</option>
+                                            <option value="classificacoes.html">📊 Classificações Oficiais (classificacoes)</option>
+                                            <option value="competicoes.html">📅 Competições (competicoes)</option>
+                                            <option value="equipas.html">👥 Equipas & Plantéis (equipas)</option>
+                                            <option value="clube.html">🏛️ O Clube / História (clube)</option>
+                                            <option value="direto.html">📺 BCV TV / Em Direto (direto)</option>
+                                        </select>
+                                    </div>
+                                </div>
+
+                                <div style="display: grid; grid-template-columns: 2fr 1fr; gap: 15px; margin-bottom: 16px;">
+                                    <div>
+                                        <label style="display: block; font-weight: 600; font-size: 0.85rem; margin-bottom: 6px;">Nome / Identificação do Espaço *</label>
+                                        <input type="text" id="pub-nome" class="admin-input" placeholder="Ex: Zona 1 - Sidebar Topo (300x250)" required style="width: 100%;">
                                     </div>
                                     <div>
                                         <label style="display: block; font-weight: 600; font-size: 0.85rem; margin-bottom: 6px;">Formato / Dimensões</label>
                                         <input type="text" id="pub-formato" class="admin-input" value="300x250" placeholder="Ex: 300x250" style="width: 100%;">
                                     </div>
-                                </div>
-
-                                <div style="margin-bottom: 16px;">
-                                    <label style="display: block; font-weight: 600; font-size: 0.85rem; margin-bottom: 6px;">Nome / Identificação do Espaço *</label>
-                                    <input type="text" id="pub-nome" class="admin-input" placeholder="Ex: Zona 1 - Sidebar Topo (300x250)" required style="width: 100%;">
                                 </div>
 
                                 <div style="margin-bottom: 16px;">
@@ -3486,6 +3502,6 @@
 
     <!-- Scripts -->
     <script src="js/config.js"></script>
-    <script src="js/admin.js?v=20261115_1920"></script>
+    <script src="js/admin.js?v=20261115_1930"></script>
 </body>
 </html>

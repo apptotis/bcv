@@ -1245,8 +1245,17 @@ async function carregarZonasPublicidade(supabaseClient) {
             .filter(z => !!z.ativo && ((z.pub_zone_id && z.pub_zone_id.trim()) || (z.codigo_html && z.codigo_html.trim())))
             .sort((a, b) => (Number(a.ordem) || 0) - (Number(b.ordem) || 0));
 
+        // Determinar página ativa atual para segmentação por destino
+        let currentPage = window.location.pathname.split('/').pop() || 'index.html';
+        if (!currentPage || currentPage === '' || currentPage === '/') currentPage = 'index.html';
+        currentPage = currentPage.split('?')[0].split('#')[0];
+
         // 1. ZONAS DESKTOP (Sidebar)
-        const zonasDesktop = zonasAtivas.filter(z => !z.dispositivo || z.dispositivo === 'desktop' || z.dispositivo === 'ambos');
+        const zonasDesktop = zonasAtivas.filter(z => {
+            const isDesktop = !z.dispositivo || z.dispositivo === 'desktop' || z.dispositivo === 'ambos';
+            const isMatchingPage = !z.pagina || z.pagina === 'todas' || z.pagina === currentPage;
+            return isDesktop && isMatchingPage;
+        });
         if (containers && containers.length > 0 && zonasDesktop.length > 0) {
             containers.forEach(sidebar => {
                 let stack = sidebar.querySelector('#sidebar-ads-container');
@@ -1289,7 +1298,17 @@ async function carregarZonasPublicidade(supabaseClient) {
         }
 
         // 2. ZONAS MOBILE (Card no Topo)
-        const zonaMobile = zonasAtivas.find(z => z.dispositivo === 'mobile' || z.dispositivo === 'ambos' || z.tipo === 'mobile');
+        // Hierarquia Inteligente Mobile: 1º Específico da página atual -> 2º Global ('todas')
+        let zonaMobile = zonasAtivas.find(z => 
+            (z.dispositivo === 'mobile' || z.dispositivo === 'ambos' || z.tipo === 'mobile') && 
+            z.pagina === currentPage
+        );
+        if (!zonaMobile) {
+            zonaMobile = zonasAtivas.find(z => 
+                (z.dispositivo === 'mobile' || z.dispositivo === 'ambos' || z.tipo === 'mobile') && 
+                (!z.pagina || z.pagina === 'todas')
+            );
+        }
         if (mobileCards && mobileCards.length > 0) {
             mobileCards.forEach(card => {
                 if (zonaMobile) {
