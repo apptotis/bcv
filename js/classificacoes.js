@@ -302,46 +302,6 @@ document.addEventListener('DOMContentLoaded', async () => {
                 `;
             }
 
-            // Jogos da série registados (se existirem)
-            let jogosSerieHtml = '';
-            if (comp.jogos_serie && Array.isArray(comp.jogos_serie) && comp.jogos_serie.length > 0) {
-                const isCN2 = comp.sigla === 'CN2' || /cn2|2ª\s*div/i.test(comp.nome || '');
-                const jogosFiltrados = comp.jogos_serie.filter(j => {
-                    if (isCN2) {
-                        const c = (j.equipa_casa || '').toLowerCase();
-                        const f = (j.equipa_fora || '').toLowerCase();
-                        if (c.includes('maria da fonte') || f.includes('maria da fonte')) return false;
-                    }
-                    return true;
-                });
-
-                if (jogosFiltrados.length > 0) {
-                    jogosSerieHtml = `
-                        <div style="margin-top: 18px; border-top: 1px dashed var(--border-color); padding-top: 14px;">
-                            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
-                                <strong style="font-size: 0.88rem; color: var(--text-primary);">⚡ Quadro de Jogos da Série</strong>
-                                <span style="font-size: 0.78rem; color: var(--text-secondary);">${jogosFiltrados.length} jogo(s) registado(s)</span>
-                            </div>
-                            <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 8px;">
-                                ${jogosFiltrados.slice(0, 6).map(j => {
-                                    const temPlacar = j.pontos_casa !== null && j.pontos_fora !== null && j.pontos_casa !== '' && j.pontos_fora !== '';
-                                    const scoreStr = temPlacar ? `<strong>${j.pontos_casa} - ${j.pontos_fora}</strong>` : '<span style="color:var(--text-secondary); font-size:0.75rem;">vs</span>';
-                                    const isBCV = /valen[cç]a|bcv/i.test(j.equipa_casa || '') || /valen[cç]a|bcv/i.test(j.equipa_fora || '');
-
-                                    return `
-                                        <div style="background: #f8fafc; border: 1px solid var(--border-color); ${isBCV ? 'border-left: 3px solid #7e22ce;' : ''} border-radius: 6px; padding: 6px 10px; font-size: 0.8rem; display: flex; justify-content: space-between; align-items: center;">
-                                            <span style="overflow: hidden; text-overflow: ellipsis; white-space: nowrap; max-width: 42%; font-weight: 600;">${j.equipa_casa}</span>
-                                            <span style="padding: 0 4px; white-space: nowrap;">${scoreStr}</span>
-                                            <span style="overflow: hidden; text-overflow: ellipsis; white-space: nowrap; max-width: 42%; text-align: right; font-weight: 600;">${j.equipa_fora}</span>
-                                        </div>
-                                    `;
-                                }).join('')}
-                            </div>
-                        </div>
-                    `;
-                }
-            }
-
             card.innerHTML = `
                 <!-- Linha 1: Nome da Competição (Largura Total) -->
                 <div class="competicao-title-row">
@@ -361,7 +321,6 @@ document.addEventListener('DOMContentLoaded', async () => {
                 </div>
 
                 ${tabelaHtml}
-                ${jogosSerieHtml}
 
                 <div class="competicao-footer" style="display: flex; justify-content: space-between; align-items: center; margin-top: 14px; padding-top: 10px; border-top: 1px solid var(--border-color); font-size: 0.75rem; color: var(--text-secondary); flex-wrap: wrap; gap: 6px;">
                     <span style="font-size: 0.75rem; color: var(--text-secondary); font-weight: 600;">Época 2026/2027</span>
