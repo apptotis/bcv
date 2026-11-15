@@ -219,9 +219,8 @@ document.addEventListener('DOMContentLoaded', async () => {
 
         comps.forEach(comp => {
             const card = document.createElement('div');
-            card.className = 'portal-card comp-card-wrapper';
-            card.style.padding = '22px';
-            card.style.marginBottom = '20px';
+            card.className = `competicao-card ${comp.tipo === 'nacional' ? 'nacional' : ''}`;
+            card.style.marginBottom = '24px';
 
             const compEscalao = comp.escalao || 'BCV';
             const compTipo = comp.tipo || 'Oficial FPB';
@@ -235,52 +234,62 @@ document.addEventListener('DOMContentLoaded', async () => {
             let tabelaHtml = '';
             if (equipasTabela && equipasTabela.length > 0) {
                 tabelaHtml = `
-                    <div class="comp-classificacao-container" style="margin-top: 15px; overflow-x: auto;">
-                        <table class="comp-classificacao-table" style="width: 100%; border-collapse: collapse;">
-                            <thead>
-                                <tr>
-                                    <th class="col-pos">#</th>
-                                    <th class="col-team">EQUIPA</th>
-                                    <th class="col-stat">J</th>
-                                    <th class="col-stat">V</th>
-                                    <th class="col-stat">D</th>
-                                    <th class="col-stat col-pm">PM</th>
-                                    <th class="col-stat col-ps">PS</th>
-                                    <th class="col-stat col-dif">DIF</th>
-                                    <th class="col-pts">PTS</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                ${equipasTabela.map(eq => {
-                                    const isBCV = /valen[cç]a|bcv/i.test(eq.nome);
-                                    const logoUrl = eq.logo || (typeof window.obterLogoEquipa === 'function' ? window.obterLogoEquipa(eq.nome) : null);
-                                    const diffFormatada = eq.dif > 0 ? `+${eq.dif}` : eq.dif;
-                                    const difColor = eq.dif > 0 ? '#16a34a' : (eq.dif < 0 ? '#dc2626' : 'var(--text-secondary)');
+                    <div class="comp-classificacao-container" style="margin-top: 8px;">
+                        <div class="comp-classificacao-header" style="margin-bottom: 8px;">
+                            <span class="comp-class-source-badge">⚡ Quadro Oficial da Série • FPB • ${comp.tipo === 'nacional' ? 'Nacional' : 'Distrital'}</span>
+                        </div>
 
-                                    return `
-                                        <tr class="${isBCV ? 'is-bcv-row' : ''}">
-                                            <td class="col-pos"><strong>${eq.pos}</strong></td>
-                                            <td class="col-team">
-                                                <div class="team-cell-wrap">
-                                                    <div class="team-logo-mini-wrap">
-                                                        ${logoUrl ? `<img src="${logoUrl}" alt="" class="team-logo-mini" onerror="this.parentElement.innerHTML='🏀'">` : '<span class="team-logo-placeholder-mini">🏀</span>'}
+                        <div class="comp-table-scroll">
+                            <table class="comp-classificacao-table">
+                                <thead>
+                                    <tr>
+                                        <th class="th-pos">#</th>
+                                        <th class="th-team">Equipa</th>
+                                        <th class="th-num" title="Jogos Disputados">J</th>
+                                        <th class="th-num" title="Vitórias">V</th>
+                                        <th class="th-num" title="Derrotas">D</th>
+                                        <th class="th-num col-pts-extra" title="Pontos Marcados">PM</th>
+                                        <th class="th-num col-pts-extra" title="Pontos Sofridos">PS</th>
+                                        <th class="th-num" title="Diferença de Pontos">DIF</th>
+                                        <th class="th-num th-pts" title="Pontos de Classificação">PTS</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    ${equipasTabela.map((eq, idx) => {
+                                        const isBCV = /valen[cç]a|bcv/i.test(eq.nome);
+                                        const logo = eq.logo || (typeof window.obterLogoEquipa === 'function' ? window.obterLogoEquipa(eq.nome) : null);
+                                        const diffFormatada = eq.dif > 0 ? `+${eq.dif}` : eq.dif;
+                                        const difColorClass = eq.dif > 0 ? 'dif-pos' : (eq.dif < 0 ? 'dif-neg' : '');
+                                        const posNum = eq.pos || (idx + 1);
+
+                                        return `
+                                            <tr class="${isBCV ? 'is-bcv-row' : ''}">
+                                                <td class="td-pos">
+                                                    <span class="pos-badge ${posNum === 1 ? 'pos-first' : ''}">${posNum}</span>
+                                                </td>
+                                                <td class="td-team">
+                                                    <div class="td-team-content">
+                                                        ${logo ? `<img src="${logo}" alt="" class="team-logo-icon" style="width: 18px; height: 18px; max-width: 18px; max-height: 18px; object-fit: contain; flex-shrink: 0;" onerror="this.style.display='none'">` : ''}
+                                                        <span class="team-name" title="${eq.nome}">${eq.nome}</span>
+                                                        ${isBCV ? '<span class="bcv-badge-tag">BCV</span>' : ''}
                                                     </div>
-                                                    <span class="team-cell-name">${eq.nome}</span>
-                                                    ${isBCV ? '<span class="team-bcv-pill">BCV</span>' : ''}
-                                                </div>
-                                            </td>
-                                            <td class="col-stat stat-num">${eq.j}</td>
-                                            <td class="col-stat stat-num" style="color: #16a34a; font-weight: 700;">${eq.v}</td>
-                                            <td class="col-stat stat-num" style="color: ${eq.d > 0 ? '#dc2626' : 'inherit'};">${eq.d}</td>
-                                            <td class="col-stat stat-num col-pm">${eq.pm}</td>
-                                            <td class="col-stat stat-num col-ps">${eq.ps}</td>
-                                            <td class="col-stat stat-num col-dif" style="color: ${difColor}; font-weight: 700;">${diffFormatada}</td>
-                                            <td class="col-pts pts-highlight">${eq.pts}</td>
-                                        </tr>
-                                    `;
-                                }).join('')}
-                            </tbody>
-                        </table>
+                                                </td>
+                                                <td class="td-num">${eq.j}</td>
+                                                <td class="td-num v-color">${eq.v}</td>
+                                                <td class="td-num d-color">${eq.d}</td>
+                                                <td class="td-num col-pts-extra text-muted">${eq.pm}</td>
+                                                <td class="td-num col-pts-extra text-muted">${eq.ps}</td>
+                                                <td class="td-num dif-color ${difColorClass}">${diffFormatada}</td>
+                                                <td class="td-num td-pts"><strong>${eq.pts}</strong></td>
+                                            </tr>
+                                        `;
+                                    }).join('')}
+                                </tbody>
+                            </table>
+                        </div>
+                        <div class="comp-table-legend">
+                            <span><strong>Regra Oficial FPB:</strong> Vitória = 2 Pts | Derrota = 1 Pt</span>
+                        </div>
                     </div>
                 `;
             } else {
@@ -334,36 +343,29 @@ document.addEventListener('DOMContentLoaded', async () => {
             }
 
             card.innerHTML = `
-                <div style="display: flex; justify-content: space-between; align-items: flex-start; flex-wrap: wrap; gap: 10px;">
-                    <div>
-                        <div style="display: inline-flex; align-items: center; gap: 6px; margin-bottom: 6px;">
-                            <span style="background: rgba(126,34,206,0.1); color: #7e22ce; font-size: 0.75rem; font-weight: 800; padding: 2px 8px; border-radius: 4px; border: 1px solid rgba(126,34,206,0.2);">${compEscalao}</span>
-                            <span style="background: #f1f5f9; color: #475569; font-size: 0.75rem; font-weight: 700; padding: 2px 8px; border-radius: 4px;">${compTipo}</span>
-                        </div>
-                        <h2 style="font-size: 1.25rem; font-weight: 800; color: var(--text-primary); margin: 0 0 4px 0; line-height: 1.3;">${comp.nome}</h2>
-                        <div style="font-size: 0.82rem; color: var(--text-secondary);">
-                            <span>🏛️ ${compOrganizador}</span>
-                            ${compFase ? ` • <span>${compFase}</span>` : ''}
-                        </div>
+                <!-- Linha 1: Nome da Competição (Largura Total) -->
+                <div class="competicao-title-row">
+                    <h3 class="competicao-title">${comp.nome}</h3>
+                </div>
+
+                <!-- Linha 2: Tag da Série + Botão FPB Oficial -->
+                <div class="competicao-sub-row">
+                    <div class="competicao-tags-group">
+                        <span class="competicao-tag">${comp.tipo === 'nacional' ? 'FPB • NACIONAL' : (comp.tag || comp.escalao || 'FPB • DISTRITAL')}</span>
+                        ${comp.sigla ? `<span class="competicao-sigla">${comp.sigla}</span>` : ''}
                     </div>
-                    <div>
-                        <a href="${urlFPB}" target="_blank" rel="noopener noreferrer" class="btn-secondary" style="font-size: 0.78rem; padding: 6px 12px; border-radius: 6px; text-decoration: none; display: inline-flex; align-items: center; gap: 4px;" title="Ver classificação oficial na FPB">
-                            <span>FPB Oficial</span>
-                            <span style="font-size: 0.72rem;">↗</span>
-                        </a>
-                    </div>
+                    <a href="${urlFPB}" target="_blank" rel="noopener noreferrer" class="comp-class-link-fpb" style="text-decoration: none;" title="Consultar classificação oficial na FPB">
+                        <span>FPB Oficial</span>
+                        <span>↗</span>
+                    </a>
                 </div>
 
                 ${tabelaHtml}
                 ${jogosSerieHtml}
 
-                <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 14px; padding-top: 10px; border-top: 1px solid var(--border-color); font-size: 0.75rem; color: var(--text-secondary); flex-wrap: wrap; gap: 6px;">
-                    <div>
-                        <span>Critério FPB: Vitória = 2 pts • Derrota = 1 pt • Desempate por Pontos e Diferença</span>
-                    </div>
-                    <div>
-                        <span>Época 2026/2027</span>
-                    </div>
+                <div class="competicao-footer" style="display: flex; justify-content: space-between; align-items: center; margin-top: 14px; padding-top: 10px; border-top: 1px solid var(--border-color); font-size: 0.75rem; color: var(--text-secondary); flex-wrap: wrap; gap: 6px;">
+                    <span style="font-size: 0.75rem; color: var(--text-secondary); font-weight: 600;">Época 2026/2027</span>
+                    <a href="${urlFPB}" target="_blank" rel="noopener noreferrer" style="font-size: 0.72rem; color: var(--accent-primary); font-weight: 700; background: rgba(126,34,206,0.08); padding: 2px 8px; border-radius: 4px; text-decoration: none; display: inline-flex; align-items: center; gap: 3px;" title="Consultar no portal oficial da FPB">FPB Oficial ↗</a>
                 </div>
             `;
 

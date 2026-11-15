@@ -3288,6 +3288,19 @@ img {
     gap: 7px;
 }
 
+.td-team-content img,
+.team-logo-icon,
+.team-logo-mini {
+    width: 18px !important;
+    height: 18px !important;
+    max-width: 18px !important;
+    max-height: 18px !important;
+    object-fit: contain !important;
+    flex-shrink: 0 !important;
+    display: inline-block !important;
+    vertical-align: middle !important;
+}
+
 .team-name {
     font-weight: 600;
 }
