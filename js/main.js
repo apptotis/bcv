@@ -1202,7 +1202,8 @@ async function loadPatrocinadoresPublic(supabase) {
 // 5.1 Carregar Zonas Dinâmicas de Publicidade (AdServer / clube_config)
 async function carregarZonasPublicidade(supabaseClient) {
     const containers = document.querySelectorAll('.portal-sidebar');
-    if (!containers || containers.length === 0) return;
+    const mobileCards = document.querySelectorAll('.mobile-ad-card');
+    if ((!containers || containers.length === 0) && (!mobileCards || mobileCards.length === 0)) return;
 
     try {
         const client = supabaseClient || (typeof window.supabase !== 'undefined' && typeof SUPABASE_URL !== 'undefined' ? window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY) : null);
@@ -1283,6 +1284,28 @@ async function carregarZonasPublicidade(supabaseClient) {
                 stack.appendChild(widget);
             });
         });
+
+        // Preencher também os Cards de Publicidade Mobile (se existirem)
+        if (mobileCards && mobileCards.length > 0) {
+            const zonaMobile = zonasAtivas[0];
+            if (zonaMobile) {
+                mobileCards.forEach(card => {
+                    card.setAttribute('data-zona-id', zonaMobile.id);
+                    if (zonaMobile.codigo_html && zonaMobile.codigo_html.trim()) {
+                        card.innerHTML = `
+                            <span class="ad-label">Publicidade</span>
+                            ${zonaMobile.codigo_html}
+                        `;
+                    } else {
+                        card.innerHTML = `
+                            <span class="ad-label">Publicidade</span>
+                            <!-- Espaço Publicitário Mobile (300x250) -->
+                            <div data-pub-zone="${zonaMobile.pub_zone_id.trim()}"></div>
+                        `;
+                    }
+                });
+            }
+        }
 
         // Injetar script do AdServer se houver zona com data-pub-zone
         const temPubZone = zonasAtivas.some(z => z.pub_zone_id && z.pub_zone_id.trim());
