@@ -1295,8 +1295,6 @@ async function carregarZonasPublicidade(supabaseClient) {
                 document.body.appendChild(s);
             }
         }
-            }
-        }
 
     } catch (err) {
         console.warn("Aviso ao carregar zonas dinâmicas de publicidade:", err);
