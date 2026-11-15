@@ -1199,10 +1199,11 @@ async function loadPatrocinadoresPublic(supabase) {
     }
 }
 
-// 5.1 Carregar Zonas Dinâmicas de Publicidade (AdServer / clube_config na Sidebar Desktop)
+// 5.1 Carregar Zonas Dinâmicas de Publicidade (AdServer / clube_config - Desktop & Mobile)
 async function carregarZonasPublicidade(supabaseClient) {
     const containers = document.querySelectorAll('.portal-sidebar');
-    if (!containers || containers.length === 0) return;
+    const mobileCards = document.querySelectorAll('.mobile-ad-card');
+    if ((!containers || containers.length === 0) && (!mobileCards || mobileCards.length === 0)) return;
 
     try {
         const client = supabaseClient || (typeof window.supabase !== 'undefined' && typeof SUPABASE_URL !== 'undefined' ? window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY) : null);
@@ -1222,11 +1223,13 @@ async function carregarZonasPublicidade(supabaseClient) {
         if (data && Array.isArray(data.dados) && data.dados.length > 0) {
             zonas = data.dados;
         } else {
-            // Fallback de segurança: Zona 1 padrão ativa
+            // Fallback de segurança: Zona 1 padrão ativa para desktop
             zonas = [
                 {
                     id: "pub_zona_1",
                     nome: "Zona 1 - Sidebar Topo (300x250)",
+                    dispositivo: "desktop",
+                    formato: "300x250",
                     ativo: true,
                     tipo: "adserver",
                     pub_zone_id: "pub_zn_24pynkpv1ci99t",
@@ -1242,49 +1245,79 @@ async function carregarZonasPublicidade(supabaseClient) {
             .filter(z => !!z.ativo && ((z.pub_zone_id && z.pub_zone_id.trim()) || (z.codigo_html && z.codigo_html.trim())))
             .sort((a, b) => (Number(a.ordem) || 0) - (Number(b.ordem) || 0));
 
-        if (zonasAtivas.length === 0) return;
+        // 1. ZONAS DESKTOP (Sidebar)
+        const zonasDesktop = zonasAtivas.filter(z => !z.dispositivo || z.dispositivo === 'desktop' || z.dispositivo === 'ambos');
+        if (containers && containers.length > 0 && zonasDesktop.length > 0) {
+            containers.forEach(sidebar => {
+                let stack = sidebar.querySelector('#sidebar-ads-container');
+                if (!stack) {
+                    const widgetsAntigos = sidebar.querySelectorAll('.ad-widget');
+                    stack = document.createElement('div');
+                    stack.id = 'sidebar-ads-container';
+                    stack.className = 'sidebar-ads-stack';
 
-        containers.forEach(sidebar => {
-            let stack = sidebar.querySelector('#sidebar-ads-container');
-            if (!stack) {
-                // Procurar os widgets de publicidade antigos e substituí-los
-                const widgetsAntigos = sidebar.querySelectorAll('.ad-widget');
-                stack = document.createElement('div');
-                stack.id = 'sidebar-ads-container';
-                stack.className = 'sidebar-ads-stack';
-
-                if (widgetsAntigos.length > 0) {
-                    sidebar.insertBefore(stack, widgetsAntigos[0]);
-                    widgetsAntigos.forEach(w => w.remove());
+                    if (widgetsAntigos.length > 0) {
+                        sidebar.insertBefore(stack, widgetsAntigos[0]);
+                        widgetsAntigos.forEach(w => w.remove());
+                    } else {
+                        sidebar.appendChild(stack);
+                    }
                 } else {
-                    sidebar.appendChild(stack);
+                    stack.innerHTML = '';
                 }
-            } else {
-                stack.innerHTML = '';
-            }
 
-            zonasAtivas.forEach(z => {
-                const widget = document.createElement('div');
-                widget.className = 'ad-widget ad-square has-adserver';
-                widget.setAttribute('data-zona-id', z.id);
+                zonasDesktop.forEach(z => {
+                    const widget = document.createElement('div');
+                    widget.className = 'ad-widget ad-square has-adserver';
+                    widget.setAttribute('data-zona-id', z.id);
 
-                if (z.codigo_html && z.codigo_html.trim()) {
-                    widget.innerHTML = `
-                        <span class="ad-label">Publicidade</span>
-                        ${z.codigo_html}
-                    `;
-                } else {
-                    widget.innerHTML = `
-                        <span class="ad-label">Publicidade</span>
-                        <!-- Espaço Publicitário: ${z.nome || 'Patrocínio Oficial'} (300x250) -->
-                        <div data-pub-zone="${z.pub_zone_id.trim()}"></div>
-                    `;
-                }
-                stack.appendChild(widget);
+                    if (z.codigo_html && z.codigo_html.trim()) {
+                        widget.innerHTML = `
+                            <span class="ad-label">Publicidade</span>
+                            ${z.codigo_html}
+                        `;
+                    } else {
+                        widget.innerHTML = `
+                            <span class="ad-label">Publicidade</span>
+                            <!-- Espaço Publicitário: ${escapeHtml(z.nome || 'Patrocínio Oficial')} (300x250) -->
+                            <div data-pub-zone="${z.pub_zone_id.trim()}"></div>
+                        `;
+                    }
+                    stack.appendChild(widget);
+                });
             });
-        });
+        }
 
-        // Injetar script do AdServer se houver zona com data-pub-zone
+        // 2. ZONAS MOBILE (Card no Topo)
+        const zonaMobile = zonasAtivas.find(z => z.dispositivo === 'mobile' || z.dispositivo === 'ambos' || z.tipo === 'mobile');
+        if (mobileCards && mobileCards.length > 0) {
+            mobileCards.forEach(card => {
+                if (zonaMobile) {
+                    card.setAttribute('data-zona-id', zonaMobile.id);
+                    if (zonaMobile.codigo_html && zonaMobile.codigo_html.trim()) {
+                        card.innerHTML = `
+                            <span class="ad-label" style="display: block; width: 100%; text-align: right; margin-bottom: 6px; font-size: 0.65rem; color: var(--text-secondary); text-transform: uppercase; font-weight: 700; letter-spacing: 1px;">Publicidade</span>
+                            ${zonaMobile.codigo_html}
+                        `;
+                    } else if (zonaMobile.pub_zone_id) {
+                        card.innerHTML = `
+                            <span class="ad-label" style="display: block; width: 100%; text-align: right; margin-bottom: 6px; font-size: 0.65rem; color: var(--text-secondary); text-transform: uppercase; font-weight: 700; letter-spacing: 1px;">Publicidade</span>
+                            <div data-pub-zone="${zonaMobile.pub_zone_id.trim()}" style="display: flex; justify-content: center; align-items: center; width: 100%; min-height: 100px;"></div>
+                        `;
+                    }
+                } else {
+                    // Fallback institucional: Se não houver zona mobile ativa, exibe os 30 anos sem etiqueta
+                    card.removeAttribute('data-zona-id');
+                    card.innerHTML = `
+                        <a href="clube.html" title="Basket Clube de Valença • 30 Anos (1996 - 2026)" style="display: block; width: 100%; text-decoration: none;">
+                            <img src="assets/pub_30anos_mobile.svg" alt="1996 - 2026 | Celebramos 30 Anos de História e Paixão pelo Basquetebol! 🏀" class="mobile-ad-banner-img">
+                        </a>
+                    `;
+                }
+            });
+        }
+
+        // 3. Injetar script do AdServer se houver zona com data-pub-zone
         const temPubZone = zonasAtivas.some(z => z.pub_zone_id && z.pub_zone_id.trim());
         if (temPubZone) {
             const scriptUrl = zonasAtivas[0]?.script_url || 'https://pub-adserver-worker.nwaltercarvalho.workers.dev/pub.js';

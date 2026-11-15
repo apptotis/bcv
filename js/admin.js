@@ -11473,11 +11473,14 @@ document.addEventListener('DOMContentLoaded', async () => {
     // 14. GESTÃO DE ESPAÇOS PUBLICITÁRIOS (clube_config -> 'publicidade_adserver')
     // =========================================================================
     let currentZonasPub = [];
+    let filtroDispositivoPub = 'todos';
 
     const DEFAULT_PUBLICIDADE_ZONAS = [
         {
             id: "pub_zona_1",
             nome: "Zona 1 - Sidebar Topo (300x250)",
+            dispositivo: "desktop",
+            formato: "300x250",
             ativo: true,
             tipo: "adserver",
             pub_zone_id: "pub_zn_24pynkpv1ci99t",
@@ -11488,6 +11491,8 @@ document.addEventListener('DOMContentLoaded', async () => {
         {
             id: "pub_zona_2",
             nome: "Zona 2 - Sidebar Posição 2 (300x250)",
+            dispositivo: "desktop",
+            formato: "300x250",
             ativo: false,
             tipo: "adserver",
             pub_zone_id: "",
@@ -11498,6 +11503,8 @@ document.addEventListener('DOMContentLoaded', async () => {
         {
             id: "pub_zona_3",
             nome: "Zona 3 - Sidebar Posição 3 (300x250)",
+            dispositivo: "desktop",
+            formato: "300x250",
             ativo: false,
             tipo: "adserver",
             pub_zone_id: "",
@@ -11508,6 +11515,8 @@ document.addEventListener('DOMContentLoaded', async () => {
         {
             id: "pub_zona_4",
             nome: "Zona 4 - Sidebar Posição 4 (300x250)",
+            dispositivo: "desktop",
+            formato: "300x250",
             ativo: false,
             tipo: "adserver",
             pub_zone_id: "",
@@ -11548,7 +11557,7 @@ document.addEventListener('DOMContentLoaded', async () => {
             renderPublicidadeAdmin();
         } catch (err) {
             console.error("Erro ao carregar zonas de publicidade:", err);
-            tbody.innerHTML = `<tr><td colspan="6" style="padding: 20px; text-align: center; color: #dc2626;">Erro ao carregar zonas: ${err.message}</td></tr>`;
+            tbody.innerHTML = `<tr><td colspan="7" style="padding: 20px; text-align: center; color: #dc2626;">Erro ao carregar zonas: ${err.message}</td></tr>`;
         }
     }
 
@@ -11561,28 +11570,50 @@ document.addEventListener('DOMContentLoaded', async () => {
         if (kpiTotal) kpiTotal.textContent = currentZonasPub.length;
         if (kpiAtivas) kpiAtivas.textContent = currentZonasPub.filter(z => z.ativo).length;
 
-        if (currentZonasPub.length === 0) {
+        let zonasExibidas = currentZonasPub;
+        if (filtroDispositivoPub === 'desktop') {
+            zonasExibidas = currentZonasPub.filter(z => !z.dispositivo || z.dispositivo === 'desktop' || z.dispositivo === 'ambos');
+        } else if (filtroDispositivoPub === 'mobile') {
+            zonasExibidas = currentZonasPub.filter(z => z.dispositivo === 'mobile' || z.dispositivo === 'ambos' || z.tipo === 'mobile');
+        }
+
+        if (zonasExibidas.length === 0) {
             tbody.innerHTML = `
                 <tr>
-                    <td colspan="6" style="padding: 30px; text-align: center; color: var(--text-secondary);">
-                        Nenhuma zona de publicidade configurada. Clique em <strong>➕ Nova Zona Publicitária</strong> para criar a primeira.
+                    <td colspan="7" style="padding: 30px; text-align: center; color: var(--text-secondary);">
+                        Nenhuma zona de publicidade encontrada para este filtro. Clique em <strong>➕ Nova Zona Publicitária</strong> para criar.
                     </td>
                 </tr>
             `;
             return;
         }
 
-        tbody.innerHTML = currentZonasPub.map((z, idx) => {
+        tbody.innerHTML = zonasExibidas.map((z, idx) => {
             const isAtivo = !!z.ativo;
             const hasId = Boolean(z.pub_zone_id && z.pub_zone_id.trim());
             const hasHtml = Boolean(z.codigo_html && z.codigo_html.trim());
             const infoAd = hasId ? `<code style="background: rgba(126, 34, 206, 0.08); color: #7e22ce; padding: 2px 6px; border-radius: 4px; font-weight: 700;">${z.pub_zone_id}</code>` 
                                  : (hasHtml ? '<span style="color:#0284c7; font-weight:600;">HTML Personalizado</span>' : '<span style="color:#dc2626; font-style:italic;">Por configurar (sem ID)</span>');
 
+            const disp = z.dispositivo || (z.tipo === 'mobile' || (z.id && z.id.includes('mobile')) ? 'mobile' : 'desktop');
+            let badgeDisp = '';
+            if (disp === 'mobile') {
+                badgeDisp = `<span style="background: rgba(126, 34, 206, 0.1); color: #7e22ce; font-size: 0.75rem; font-weight: 800; padding: 3px 8px; border-radius: 6px; border: 1px solid rgba(126, 34, 206, 0.2);">📱 Mobile</span>`;
+            } else if (disp === 'ambos') {
+                badgeDisp = `<span style="background: rgba(22, 163, 74, 0.1); color: #15803d; font-size: 0.75rem; font-weight: 800; padding: 3px 8px; border-radius: 6px; border: 1px solid rgba(22, 163, 74, 0.2);">🌐 Ambos</span>`;
+            } else {
+                badgeDisp = `<span style="background: rgba(37, 99, 235, 0.1); color: #2563eb; font-size: 0.75rem; font-weight: 800; padding: 3px 8px; border-radius: 6px; border: 1px solid rgba(37, 99, 235, 0.2);">🖥️ Desktop</span>`;
+            }
+
+            const formatoLabel = z.formato || (disp === 'mobile' ? 'Card Responsivo' : '300x250');
+
             return `
                 <tr style="border-bottom: 1px solid var(--border-color); ${!isAtivo ? 'opacity: 0.65; background: #fafafa;' : ''}">
                     <td style="padding: 12px 10px; text-align: center; font-weight: 700; color: var(--text-secondary);">
                         ${z.ordem || idx + 1}
+                    </td>
+                    <td style="padding: 12px 10px; text-align: center;">
+                        ${badgeDisp}
                     </td>
                     <td style="padding: 12px 10px;">
                         <strong style="color: var(--text-primary); font-size: 0.95rem;">${escapeHtml(z.nome || 'Zona ' + (idx + 1))}</strong>
@@ -11592,7 +11623,7 @@ document.addEventListener('DOMContentLoaded', async () => {
                         ${infoAd}
                     </td>
                     <td style="padding: 12px 10px; text-align: center;">
-                        <span style="background: #f1f5f9; color: #475569; font-size: 0.75rem; font-weight: 700; padding: 2px 8px; border-radius: 4px; border: 1px solid #cbd5e1;">300x250</span>
+                        <span style="background: #f1f5f9; color: #475569; font-size: 0.75rem; font-weight: 700; padding: 2px 8px; border-radius: 4px; border: 1px solid #cbd5e1;">${escapeHtml(formatoLabel)}</span>
                     </td>
                     <td style="padding: 12px 10px; text-align: center;">
                         <button type="button" onclick="window.togglePublicidadeAtiva('${z.id}', ${isAtivo})" title="Clique para alternar visibilidade no site" style="background: ${isAtivo ? '#dcfce7' : '#fee2e2'}; color: ${isAtivo ? '#15803d' : '#b91c1c'}; border: 1px solid ${isAtivo ? '#86efac' : '#fca5a5'}; border-radius: 20px; padding: 4px 12px; font-size: 0.78rem; font-weight: 800; cursor: pointer; display: inline-flex; align-items: center; gap: 4px;">
@@ -11642,9 +11673,13 @@ document.addEventListener('DOMContentLoaded', async () => {
         const zona = currentZonasPub.find(z => z.id === id);
         if (!zona) return;
 
+        const disp = zona.dispositivo || (zona.tipo === 'mobile' || (zona.id && zona.id.includes('mobile')) ? 'mobile' : 'desktop');
+
         document.getElementById('modal-pub-title').textContent = "Editar Zona de Publicidade";
         document.getElementById('pub-id').value = zona.id;
         document.getElementById('pub-nome').value = zona.nome || '';
+        document.getElementById('pub-dispositivo').value = disp;
+        document.getElementById('pub-formato').value = zona.formato || (disp === 'mobile' ? 'Card Responsivo' : '300x250');
         document.getElementById('pub-zone-id').value = zona.pub_zone_id || '';
         document.getElementById('pub-script-url').value = zona.script_url || 'https://pub-adserver-worker.nwaltercarvalho.workers.dev/pub.js';
         document.getElementById('pub-codigo-html').value = zona.codigo_html || '';
@@ -11691,9 +11726,11 @@ document.addEventListener('DOMContentLoaded', async () => {
             const form = document.getElementById('form-zona-pub');
             if (!modal || !form) return;
 
-            document.getElementById('modal-pub-title').textContent = "Nova Zona de Publicidade (300x250)";
+            document.getElementById('modal-pub-title').textContent = "Nova Zona de Publicidade";
             form.reset();
             document.getElementById('pub-id').value = '';
+            document.getElementById('pub-dispositivo').value = 'desktop';
+            document.getElementById('pub-formato').value = '300x250';
             document.getElementById('pub-script-url').value = 'https://pub-adserver-worker.nwaltercarvalho.workers.dev/pub.js';
             document.getElementById('pub-ordem').value = currentZonasPub.length + 1;
             document.getElementById('pub-ativo').checked = true;
@@ -11701,6 +11738,42 @@ document.addEventListener('DOMContentLoaded', async () => {
             modal.classList.remove('hidden');
         });
     }
+
+    const selectDispositivoPub = document.getElementById('pub-dispositivo');
+    if (selectDispositivoPub) {
+        selectDispositivoPub.addEventListener('change', (e) => {
+            const val = e.target.value;
+            const inputFormato = document.getElementById('pub-formato');
+            const inputNome = document.getElementById('pub-nome');
+            if (val === 'mobile') {
+                if (inputFormato) inputFormato.value = 'Card Responsivo';
+                if (inputNome && !inputNome.value) inputNome.placeholder = 'Ex: Zona Mobile 1 - Topo';
+            } else if (val === 'desktop') {
+                if (inputFormato) inputFormato.value = '300x250';
+                if (inputNome && !inputNome.value) inputNome.placeholder = 'Ex: Zona 1 - Sidebar Topo (300x250)';
+            } else {
+                if (inputFormato) inputFormato.value = 'Banner Responsivo';
+            }
+        });
+    }
+
+    // Filtros de visualização na tabela (Todos / Desktop / Mobile)
+    const btnsFiltroPub = document.querySelectorAll('.btn-filtro-pub');
+    btnsFiltroPub.forEach(btn => {
+        btn.addEventListener('click', () => {
+            btnsFiltroPub.forEach(b => {
+                b.style.background = 'transparent';
+                b.style.color = 'var(--text-secondary)';
+                b.classList.remove('active');
+            });
+            btn.style.background = '#ffffff';
+            btn.style.color = 'var(--text-primary)';
+            btn.classList.add('active');
+
+            filtroDispositivoPub = btn.getAttribute('data-filtro') || 'todos';
+            renderPublicidadeAdmin();
+        });
+    });
 
     const btnRecarregarPub = document.getElementById('btn-recarregar-pub');
     if (btnRecarregarPub) {
@@ -11720,6 +11793,8 @@ document.addEventListener('DOMContentLoaded', async () => {
 
             const id = document.getElementById('pub-id').value;
             const nome = document.getElementById('pub-nome').value.trim();
+            const dispositivo = document.getElementById('pub-dispositivo').value || 'desktop';
+            const formato = document.getElementById('pub-formato').value.trim() || (dispositivo === 'mobile' ? 'Card Responsivo' : '300x250');
             const pubZoneId = document.getElementById('pub-zone-id').value.trim();
             const scriptUrl = document.getElementById('pub-script-url').value.trim();
             const codigoHtml = document.getElementById('pub-codigo-html').value.trim();
@@ -11731,6 +11806,8 @@ document.addEventListener('DOMContentLoaded', async () => {
                 const zona = currentZonasPub.find(z => z.id === id);
                 if (zona) {
                     zona.nome = nome;
+                    zona.dispositivo = dispositivo;
+                    zona.formato = formato;
                     zona.pub_zone_id = pubZoneId;
                     zona.script_url = scriptUrl;
                     zona.codigo_html = codigoHtml;
@@ -11743,6 +11820,8 @@ document.addEventListener('DOMContentLoaded', async () => {
                 currentZonasPub.push({
                     id: newId,
                     nome: nome,
+                    dispositivo: dispositivo,
+                    formato: formato,
                     pub_zone_id: pubZoneId,
                     script_url: scriptUrl,
                     codigo_html: codigoHtml,
