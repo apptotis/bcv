@@ -2303,6 +2303,11 @@ img {
         margin-top: 0 !important;
         gap: 12px !important;
     }
+    /* Ocultar subtítulo/descrição de cabeçalho no mobile nas páginas de Resultados e Classificações */
+    #resultados-page-subtitle,
+    #classificacoes-page-subtitle {
+        display: none !important;
+    }
 }
 
 .mobile-ad-card {
