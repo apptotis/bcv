@@ -86,3 +86,4 @@
 - [2026-11-15] Gemini: Zonas de Publicidade Mobile/Desktop com segmentação por Página/Destino no Admin (admin.html, admin.js) e resolução dinâmica hierárquica no frontend (js/main.js).
 - [2026-11-15] Gemini: Otimização mobile do card de publicidade: cantos retos (border-radius: 0 no card, banner e SVG 30 anos) idêntico à Agenda Desportiva, e redução ao mínimo do espaçamento de topo e transição.
 - [2026-11-15] Gemini: Ocultação da descrição/subtítulo de cabeçalho em mobile nas páginas Resultados e Classificações (resultados-page-subtitle e classificacoes-page-subtitle).
+- [2026-11-15] Gemini: Remoção do item redundante 'Competições Oficiais' do submenu de Equipas no menu Drawer (js/main.js).

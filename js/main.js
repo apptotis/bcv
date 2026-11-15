@@ -740,14 +740,10 @@ async function loadEquipasMenu(supabase) {
             
             dropdownEquipasMenu.innerHTML = ''; // Limpar o conteúdo anterior
 
-            // Opção inicial para ver todas as equipas e competições
+            // Opção inicial para ver todas as equipas
             const liAll = document.createElement('li');
             liAll.innerHTML = `<a href="equipas.html" class="drawer-dropdown-link" style="font-weight: 700; color: #ffffff;">🏀 Ver Todas as Equipas</a>`;
             dropdownEquipasMenu.appendChild(liAll);
-
-            const liComp = document.createElement('li');
-            liComp.innerHTML = `<a href="competicoes.html" class="drawer-dropdown-link" style="font-weight: 700; color: #f59e0b;">🏆 Competições Oficiais</a>`;
-            dropdownEquipasMenu.appendChild(liComp);
 
             equipas.forEach(equipa => {
                 const li = document.createElement('li');
