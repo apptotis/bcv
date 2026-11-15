@@ -62,6 +62,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         if (t.includes('12') && t.includes('mas') && v.includes('12') && v.includes('mas')) return true;
         if (t.includes('12') && t.includes('fem') && v.includes('12') && v.includes('fem')) return true;
         if (t.includes('14') && t.includes('mas') && v.includes('14') && v.includes('mas')) return true;
+        if (t.includes('14') && t.includes('fem') && v.includes('14') && v.includes('fem')) return true;
         if (t.includes('16') && t.includes('fem') && v.includes('16') && v.includes('fem')) return true;
         if (t.includes('18') && t.includes('mas') && v.includes('18') && v.includes('mas')) return true;
         if ((t.includes('sen') || t.includes('cn2')) && (v.includes('sen') || v.includes('cn2'))) return true;
@@ -132,6 +133,19 @@ document.addEventListener('DOMContentLoaded', async () => {
                         url_fpb: "https://www.fpb.pt/classificacao/associacao_5/"
                     },
                     {
+                        id: "sub14_fem",
+                        sigla: "Sub 14 Fem",
+                        nome: "Campeonato Distrital Sub 14 Feminino",
+                        escalao: "Sub 14",
+                        sexo: "Feminino",
+                        tipo: "Distrital",
+                        organizador: "ABVC / FPB",
+                        fase: "Fase Regular",
+                        ativo: true,
+                        ordem: 5,
+                        url_fpb: "https://www.fpb.pt/classificacao/associacao_5/"
+                    },
+                    {
                         id: "sub12_masc",
                         sigla: "Sub 12 Masc",
                         nome: "Circuito Regional de Minibasquete Sub 12 Masculino",
@@ -189,11 +203,21 @@ document.addEventListener('DOMContentLoaded', async () => {
         comps.sort((a, b) => (Number(a.ordem) || 99) - (Number(b.ordem) || 99));
 
         if (comps.length === 0) {
+            const isMini12 = (filtroEscalaoAtual || '').toLowerCase().includes('12');
+            const titulo = isMini12 ? 'Minibasquete Sub 12 • Escalão de Formação' : 'Nenhuma classificação encontrada';
+            const texto = isMini12 
+                ? 'O Minibasquete (Sub 12 / Mini 12) é um escalão de formação e desenvolvimento desportivo. Segundo os regulamentos oficiais da FPB, os encontros e torneios de minibasquete não têm tabela classificativa oficial.'
+                : 'Não existem competições registadas para o escalão selecionado.';
+            const cta = isMini12
+                ? `<div style="margin-top: 16px;"><a href="resultados.html?escalao=${encodeURIComponent(filtroEscalaoAtual)}" class="btn-primary" style="display: inline-block; padding: 8px 18px; border-radius: 8px; text-decoration: none; font-size: 0.85rem; font-weight: 700; background: #7e22ce; color: #fff;">Ver Resultados e Torneios →</a></div>`
+                : '';
+
             container.innerHTML = `
                 <div style="padding: 45px 20px; text-align: center; color: var(--text-secondary); background: #ffffff; border-radius: 12px; border: 1px solid var(--border-color);">
-                    <div style="font-size: 2.2rem; margin-bottom: 12px;">🔍</div>
-                    <h3 style="margin: 0 0 6px 0; color: var(--text-primary); font-size: 1.15rem;">Nenhuma classificação encontrada</h3>
-                    <p style="margin: 0; font-size: 0.9rem;">Não existem competições registadas para o escalão selecionado.</p>
+                    <div style="font-size: 2.2rem; margin-bottom: 12px;">${isMini12 ? '⭐' : '🔍'}</div>
+                    <h3 style="margin: 0 0 6px 0; color: var(--text-primary); font-size: 1.15rem;">${titulo}</h3>
+                    <p style="margin: 0 auto; max-width: 540px; font-size: 0.9rem; line-height: 1.5;">${texto}</p>
+                    ${cta}
                 </div>
             `;
             return;
@@ -368,7 +392,10 @@ document.addEventListener('DOMContentLoaded', async () => {
             return (esc.includes('12') || nome.includes('12')) && (nome.includes('fem') || esc.includes('fem'));
         }
         if (f.includes('14') && f.includes('mas')) {
-            return (esc.includes('14') || nome.includes('14')) && (nome.includes('mas') || esc.includes('mas') || !nome.includes('fem'));
+            return (esc.includes('14') || nome.includes('14')) && (nome.includes('mas') || esc.includes('mas') || (comp.sexo && comp.sexo.toLowerCase().includes('mas')) || (!nome.includes('fem') && (!comp.sexo || !comp.sexo.toLowerCase().includes('fem'))));
+        }
+        if (f.includes('14') && f.includes('fem')) {
+            return (esc.includes('14') || nome.includes('14')) && (nome.includes('fem') || esc.includes('fem') || (comp.sexo && comp.sexo.toLowerCase().includes('fem')));
         }
         if (f.includes('16') && f.includes('fem')) {
             return (esc.includes('16') || nome.includes('16')) && (nome.includes('fem') || esc.includes('fem'));
@@ -531,3 +558,4 @@ document.addEventListener('DOMContentLoaded', async () => {
         return n;
     }
 });
+

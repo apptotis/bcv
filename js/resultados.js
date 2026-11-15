@@ -289,11 +289,17 @@ document.addEventListener('DOMContentLoaded', async () => {
         if (!listContainer) return;
 
         if (lista.length === 0) {
+            const isMini12 = (filtroEscalaoAtual || '').toLowerCase().includes('12');
+            const titulo = isMini12 ? 'Sem resultados registados para Sub 12' : 'Nenhum resultado encontrado';
+            const texto = isMini12 
+                ? 'Ainda não foram registados resultados ou torneios para este escalão na época ativa. Os resultados podem ser registados na Área de Gestão do Clube.'
+                : 'Não existem jogos com resultados para o filtro selecionado no momento.';
+
             listContainer.innerHTML = `
                 <div style="padding: 45px 20px; text-align: center; color: var(--text-secondary); background: #ffffff; border-radius: 12px; border: 1px solid var(--border-color);">
-                    <div style="font-size: 2.2rem; margin-bottom: 12px;">🔍</div>
-                    <h3 style="margin: 0 0 6px 0; color: var(--text-primary); font-size: 1.15rem;">Nenhum resultado encontrado</h3>
-                    <p style="margin: 0; font-size: 0.9rem;">Não existem jogos com resultados para o filtro selecionado no momento.</p>
+                    <div style="font-size: 2.2rem; margin-bottom: 12px;">${isMini12 ? '🏀' : '🔍'}</div>
+                    <h3 style="margin: 0 0 6px 0; color: var(--text-primary); font-size: 1.15rem;">${titulo}</h3>
+                    <p style="margin: 0; font-size: 0.9rem;">${texto}</p>
                 </div>
             `;
             return;
@@ -420,3 +426,4 @@ document.addEventListener('DOMContentLoaded', async () => {
         return limpoA === limpoB;
     }
 });
+
