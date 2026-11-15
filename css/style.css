@@ -2318,9 +2318,10 @@ img {
         margin-top: 0 !important;
         gap: 12px !important;
     }
-    /* Ocultar subtítulo/descrição de cabeçalho no mobile nas páginas de Resultados e Classificações */
+    /* Ocultar subtítulo/descrição de cabeçalho no mobile nas páginas de Resultados, Classificações e Equipas */
     #resultados-page-subtitle,
-    #classificacoes-page-subtitle {
+    #classificacoes-page-subtitle,
+    #equipas-page-subtitle {
         display: none !important;
     }
 }

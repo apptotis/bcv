@@ -32,6 +32,13 @@ document.addEventListener('DOMContentLoaded', async () => {
         ];
 
         if (equipas) {
+            // Filtrar BabyBasket na página de equipas para evitar informação repetida
+            equipas = equipas.filter(e => {
+                const esc = (e.escalao || '').toLowerCase().trim();
+                const nom = (e.nome || '').toLowerCase().trim();
+                return esc !== 'babybasket' && !esc.includes('baby') && !nom.includes('baby');
+            });
+
             equipas.sort((a, b) => {
                 let indexA = ordemEscalao.indexOf(a.escalao);
                 let indexB = ordemEscalao.indexOf(b.escalao);

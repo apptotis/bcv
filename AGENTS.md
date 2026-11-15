@@ -88,3 +88,4 @@
 - [2026-11-15] Gemini: Ocultação da descrição/subtítulo de cabeçalho em mobile nas páginas Resultados e Classificações (resultados-page-subtitle e classificacoes-page-subtitle).
 - [2026-11-15] Gemini: Remoção do item redundante 'Competições Oficiais' do submenu de Equipas no menu Drawer (js/main.js).
 - [2026-11-15] Gemini: Alinhamento lateral do ícone hambúrguer no mobile com a margem esquerda dos cards (navbar-grid padding 15px e hamburger-btn padding-left 0).
+- [2026-11-15] Gemini: Harmonização de equipas.html com ícone institucional (👥 As Nossas Equipas) e exclusão do card repetitivo BabyBasket em js/equipas.js.
