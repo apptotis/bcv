@@ -78,7 +78,7 @@ body.with-bg-image {
 }
 
 main {
-    padding-top: 105px;
+    padding-top: 90px;
     width: 100%;
 }
 
@@ -2230,12 +2230,50 @@ img {
 }
 
 /* ==========================================================================
+   Anniversary Banner (30 Anos - Desktop)
+   ========================================================================== */
+.anniversary-banner {
+    display: none;
+    width: 100%;
+    background: var(--accent-primary);
+    color: white;
+    text-align: center;
+    padding: 12px 20px;
+    font-family: var(--font-heading);
+    font-weight: 700;
+    font-size: 1rem;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    position: relative;
+    z-index: 10;
+    box-shadow: var(--shadow-md);
+    flex-wrap: wrap;
+    justify-content: center;
+    align-items: center;
+    gap: 15px;
+}
+
+@media (min-width: 992px) {
+    .anniversary-banner {
+        display: flex;
+    }
+}
+
+.anniversary-banner span {
+    display: inline-block;
+    background: rgba(0, 0, 0, 0.3);
+    padding: 3px 12px;
+    border-radius: 20px;
+    font-size: 0.85rem;
+}
+
+/* ==========================================================================
    Espaço Publicitário Mobile (Card no Topo)
    ========================================================================== */
 .mobile-ad-banner-wrap {
     display: none;
     width: 100%;
-    margin-top: 10px;
+    margin-top: 15px;
     margin-bottom: 24px;
 }
 

@@ -85,3 +85,4 @@
 - [2026-11-15] Gemini: Dropdowns de resultados/classificações, unificação oficial FPB (18px), eliminação da faixa de topo e criação do card mobile com arte comemorativa 30 anos (assets/pub_30anos_mobile.svg).
 - [2026-11-15] Gemini: Isolamento completo do card mobile dos 30 anos (remoção de badge de publicidade e adserver), blindagem da sidebar desktop (320px fixos, top 110px, label não-sobreposta) e padding-top de 105px no main.
 - [2026-11-15] Gemini: Correção imediata de SyntaxError em js/main.js (remoção de chaves excedentes na função carregarZonasPublicidade), restauração completa da inicialização do menu Drawer, portal index e renovação do cache-buster (v=20261115_1906).
+- [2026-11-15] Gemini: Restauração da faixa comemorativa dos 30 anos no topo exclusivamente para versão Desktop (.anniversary-banner display: flex em >=992px) mantendo o card nos dispositivos móveis.
