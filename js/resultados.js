@@ -350,16 +350,9 @@ document.addEventListener('DOMContentLoaded', async () => {
                             <span class="tournament-trophy-icon">🏆</span>
                             <div>
                                 <div class="tournament-main-title">${nomeTorneio}</div>
-                                ${resultado.competicao ? `<div style="font-size: 0.8rem; color: var(--text-secondary); margin-top: 3px;">${resultado.competicao}</div>` : ''}
+                                ${resultado.competicao ? `<div style="font-size: 0.8rem; color: var(--text-secondary); margin-top: 3px;">${limparNomeCompeticao(resultado.competicao)}</div>` : ''}
                             </div>
                         </div>
-                    </div>
-                    <div class="game-schedule-venue" style="border-top: 1px dashed var(--border-color); padding-top: 8px; margin-top: 4px;">
-                        <a href="${linkMaps}" target="_blank" rel="noopener noreferrer" class="venue-maps-link" title="Abrir localização no Google Maps">
-                            <span class="venue-pin">📍</span>
-                            <span class="venue-name">${localNome}</span>
-                            <span class="venue-external-icon">↗</span>
-                        </a>
                     </div>
                 `;
             } else {
@@ -417,22 +410,23 @@ document.addEventListener('DOMContentLoaded', async () => {
                         </div>
                     </div>
                     ${resultado.competicao ? `
-                        <div style="font-size: 0.8rem; color: var(--text-secondary); margin-top: 4px; padding-left: 2px;">
-                            🏆 ${resultado.competicao}
+                        <div style="font-size: 0.82rem; color: var(--text-secondary); margin-top: 6px; padding-left: 2px;">
+                            🏆 ${limparNomeCompeticao(resultado.competicao)}
                         </div>
                     ` : ''}
-                    <div class="game-schedule-venue" style="border-top: 1px dashed var(--border-color); padding-top: 8px; margin-top: 8px;">
-                        <a href="${linkMaps}" target="_blank" rel="noopener noreferrer" class="venue-maps-link" title="Abrir localização no Google Maps">
-                            <span class="venue-pin">📍</span>
-                            <span class="venue-name">${localNome}</span>
-                            <span class="venue-external-icon">↗</span>
-                        </a>
-                    </div>
                 `;
             }
 
             listContainer.appendChild(card);
         });
+    }
+
+    function limparNomeCompeticao(texto) {
+        if (!texto) return '';
+        if (texto.includes('|')) {
+            return texto.split('|').pop().trim();
+        }
+        return texto.trim();
     }
 
     function compararEquipasSimples(a, b) {
