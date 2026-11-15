@@ -78,7 +78,7 @@ body.with-bg-image {
 }
 
 main {
-    padding-top: 95px;
+    padding-top: 105px;
     width: 100%;
 }
 
@@ -2066,17 +2066,20 @@ img {
     .portal-container {
         flex-direction: row;
         align-items: flex-start;
+        gap: var(--spacing-lg);
     }
     
     .portal-main {
         flex: 1;
-        width: 70%;
+        min-width: 0;
     }
     
     .portal-sidebar {
-        width: 30%;
+        width: 320px;
+        flex-shrink: 0;
         position: sticky;
-        top: 100px;
+        top: 110px;
+        z-index: 10;
         display: flex;
         flex-direction: column;
         gap: var(--spacing-lg);
@@ -2084,8 +2087,10 @@ img {
 }
 
 @media (max-width: 991px) {
-    .portal-sidebar {
-        display: none;
+    .portal-sidebar,
+    .sidebar-ads-stack,
+    #sidebar-ads-container {
+        display: none !important;
     }
 }
 
@@ -2230,12 +2235,13 @@ img {
 .mobile-ad-banner-wrap {
     display: none;
     width: 100%;
+    margin-top: 10px;
     margin-bottom: 24px;
 }
 
 @media (max-width: 991px) {
     .mobile-ad-banner-wrap {
-        display: block;
+        display: block !important;
     }
 }
 
@@ -2243,37 +2249,20 @@ img {
     background: #ffffff;
     border: 1px solid var(--border-color);
     border-radius: 12px;
-    padding: 24px 16px 16px 16px;
+    padding: 8px;
     text-align: center;
     position: relative;
     box-shadow: var(--shadow-sm);
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    overflow: hidden;
+    display: block;
     width: 100%;
     box-sizing: border-box;
-}
-
-.mobile-ad-card .ad-label {
-    position: absolute;
-    top: 6px;
-    right: 12px;
-    font-size: 0.65rem;
-    text-transform: uppercase;
-    color: var(--text-secondary);
-    letter-spacing: 1px;
-    font-weight: 700;
-}
-
-.mobile-ad-card [data-pub-zone] {
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    width: 100%;
-    max-width: 100%;
     overflow: hidden;
+}
+
+.mobile-ad-card a {
+    display: block;
+    width: 100%;
+    text-decoration: none;
 }
 
 .mobile-ad-banner-img {

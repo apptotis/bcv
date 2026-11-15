@@ -1199,11 +1199,10 @@ async function loadPatrocinadoresPublic(supabase) {
     }
 }
 
-// 5.1 Carregar Zonas Dinâmicas de Publicidade (AdServer / clube_config)
+// 5.1 Carregar Zonas Dinâmicas de Publicidade (AdServer / clube_config na Sidebar Desktop)
 async function carregarZonasPublicidade(supabaseClient) {
     const containers = document.querySelectorAll('.portal-sidebar');
-    const mobileCards = document.querySelectorAll('.mobile-ad-card');
-    if ((!containers || containers.length === 0) && (!mobileCards || mobileCards.length === 0)) return;
+    if (!containers || containers.length === 0) return;
 
     try {
         const client = supabaseClient || (typeof window.supabase !== 'undefined' && typeof SUPABASE_URL !== 'undefined' ? window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY) : null);
@@ -1285,25 +1284,6 @@ async function carregarZonasPublicidade(supabaseClient) {
             });
         });
 
-        // Preencher também os Cards de Publicidade Mobile (apenas se houver zona específica mobile ativa)
-        const zonaExplicitaMobile = zonasAtivas.find(z => z.tipo === 'mobile' || (z.id && z.id.includes('mobile')));
-        if (mobileCards && mobileCards.length > 0 && zonaExplicitaMobile) {
-            mobileCards.forEach(card => {
-                card.setAttribute('data-zona-id', zonaExplicitaMobile.id);
-                if (zonaExplicitaMobile.codigo_html && zonaExplicitaMobile.codigo_html.trim()) {
-                    card.innerHTML = `
-                        <span class="ad-label">Publicidade</span>
-                        ${zonaExplicitaMobile.codigo_html}
-                    `;
-                } else if (zonaExplicitaMobile.pub_zone_id) {
-                    card.innerHTML = `
-                        <span class="ad-label">Publicidade</span>
-                        <div data-pub-zone="${zonaExplicitaMobile.pub_zone_id.trim()}"></div>
-                    `;
-                }
-            });
-        }
-
         // Injetar script do AdServer se houver zona com data-pub-zone
         const temPubZone = zonasAtivas.some(z => z.pub_zone_id && z.pub_zone_id.trim());
         if (temPubZone) {
@@ -1313,6 +1293,8 @@ async function carregarZonasPublicidade(supabaseClient) {
                 s.async = true;
                 s.src = scriptUrl;
                 document.body.appendChild(s);
+            }
+        }
             }
         }
 
