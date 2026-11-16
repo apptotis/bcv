@@ -84,15 +84,17 @@ function parseFPBCalendar(rawHtml: string): FPBGame[] {
 
       // Competição & Escalão
       const compMatch = gameContent.match(/<div class="competition">[\s\S]*?<span>([\s\S]*?)<\/span>/i);
-      const rawComp = compMatch ? compMatch[1].trim() : '';
+      let rawComp = compMatch ? compMatch[1].replace(/<[^>]+>/g, '').replace(/<\?[\s\S]*?\?>/g, '').replace(/\s+/g, ' ').trim() : '';
 
       // Mapeamento normalizado de Escalões do BCV
       let escalao = 'BCV';
-      if (/Sub\s*14/i.test(rawComp)) escalao = 'Sub 14';
-      else if (/Sub\s*16/i.test(rawComp)) escalao = 'Sub 16';
-      else if (/Sub\s*18/i.test(rawComp)) escalao = 'Sub 18';
+      if (/Sub\s*14/i.test(rawComp)) {
+        escalao = /Fem/i.test(rawComp) ? 'Sub 14 Feminino' : 'Sub 14 Masculino';
+      }
+      else if (/Sub\s*16/i.test(rawComp)) escalao = 'Sub 16 Feminino';
+      else if (/Sub\s*18/i.test(rawComp)) escalao = 'Sub 18 Masculino';
       else if (/Sub\s*20/i.test(rawComp)) escalao = 'Sub 20';
-      else if (/S[eé]nior|CN2|1ª Div/i.test(rawComp)) escalao = 'Seniores';
+      else if (/S[eé]nior|CN2|1ª Div|2ª Div|2\.ª Div/i.test(rawComp)) escalao = 'Seniores';
       else if (/Mini\s*12/i.test(rawComp)) escalao = 'Mini 12';
       else if (/Mini\s*10/i.test(rawComp)) escalao = 'Mini 10';
       else if (/Mini\s*8/i.test(rawComp)) escalao = 'Mini 8';

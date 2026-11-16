@@ -5361,7 +5361,7 @@ document.addEventListener('DOMContentLoaded', async () => {
                 const local = locMatch ? locMatch[1].replace(/\s+/g, ' ').trim() : '';
 
                 const compMatch = gameContent.match(/<div class="competition">[\s\S]*?<span>([\s\S]*?)<\/span>/i);
-                const rawComp = compMatch ? compMatch[1].trim() : '';
+                let rawComp = compMatch ? compMatch[1].replace(/<[^>]+>/g, '').replace(/<\?[\s\S]*?\?>/g, '').replace(/\s+/g, ' ').trim() : '';
 
                 let escalao = 'BCV';
                 if (/Sub\s*14/i.test(rawComp)) {
@@ -5369,7 +5369,7 @@ document.addEventListener('DOMContentLoaded', async () => {
                 }
                 else if (/Sub\s*16/i.test(rawComp)) escalao = 'Sub 16 Feminino';
                 else if (/Sub\s*18/i.test(rawComp)) escalao = 'Sub 18 Masculino';
-                else if (/S[eé]nior|CN2|1ª Div/i.test(rawComp)) escalao = 'Seniores';
+                else if (/S[eé]nior|CN2|1ª Div|2ª Div|2\.ª Div/i.test(rawComp)) escalao = 'Seniores';
                 else if (/Mini\s*12/i.test(rawComp)) escalao = 'Mini 12';
                 else if (/Mini\s*10/i.test(rawComp)) escalao = 'Mini 10';
                 else if (/Mini\s*8/i.test(rawComp)) escalao = 'Mini 8';
@@ -5484,23 +5484,34 @@ document.addEventListener('DOMContentLoaded', async () => {
     }
 
     async function fetchFPBHtmlViaProxies(targetUrl) {
-        const proxies = [
-            `https://api.allorigins.win/raw?url=${encodeURIComponent(targetUrl)}`,
-            `https://corsproxy.io/?${encodeURIComponent(targetUrl)}`,
-            `https://api.codetabs.com/v1/proxy?quest=${encodeURIComponent(targetUrl)}`
+        const proxyConfigs = [
+            {
+                url: `https://api.allorigins.win/raw?url=${encodeURIComponent(targetUrl)}`,
+                extract: async (r) => await r.text()
+            },
+            {
+                url: `https://api.allorigins.win/get?url=${encodeURIComponent(targetUrl)}`,
+                extract: async (r) => {
+                    const j = await r.json();
+                    return j?.contents || '';
+                }
+            }
         ];
 
-        for (const proxyUrl of proxies) {
+        for (const proxy of proxyConfigs) {
             try {
-                const res = await fetch(proxyUrl);
+                const controller = new AbortController();
+                const timeoutId = setTimeout(() => controller.abort(), 12000);
+                const res = await fetch(proxy.url, { signal: controller.signal });
+                clearTimeout(timeoutId);
                 if (res.ok) {
-                    const html = await res.text();
+                    const html = await proxy.extract(res);
                     if (html && (html.includes('day-wrapper') || html.includes('ficha-de-jogo') || html.includes('results_wrapper'))) {
                         return html;
                     }
                 }
             } catch (eProxy) {
-                console.warn(`Proxy ${proxyUrl} falhou:`, eProxy);
+                console.warn(`Proxy ${proxy.url} falhou:`, eProxy);
             }
         }
         return null;
@@ -5528,7 +5539,7 @@ document.addEventListener('DOMContentLoaded', async () => {
 
             // 1. Tentar Endpoint da Cloudflare Pages (/api/sync-fpb)
             try {
-                const cfRes = await fetch('/api/sync-fpb?preview=true');
+                const cfRes = await fetch(`/api/sync-fpb?preview=true&tipo=${encodeURIComponent(tipoOrigem)}`);
                 if (cfRes.ok) {
                     const data = await cfRes.json();
                     if (data && data.success && Array.isArray(data.jogos) && data.jogos.length > 0) {
@@ -5542,7 +5553,7 @@ document.addEventListener('DOMContentLoaded', async () => {
             // 2. Tentar Edge Function Supabase
             if (jogos.length === 0) {
                 try {
-                    const edgeRes = await fetch(`${SUPABASE_URL}/functions/v1/sync-fpb?preview=true`, {
+                    const edgeRes = await fetch(`${SUPABASE_URL}/functions/v1/sync-fpb?preview=true&tipo=${encodeURIComponent(tipoOrigem)}`, {
                         headers: {
                             'apikey': SUPABASE_ANON_KEY,
                             'Authorization': `Bearer ${SUPABASE_ANON_KEY}`
@@ -5559,12 +5570,22 @@ document.addEventListener('DOMContentLoaded', async () => {
                 }
             }
 
-            // 3. Fallback: Proxies CORS com URLs canónicas oficiais da FPB (Agenda e Resultados)
+            // 3. Fallback: Proxies CORS com URLs canónicas oficiais da FPB (Agenda e/ou Resultados)
             if (jogos.length === 0) {
-                const [calHtml, resHtml] = await Promise.all([
-                    fetchFPBHtmlViaProxies('https://www.fpb.pt/calendario/clube_656/'),
-                    fetchFPBHtmlViaProxies('https://www.fpb.pt/resultados/clube_656/')
-                ]);
+                let calHtml = null;
+                let resHtml = null;
+
+                if (tipoOrigem === 'agenda') {
+                    calHtml = await fetchFPBHtmlViaProxies('https://www.fpb.pt/calendario/clube_656/');
+                } else if (tipoOrigem === 'resultados') {
+                    resHtml = await fetchFPBHtmlViaProxies('https://www.fpb.pt/resultados/clube_656/');
+                } else {
+                    [calHtml, resHtml] = await Promise.all([
+                        fetchFPBHtmlViaProxies('https://www.fpb.pt/calendario/clube_656/'),
+                        fetchFPBHtmlViaProxies('https://www.fpb.pt/resultados/clube_656/')
+                    ]);
+                }
+
                 const calGames = calHtml ? parseFPBHtml(calHtml) : [];
                 const resGames = resHtml ? parseFPBHtml(resHtml) : [];
                 jogos = mergeFPBGames(calGames, resGames);

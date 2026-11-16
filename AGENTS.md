@@ -89,3 +89,4 @@
 - [2026-11-15] Gemini: Remoção do item redundante 'Competições Oficiais' do submenu de Equipas no menu Drawer (js/main.js).
 - [2026-11-15] Gemini: Alinhamento lateral do ícone hambúrguer no mobile com a margem esquerda dos cards (navbar-grid padding 15px e hamburger-btn padding-left 0).
 - [2026-11-15] Gemini: Harmonização de equipas.html com ícone institucional (👥 As Nossas Equipas) e exclusão do card repetitivo BabyBasket em js/equipas.js.
+- [2026-11-16] Gemini: Resolução e importação de 21 jogos futuros da FPB em agenda_bcv, otimização da sincronização FPB no Admin (timeout 12s, filtro por tipo de origem, suporte a 2ª Divisão e limpeza de tags PHP da FPB).
