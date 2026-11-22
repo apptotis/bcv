@@ -226,8 +226,7 @@ document.addEventListener('DOMContentLoaded', async () => {
                 card.innerHTML = `
                     <img src="${fotoUrl}" alt="${equipa.nome}" class="equipa-foto">
                     <div class="equipa-info">
-                        <h3 style="color: var(--accent-primary); margin-bottom: 5px;">${equipa.nome}</h3>
-                        <p style="color: var(--text-secondary); font-weight: 600; margin-bottom: 15px;">${escalaoDisplay}</p>
+                        <h3 style="color: var(--accent-primary); margin-bottom: 18px;">${equipa.nome}</h3>
                         <button onclick="window.location.href='equipas.html?equipaId=${equipa.id}'" class="btn btn-primary" style="width: 100%;">Ver Plantel</button>
                     </div>
                 `;

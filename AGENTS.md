@@ -91,3 +91,4 @@
 - [2026-11-15] Gemini: Harmonização de equipas.html com ícone institucional (👥 As Nossas Equipas) e exclusão do card repetitivo BabyBasket em js/equipas.js.
 - [2026-11-16] Gemini: Resolução e importação de 21 jogos futuros da FPB em agenda_bcv, otimização da sincronização FPB no Admin (timeout 12s, filtro por tipo de origem, suporte a 2ª Divisão e limpeza de tags PHP da FPB).
 - [2026-11-22] Gemini: Remoção dos botões 'Ver Todos' nas secções Agenda Desportiva e Resultados Recentes da Homepage (index.html).
+- [2026-11-22] Gemini: Remoção do subtítulo (escalão) nos cards da lista de equipas em equipas.html / js/equipas.js mantendo apenas foto, título e botão.
