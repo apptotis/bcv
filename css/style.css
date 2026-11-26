@@ -2175,6 +2175,15 @@ img {
     min-height: 250px;
     text-align: center;
     overflow: hidden;
+    position: relative;
+}
+
+/* Ocultar badge Ad gerado pelo AdServer e labels no card de publicidade mobile */
+[data-pub-zone] > span,
+.ad-widget [data-pub-zone] > span,
+.mobile-ad-card [data-pub-zone] > span,
+.mobile-ad-card .ad-label {
+    display: none !important;
 }
 
 [data-pub-zone] iframe,
@@ -2294,15 +2303,15 @@ img {
         padding: 0 15px !important;
     }
     main {
-        padding-top: 80px !important;
+        padding-top: 96px !important;
     }
     .mobile-ad-banner-wrap {
         display: flex !important;
         justify-content: center !important;
         align-items: center !important;
         width: 100% !important;
-        margin-top: 6px !important;
-        margin-bottom: 8px !important;
+        margin-top: 14px !important;
+        margin-bottom: 12px !important;
     }
     .mobile-ad-banner-wrap .container {
         padding: 0 15px !important;

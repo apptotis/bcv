@@ -1361,12 +1361,10 @@ async function carregarZonasPublicidade(supabaseClient) {
 
                         if (pubZoneId) {
                             card.innerHTML = `
-                                <span class="ad-label" style="display: block; width: 100%; text-align: right; margin-bottom: 4px; font-size: 0.65rem; color: var(--text-secondary); text-transform: uppercase; font-weight: 700; letter-spacing: 1px;">Publicidade</span>
                                 <div data-pub-zone="${pubZoneId}" style="width: ${largura}px; max-width: 100%; height: ${altura}px; min-height: ${altura}px; margin: 0 auto; display: flex; align-items: center; justify-content: center; overflow: hidden; background: #fafafa;"></div>
                             `;
                         } else if (zonaMobile.codigo_html && zonaMobile.codigo_html.trim()) {
                             card.innerHTML = `
-                                <span class="ad-label" style="display: block; width: 100%; text-align: right; margin-bottom: 4px; font-size: 0.65rem; color: var(--text-secondary); text-transform: uppercase; font-weight: 700; letter-spacing: 1px;">Publicidade</span>
                                 <div style="width: ${largura}px; max-width: 100%; height: ${altura}px; min-height: ${altura}px; margin: 0 auto; overflow: hidden; display: flex; align-items: center; justify-content: center;">
                                     ${zonaMobile.codigo_html}
                                 </div>
