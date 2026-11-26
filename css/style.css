@@ -2358,6 +2358,10 @@ img {
     overflow: hidden;
 }
 
+.mobile-ad-card:empty {
+    display: none !important;
+}
+
 .mobile-ad-card a {
     display: block;
     width: 100%;

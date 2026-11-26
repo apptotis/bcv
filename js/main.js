@@ -1359,6 +1359,8 @@ async function carregarZonasPublicidade(supabaseClient) {
                         card.style.width = '100%';
                         card.style.boxSizing = 'border-box';
 
+                        card.style.display = 'block';
+
                         if (pubZoneId) {
                             card.innerHTML = `
                                 <div data-pub-zone="${pubZoneId}" style="width: ${largura}px; max-width: 100%; height: ${altura}px; min-height: ${altura}px; margin: 0 auto; display: flex; align-items: center; justify-content: center; overflow: hidden; background: #fafafa;"></div>
@@ -1371,15 +1373,11 @@ async function carregarZonasPublicidade(supabaseClient) {
                             `;
                         }
                     } else {
-                        // Fallback institucional: Se não houver zona mobile ativa, exibe os 30 anos sem etiqueta
+                        // Se não houver zona mobile ativa, oculta o card mobile
                         card.removeAttribute('data-zona-id');
-                        card.style.maxWidth = '460px';
-                        card.style.margin = '0 auto';
-                        card.innerHTML = `
-                            <a href="clube.html" title="Basket Clube de Valença • 30 Anos (1996 - 2026)" style="display: block; width: 100%; text-decoration: none;">
-                                <img src="assets/pub_30anos_mobile.svg" alt="1996 - 2026 | Celebramos 30 Anos de História e Paixão pelo Basquetebol! 🏀" class="mobile-ad-banner-img">
-                            </a>
-                        `;
+                        card.style.display = 'none';
+                        const wrap = card.closest('.mobile-ad-banner-wrap');
+                        if (wrap) wrap.style.display = 'none';
                     }
                 });
             }
