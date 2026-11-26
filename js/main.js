@@ -1355,6 +1355,9 @@ async function carregarZonasPublicidade(supabaseClient) {
 
                         // Aplicar restrições estritas de tamanho no card exterior
                         card.style.maxWidth = largura + 'px';
+                        card.style.height = altura + 'px';
+                        card.style.minHeight = altura + 'px';
+                        card.style.maxHeight = altura + 'px';
                         card.style.margin = '0 auto';
                         card.style.width = '100%';
                         card.style.boxSizing = 'border-box';
@@ -1364,11 +1367,11 @@ async function carregarZonasPublicidade(supabaseClient) {
 
                         if (pubZoneId) {
                             card.innerHTML = `
-                                <div data-pub-zone="${pubZoneId}" style="width: 100%; max-width: ${largura}px; margin: 0 auto; display: block; overflow: hidden; line-height: 0;"></div>
+                                <div data-pub-zone="${pubZoneId}" style="width: 100%; max-width: ${largura}px; height: ${altura}px; max-height: ${altura}px; margin: 0 auto; display: flex; align-items: center; justify-content: center; overflow: hidden; line-height: 0;"></div>
                             `;
                         } else if (zonaMobile.codigo_html && zonaMobile.codigo_html.trim()) {
                             card.innerHTML = `
-                                <div style="width: 100%; max-width: ${largura}px; margin: 0 auto; overflow: hidden; display: block; line-height: 0;">
+                                <div style="width: 100%; max-width: ${largura}px; height: ${altura}px; max-height: ${altura}px; margin: 0 auto; overflow: hidden; display: flex; align-items: center; justify-content: center; line-height: 0;">
                                     ${zonaMobile.codigo_html}
                                 </div>
                             `;

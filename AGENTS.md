@@ -94,3 +94,4 @@
 - [2026-11-22] Gemini: Remoção do subtítulo (escalão) nos cards da lista de equipas em equipas.html / js/equipas.js mantendo apenas foto, título e botão.
 - [2026-11-26] Gemini: Publicidade no Admin e mobile: resolução de escapeHtml, eliminação de pub_30anos_mobile.svg, remoção de badges Ad/labels e limpeza de botões/siglas redundantes em classificacoes.html.
 - [2026-11-26] Gemini: Ajustes mobile na publicidade: redução para metade do espaço entre o cabeçalho e o card (margin-top 10px), eliminação de padding interno e preenchimento a 100% da imagem até ao limite do card.
+- [2026-11-26] Gemini: Padronização da publicidade mobile com altura rígida de 100px (320x100) e object-fit contain centrado, eliminando oscilações de layout.

@@ -2346,13 +2346,16 @@ img {
     background: #ffffff;
     border: 1px solid var(--border-color);
     border-radius: 0 !important; /* Cantos retos idênticos à Agenda Desportiva */
-    padding: 0 !important; /* Imagem a ocupar 100% sem espaço interior */
+    padding: 0 !important;
     text-align: center;
     position: relative;
     box-shadow: var(--shadow-sm);
     display: block;
     width: 100%;
     max-width: 320px;
+    height: 100px !important;
+    min-height: 100px !important;
+    max-height: 100px !important;
     margin: 0 auto;
     box-sizing: border-box;
     overflow: hidden;
@@ -2365,38 +2368,48 @@ img {
 
 .mobile-ad-card [data-pub-zone] {
     width: 100% !important;
-    min-height: auto !important;
-    height: auto !important;
-    display: block !important;
-    margin: 0 !important;
+    height: 100% !important;
+    max-width: 320px !important;
+    min-height: 100px !important;
+    max-height: 100px !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    margin: 0 auto !important;
     padding: 0 !important;
-    background: transparent !important;
+    background: #ffffff !important;
     line-height: 0 !important;
     overflow: hidden !important;
 }
 
 .mobile-ad-card [data-pub-zone] a,
 .mobile-ad-card a {
-    display: block !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
     width: 100% !important;
-    height: auto !important;
+    height: 100% !important;
+    max-height: 100px !important;
     margin: 0 !important;
     padding: 0 !important;
     line-height: 0 !important;
     text-decoration: none !important;
     border-radius: 0 !important;
+    overflow: hidden !important;
 }
 
 .mobile-ad-card [data-pub-zone] img,
 .mobile-ad-card img {
     width: 100% !important;
+    height: 100% !important;
     max-width: 100% !important;
-    height: auto !important;
+    max-height: 100px !important;
     display: block !important;
-    margin: 0 !important;
+    margin: 0 auto !important;
     padding: 0 !important;
     border: 0 !important;
     border-radius: 0 !important;
+    object-fit: contain !important; /* Centra perfeitamente e preserva proporção original */
 }
 
 .mobile-ad-banner-img {
