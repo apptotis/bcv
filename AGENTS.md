@@ -92,4 +92,4 @@
 - [2026-11-16] Gemini: Resolução e importação de 21 jogos futuros da FPB em agenda_bcv, otimização da sincronização FPB no Admin (timeout 12s, filtro por tipo de origem, suporte a 2ª Divisão e limpeza de tags PHP da FPB).
 - [2026-11-22] Gemini: Remoção dos botões 'Ver Todos' nas secções Agenda Desportiva e Resultados Recentes da Homepage (index.html).
 - [2026-11-22] Gemini: Remoção do subtítulo (escalão) nos cards da lista de equipas em equipas.html / js/equipas.js mantendo apenas foto, título e botão.
-- [2026-11-26] Gemini: Configuração de dimensões (presets e px) na Gestão de Publicidade do Admin (admin.html, admin.js) e renderização estrita de tamanho no card mobile (320x100 centrado, auto-extração de data-pub-zone e execução dinâmica do pub.js em main.js e style.css).
+- [2026-11-26] Gemini: Configuração de dimensões (presets e px) na Publicidade do Admin, correção de ReferenceError escapeHtml em main.js e ativação da entrega de campanhas mobile (320x100, Intermarché).

@@ -1195,6 +1195,17 @@ async function loadPatrocinadoresPublic(supabase) {
     }
 }
 
+function escapeHtml(str) {
+    if (!str) return '';
+    return String(str)
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;')
+        .replace(/'/g, '&#039;');
+}
+window.escapeHtml = escapeHtml;
+
 // 5.1 Carregar Zonas Dinâmicas de Publicidade (AdServer / clube_config - Desktop & Mobile)
 async function carregarZonasPublicidade(supabaseClient) {
     const containers = document.querySelectorAll('.portal-sidebar');
@@ -1247,127 +1258,135 @@ async function carregarZonasPublicidade(supabaseClient) {
         currentPage = currentPage.split('?')[0].split('#')[0];
 
         // 1. ZONAS DESKTOP (Sidebar)
-        const zonasDesktop = zonasAtivas.filter(z => {
-            const isDesktop = !z.dispositivo || z.dispositivo === 'desktop' || z.dispositivo === 'ambos';
-            const isMatchingPage = !z.pagina || z.pagina === 'todas' || z.pagina === currentPage;
-            return isDesktop && isMatchingPage;
-        });
-        if (containers && containers.length > 0 && zonasDesktop.length > 0) {
-            containers.forEach(sidebar => {
-                let stack = sidebar.querySelector('#sidebar-ads-container');
-                if (!stack) {
-                    const widgetsAntigos = sidebar.querySelectorAll('.ad-widget');
-                    stack = document.createElement('div');
-                    stack.id = 'sidebar-ads-container';
-                    stack.className = 'sidebar-ads-stack';
-
-                    if (widgetsAntigos.length > 0) {
-                        sidebar.insertBefore(stack, widgetsAntigos[0]);
-                        widgetsAntigos.forEach(w => w.remove());
-                    } else {
-                        sidebar.appendChild(stack);
-                    }
-                } else {
-                    stack.innerHTML = '';
-                }
-
-                zonasDesktop.forEach(z => {
-                    const widget = document.createElement('div');
-                    widget.className = 'ad-widget ad-square has-adserver';
-                    widget.setAttribute('data-zona-id', z.id);
-
-                    let pzId = (z.pub_zone_id || '').trim();
-                    if (!pzId && z.codigo_html) {
-                        const m = z.codigo_html.match(/data-pub-zone=["']([^"']+)["']/i);
-                        if (m) pzId = m[1].trim();
-                    }
-
-                    if (pzId) {
-                        widget.innerHTML = `
-                            <span class="ad-label">Publicidade</span>
-                            <!-- Espaço Publicitário: ${escapeHtml(z.nome || 'Patrocínio Oficial')} -->
-                            <div data-pub-zone="${pzId}"></div>
-                        `;
-                    } else if (z.codigo_html && z.codigo_html.trim()) {
-                        widget.innerHTML = `
-                            <span class="ad-label">Publicidade</span>
-                            ${z.codigo_html}
-                        `;
-                    }
-                    stack.appendChild(widget);
-                });
+        try {
+            const zonasDesktop = zonasAtivas.filter(z => {
+                const isDesktop = !z.dispositivo || z.dispositivo === 'desktop' || z.dispositivo === 'ambos';
+                const isMatchingPage = !z.pagina || z.pagina === 'todas' || z.pagina === currentPage;
+                return isDesktop && isMatchingPage;
             });
+            if (containers && containers.length > 0 && zonasDesktop.length > 0) {
+                containers.forEach(sidebar => {
+                    let stack = sidebar.querySelector('#sidebar-ads-container');
+                    if (!stack) {
+                        const widgetsAntigos = sidebar.querySelectorAll('.ad-widget');
+                        stack = document.createElement('div');
+                        stack.id = 'sidebar-ads-container';
+                        stack.className = 'sidebar-ads-stack';
+
+                        if (widgetsAntigos.length > 0) {
+                            sidebar.insertBefore(stack, widgetsAntigos[0]);
+                            widgetsAntigos.forEach(w => w.remove());
+                        } else {
+                            sidebar.appendChild(stack);
+                        }
+                    } else {
+                        stack.innerHTML = '';
+                    }
+
+                    zonasDesktop.forEach(z => {
+                        const widget = document.createElement('div');
+                        widget.className = 'ad-widget ad-square has-adserver';
+                        widget.setAttribute('data-zona-id', z.id);
+
+                        let pzId = (z.pub_zone_id || '').trim();
+                        if (!pzId && z.codigo_html) {
+                            const m = z.codigo_html.match(/data-pub-zone=["']([^"']+)["']/i);
+                            if (m) pzId = m[1].trim();
+                        }
+
+                        if (pzId) {
+                            widget.innerHTML = `
+                                <span class="ad-label">Publicidade</span>
+                                <!-- Espaço Publicitário: ${escapeHtml(z.nome || 'Patrocínio Oficial')} -->
+                                <div data-pub-zone="${pzId}"></div>
+                            `;
+                        } else if (z.codigo_html && z.codigo_html.trim()) {
+                            widget.innerHTML = `
+                                <span class="ad-label">Publicidade</span>
+                                ${z.codigo_html}
+                            `;
+                        }
+                        stack.appendChild(widget);
+                    });
+                });
+            }
+        } catch (errDesktop) {
+            console.warn("Aviso ao renderizar zonas de publicidade desktop:", errDesktop);
         }
 
         // 2. ZONAS MOBILE (Card no Topo)
         // Hierarquia Inteligente Mobile: 1º Específico da página atual -> 2º Global ('todas')
-        let zonaMobile = zonasAtivas.find(z => 
-            (z.dispositivo === 'mobile' || z.dispositivo === 'ambos' || z.tipo === 'mobile') && 
-            z.pagina === currentPage
-        );
-        if (!zonaMobile) {
-            zonaMobile = zonasAtivas.find(z => 
+        try {
+            let zonaMobile = zonasAtivas.find(z => 
                 (z.dispositivo === 'mobile' || z.dispositivo === 'ambos' || z.tipo === 'mobile') && 
-                (!z.pagina || z.pagina === 'todas')
+                z.pagina === currentPage
             );
-        }
-        if (mobileCards && mobileCards.length > 0) {
-            mobileCards.forEach(card => {
-                if (zonaMobile) {
-                    card.setAttribute('data-zona-id', zonaMobile.id);
+            if (!zonaMobile) {
+                zonaMobile = zonasAtivas.find(z => 
+                    (z.dispositivo === 'mobile' || z.dispositivo === 'ambos' || z.tipo === 'mobile') && 
+                    (!z.pagina || z.pagina === 'todas')
+                );
+            }
+            if (mobileCards && mobileCards.length > 0) {
+                mobileCards.forEach(card => {
+                    if (zonaMobile) {
+                        card.setAttribute('data-zona-id', zonaMobile.id);
 
-                    // Extrair dimensões (padrão 320x100)
-                    let largura = 320;
-                    let altura = 100;
-                    if (zonaMobile.largura && zonaMobile.altura) {
-                        largura = parseInt(zonaMobile.largura, 10);
-                        altura = parseInt(zonaMobile.altura, 10);
-                    } else if (zonaMobile.formato) {
-                        const mDim = String(zonaMobile.formato).match(/(\d+)\s*[xX*]\s*(\d+)/);
-                        if (mDim) {
-                            largura = parseInt(mDim[1], 10);
-                            altura = parseInt(mDim[2], 10);
+                        // Extrair dimensões (padrão 320x100)
+                        let largura = 320;
+                        let altura = 100;
+                        if (zonaMobile.largura && zonaMobile.altura) {
+                            largura = parseInt(zonaMobile.largura, 10);
+                            altura = parseInt(zonaMobile.altura, 10);
+                        } else if (zonaMobile.formato) {
+                            const mDim = String(zonaMobile.formato).match(/(\d+)\s*[xX*]\s*(\d+)/);
+                            if (mDim) {
+                                largura = parseInt(mDim[1], 10);
+                                altura = parseInt(mDim[2], 10);
+                            }
                         }
-                    }
 
-                    // Extrair pub_zone_id quer esteja explícito quer venha dentro de codigo_html
-                    let pubZoneId = (zonaMobile.pub_zone_id || '').trim();
-                    if (!pubZoneId && zonaMobile.codigo_html) {
-                        const mZone = zonaMobile.codigo_html.match(/data-pub-zone=["']([^"']+)["']/i);
-                        if (mZone) pubZoneId = mZone[1].trim();
-                    }
+                        // Extrair pub_zone_id quer esteja explícito quer venha dentro de codigo_html
+                        let pubZoneId = (zonaMobile.pub_zone_id || '').trim();
+                        if (!pubZoneId && zonaMobile.codigo_html) {
+                            const mZone = zonaMobile.codigo_html.match(/data-pub-zone=["']([^"']+)["']/i);
+                            if (mZone) pubZoneId = mZone[1].trim();
+                        }
 
-                    // Aplicar restrições estritas de tamanho no card exterior
-                    card.style.maxWidth = largura + 'px';
-                    card.style.margin = '0 auto';
-                    card.style.width = '100%';
-                    card.style.boxSizing = 'border-box';
+                        // Aplicar restrições estritas de tamanho no card exterior
+                        card.style.maxWidth = largura + 'px';
+                        card.style.margin = '0 auto';
+                        card.style.width = '100%';
+                        card.style.boxSizing = 'border-box';
 
-                    if (pubZoneId) {
+                        if (pubZoneId) {
+                            card.innerHTML = `
+                                <span class="ad-label" style="display: block; width: 100%; text-align: right; margin-bottom: 4px; font-size: 0.65rem; color: var(--text-secondary); text-transform: uppercase; font-weight: 700; letter-spacing: 1px;">Publicidade</span>
+                                <div data-pub-zone="${pubZoneId}" style="width: ${largura}px; max-width: 100%; height: ${altura}px; min-height: ${altura}px; margin: 0 auto; display: flex; align-items: center; justify-content: center; overflow: hidden; background: #fafafa;"></div>
+                            `;
+                        } else if (zonaMobile.codigo_html && zonaMobile.codigo_html.trim()) {
+                            card.innerHTML = `
+                                <span class="ad-label" style="display: block; width: 100%; text-align: right; margin-bottom: 4px; font-size: 0.65rem; color: var(--text-secondary); text-transform: uppercase; font-weight: 700; letter-spacing: 1px;">Publicidade</span>
+                                <div style="width: ${largura}px; max-width: 100%; height: ${altura}px; min-height: ${altura}px; margin: 0 auto; overflow: hidden; display: flex; align-items: center; justify-content: center;">
+                                    ${zonaMobile.codigo_html}
+                                </div>
+                            `;
+                        }
+                    } else {
+                        // Fallback institucional: Se não houver zona mobile ativa, exibe os 30 anos sem etiqueta
+                        card.removeAttribute('data-zona-id');
+                        card.style.maxWidth = '460px';
+                        card.style.margin = '0 auto';
                         card.innerHTML = `
-                            <span class="ad-label" style="display: block; width: 100%; text-align: right; margin-bottom: 4px; font-size: 0.65rem; color: var(--text-secondary); text-transform: uppercase; font-weight: 700; letter-spacing: 1px;">Publicidade</span>
-                            <div data-pub-zone="${pubZoneId}" style="width: ${largura}px; max-width: 100%; height: ${altura}px; min-height: ${altura}px; margin: 0 auto; display: flex; align-items: center; justify-content: center; overflow: hidden; background: #fafafa;"></div>
-                        `;
-                    } else if (zonaMobile.codigo_html && zonaMobile.codigo_html.trim()) {
-                        card.innerHTML = `
-                            <span class="ad-label" style="display: block; width: 100%; text-align: right; margin-bottom: 4px; font-size: 0.65rem; color: var(--text-secondary); text-transform: uppercase; font-weight: 700; letter-spacing: 1px;">Publicidade</span>
-                            <div style="width: ${largura}px; max-width: 100%; height: ${altura}px; min-height: ${altura}px; margin: 0 auto; overflow: hidden; display: flex; align-items: center; justify-content: center;">
-                                ${zonaMobile.codigo_html}
-                            </div>
+                            <a href="clube.html" title="Basket Clube de Valença • 30 Anos (1996 - 2026)" style="display: block; width: 100%; text-decoration: none;">
+                                <img src="assets/pub_30anos_mobile.svg" alt="1996 - 2026 | Celebramos 30 Anos de História e Paixão pelo Basquetebol! 🏀" class="mobile-ad-banner-img">
+                            </a>
                         `;
                     }
-                } else {
-                    // Fallback institucional: Se não houver zona mobile ativa, exibe os 30 anos sem etiqueta
-                    card.removeAttribute('data-zona-id');
-                    card.style.maxWidth = '460px';
-                    card.style.margin = '0 auto';
-                    card.innerHTML = `
-                        <a href="clube.html" title="Basket Clube de Valença • 30 Anos (1996 - 2026)" style="display: block; width: 100%; text-decoration: none;">
-                            <img src="assets/pub_30anos_mobile.svg" alt="1996 - 2026 | Celebramos 30 Anos de História e Paixão pelo Basquetebol! 🏀" class="mobile-ad-banner-img">
-                        </a>
-                    `;
-                }
-            });
+                });
+            }
+        } catch (errMobile) {
+            console.warn("Aviso ao renderizar zona de publicidade mobile:", errMobile);
         }
 
         // 3. Injetar / Executar script do AdServer se houver zona com data-pub-zone
