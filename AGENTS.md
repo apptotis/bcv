@@ -92,7 +92,5 @@
 - [2026-11-16] Gemini: Resolução e importação de 21 jogos futuros da FPB em agenda_bcv, otimização da sincronização FPB no Admin (timeout 12s, filtro por tipo de origem, suporte a 2ª Divisão e limpeza de tags PHP da FPB).
 - [2026-11-22] Gemini: Remoção dos botões 'Ver Todos' nas secções Agenda Desportiva e Resultados Recentes da Homepage (index.html).
 - [2026-11-22] Gemini: Remoção do subtítulo (escalão) nos cards da lista de equipas em equipas.html / js/equipas.js mantendo apenas foto, título e botão.
-- [2026-11-26] Gemini: Configuração de dimensões (presets e px) na Publicidade do Admin, correção de ReferenceError escapeHtml em main.js e ativação da entrega de campanhas mobile (320x100, Intermarché).
-- [2026-11-26] Gemini: Remoção do badge 'Ad' e rótulo 'Publicidade' no card de publicidade e criação de espaçamento superior elegante no mobile (padding-top 96px, margin 14px).
-- [2026-11-26] Gemini: Remoção do botão 'FPB Oficial' e das siglas/subtítulos redundantes (CN2, Sub 18 Masc, etc.) nos cartões da página Classificações (classificacoes.html, js/classificacoes.js).
-- [2026-11-26] Gemini: Eliminação completa do fallback e flash da imagem pub_30anos_mobile.svg no mobile, renderizando diretamente a publicidade ativa (todas as páginas HTML e main.js).
+- [2026-11-26] Gemini: Publicidade no Admin e mobile: resolução de escapeHtml, eliminação de pub_30anos_mobile.svg, remoção de badges Ad/labels e limpeza de botões/siglas redundantes em classificacoes.html.
+- [2026-11-26] Gemini: Ajustes mobile na publicidade: redução para metade do espaço entre o cabeçalho e o card (margin-top 10px), eliminação de padding interno e preenchimento a 100% da imagem até ao limite do card.

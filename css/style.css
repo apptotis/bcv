@@ -2303,15 +2303,15 @@ img {
         padding: 0 15px !important;
     }
     main {
-        padding-top: 96px !important;
+        padding-top: 90px !important;
     }
     .mobile-ad-banner-wrap {
         display: flex !important;
         justify-content: center !important;
         align-items: center !important;
         width: 100% !important;
-        margin-top: 14px !important;
-        margin-bottom: 12px !important;
+        margin-top: 10px !important;
+        margin-bottom: 10px !important;
     }
     .mobile-ad-banner-wrap .container {
         padding: 0 15px !important;
@@ -2346,7 +2346,7 @@ img {
     background: #ffffff;
     border: 1px solid var(--border-color);
     border-radius: 0 !important; /* Cantos retos idênticos à Agenda Desportiva */
-    padding: 6px;
+    padding: 0 !important; /* Imagem a ocupar 100% sem espaço interior */
     text-align: center;
     position: relative;
     box-shadow: var(--shadow-sm);
@@ -2356,16 +2356,46 @@ img {
     margin: 0 auto;
     box-sizing: border-box;
     overflow: hidden;
+    line-height: 0 !important;
 }
 
 .mobile-ad-card:empty {
     display: none !important;
 }
 
+.mobile-ad-card [data-pub-zone] {
+    width: 100% !important;
+    min-height: auto !important;
+    height: auto !important;
+    display: block !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    background: transparent !important;
+    line-height: 0 !important;
+    overflow: hidden !important;
+}
+
+.mobile-ad-card [data-pub-zone] a,
 .mobile-ad-card a {
-    display: block;
-    width: 100%;
-    text-decoration: none;
+    display: block !important;
+    width: 100% !important;
+    height: auto !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    line-height: 0 !important;
+    text-decoration: none !important;
+    border-radius: 0 !important;
+}
+
+.mobile-ad-card [data-pub-zone] img,
+.mobile-ad-card img {
+    width: 100% !important;
+    max-width: 100% !important;
+    height: auto !important;
+    display: block !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    border: 0 !important;
     border-radius: 0 !important;
 }
 
