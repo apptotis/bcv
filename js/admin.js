@@ -11718,8 +11718,43 @@ document.addEventListener('DOMContentLoaded', async () => {
         document.getElementById('pub-nome').value = zona.nome || '';
         document.getElementById('pub-dispositivo').value = disp;
         document.getElementById('pub-pagina').value = zona.pagina || 'todas';
-        document.getElementById('pub-formato').value = zona.formato || (disp === 'mobile' ? 'Card Responsivo' : '300x250');
-        document.getElementById('pub-zone-id').value = zona.pub_zone_id || '';
+
+        // Dimensões e Formato
+        let w = (disp === 'mobile' ? 320 : 300);
+        let h = (disp === 'mobile' ? 100 : 250);
+        if (zona.largura && zona.altura) {
+            w = parseInt(zona.largura, 10);
+            h = parseInt(zona.altura, 10);
+        } else if (zona.formato) {
+            const m = String(zona.formato).match(/(\d+)\s*[xX*]\s*(\d+)/);
+            if (m) {
+                w = parseInt(m[1], 10);
+                h = parseInt(m[2], 10);
+            }
+        }
+        const fmtStr = `${w}x${h}`;
+        const inputLargura = document.getElementById('pub-largura');
+        const inputAltura = document.getElementById('pub-altura');
+        const inputFormato = document.getElementById('pub-formato');
+        const selPreset = document.getElementById('pub-formato-preset');
+        const prevText = document.getElementById('pub-dimensoes-preview');
+
+        if (inputLargura) inputLargura.value = w;
+        if (inputAltura) inputAltura.value = h;
+        if (inputFormato) inputFormato.value = fmtStr;
+        if (selPreset) {
+            const optExiste = Array.from(selPreset.options).some(o => o.value === fmtStr);
+            selPreset.value = optExiste ? fmtStr : 'custom';
+        }
+        if (prevText) prevText.textContent = `${w} × ${h} px`;
+
+        // Se pub_zone_id estiver vazio mas presente no código HTML, auto-extrai
+        let zoneId = (zona.pub_zone_id || '').trim();
+        if (!zoneId && zona.codigo_html) {
+            const mZone = zona.codigo_html.match(/data-pub-zone=["']([^"']+)["']/i);
+            if (mZone) zoneId = mZone[1].trim();
+        }
+        document.getElementById('pub-zone-id').value = zoneId;
         document.getElementById('pub-script-url').value = zona.script_url || 'https://pub-adserver-worker.nwaltercarvalho.workers.dev/pub.js';
         document.getElementById('pub-codigo-html').value = zona.codigo_html || '';
         document.getElementById('pub-ordem').value = zona.ordem || 1;
@@ -11770,7 +11805,12 @@ document.addEventListener('DOMContentLoaded', async () => {
             document.getElementById('pub-id').value = '';
             document.getElementById('pub-dispositivo').value = 'desktop';
             document.getElementById('pub-pagina').value = 'todas';
+            document.getElementById('pub-formato-preset').value = '300x250';
+            document.getElementById('pub-largura').value = 300;
+            document.getElementById('pub-altura').value = 250;
             document.getElementById('pub-formato').value = '300x250';
+            const prevText = document.getElementById('pub-dimensoes-preview');
+            if (prevText) prevText.textContent = '300 × 250 px';
             document.getElementById('pub-script-url').value = 'https://pub-adserver-worker.nwaltercarvalho.workers.dev/pub.js';
             document.getElementById('pub-ordem').value = currentZonasPub.length + 1;
             document.getElementById('pub-ativo').checked = true;
@@ -11783,16 +11823,98 @@ document.addEventListener('DOMContentLoaded', async () => {
     if (selectDispositivoPub) {
         selectDispositivoPub.addEventListener('change', (e) => {
             const val = e.target.value;
-            const inputFormato = document.getElementById('pub-formato');
             const inputNome = document.getElementById('pub-nome');
+            const selPreset = document.getElementById('pub-formato-preset');
+            const inputLargura = document.getElementById('pub-largura');
+            const inputAltura = document.getElementById('pub-altura');
+            const inputFormato = document.getElementById('pub-formato');
+            const prevText = document.getElementById('pub-dimensoes-preview');
+
             if (val === 'mobile') {
-                if (inputFormato) inputFormato.value = 'Card Responsivo';
-                if (inputNome && !inputNome.value) inputNome.placeholder = 'Ex: Zona Mobile 1 - Topo';
+                if (selPreset) selPreset.value = '320x100';
+                if (inputLargura) inputLargura.value = 320;
+                if (inputAltura) inputAltura.value = 100;
+                if (inputFormato) inputFormato.value = '320x100';
+                if (prevText) prevText.textContent = '320 × 100 px';
+                if (inputNome && !inputNome.value) inputNome.placeholder = 'Ex: Top Index (320x100)';
             } else if (val === 'desktop') {
+                if (selPreset) selPreset.value = '300x250';
+                if (inputLargura) inputLargura.value = 300;
+                if (inputAltura) inputAltura.value = 250;
                 if (inputFormato) inputFormato.value = '300x250';
+                if (prevText) prevText.textContent = '300 × 250 px';
                 if (inputNome && !inputNome.value) inputNome.placeholder = 'Ex: Zona 1 - Sidebar Topo (300x250)';
-            } else {
-                if (inputFormato) inputFormato.value = 'Banner Responsivo';
+            }
+        });
+    }
+
+    const selectPresetPub = document.getElementById('pub-formato-preset');
+    if (selectPresetPub) {
+        selectPresetPub.addEventListener('change', (e) => {
+            const val = e.target.value;
+            const inputLargura = document.getElementById('pub-largura');
+            const inputAltura = document.getElementById('pub-altura');
+            const inputFormato = document.getElementById('pub-formato');
+            const prevText = document.getElementById('pub-dimensoes-preview');
+
+            if (val !== 'custom') {
+                const parts = val.split('x');
+                if (parts.length === 2) {
+                    const w = parseInt(parts[0], 10);
+                    const h = parseInt(parts[1], 10);
+                    if (inputLargura) inputLargura.value = w;
+                    if (inputAltura) inputAltura.value = h;
+                    if (inputFormato) inputFormato.value = val;
+                    if (prevText) prevText.textContent = `${w} × ${h} px`;
+                }
+            }
+        });
+    }
+
+    const atualizarDimensoesCustomPub = () => {
+        const inputLargura = document.getElementById('pub-largura');
+        const inputAltura = document.getElementById('pub-altura');
+        const inputFormato = document.getElementById('pub-formato');
+        const selPreset = document.getElementById('pub-formato-preset');
+        const prevText = document.getElementById('pub-dimensoes-preview');
+
+        const w = parseInt(inputLargura?.value, 10) || 0;
+        const h = parseInt(inputAltura?.value, 10) || 0;
+        const fmtStr = `${w}x${h}`;
+
+        if (inputFormato) inputFormato.value = fmtStr;
+        if (selPreset) {
+            const optExiste = Array.from(selPreset.options).some(o => o.value === fmtStr);
+            selPreset.value = optExiste ? fmtStr : 'custom';
+        }
+        if (prevText) prevText.textContent = `${w} × ${h} px`;
+    };
+
+    const inputLarguraPub = document.getElementById('pub-largura');
+    const inputAlturaPub = document.getElementById('pub-altura');
+    if (inputLarguraPub) inputLarguraPub.addEventListener('input', atualizarDimensoesCustomPub);
+    if (inputAlturaPub) inputAlturaPub.addEventListener('input', atualizarDimensoesCustomPub);
+
+    const txtCodigoHtmlPub = document.getElementById('pub-codigo-html');
+    if (txtCodigoHtmlPub) {
+        txtCodigoHtmlPub.addEventListener('input', (e) => {
+            const txt = e.target.value;
+            const inputZoneId = document.getElementById('pub-zone-id');
+            const mZone = txt.match(/data-pub-zone=["']([^"']+)["']/i);
+            if (mZone && inputZoneId && !inputZoneId.value.trim()) {
+                inputZoneId.value = mZone[1].trim();
+            }
+            const mDim = txt.match(/(\d+)\s*[xX*]\s*(\d+)/);
+            if (mDim) {
+                const w = parseInt(mDim[1], 10);
+                const h = parseInt(mDim[2], 10);
+                const inputLargura = document.getElementById('pub-largura');
+                const inputAltura = document.getElementById('pub-altura');
+                if (inputLargura && inputAltura) {
+                    inputLargura.value = w;
+                    inputAltura.value = h;
+                    atualizarDimensoesCustomPub();
+                }
             }
         });
     }
@@ -11835,12 +11957,19 @@ document.addEventListener('DOMContentLoaded', async () => {
             const nome = document.getElementById('pub-nome').value.trim();
             const dispositivo = document.getElementById('pub-dispositivo').value || 'desktop';
             const pagina = document.getElementById('pub-pagina').value || 'todas';
-            const formato = document.getElementById('pub-formato').value.trim() || (dispositivo === 'mobile' ? 'Card Responsivo' : '300x250');
-            const pubZoneId = document.getElementById('pub-zone-id').value.trim();
+            const largura = parseInt(document.getElementById('pub-largura').value, 10) || (dispositivo === 'mobile' ? 320 : 300);
+            const altura = parseInt(document.getElementById('pub-altura').value, 10) || (dispositivo === 'mobile' ? 100 : 250);
+            const formato = `${largura}x${altura}`;
+            let pubZoneId = document.getElementById('pub-zone-id').value.trim();
             const scriptUrl = document.getElementById('pub-script-url').value.trim();
             const codigoHtml = document.getElementById('pub-codigo-html').value.trim();
             const ordem = parseInt(document.getElementById('pub-ordem').value, 10) || 1;
             const ativo = document.getElementById('pub-ativo').checked;
+
+            if (!pubZoneId && codigoHtml) {
+                const m = codigoHtml.match(/data-pub-zone=["']([^"']+)["']/i);
+                if (m) pubZoneId = m[1].trim();
+            }
 
             if (id) {
                 // Atualizar existente
@@ -11850,6 +11979,8 @@ document.addEventListener('DOMContentLoaded', async () => {
                     zona.dispositivo = dispositivo;
                     zona.pagina = pagina;
                     zona.formato = formato;
+                    zona.largura = largura;
+                    zona.altura = altura;
                     zona.pub_zone_id = pubZoneId;
                     zona.script_url = scriptUrl;
                     zona.codigo_html = codigoHtml;
@@ -11865,6 +11996,8 @@ document.addEventListener('DOMContentLoaded', async () => {
                     dispositivo: dispositivo,
                     pagina: pagina,
                     formato: formato,
+                    largura: largura,
+                    altura: altura,
                     pub_zone_id: pubZoneId,
                     script_url: scriptUrl,
                     codigo_html: codigoHtml,

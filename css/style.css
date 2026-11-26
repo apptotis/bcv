@@ -2297,12 +2297,19 @@ img {
         padding-top: 80px !important;
     }
     .mobile-ad-banner-wrap {
-        display: block !important;
+        display: flex !important;
+        justify-content: center !important;
+        align-items: center !important;
+        width: 100% !important;
         margin-top: 6px !important;
         margin-bottom: 8px !important;
     }
     .mobile-ad-banner-wrap .container {
         padding: 0 15px !important;
+        display: flex !important;
+        justify-content: center !important;
+        align-items: center !important;
+        width: 100% !important;
     }
     /* Reduzir ao mínimo a distância para a Agenda Desportiva e Conteúdo Principal */
     .container.section,
@@ -2336,6 +2343,8 @@ img {
     box-shadow: var(--shadow-sm);
     display: block;
     width: 100%;
+    max-width: 320px;
+    margin: 0 auto;
     box-sizing: border-box;
     overflow: hidden;
 }
