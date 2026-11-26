@@ -308,23 +308,17 @@ document.addEventListener('DOMContentLoaded', async () => {
                     <h3 class="competicao-title">${comp.nome}</h3>
                 </div>
 
-                <!-- Linha 2: Tag da Série + Botão FPB Oficial -->
-                <div class="competicao-sub-row">
+                <!-- Linha 2: Tag da Prova -->
+                <div class="competicao-sub-row" style="margin-bottom: 10px;">
                     <div class="competicao-tags-group">
                         <span class="competicao-tag">${comp.tipo === 'nacional' ? 'FPB • NACIONAL' : (comp.tag || comp.escalao || 'FPB • DISTRITAL')}</span>
-                        ${comp.sigla ? `<span class="competicao-sigla">${comp.sigla}</span>` : ''}
                     </div>
-                    <a href="${urlFPB}" target="_blank" rel="noopener noreferrer" class="comp-class-link-fpb" style="text-decoration: none;" title="Consultar classificação oficial na FPB">
-                        <span>FPB Oficial</span>
-                        <span>↗</span>
-                    </a>
                 </div>
 
                 ${tabelaHtml}
 
-                <div class="competicao-footer" style="display: flex; justify-content: space-between; align-items: center; margin-top: 14px; padding-top: 10px; border-top: 1px solid var(--border-color); font-size: 0.75rem; color: var(--text-secondary); flex-wrap: wrap; gap: 6px;">
+                <div class="competicao-footer" style="display: flex; justify-content: flex-start; align-items: center; margin-top: 14px; padding-top: 10px; border-top: 1px solid var(--border-color); font-size: 0.75rem; color: var(--text-secondary);">
                     <span style="font-size: 0.75rem; color: var(--text-secondary); font-weight: 600;">Época 2026/2027</span>
-                    <a href="${urlFPB}" target="_blank" rel="noopener noreferrer" style="font-size: 0.72rem; color: var(--accent-primary); font-weight: 700; background: rgba(126,34,206,0.08); padding: 2px 8px; border-radius: 4px; text-decoration: none; display: inline-flex; align-items: center; gap: 3px;" title="Consultar no portal oficial da FPB">FPB Oficial ↗</a>
                 </div>
             `;
 

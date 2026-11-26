@@ -94,3 +94,4 @@
 - [2026-11-22] Gemini: Remoção do subtítulo (escalão) nos cards da lista de equipas em equipas.html / js/equipas.js mantendo apenas foto, título e botão.
 - [2026-11-26] Gemini: Configuração de dimensões (presets e px) na Publicidade do Admin, correção de ReferenceError escapeHtml em main.js e ativação da entrega de campanhas mobile (320x100, Intermarché).
 - [2026-11-26] Gemini: Remoção do badge 'Ad' e rótulo 'Publicidade' no card de publicidade e criação de espaçamento superior elegante no mobile (padding-top 96px, margin 14px).
+- [2026-11-26] Gemini: Remoção do botão 'FPB Oficial' e das siglas/subtítulos redundantes (CN2, Sub 18 Masc, etc.) nos cartões da página Classificações (classificacoes.html, js/classificacoes.js).
